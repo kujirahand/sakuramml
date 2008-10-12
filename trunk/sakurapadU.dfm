@@ -1,6 +1,6 @@
 object frmSakuraPad: TfrmSakuraPad
-  Left = 194
-  Top = 108
+  Left = 192
+  Top = 133
   Width = 769
   Height = 577
   Caption = #12486#12461#12473#12488#38899#27005#12300#12469#12463#12521#12301
@@ -23,8 +23,8 @@ object frmSakuraPad: TfrmSakuraPad
   object panelForm: TPanel
     Left = 0
     Top = 31
-    Width = 761
-    Height = 470
+    Width = 753
+    Height = 458
     Align = alClient
     BevelOuter = bvLowered
     UseDockManager = False
@@ -32,8 +32,8 @@ object frmSakuraPad: TfrmSakuraPad
     TabOrder = 0
     object splitBottom: TSplitter
       Left = 1
-      Top = 362
-      Width = 759
+      Top = 350
+      Width = 751
       Height = 8
       Cursor = crVSplit
       Align = alBottom
@@ -42,13 +42,13 @@ object frmSakuraPad: TfrmSakuraPad
     object splitLeft: TSplitter
       Left = 186
       Top = 1
-      Height = 361
+      Height = 349
       OnMoved = splitLeftMoved
     end
     object pageBottom: TPageControl
       Left = 1
-      Top = 370
-      Width = 759
+      Top = 358
+      Width = 751
       Height = 99
       ActivePage = tabError
       Align = alBottom
@@ -68,7 +68,7 @@ object frmSakuraPad: TfrmSakuraPad
         object Panel5: TPanel
           Left = 0
           Top = 0
-          Width = 751
+          Width = 743
           Height = 79
           Align = alClient
           BevelOuter = bvLowered
@@ -110,7 +110,7 @@ object frmSakuraPad: TfrmSakuraPad
           object edtError: TEditor
             Left = 18
             Top = 1
-            Width = 732
+            Width = 724
             Height = 77
             Cursor = crIBeam
             Align = alClient
@@ -137,7 +137,6 @@ object frmSakuraPad: TfrmSakuraPad
             Caret.Style = csDefault
             Caret.TabIndent = False
             Caret.TabSpaceCount = 8
-            Caret.TokenEndStop = False
             Font.Charset = SHIFTJIS_CHARSET
             Font.Color = clBlack
             Font.Height = -12
@@ -386,7 +385,7 @@ object frmSakuraPad: TfrmSakuraPad
       Left = 1
       Top = 1
       Width = 185
-      Height = 361
+      Height = 349
       Align = alLeft
       TabOrder = 1
       OnClick = panelLeftClick
@@ -437,7 +436,7 @@ object frmSakuraPad: TfrmSakuraPad
         Left = 1
         Top = 16
         Width = 183
-        Height = 344
+        Height = 332
         ActivePage = tabList
         Align = alClient
         DockSite = True
@@ -512,7 +511,7 @@ object frmSakuraPad: TfrmSakuraPad
             Left = 0
             Top = 33
             Width = 175
-            Height = 267
+            Height = 255
             Style = lbOwnerDrawFixed
             Align = alClient
             Font.Charset = SHIFTJIS_CHARSET
@@ -554,7 +553,7 @@ object frmSakuraPad: TfrmSakuraPad
             Left = 0
             Top = 100
             Width = 175
-            Height = 200
+            Height = 188
             Style = lbOwnerDrawFixed
             Align = alClient
             DragMode = dmAutomatic
@@ -595,7 +594,7 @@ object frmSakuraPad: TfrmSakuraPad
           end
           object Panel1: TPanel
             Left = 0
-            Top = 274
+            Top = 262
             Width = 175
             Height = 26
             Align = alBottom
@@ -616,7 +615,7 @@ object frmSakuraPad: TfrmSakuraPad
             Left = 0
             Top = 100
             Width = 175
-            Height = 174
+            Height = 162
             Style = lbOwnerDrawFixed
             Align = alClient
             DragMode = dmAutomatic
@@ -684,7 +683,7 @@ object frmSakuraPad: TfrmSakuraPad
             Left = 0
             Top = 140
             Width = 175
-            Height = 160
+            Height = 148
             Style = lbOwnerDrawFixed
             Align = alClient
             DragMode = dmAutomatic
@@ -801,16 +800,16 @@ object frmSakuraPad: TfrmSakuraPad
     object panelEditor: TPanel
       Left = 189
       Top = 1
-      Width = 571
-      Height = 361
+      Width = 563
+      Height = 349
       Align = alClient
       Caption = 'panelEditor'
       TabOrder = 2
       object edtMain: TEditor
         Left = 1
         Top = 1
-        Width = 569
-        Height = 359
+        Width = 561
+        Height = 347
         Cursor = crIBeam
         Align = alClient
         Caret.AutoCursor = True
@@ -836,7 +835,6 @@ object frmSakuraPad: TfrmSakuraPad
         Caret.Style = csDefault
         Caret.TabIndent = True
         Caret.TabSpaceCount = 6
-        Caret.TokenEndStop = False
         Font.Charset = SHIFTJIS_CHARSET
         Font.Color = clBlack
         Font.Height = -16
@@ -978,7 +976,7 @@ object frmSakuraPad: TfrmSakuraPad
   object cbarTop: TControlBar
     Left = 0
     Top = 0
-    Width = 761
+    Width = 753
     Height = 31
     Align = alTop
     AutoSize = True
@@ -1040,7 +1038,7 @@ object frmSakuraPad: TfrmSakuraPad
     object panelPlayer: TPanel
       Left = 634
       Top = 2
-      Width = 121
+      Width = 113
       Height = 23
       BevelOuter = bvNone
       DockSite = True
@@ -1154,7 +1152,7 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsDropDown
       end
       object toolSave: TToolButton
-        Left = 61
+        Left = 67
         Top = 0
         Hint = #20445#23384
         Action = actSaveAs
@@ -1358,8 +1356,8 @@ object frmSakuraPad: TfrmSakuraPad
   end
   object cbarBottom: TControlBar
     Left = 0
-    Top = 501
-    Width = 761
+    Top = 489
+    Width = 753
     Height = 30
     Align = alBottom
     AutoSize = True
@@ -2146,7 +2144,6 @@ object frmSakuraPad: TfrmSakuraPad
     Caret.Style = csDefault
     Caret.TabIndent = False
     Caret.TabSpaceCount = 8
-    Caret.TokenEndStop = False
     Font.Charset = SHIFTJIS_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
