@@ -41,6 +41,7 @@ type
     MuteTrack: Boolean;
     LastTime: Integer;//EndOfTrack‚Ì‘‚«‚İ‚Ì‚½‚ß
     FTimeBase: Integer;
+    LastNodeNo: Integer; // KeyPressure ‚Ì‚½‚ß‚É•Û‚·‚é
     constructor Create;
     destructor Destroy;override;
     procedure Delete(Index: Integer);

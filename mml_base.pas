@@ -135,6 +135,7 @@ type
     function scriptUseKeyShift(var sp: TSrcPos): TMVarCustom;
     function scriptCCMute(var sp: TSrcPos): TMVarCustom;
     function scriptCCNoMute(var sp: TSrcPos): TMVarCustom;
+    function scriptKeyPress(var sp:TSrcPos): TMVarCustom;
 
 
     //
@@ -250,7 +251,7 @@ end;
 procedure TMmlBase.AddSystemCommand;
 var
   //ラストの数値
-  cmds: array [0..129] of Pointer;
+  cmds: array [0..130] of Pointer;
   i: Integer;
 
     procedure tag_check(tag: Integer; p:Pointer; key:string);
@@ -388,6 +389,8 @@ begin
     cmd( 'DeleteCC', scriptDeleteCC,121 );//DeleteCC(n)//この命令以降のタイムに書かれたコントロールチェンジ・ピッチベンドを完全に削除する。
     cmd( 'CCMute', scriptCCMute,123 );//CCMute(on/off)//コントロールチェンジの書き込みをミュートする。トラックごとに指定できる。
     cmd( 'CCNoMute', scriptCCNoMute,126 );//CCNoMute(no,on/off)//特定のコントロールチェンジナンバーの書き込みをミュートする。トラックごとに指定できる。
+    cmd( 'KeyPressure', scriptKeyPress,130 );//KeyPressure(n)//最後に発音したノートに対してキープレッシャー(アフタータッチ)を書き込む
+    cmd( 'KP',       scriptKeyPress,130 );//KP(n)//最後に発音したノートに対してキープレッシャー(アフタータッチ)を書き込む
 
     //メタイベント
     cmd( 'Tempo', scriptTempo,56 );//Tempo(n)//テンポを設定する(1~500の範囲)。読取り可。
@@ -2481,6 +2484,7 @@ var
         c.Velocity := Max(0, Min(v,127));
         c.Len := q;
         c.PackedNoteOff := True;
+        CurSmfTrack.LastNodeNo := c.NoteNo;
 
         //---実際の書き込み処理。和音orタイならスタックへ書き込み
 
@@ -7313,6 +7317,25 @@ begin
       // 漢字コードあり
       TMStr(Result).value := CHR((i shr 8)and $FF) + CHR(i and $FF);
     end;
+end;
+
+function TMmlBase.scriptKeyPress(var sp: TSrcPos): TMVarCustom;
+var
+    v: Integer;
+    kp: TSmfKeyPressure;
+begin
+    Result := nil;
+
+    v := GetIntValue(sp); //値を得る
+    skipSpace(sp.ptr);
+
+    //smfに書き込む
+    kp := TSmfKeyPressure.Create;
+    kp.Time := CurTrack.TimePtr;
+    kp.Event := EVENT_KEY_PRESSURE or CurTrack.Channel;
+    kp.NoteNo := CurSmfTrack.LastNodeNo;
+    kp.velocity := v;
+    CurSmfTrack.Add(kp);
 end;
 
 end.
