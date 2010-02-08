@@ -715,7 +715,7 @@ object frmSakuraPad: TfrmSakuraPad
             Left = 0
             Top = 0
             Width = 175
-            Height = 285
+            Height = 292
             Align = alClient
             BevelOuter = bvLowered
             Caption = #12463#12452#12483#12463#12504#12523#12503
@@ -732,7 +732,7 @@ object frmSakuraPad: TfrmSakuraPad
               Left = 1
               Top = 52
               Width = 173
-              Height = 232
+              Height = 239
               Style = lbOwnerDrawFixed
               Align = alClient
               ItemHeight = 20
@@ -783,7 +783,7 @@ object frmSakuraPad: TfrmSakuraPad
             Left = 0
             Top = 0
             Width = 175
-            Height = 285
+            Height = 292
             Style = lbOwnerDrawFixed
             Align = alClient
             DragMode = dmAutomatic
@@ -1434,7 +1434,7 @@ object frmSakuraPad: TfrmSakuraPad
         Caption = '-'
       end
       object mnuShowBBS: TMenuItem
-        Caption = #12469#12463#12521#26354#25522#31034#26495#12434#38283#12367
+        Caption = #12469#12463#12521#12398'Web'#12469#12452#12488#12434#38283#12367
         ImageIndex = 14
         OnClick = mnuShowBBSClick
       end

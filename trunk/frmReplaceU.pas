@@ -56,8 +56,8 @@ var
     idx,cur: Integer;
 begin
     key := edtKey.Text ;
-    txt := frmSakuraPad.edtMain.Lines.Text ;
-    cur := frmSakuraPad.edtMain.SelStart +1;
+    txt := frmSakuraPad.ActiveEditor.Lines.Text ;
+    cur := frmSakuraPad.ActiveEditor.SelStart +1;
     idx := JPosEx(key, txt , cur);
     if idx<=0 then begin
         cur := 0;
@@ -72,7 +72,7 @@ begin
     begin
         Delete(txt, idx, Length(key));
         Insert(edtReplace.Text, txt, idx);
-        with frmSakuraPad.edtMain do begin
+        with frmSakuraPad.ActiveEditor do begin
             Lines.Text := txt;
             SetFocus ;
             SelStart := idx-1 + Length(Self.edtReplace.Text);
@@ -85,7 +85,7 @@ end;
 procedure TfrmReplace.btnReplaceAllClick(Sender: TObject);
 begin
     //if MsgYesNo('全て置換します。よろしいですか？')=False then Exit;
-    with frmSakuraPad.edtMain do
+    with frmSakuraPad.ActiveEditor do
     begin
         if chkSelectArea.Checked then
         begin

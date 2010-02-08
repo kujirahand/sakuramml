@@ -698,7 +698,6 @@ type
     SmfPlayer: TSmfPlayer;
     voiceList: TStringList;
     ini: TIniSakura;
-    ActiveEditor: TEditor;
     cmd: TCsvDb;
     IsShowHokan: Boolean;
     TempMidiFile: string;
@@ -707,6 +706,7 @@ type
     DirPlugins: string;
     IniWindowMaxize: Boolean;
     ManualOnline: Boolean;
+    ActiveEditor: TEditor;
     procedure GotoLine(lineNo: Integer);
     procedure mciClose;
     procedure PlayWave(no: Integer);
@@ -2248,8 +2248,10 @@ end;
 
 procedure TfrmSakuraPad.mnuReplaceClick(Sender: TObject);
 begin
-    if edtMain.SelLength > 0 then
+    if ActiveEditor.SelLength > 0 then
+    begin
         frmReplace.chkSelectArea.Checked := True;
+    end;
     frmReplace.Show ;
 end;
 
@@ -4056,6 +4058,7 @@ procedure TfrmSakuraPad.mnuSplitEditClick(Sender: TObject);
       begin
         ActiveSplitter.Free;
         SecondEditor.Free;
+        ActiveEditor := edtMain;
       end;
       IsSplit := False;
     end;
