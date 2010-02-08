@@ -8,6 +8,7 @@ uses
 
 const
   HISTORY = 'history.txt';
+  TITLE_JPG = 'doc\title.jpg';
 
 type
   TfrmAbout = class(TForm)
@@ -99,7 +100,10 @@ var
 begin
   try
     try
-      Image1.Picture.LoadFromFile(AppPath+'doc\title.jpg');
+      if FileExists(AppPath+TITLE_JPG) then
+      begin
+        Image1.Picture.LoadFromFile(AppPath+TITLE_JPG);
+      end;
     except
     end;
     cmd := '';

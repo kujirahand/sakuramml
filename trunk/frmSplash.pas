@@ -25,7 +25,7 @@ var
 
 implementation
 
-uses gui_benri;
+uses gui_benri, frmAboutU;
 
 {$R *.dfm}
 
@@ -44,8 +44,11 @@ end;
 procedure TfrmSplashWindow.FormCreate(Sender: TObject);
 begin
     try
-        Image1.Picture.LoadFromFile(AppPath+'doc\title.jpg');
-        Image1.Invalidate ;
+        if FileExists(AppPath + TITLE_JPG) then
+        begin
+          Image1.Picture.LoadFromFile(AppPath+TITLE_JPG);
+          Image1.Invalidate ;
+        end;
     finally
     end;
 end;

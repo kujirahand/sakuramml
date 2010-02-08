@@ -173,6 +173,8 @@ type
     BendRange:          array [0..15] of Integer; //ベンドレンジ値(初期値は、2)
     UseKeyShift:        Boolean;            //キーシフトを適用するかどうか
     TrackSyncTime:      Integer;            //最後にTrackSyncした個所を覚えておく。新しいトラック生成に備える
+    AllowMuliLine:      Boolean;            //和音で改行を許すか？
+    MetaTextEOL:        Integer;            //1でLFに2でCRに、0でCRLFする機能を追加。
     constructor Create;
     destructor Destroy;override;
     procedure Clear; override;
@@ -221,6 +223,8 @@ begin
     TimeSigHa := 4;
     UseKeyShift := True;
     TrackSyncTime := 0; //未設定
+    MetaTextEOL := 0;
+    AllowMuliLine := True;
 end;
 
 constructor TSongInfo.Create;

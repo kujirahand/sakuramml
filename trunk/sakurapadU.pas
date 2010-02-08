@@ -7,7 +7,8 @@ uses
   Dialogs, Menus, HEditor, heClasses, HEdtProp, HPropUtils, HViewEdt, heRaStrings, ToolWin, ComCtrls, ImgList, ExtCtrls, StdCtrls,
   DdeMan, csvDB, OleCtrls, SHDocVw, NewCtrls, MPlayer, smf_play, midi_out,
   Gauges, jpeg, Registry, shlobj, clipbrd, ActiveX, Buttons, Spin, tabCtrlMan,
-  MenuBar, ActnMan, ActnCtrls, ActnList, ActnMenus, mmsystem, gMouseGesture, ini_util;
+  MenuBar, ActnMan, ActnCtrls, ActnList, ActnMenus, mmsystem, gMouseGesture, ini_util,
+  shellapi;
 
 const
   TEMP_DIR        = 'temp\';
@@ -2701,78 +2702,78 @@ begin
     IsInit := False;
 end;
 
+
+procedure RunAsAdmin(hWnd: THandle; aFile: AnsiString; aParameters: AnsiString);
+var
+  sei: TShellExecuteInfoA;
+begin
+  ZeroMemory(@sei, SizeOf(sei));
+  sei.cbSize := SizeOf(sei);
+  sei.Wnd := hWnd;
+  sei.fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_FLAG_NO_UI;
+  sei.lpVerb := 'runas';
+  sei.lpFile := PAnsiChar(aFile);
+  sei.lpParameters := PAnsiChar(aParameters);
+  sei.nShow := SW_SHOWNORMAL;
+  if not ShellExecuteEx(@sei) then
+    raise Exception.Create('起動に失敗しました。(' + aFile + ')');
+end;
+
+function isVistaOr7: Boolean;
+var
+  osInfo: OSVERSIONINFO;
+begin
+  Result := False;
+  osInfo.dwOSVersionInfoSize:=sizeof(OSVERSIONINFO);
+  if not GetVersionEx(osInfo) then Exit;
+  Result := osInfo.dwMajorVersion >= 6;
+end;
+
+function isWindowsVista: Boolean;
+var
+  osInfo: OSVERSIONINFO;
+begin
+  Result := False;
+  osInfo.dwOSVersionInfoSize:=sizeof(OSVERSIONINFO);
+  if not GetVersionEx(osInfo) then Exit;
+  Result := (osInfo.dwMajorVersion = 6) and (osInfo.dwMinorVersion = 0);
+end;
+
+function isWindowsSeven: Boolean;
+var
+  osInfo: OSVERSIONINFO;
+begin
+  Result := False;
+  osInfo.dwOSVersionInfoSize:=sizeof(OSVERSIONINFO);
+  if not GetVersionEx(osInfo) then Exit;
+  Result := (osInfo.dwMajorVersion = 6) and (osInfo.dwMinorVersion = 1);
+end;
+
 procedure TfrmSakuraPad.mnuRegistMMLClick(Sender: TObject);
 begin
   //MMLの関連付け
-  with TRegistry.Create do
+  // Windows Vista/7なら警告を出す
+  if isVistaOr7 then
   begin
-    try
-      RootKey:=HKEY_CLASSES_ROOT;
-      if KeyExists('\.mml') then
-      begin
-        if MsgYesNo('既に他のソフトに関連付けがされていますが、'#13#10+
-            '関連付けをやり直しますか？','拡張子".mml"の関連付け') then
-        begin
-            mnuUninstallClick(nil);
-        end else
-        begin
-            Exit;
-        end;
-      end;
-      OpenKey('\.mml',True);                        // 拡張子.xxx を登録
-      WriteString('','mmlFile');                    // 拡張子.xxx は xxxFile を参照
-      OpenKey('\.mml\ShellNew',True);               // 拡張子.xxx を登録
-      WriteString('NullFile','');                   // 新規作成にひまわりプログラムを追加
-      OpenKey('\mmlFile',True);                     // xxxFile を登録
-      WriteString('','「サクラ」用音楽テキスト');         // Explorer の説明用
-      OpenKey('\mmlFile\DefaultIcon',True);         // Icon 参照キー
-      WriteString('','"'+AppPath+'tools\mml.ico"'); // Icon の指定
-      OpenKey('\mmlFile\shell\open\command',True);  // Application 参照キー
-      WriteString('',                               // Application の指定
-            '"'+AppPath+'sakura.exe'+'" "%1" %*');
-      {もし、サブコマンドがあれば・・・
-      OpenKey('\hmwFile\shell\編集\command',True);  // Application 参照キー
-      WriteString('',                               // Application の指定
-            '"'+AppPath+'himapad.exe'+'" "%1"');
-      }
-      SHChangeNotify(SHCNE_ASSOCCHANGED,            //システムに変更を通知
-                     SHCNF_FLUSH,nil,nil);
-      ShowMessage('".mml"ファイルに、サクラを関連付けました。'#13#10+
-          'これから、".mml"ファイルをダブルクリックしただけで、演奏されます。');
-    finally
-      Free;
-    end;
+    if MsgYesNo('管理者権限で起動しますがよろしいですか？'#13#10+
+      '*不明な発行元と出ますが、regmml.exeであることを確認して許可してください。') = False then Exit;
+    RunAsAdmin(Application.Handle, AppPath + 'regmml.exe', '');
+  end else
+  begin
+    OpenApp(AppPath + 'regmml.exe');
   end;
 end;
 
 procedure TfrmSakuraPad.mnuUninstallClick(Sender: TObject);
-var
-    cnt: Integer;
 begin
-  cnt := 0;
-  with TRegistry.Create do
+  if isVistaOr7 then
   begin
-    try
-      RootKey:=HKEY_CLASSES_ROOT;
-      if KeyExists('\.mml') then
-      begin
-          Inc(cnt);
-          DeleteKey('\.mml');                        // 拡張子.xxx を登録
-      end;
-      if KeyExists('\mmlFile') then
-      begin
-          Inc(cnt);
-          DeleteKey('\mmlFile');                     // xxxFile を登録
-      end;
-      if cnt>0 then
-      begin
-        SHChangeNotify(SHCNE_ASSOCCHANGED,            //システムに変更を通知
-                     SHCNF_FLUSH,nil,nil);
-        ShowMessage('".mml" ファイルの関連付けを解除しました。');
-      end;
-    finally
-      Free;
-    end;
+    if MsgYesNo('管理者権限で起動しますがよろしいですか？'#13#10+
+      '*不明な発行元と出ますが、regmml.exeであることを確認して許可してください。') = False then Exit;
+    RunAsAdmin(Application.Handle, AppPath + 'regmml.exe', '/u');
+  end else
+  begin
+    OpenApp('"'+AppPath + 'regmml.exe" /u');
   end;
 end;
 
