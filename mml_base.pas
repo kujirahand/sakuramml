@@ -29,9 +29,9 @@ uses
 //------------------------------------------------------------------------------
 const
   //TODO: バージョン情報
-  VER_INFO   = '2.372';
-  DATE_INFO  = '2006/11/03';
-  VER_NUMBER = 2372;
+  VER_INFO   = '2.374';
+  DATE_INFO  = '2010/02/09';
+  VER_NUMBER = 2374;
 //------------------------------------------------------------------------------
 
 type
@@ -74,6 +74,8 @@ type
     function scriptFunction(var sp: TSrcPos): TMVarCustom;
     function scriptResult(var sp: TSrcPos): TMVarCustom;
     function scriptArgOrder(var sp: TSrcPos): TMVarCustom;
+    function scriptAllowMultiLine(var sp: TSrcPos): TMVarCustom;
+    function scriptMetaTextEOL(var sp: TSrcPos): TMVarCustom;
     //MML命令
     function funcLength(var sp: TSrcPos): TMVarCustom;
     function funcOctave(var sp: TSrcPos): TMVarCustom;
@@ -251,7 +253,7 @@ end;
 procedure TMmlBase.AddSystemCommand;
 var
   //ラストの数値
-  cmds: array [0..130] of Pointer;
+  cmds: array [0..132] of Pointer;
   i: Integer;
 
     procedure tag_check(tag: Integer; p:Pointer; key:string);
@@ -422,6 +424,8 @@ begin
     cmd('NoteOff', funcNoteOff,78); //NoteOff(noteno,velocity)//ノートオフだけをSMFに埋め込む//
     cmd('UseKeyShift', scriptUseKeyShift,110); //UseKeyShift(on|off)//KeyやTimeKeyやTrackKeyの適用をオンオフする
     cmd('ArgOrder', scriptArgOrder,114); //ArgOrder(lqvto)//ノート(abcdefgn)引数の並び順をカスタマイズする
+    cmd('AllowMultiLine', scriptAllowMultiLine,131); //AllowMultiLine(0|1)//複数行にわたる和音をエラーにする(0でオフにする)
+    cmd('MetaTextEOL', scriptMetaTextEOL,132); //MetaTextEOL(0|1|2)//メタテキストの改行コードをLFに変える「MetaTextEOL(1)」でLF、2でCRに、0でCRLFする
 
     //スクリプト
     cmd( 'Int', scriptInt,79 );//Int name[=value];//整数型(32bit)の変数(name)を作成し、(value)で初期化する
@@ -3832,6 +3836,14 @@ begin
 
     //和音の範囲を得る
     s := GetTokenChars([''''], sp.ptr);
+    //和音の範囲に改行があればエラー
+    if SongInfo.AllowMuliLine = False then
+    begin
+      if Pos(#13#10, s) > 0 then
+      begin
+        raise Exception.Create('和音内に改行があります。');
+      end;
+    end;
     //オプションがあれば、オプションを得る
     len := GetNoteLength(sp, CurTrack.Stepmode, CurTrack.Length.GetValue);
 
@@ -4369,6 +4381,18 @@ begin
     end;
     if mv=nil then raise EMml.CreateFmt(ErrMsg(MML_ERR_ARG+'`MetaText={"text"}`の形式で指定してください。',sp),['メタイベント']);
     txt := mv.StrValue ;
+    case SongInfo.MetaTextEOL of
+      1:
+        begin
+          // LF
+          txt := JReplace(txt, #13#10, #10, True);
+        end;
+      2:
+        begin
+          // CR
+          txt := JReplace(txt, #13#10, #13, True);
+        end;
+    end;
 
     if mType=META_TRACK_NAME then // MLDのタイトル書き出しように覚えておく
     begin
@@ -6832,6 +6856,16 @@ begin
   CurTrack.ArgOrder := s;
 end;
 
+function TMmlBase.scriptAllowMultiLine(var sp: TSrcPos): TMVarCustom;
+var
+  s: string;
+begin
+  Result := nil;
+  s := GetMaruKakko(sp);
+  SongInfo.AllowMuliLine := (s <> '0');
+end;
+
+
 function TMmlBase.scriptPos(var sp: TSrcPos): TMVarCustom;
 var
     mv: TMArray ;
@@ -7336,6 +7370,15 @@ begin
     kp.NoteNo := CurSmfTrack.LastNodeNo;
     kp.velocity := v;
     CurSmfTrack.Add(kp);
+end;
+
+function TMmlBase.scriptMetaTextEOL(var sp: TSrcPos): TMVarCustom;
+var
+  s: string;
+begin
+  Result := nil;
+  s := GetMaruKakko(sp);
+  SongInfo.MetaTextEOL := StrToIntDef(s, 0);
 end;
 
 end.
