@@ -1379,9 +1379,9 @@ begin
   ini.AddBool(@ini.UseSkin, 'main','skin_use', True);
   ini.AddStr(@ini.SkinPath, 'main', 'skin', AppPath+'skin\skin.jpg');
   //å¯â âπ
-  ini.AddMenu(mnuEffect, 'main', 'effect_edit', True);
-  ini.AddMenu(mnuEffectPlay, 'main', 'effect_play', True);
-  ini.AddMenu(mnuEffectClipboard, 'main', 'effect_clipboard', True);
+  ini.AddMenu(mnuEffect, 'main', 'effect_edit', False);
+  ini.AddMenu(mnuEffectPlay, 'main', 'effect_play', False);
+  ini.AddMenu(mnuEffectClipboard, 'main', 'effect_clipboard', False);
   //é©ìÆÉwÉãÉv
   ini.AddMenu(mnuAutoHelp, 'main','auto_help', False);
 
@@ -2855,7 +2855,7 @@ var
             showtab;
             if ManualOnline then
             begin
-              wkey := key;
+              wkey := Key;
               ukey := UTF8Encode(wkey);
               s    := ukey;
               key := '';
@@ -2863,7 +2863,7 @@ var
               begin
                 key := key + '%' + IntToHex(Ord(s[i]),2);
               end;
-              show_doc('http://aoi-project.com/sakura/cmd/wiki.aoi?' + Key);
+              show_doc('http://oto.chu.jp/wiki/index.php?' + Key);
             end else
             begin
               show_doc(AppPath + 'doc\command\'+str+'.htm');
@@ -3295,7 +3295,7 @@ begin
         s := '';
         if cmd.Cells[3,i] <> '' then
         begin
-            s := s + '(*doc:'+cmd.Cells[3,i]+')';
+            s := s + '(*doc:'+cmd.Cells[3,i]+')[' + cmd.Cells[0,i] + ']';
         end;
         s := s + 'ÅyèëéÆÅz'+cmd.Cells[1,i] + 'Å@Åyê‡ñæÅz'+cmd.Cells[2,i];
         ShowBar(s);
