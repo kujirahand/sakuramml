@@ -6,6 +6,11 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, sakurapadU, mmsystem;
 
+const
+  WEB_TMIDI = 'http://hp.vector.co.jp/authors/VA010012/';
+  WEB_TWMUSIC = 'https://www.google.com/search?q=TW-MUSIC2&rct=j';
+
+
 type
   TfrmSetting = class(TForm)
     page: TPageControl;
@@ -72,6 +77,8 @@ type
     cmbMidiOut: TComboBox;
     Label8: TLabel;
     chkMidiInToEdit: TCheckBox;
+    GroupBox6: TGroupBox;
+    btnMultimedia: TButton;
     procedure FormShow(Sender: TObject);
     procedure listSkinClick(Sender: TObject);
     procedure btnSkinAddClick(Sender: TObject);
@@ -99,6 +106,7 @@ type
     procedure btnTWGetClick(Sender: TObject);
     procedure chkKansiMidiInClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure btnMultimediaClick(Sender: TObject);
   private
     oldSkin: string;
     procedure EnumSkinFile;
@@ -302,7 +310,7 @@ begin
   if MsgYesNo('TMidiは、ふみぃさん作のMIDIプレイヤーです。'#13#10+
               'ふみぃさんのホームページからダウンロードしてください。') then
   begin
-    OpenApp('http://hp.vector.co.jp/authors/VA010012/');
+    OpenApp(WEB_TMIDI);
   end;
 end;
 
@@ -482,7 +490,7 @@ begin
   if MsgYesNo('TW-Music2は、TAKE SOFTさん作のMIDIプレイヤーです。'#13#10+
               'TW-Music2のホームページからダウンロードしてください。') then
   begin
-    OpenApp('http://koremaka.hp.infoseek.co.jp/twm2.html');
+    OpenApp(WEB_TWMUSIC);
   end;
 end;
 
@@ -601,6 +609,12 @@ end;
 procedure TfrmSetting.FormDestroy(Sender: TObject);
 begin
   MidiToEdit := False;
+end;
+
+procedure TfrmSetting.btnMultimediaClick(Sender: TObject);
+begin
+  frmSakuraPad.mciClose ;
+	WinExec('control.exe Mmsys.cpl',SW_SHOW);
 end;
 
 initialization

@@ -22,6 +22,7 @@ const
   ARUKAS          = 'tools\arukas.exe';
   SHOW_LOGO_FILE  = 'tools\nologo';
   Kakikake        = 'ÉTÉNÉâèëÇ´Ç©ÇØ.txt';
+  WEB_URL         = 'http://oto.chu.jp/';
 
   NOTE_NO_TABLE: array [0..6] of Integer = (9,11,0,2,4,5,7);
 
@@ -99,7 +100,6 @@ type
     mnuStop: TMenuItem;
     N10: TMenuItem;
     S1: TMenuItem;
-    mnuSelDevice: TMenuItem;
     dlgOpen: TOpenDialog;
     dlgSave: TSaveDialog;
     Find1: TMenuItem;
@@ -309,13 +309,10 @@ type
     lstUser: TListBox;
     chkSortUserFunc: TCheckBox;
     mnuShowIncludeManual: TMenuItem;
-    mnuWriteMidiBBS: TMenuItem;
     N64: TMenuItem;
     mnuOnlyCompile: TMenuItem;
     mnuFindManual: TMenuItem;
     N66: TMenuItem;
-    MIDI1: TMenuItem;
-    mnuOpenMidiBBS: TMenuItem;
     mnuShowFAQ: TMenuItem;
     N65: TMenuItem;
     mnuPlugins: TMenuItem;
@@ -602,7 +599,6 @@ type
     procedure mnuWriteMidiBBSClick(Sender: TObject);
     procedure mnuOnlyCompileClick(Sender: TObject);
     procedure mnuFindManualClick(Sender: TObject);
-    procedure mnuOpenMidiBBSClick(Sender: TObject);
     procedure mnuShowFAQClick(Sender: TObject);
     procedure mnuPluginEnumClick(Sender: TObject);
     procedure mnuInsDllVerClick(Sender: TObject);
@@ -685,8 +681,6 @@ type
     procedure MakeRecentMenu;
     procedure mnuOpenRecent(Sender: TObject);
     procedure ShowVoiceDescript;
-    procedure ReadBar(Bar: TControl);
-    procedure WriteBar(Bar: TControl);
     procedure PluginClick(Sender: TObject);
     procedure makeKakikake;
     procedure AutoSaveExecute;
@@ -712,6 +706,8 @@ type
     procedure LoadToEdit(fname: string);
     procedure ChangeSkin(fname: string);
     procedure SetPlayMonitorTop;
+    procedure ReadBar(Bar: TControl);
+    procedure WriteBar(Bar: TControl);
   end;
 
 var
@@ -4374,11 +4370,6 @@ begin
   frmFindHelpF.Show ;  
 end;
 
-procedure TfrmSakuraPad.mnuOpenMidiBBSClick(Sender: TObject);
-begin
-  OpenApp('http://www.text2music.com/midi/midi.cgi');
-end;
-
 procedure TfrmSakuraPad.mnuShowFAQClick(Sender: TObject);
 begin
   OpenApp(AppPath+'doc\faq\index.htm');
@@ -4702,7 +4693,7 @@ end;
 
 procedure TfrmSakuraPad.mnuShowBBSClick(Sender: TObject);
 begin
-  OpenApp('http://oto.chu.jp/');
+  OpenApp(WEB_URL);
 end;
 
 procedure TfrmSakuraPad.mnuMML2MIDIAllClick(Sender: TObject);
