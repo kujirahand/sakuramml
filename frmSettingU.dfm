@@ -2,7 +2,7 @@ object frmSetting: TfrmSetting
   Left = 305
   Top = 150
   Width = 545
-  Height = 499
+  Height = 561
   Caption = #35373#23450
   Color = clBtnFace
   Font.Charset = SHIFTJIS_CHARSET
@@ -21,7 +21,7 @@ object frmSetting: TfrmSetting
     Left = 0
     Top = 0
     Width = 529
-    Height = 417
+    Height = 481
     ActivePage = TabSheet2
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -111,7 +111,8 @@ object frmSetting: TfrmSetting
         Left = 0
         Top = 0
         Width = 521
-        Height = 385
+        Height = 454
+        Align = alClient
         BevelOuter = bvLowered
         TabOrder = 0
         object grpPlayer: TRadioGroup
@@ -205,15 +206,15 @@ object frmSetting: TfrmSetting
             Caption = 'msec'
           end
           object Label3: TLabel
-            Left = 264
-            Top = 40
+            Left = 272
+            Top = 24
             Width = 200
             Height = 12
             Caption = #25968#20516#12364#20302#12356#12411#12393#31934#24230#12364#39640#12367#12394#12426#12414#12377#12364#12289
           end
           object Label4: TLabel
-            Left = 264
-            Top = 56
+            Left = 272
+            Top = 40
             Width = 160
             Height = 12
             Caption = #12497#12477#12467#12531#12398#21205#20316#12364#37325#12367#12394#12426#12414#12377#12290
@@ -319,6 +320,23 @@ object frmSetting: TfrmSetting
             OnClick = btnTWDownloadClick
           end
         end
+        object GroupBox6: TGroupBox
+          Left = 8
+          Top = 384
+          Width = 497
+          Height = 65
+          Caption = 'OS'#12510#12523#12481#12513#12487#12451#12450
+          TabOrder = 6
+          object btnMultimedia: TButton
+            Left = 16
+            Top = 24
+            Width = 161
+            Height = 25
+            Caption = #12510#12523#12481#12513#12487#12451#12450#12398#35373#23450#12434#38283#12367
+            TabOrder = 0
+            OnClick = btnMultimediaClick
+          end
+        end
       end
     end
     object TabSheet3: TTabSheet
@@ -328,7 +346,7 @@ object frmSetting: TfrmSetting
         Left = 0
         Top = 0
         Width = 521
-        Height = 390
+        Height = 454
         Align = alClient
         BevelOuter = bvLowered
         TabOrder = 0
@@ -441,7 +459,7 @@ object frmSetting: TfrmSetting
         Left = 0
         Top = 0
         Width = 521
-        Height = 390
+        Height = 454
         Align = alClient
         BevelOuter = bvLowered
         TabOrder = 0
@@ -517,7 +535,7 @@ object frmSetting: TfrmSetting
   end
   object btnOk: TButton
     Left = 344
-    Top = 424
+    Top = 488
     Width = 99
     Height = 25
     Caption = #27770#23450'(&O)'
@@ -526,7 +544,7 @@ object frmSetting: TfrmSetting
   end
   object btnCancel: TButton
     Left = 448
-    Top = 424
+    Top = 488
     Width = 73
     Height = 25
     Caption = #12461#12515#12531#12475#12523

@@ -1234,6 +1234,7 @@ object frmSakuraPad: TfrmSakuraPad
           Top = 2
           Width = 31
           Height = 20
+          Enabled = False
           TabOrder = 1
           Text = '1'
         end
@@ -1242,6 +1243,7 @@ object frmSakuraPad: TfrmSakuraPad
           Top = 2
           Width = 31
           Height = 20
+          Enabled = False
           TabOrder = 2
           Text = '1'
         end
@@ -1250,6 +1252,7 @@ object frmSakuraPad: TfrmSakuraPad
           Top = 2
           Width = 31
           Height = 20
+          Enabled = False
           TabOrder = 3
           Text = '0'
         end
@@ -1302,18 +1305,6 @@ object frmSakuraPad: TfrmSakuraPad
         Caption = #12469#12463#12521#12398'Web'#12469#12452#12488#12434#38283#12367
         ImageIndex = 14
         OnClick = mnuShowBBSClick
-      end
-      object MIDI1: TMenuItem
-        Caption = 'MIDI'#32032#26448#25522#31034#26495
-        Visible = False
-        object mnuOpenMidiBBS: TMenuItem
-          Caption = 'MIDI'#32032#26448#25522#31034#26495#12434#38283#12367
-          OnClick = mnuOpenMidiBBSClick
-        end
-        object mnuWriteMidiBBS: TMenuItem
-          Caption = 'MIDI'#32032#26448#25522#31034#26495#12408#26360#12365#36796#12415
-          OnClick = mnuWriteMidiBBSClick
-        end
       end
       object N37: TMenuItem
         Caption = '-'
@@ -1794,12 +1785,8 @@ object frmSakuraPad: TfrmSakuraPad
       object N47: TMenuItem
         Caption = '-'
       end
-      object mnuSelDevice: TMenuItem
-        Caption = #12510#12523#12481#12513#12487#12451#12450#12398#35373#23450'(&M)'
-        OnClick = mnuSelDeviceClick
-      end
       object mnuSetting: TMenuItem
-        Caption = #12503#12524#12452#12516#12540#12392#22806#35211#12398#35373#23450'(&P)'
+        Caption = #12503#12524#12452#12516#12540#12392#22806#35211#12398#35373#23450'...(&P)'
         OnClick = mnuSettingClick
       end
     end
