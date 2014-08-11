@@ -1,0 +1,101 @@
+/*
+KeyFlagを使ったスケール集です。
+使いたいスケールをカット＆ペーストして、
+*/
+
+//Okinawa
+System.KeyFlag=(-2,0,0,-2,0,0,0);
+l8 cdefgab>cdedc<bage de16c16dgb>cdededgedec<
+
+//のように使ってください。
+
+/*
+//Aeolian
+System.KeyFlag=(-1,-1,0,0,-1,0,0);
+//Algerian
+System.KeyFlag=(-1,0,0,0,-1,1,0);
+//Arabian
+System.KeyFlag=(0,0,0,0,-1,0,-1);
+//Balinese
+System.KeyFlag=(-1,-3,0,-1,-1,-2,0);
+//Blues
+System.KeyFlag=(0,-1,0,0,0,0,0);
+//Byzantine
+System.KeyFlag=(-1,0,0,-1,0,0,0);
+//Chinese
+System.KeyFlag=(-2,0,0,-2,0,-1,0);
+//Chinese/Mongolian
+System.KeyFlag=(-2,0,0,-2,0,-1,0);
+//Combination Diminished
+System.KeyFlag=(0,-1,0,-1,0,-1,0);
+//Egyptian
+System.KeyFlag=(1,-1,0,0,1,0,0);
+//Ethopian
+System.KeyFlag=(1,-1,0,0,-1,0,0);
+//Hawaiian
+System.KeyFlag=(0,0,0,0,-1,0,0);
+//Hindustan
+System.KeyFlag=(-1,-1,0,0,0,0,0);
+//Hungarian
+System.KeyFlag=(0,-1,0,-2,0,-1,0);
+//Hungarian Gypsy
+System.KeyFlag=(-1,0,0,0,-1,1,0);
+//Hungarian/Gypsy/Persian
+System.KeyFlag=(-1,0,0,-1,0,0,0);
+//Japanese
+System.KeyFlag=(1,-1,0,-1,1,0,0);
+//Japanese1
+System.KeyFlag=(-1,-3,0,-1,1,0,0);
+//Japanese2
+System.KeyFlag=(-1,0,0,-2,-1,0,1);
+//Japanese3
+System.KeyFlag=(0,-1,0,0,0,0,0);
+//Japanese4
+System.KeyFlag=(-1,-1,0,0,-1,0,0);
+//Japanese(Ichikotucho)
+System.KeyFlag=(0,0,0,0,0,0,0);
+//Japanese(Taishikicho)
+System.KeyFlag=(0,0,0,0,0,0,0);
+//Japanese(Hyojo)
+System.KeyFlag=(0,-1,0,0,-1,0,0);
+//Japanese(Oshikicho)
+System.KeyFlag=(0,-1,0,0,-1,0,0);
+//Japanese(Bansikicho)
+System.KeyFlag=(0,-1,0,0,-1,0,0);
+//Javaneese
+System.KeyFlag=(0,-1,0,-1,-1,0,0);
+//Major
+System.KeyFlag=(0,0,0,0,0,0,0);
+//Minor(natural)=Major
+System.KeyFlag=(-1,-1,0,0,-1,0,0);
+//Minor 5 Note 
+System.KeyFlag=(-2,-4,0,0,-1,0,0);
+//Neopolitan
+System.KeyFlag=(-1,0,0,-1,-1,0,0);
+//Okinawa
+System.KeyFlag=(-2,0,0,-2,0,0,0);
+//Oriental
+System.KeyFlag=(-1,-1,0,-1,0,0,-1);
+//Persian
+System.KeyFlag=(-1,0,0,-1,0,0,-1);
+//Pentatonic
+System.KeyFlag=(0,-2,0,0,0,-1,0);
+//Pentatonic Minor
+System.KeyFlag=(1,-1,0,-2,-1,0,0);
+//Raga Hanumat Todi
+System.KeyFlag=(-1,-1,0,-1,-1,0,0);
+//Spanish/Gypsy
+System.KeyFlag=(-1,-1,0,-1,0,0,0);
+//Whole Tone
+System.KeyFlag=(-1,-1,0,0,0,-1,-1);
+//Hungarian Minor
+System.KeyFlag=(-1,0,0,0,-1,1,0);
+//Harmonic Minor
+System.KeyFlag=(-1,0,0,0,-1,0,0);
+//Jewish(Magen Abot)
+System.KeyFlag=(-1,0,0,-1,0,-1,-1);
+//Melodic Minor
+System.KeyFlag=(0,0,0,0,-1,0,0);
+//Roumanian Minor
+System.KeyFlag=(0,-1,0,0,-1,1,-1);
+*/

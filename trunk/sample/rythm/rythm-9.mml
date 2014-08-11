@@ -1,0 +1,140 @@
+//---------------------------------------------------
+//  Rythm-9
+//  MML for SAKURA
+//  1999/12/30
+//---------------------------------------------------
+
+//	ＭＭＬのリズムモードを使ったサンプルです。
+//	ver0.999以降
+
+Copyright= {"クジラ飛行机"} 
+TrackName= {"rythm-9"} 
+TimeSignature= 4, 4;
+System.MeasureShift(1);
+Tempo=100;
+TimeBase = 96;
+
+読む(bend.h)
+
+ResetGS();r8
+ResetXG();r8
+ResetGM();
+
+//---------------------------------------------------
+//  各トラックの初期設定
+//---------------------------------------------------
+
+Function SetUp(Trk, Ch, Vo, Mvl){
+	Track(Trk); Channel(Ch);
+	Time(0:4:0); Voice=Vo; r%1 ; MainVolume(Mvl); r%1
+	PitchBendSensitivity(2); v100
+}
+
+SetUp( 1, 10, 1, 127);		//Drum-kit
+Track(2)Channel(10);v90
+Track(3)Channel(10);v90
+SetUp( 4,  1, (FingerBase), 127);//bass
+BR(4);
+
+Int INTRO  = Time(1:1:0);	//measure
+
+//---------------------------------------------------
+//  Rythm Mode
+//---------------------------------------------------
+//  Macro
+#RythmMacro = {
+	$b{n(Kick1),}
+	$B{n(Kick2),} 
+	$s{n(Snare1),}
+	$S{'n(Snare2)n(HandClap)'}
+	$h{n(ClosedHiHat),} 
+	$m{n(OpenHiHat),} 
+	$c{n(CrashCymbal1),}
+	$a{n(SideStick),}
+	$f{n(LowBongo),}
+	$g{n(HighBongo),}
+}
+
+//------------------------------------------------------------------------------
+//_1:Groove
+#Groove1 = {
+	t__0.onCycle(!16,0,8);//シャッフル
+	v__0.onCycle(!16,0,-15);
+	t__1.onCycle(!4,0,-2);//2,4拍目を少し前ノリ
+	v__1.onCycle(!4,0,5);
+}
+#Groove2 = {
+	t__0.onCycle(!16,0,6);//シャッフル
+}
+
+Int A = 30;
+#Accent1 = { v__2.onCycle(!16,0,0,A,0,A,0,0,0); }
+#Accent2 = { v__2.onNote(A,0,0,A,0,0,A,0); }
+#Accent3 = { v__2.onCycle(!16,A,0,A,A,0,0,A,A); }
+
+//------------------------------------------------------------------------------
+//_2:Phrase
+Str B1 = { #Groove1; Rythm{
+	(Sub){ (#Accent2) [4 l8 v50 BBBB BBBB ] }
+	(Sub){ (#Accent1) [4 l16 v50 aaaa aaaa32a32 aaaa aaaa32a32] }
+	[2[2 l16 v110 bbrb srbb rrrS rr:rr ]v-20sv-10sv+30 ]
+}}
+
+Str B2 = { #Groove1; Rythm{
+	(Sub){ (#Accent2) [4 l8 v50 rBrB rBBr ] }
+	(Sub){ (#Accent1) [4 l32 v50 [8 aaaa ]] }
+	[4 v110l16 brbr srrb brbr srrr ]
+}}
+
+Str H1 = { #Groove1;
+	t.Random(2);v.Random(10); v70
+	#Accent3;
+	Rythm{
+		[4 l16 hhhh hhhh hhhh hhhm ]
+	}
+}
+
+Str H2 = { #Groove1; v70
+	Rythm{
+		[4 l8 hhhh hhhm ]
+	}
+}
+
+Str P1 = { #Groove2; #Accent3;
+	Rythm{
+		[4 l16v50 ffff gfff ggff gfgf ]
+	}
+}
+
+Str P2 = { #Groove2; #Accent3;
+	Rythm{
+		[2[2 l16v50 ffrf gfrf :ggff gfgf ] fggg fggg]
+	}
+}
+
+Str A1 = { #Groove2;
+	l16o3 v100 q40 [2
+		ee>e<e rerr >ge c^ ^^^^
+		rrv---BendUp(!16)'eg'^ ^^v+++rr <:d^^c d^g^
+	] eed>d< ggbb
+}
+
+Str A2 = { #Groove2;
+	l16o3 q40 v100 [4
+		errc e^rc re^r eg>ee< 
+	]
+}
+
+//------------------------------------------------------------------------------
+//_3:Play
+Str __ = { l1rrrr }
+
+Track(0);Time(INTRO); #RythmMacro;
+Play(__,{ #Groove2 r1r1r1l16 v90 Rythm{'cb'4rrsr bsrs bsss} },__,P2,__);
+Play(__,B1,__,P1,A1);
+Play(__,B2,H1,P1,A2);
+Play(__,B1,H2,P2,A1);
+Play(__,B2,H1,P1,A2);
+Play(__,B1,__,P2,A1);
+Play(__,__,__,P2,A1);
+Play(__,__,__,P2);

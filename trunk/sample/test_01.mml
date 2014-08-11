@@ -1,0 +1,370 @@
+//------------------------------------------------------------------------------ Header.
+/* Meta Ivent */
+TrackName     = {"-= Night Flyer =- For GM Level1"}			//曲名
+Copyright     = {"Mizinco"}							//著作権表示
+MetaText      = {"This Song is test for =chord3.h="}			//説明・コメントなど
+Tempo         = 150;								//テンポ設定
+TimeSignature = 4,4;								//拍子記号
+/* System */
+System.Include(stdmsg.h)							//標準定義ファイル読込
+System.Include(chord3.h)							//らくちんぷろぐれっしょん
+System.MeasureShift(0)  							//小節数のシフト設定
+System.TimeBase(48)     							//四分音符分解能
+System.KeyFlag+()       							//調号の設定
+System.vAdd(10)         							//v++,v--で変化する値
+System.qAdd(10)         							//q++,q--で変化する値
+//------------------------------------------------------------------------------ UserFunction.
+/*
+フィーリングコントローラ
+BNote = 開始値（半音単位）
+Delay = 開始位置（省略時：FCdef値）
+Len   = 処理長（省略時：グリスベンド）
+*/
+Function FC(Int BNote,Int Delay,Int Len){
+	Int Range = 8192/BRvalue;
+	Int Value = Range*BNote;
+	y256.Frequency(1);
+	If(Len==0){
+		If(Delay==0){
+			Delay = FCdef;
+			Len   = FCdef;
+			PitchBend(Value);
+			Sub{
+				r*%(Delay); PitchBend.onTime(Value,0,Len);
+				r*%(Len); PitchBend(0);
+			}
+		}Else{
+			PitchBend(Value);
+			r*%(Delay); PitchBend(0);
+			r-%(Delay);
+		}
+	}Else{
+		PitchBend(Value);
+		Sub{
+			r*%(Delay); PitchBend.onTime(Value,0,Len);
+			r*%(Len); PitchBend(0);
+		}
+	}
+}
+
+/*
+半音シフト＋ポルタメント
+BNote = 開始値（半音単位）
+Delay = 開始位置
+Next  = 終了値
+Len   = ポルタメントタイム
+*/
+Function BG(Int BNote,Int Delay,Int Next,Int Len){
+	Int Range = 8192/BRvalue;
+	Int Value = Range*BNote;
+	y256.Frequency(1);
+	If(Len==0){
+		r*%(Delay);
+		PitchBend(Value);
+		r-%(Delay);
+	}Else{
+		Int High = Range*Next;
+		Sub{
+			r*%(Delay);
+			PitchBend.onTime(Value,High,Len);
+			Len = Len - 1;
+			r*%(Len); PitchBend(High);
+		}
+	}
+}
+
+/*
+エクスプレッショングラデ
+Low   = 開始値（省略時：現在のエクスプレッション値）
+High  = 終了値
+Len   = スライド時間
+Delay = 開始位置
+*/
+Function EG(Int Low,Int High,Int Len,Int Delay){
+	If(Low==0){Low = MML(y11)};
+	Sub{
+		r*%(Delay);
+		y11.onTime(Low,High,Len);
+		Len = Len - 1;
+		r*%(Len); y11,(High);
+	}
+}
+
+/*
+コナミＬＦＯ（一時作動）
+Delay = 開始位置
+Value = デプス
+Rise  = ライズタイム
+*/
+Function RM(Int Delay,Int Value,Int Rise){
+	Sub{
+		r*%(Delay);
+		Modulation.onTime(0,Value,Rise);
+	}
+}
+
+/*
+コナミＬＦＯ（常時作動）
+Delay = 開始位置
+Value = デプス
+Rise  = ライズタイム
+*/
+Function RM_(Int Delay,Int Value,Int Rise){
+	Modulation.onNoteWave(0,0,Delay,0,Value,Rise);
+}
+
+//------------------------------------------------------------------------------ Exclusive.
+SysEx=$F0,$7E,$7F,$09,$01,$F7; r4;		// GM reset
+//------------------------------------------------------------------------------ Main.
+#Transpose  = {RPN=0,2,Tune;}
+Int BRvalue	= 12;				// ベンド計算幅（ｘ半音）
+Int FCdef	= 8;				// フィーリングコントローラデフォルトレングス
+Int Tune    = 64;				// トランスポーズ値
+
+//============================
+//	Drums.
+//============================
+TR=10; CH=10;
+V(127); r%16 EP(127); r%16 REV(060); r%16 CHO(000); r%16
+v090 l16 q1 @001
+$b{n36,}; $s{n38,}; $d{n40,}; $h{n42,};
+$o{n46,}; $c{n49,}; $k{n57,}; $u{n53,};
+$w{n47,}; $x{n45,}; $y{n43,}; $z{n41,};
+$q{n39,};
+Time(2:1:0);
+#FI00 = {b8o,,-20hd8};
+#FI01 = {ohd8 hd,,-20};
+#FI02 = {h,,-20d,,-30 h,,-20d,,+10h24v-30h24h24v+30};
+#FI03 = {u,,-20ru,,+20r rurr u,,-20rru rru,,+30r};
+#FI04 = {rru,,-30r rurr uru,,-30u,,+20 rurr};
+#FI05 = {l32 v+20 dv-40dv-40dd dddd ddv+20dd v+20ddv+20ddv+20 l24 ddd ddd l16 dddd v-20};
+#FI06 = {v+20 rrw32w32w wwx24x24x24 xxy32y32y yyk0s0,,+17zr v-20};
+#PT01 = {b8o,,-20hd8 b8hb,,-30d8 h,,-20d,,-50h24v-30h24h24v+30};
+#PT02 = {ohd8 hd,,-20hd32,,-40d32,,-30 v-30dhbv+30d hbd8};
+#PT03 = {dhd8,,+20 hd,,-30h8 hdb0oh d8bh,,-30};
+Rythm{
+	/* Intro */
+	r1r1r1r1 r1r1 (y10.onTime(0,127,!1);) [5 #FI00; v-20] rr v090
+	r1r1r1r1 r1r1r1 (y10,64) #FI05;
+	/* Main1 */
+	[2
+		c0
+		#PT01; #PT02; #PT01; #PT03; #PT01; #PT02; #PT01; #PT03;
+		#PT01; #PT02; #PT01; #PT03; #PT01; #PT02; #PT01; #FI06; r-1 #PT03;
+		c0
+		[2 #FI03; #FI04; #FI03; #FI04; ] r-1^1^1^1^1^1^1^1
+		#PT01; #PT02; #PT01; #PT03; #PT01; #PT02; #PT01; #PT03;
+		[2 #FI03; #FI04; #FI03; #FI04; ] r-1^1^1^1^1^1^1^1
+		#PT01; #PT02; #PT01; #PT03; #PT01; #PT02; #PT01; #PT03;
+	/* Main2 */
+		[2
+			c0
+			[2 #FI03; #FI04; #FI03; #FI04; ] r-1^1^1^1^1^1^1^1
+			[5 #FI00; v-20] v090 h24h24,,-30h24,,-30 [4 #FI00; v-20] v090 #FI01; oh0d,,-30
+			[5 #FI00; v-20] v090 h24h24,,-30h24,,-30 : #PT01; r2. k4 r-1 #PT03;
+		]
+		[4 #FI00; ] k0 dhbhd8 c0 bhdoh0dd bd32d32ddy24x24z24
+		k0brrr : u24,,-40u24,,-20u24 #FI04; r-1 brrr brrr brrr brrr
+	]
+}
+
+
+//============================
+//	Slow Strings.
+//============================
+TR=01; CH=01;
+@050;
+V(127); r%16 EP(079); r%16 REV(060); r%16 CHO(000); r%16
+#Transpose;
+v100 l16 q98
+Time(2:1:0);
+/* Intro(02:1:0) */
+#KEY_C;
+EG(20,79,!1^1^1^1^1^1^1);
+SD_D2(!1^1); D_T(!1^1,1); SDM5(!1^1^1^1,1);
+SD_D2(!1^1); D_T(!1^1,1); SDM5(!1^1,1); EG(,127,!1^1) SD_D1(!1^1,1); EP(079);
+/* Main1(18:1:0) */
+[2
+	SD_D2(!1^1); D_T(!1^1,1); SDM5(!1^1^1^1,1);
+	SD_D2(!1^1); D_T(!1^1,1); SDM5(!1^1,1); EG(,127,!1,!1); SD_D1(!1^1,1); EP(079);
+	SD_D2(!1^1); D_T(!1^1,1); SDM5(!1^1^1^1,1);
+	SD_D2(!1^1); D_T(!1^1,1); SDM5(!1^1,1); EG(,127,!1,!1); SDM4(!1^1,2); EP(079);
+/* Main2(50:1:0) */
+	r1r1r1r1 r1r1r1r1
+	r1r1r1r1 r1r1r1r1
+	r1r1
+]
+
+
+//============================
+//	Strings.
+//============================
+TR=02; CH=02;
+@049;
+V(127); r%16 EP(100); r%16 REV(060); r%16 CHO(000); r%16
+#Transpose;
+v100 l16 q97
+Time(2:1:0);
+/* Intro(02:1:0) */
+r1r1r1r1 r1r1r1r1
+r1r1r1r1 r1r1r1r1
+/* Main1(18:1:0) */
+#KEY_C;
+[2
+	r1r1r1r1 r1r1r1r1
+	r1r1r1r1 r1r1r1r1
+	r1r1r1r1 r1r1r1r1
+	r1r1r1r1 r1r1r1r1
+/* Main2(50:1:0) */
+	v+20
+	q%!16 [3 SDM_T2(!4.,2); ] q97 SDM_T2(!4.,2); EG(,30,!4); r4 EG(,100,!4); r4 r-2 T1(!2,3);
+	q%!16 [3 SDM_T2(!4.,2); ] q97 T1(!4,3); T1(!8); SDM_T2(!16,2); r SDM_T2(!4.);
+	#KEY_A;
+	q%!16 [3 SDM_T2(!4.,2); ] q97 SDM_T2(!4.,2); EG(,30,!4); r4 EG(,100,!4); r4 r-2 T1(!2,3);
+	#KEY_C;
+	q%!16 [3 SDM_T2(!4.,2); ] q97 SDM_T2(!4.,2); EG(,30,!4); r4 EG(,100,!4); r4 r-2 T1(!2,3);
+	q%!16 [3 SDM_T2(!4.,2); ] q97 SDM_T2(!4.,2); EG(,30,!4); r4 EG(,100,!4); r4 r-2 T1(!2,3);
+	q%!16 [3 SDM_T2(!4.,2); ] q97 T1(!4,3); T1(!8); SDM_T2(!16,2); r SDM_T2(!4.);
+	#KEY_A;
+	q%!16 [3 SDM_T2(!4.,2); ] q97 SDM_T2(!4.,2); EG(,30,!4); r4 EG(,100,!4); r4 r-2 T1(!2,3);
+//	Disp = 1;
+	#KEY_C; q%!16 SDM_T2(!4.,2); T4(!4.,2); SDM5(!4.,3); SDM6(!4.,4);
+	#KEY_Dp; SDM_T2(!4.,1); T4(!4.,1); SDM5(!4.,2);
+	q97 EG(,40,!4.);r4. EG(,100,!1);r1 r-4.^1 : SD2(!4.^1,-1); #KEY_C;
+//	Disp = 0;
+	v-20
+]
+SD2(!4.^1^1^1,-1);
+
+//============================
+//	Wood Bass.
+//============================
+TR=04; CH=04;
+@033;
+V(127); r%16 EP(100); r%16 P(096); r%16 REV(000); r%16 CHO(048); r%16; BR(12); r%16;
+#Transpose;
+v080 l16 q99 o2
+Time(2:1:0);
+/* Intro(02:1:0) */
+r1r1r1r1 r1r1r1r1
+r1r1r1r1 r1r1r1r1
+/* Main1(18:1:0) */
+#KEY_C;
+[2
+	[2
+		g4r8> FC(-2); d4. RM_(48,127,48); g4^2. M(0); f8,%46 BG(2); r* BG(0); r*
+		e4.<a8^2^1
+		g+4r8 FC(-1); >d+4. RM_(48,127,48); g+4^1 M(0);
+		r8 FC(-1,8,10); a+4g+r FC(-1,12); g8frg+8g8 rrc8 rrdr rrd+4cr<
+		g4r8> FC(-2); d4. RM_(48,127,48); g4^2. M(0); f8,%46 BG(2); r* BG(0); r*
+		e4.<a8^2^1
+		g+4r8 FC(-1); >d+4. RM_(48,127,48); g+4^1 M(0); :
+		g4r8 FC(-1); >d4. RM_(48,127,48); g4^1 M(0); <<
+	]
+	c+4r8 FC(-1); g+4. >c+4 rrd+4c+8c8<a+r>c+4<
+/* Main2(50:1:0) */
+	c8rrrr c8rrrr c8rrrr c8,%!4.BG(10);r4BG(0); cra+8 BG(0,36,-12,12); >c4< BG(0);
+	c8rrrr c8rrrr c8rrrr BG(-2); >c8,%!4 BG(0); r*8<cr cr BG(-2); BG(-2);g8,%!4. BG(0); r4
+	Key(-3); c8rrrr c8rrrr c8rrrr c8,%!4.BG(10);r4BG(0); cra+8 BG(0,36,-12,12); >c4< BG(0);
+	Key(0); c8rrrr c8rrrr BG(0,!8,12,!8); c4 BG(0);
+	>>c,%!8<BG(-5); r BG(0); c,%!8. BG(-2); r BG(-3); r BG(0); c g
+	c,%!8 BG(-2); r BG(0); fe<a+> c,%!8 BG(2); r BG(0); g8<
+	cra+8>cr< cra+8>cr< c4. c8,%!4.BG(10);r4BG(0); cra+8 BG(0,36,-12,12); >c4< BG(0);
+	cra+8>cr< c4. crf8gr BG(-2); >c8,%!4 BG(0); r*8<cr cr BG(-2); BG(-2);g8,%!4. BG(0); r4
+	Key(-3);
+	cra+8>c4a+8,%!8. BG(2); r8< BG(0); c4. c8,%!4. BG(10); r4 BG(0);
+	cra+8 BG(0,36,-12,12); >c4< BG(0);
+	Key(0);
+	>c8rrrr<a8rrrrg+4. BG(0,!4,2,!8); a+4.> BG(0);
+	c+4.c4.<b4.:g+4.^1 <
+]
+>g+4.^1^1^1
+
+//============================
+//	Flute.
+//============================
+TR=05; CH=05;
+@065;
+V(127); r%16 EP(079); r%16 P(064); r%16 REV(000); r%16 CHO(000); r%16; BR(12); r%16;
+#Transpose;
+v110 l16 q99 o6
+Time(2:1:0);
+#KEY_C;
+#ML01 = {RM_(48,96,48);FC(-2);f4.g4.>c8<g8^2.frg8^2. FC(-2);f8 EG(,30,!1^4,!4.);e8^1^2}
+#ML02 = {EP(079);FC(-2); f8.g8.>c8<g2,!2.rr M(0); BG(1); r BG(0); r
+         RM_(48,96,48); f8 EG(,110,!1,!2^8);g8^1^2 r8 EP(079);FC(-1,12); c8.d+8.}
+#ML03 = {FC(-2); f4.g4.>c8<g8^2.frg8^4.a4.> FC(-2); e4^2 r8 FC(-2); d8.e8.}
+#ML04 = {f8.d+8.d2 FC(-1,8); f8
+         RM_(48,96,48);d+8.d8. M(0);BG(0,56,-6,16);c8^4 BG(0);RM_(48,96,48);<f8g8^1^1}
+#ML05 = {f8.d+8.d2 FC(-1,8); f8 RM_(48,96,48);d+8.d8.c2 d+8
+         c+8. FC(-2);c8.<a+8 g+8.g8.f8  FC(-2);d+8.c+8.d+8f8.}
+#ML06 = {EG(,20,!1^1^1^1^8.^8,!1^1^1); g8.^8^1^1^1^1^1^1^1r2. EP(079);
+         BG(-10);r24 BG(-8);r24 BG(-7);r24 BG(-5);r24 BG(-3);r24 BG(-2);r24 r-4 >c4< BG(0);}
+#ML07 = {>c<gca+ar gecfer ec<a+>dc<g >dc<ga+>cr FC(-2);d4 cre8^2..}
+#ML08 = {FC(-2);f8.e8.d8e8.frr FC(-2,10,10); g8^4. BG(0,56,-5,16);a4. > FC(-2);e8^1}
+#ML09 = {FC(-2);d8cr<a+r> c8<grfr g8crdr frgra+r c+d+g+a+>c+r< d+g+a+>c+d+<a+ g+a+>d+f
+         FC(-2); g2^1}
+#ML10 = {FC(-2);d8cr<a+r> c8<grfr g8crdr frgra+r c+d+g+a+>c+r< d+g+a+>c+d+<a+ g+a+>d+f
+         FC(-2); g2^1^1^1}
+#LR   = { Sub{r2 Panpot.onTime(0,127,!1^1)} }
+#RL   = { Sub{r2 Panpot.onTime(127,0,!1^1)} }
+#SQ01 = { Sub{r2 EP(060); [16 c0g8r v-5 ] v+80 EP(079);} }
+#SQ02 = { P(64); Sub{ EP(100); r2 < q%!8 [4 <cfg>cfg> v-20 ] q99 <<< v+80 EP(079); } }
+/* Intro(02:1:0) */
+r1r1r1r1 #SQ02; r1r1r1r1
+r1r1r1r1 r1r1r1r1
+/* Main1(18:1:0) */
+#LR; #SQ01; r1r1r1r1 r1r1r1r1
+#RL; #SQ01; r1r1r1r1 r1r1#SQ02; r1r1
+#LR; #SQ01; r1r1r1r1 r1r1r1r1
+#RL; #SQ01; r1r1r1r1 r1r1#SQ02; r1r1
+/* Main2(50:1:0) */
+r1r1r1r1 r1r1r1r1
+r1r1r1r1 r1r1
+P(064);
+RM_(48,96,96);
+v+20 #ML09; v-20
+/* Main3(68:1:0) */
+#ML01; #ML02; #ML03; #ML04;
+#ML01; #ML02; #ML03; #ML05;
+/* Main4(100:1:0) */
+#ML06; #ML07; #ML08; #ML10;
+
+//============================
+//	Flute.(Delay)
+//============================
+TR=06; CH=06;
+@065;
+V(127); r%16 EP(079); r%16 P(000); r%16 REV(060); r%16 CHO(060); r%16; BR(12); r%16;
+#Transpose;
+v080 l16 q99 o6
+Time(2:1:0); r8
+#KEY_C;
+/* Intro(02:1:0) */
+r1r1r1r1 #SQ02; r1r1r1r1
+r1r1r1r1 r1r1r1r1
+/* Main1(18:1:0) */
+#RL; #SQ01; r1r1r1r1 r1r1r1r1
+#LR; #SQ01; r1r1r1r1 r1r1#SQ02; r1r1
+#RL; #SQ01; r1r1r1r1 r1r1r1r1
+#LR; #SQ01; r1r1r1r1 r1r1#SQ02; r1r1 r
+/* Main2(50:1:0) */
+r1r1r1r1 r1r1r1r1
+r1r1r1r1 r1r1
+P(000); EG(1,79,!1^1^1);
+RM_(48,96,96);
+v+20 #ML09; v-20
+/* Main3(68:1:0) */
+#ML01; #ML02; #ML03; #ML04;
+#ML01; #ML02; #ML03; #ML05;
+/* Main4(100:1:0) */
+#ML06; #ML07; #ML08; #ML10;
+
+/*
+PlayFrom.SysEx(off)
+PlayFrom.RPN_NRPN(off)
+PlayFrom(64:1:0)
+*/
+
+
+

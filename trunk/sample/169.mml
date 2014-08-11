@@ -1,0 +1,699 @@
+//_
+/*        ■  Save the Mars (仮) [ 日常系３ ] (タイトル未定)  ■
+
+[ 音源フォーマット ]	GM / GS (SC-55/88/88pro/8850 Map) / XG
+[  対  象  音  源  ]	GM・GS・XG互換音源全般 (SC-8850推奨)
+[  制  作  音  源  ]    Roland SC-8850
+                        YAMAHA S-YXG50 V2e
+[ＭＩＤＩキーボード]    Roland PC-180A
+[  演  奏  時  間  ]    ５０秒 (セットアップ部２秒+演奏部４６秒+無音部２秒)
+                        ループ回数 : １回 (1ループあたり４６秒)
+[ 使用チャンネル数 ]    GS・XG:13　GM:11
+[ファイルバージョン]    β1
+[ 作 曲 ・ 著 作 権 ]    H.YAMANOI @ Circle"K"
+                              Mail : h_yamanoi@lycos.jp
+                               MSN : yamanoi@hotmail.com
+                               ICQ : 155593370
+                               Web : http://www.text2music.com/y-kun/
+[  動  作  確  認  ]    TMIDI Player version 3.8.5 (release)
+[サクラのバージョン]    SakuraPad   : 1.052
+                        dSakura.dll : 1.032
+[ 併用シーケンサー ]    Cherry version 1.4.3
+[  制  作  環  境  ]    自作DOS/V機
+                              CPU : Pentium 4  1.60AGHz  (Northwood)
+                              RAM : DDR SDRAM  256MB  (PC2100 CL2.5)
+                              O S : Windows 2000 Professional SP2 (ver5.00.2195)
+[  で  き  れ  ば  ]    ヘッドホンで聴いて下さい
+[  その他注意事項  ]    ＜ 転載・掲載・自作ゲーム等での使用について ＞
+                              現時点では不可です。
+
+　ダウンロードしていただきありがとうございました。
+　まず、ご使用のMIDI音源に合わせて以下の"="の後に数値を半角英数で入力して下さい。(初期値:4)
+*/
+//_Synth Type
+			Int	SynthType	=	0	;
+/*
+            ＜ 数値と音源の対応 ＞
+      0 : GM音源全般
+      1 : GS音源 SC-55Map
+      2 : GS音源 SC-88Map
+      3 : GS音源 SC-88ProMap
+      4 : GS音源 SC-8850Map [推奨]
+      5 : XG音源全般
+
+　↓はループ回数の指定です。
+*/
+			Int	lp		=	1	;
+/*
+
+◆ 曲について
+　サークルで制作中のゲーム用に作った曲です。
+商店街でお買い物～☆・・・みたいな感じで適当（こら）に作りました。
+リズム隊なんて８小節目のフィルが違うだけで同じパターンの繰り返しだし。
+ジャンルはなんでしょうね？ファンク？ポップ？ヒップホップ？
+まぁなんでもいいや（あのな～）。
+　SC-55/GM/XGデータはブラスがヘタレてます。
+というのも、ブラスフォール（パァ～ってピッチが下がるやつ）の音色がないので
+普通のブラスで代用してるのですよ。
+ま、SC-8850用のデータ以外はオマケなんで気にしないで下さい。、
+そもそも、どーせゲームのBGMはCDDAになるのでMIDIデータそのものには大した意味がありませんから。
+
+　ところで、そんなシーンあるの？（ぉ）
+　てーか、さっさとシナリオ上げれ（かなり切実）
+
+◆ 更新履歴
+2002/05/01　β１　なんとなく完成（…）
+
+ [ご意見・ご感想・ご要望・文句等は、
+                  Mail : h_yamanoi@lycos.jp
+                   MSN : yamanoi@hotmail.com
+                   ICQ : 155593370
+                   Web : http://www.text2music.com/y-kun/
+                                    までどうぞお気軽に・・・。]
+*/
+//---------------------------------------------------------------------------------------------
+//_Meta Ivent
+If(SynthType==5)	{
+	TrackName = {"Save thr Mars [09: 日常系３] for XG verβ1-5 by H.YAMANOI"}	}Else{If(SynthType==4)	{
+	TrackName = {"Save thr Mars [09: 日常系３] for SC-8850 verβ1-4 by H.YAMANOI"}	}Else{If(SynthType==3)	{
+	TrackName = {"Save thr Mars [09: 日常系３] for SC-88Pro verβ1-3 by H.YAMANOI"}	}Else{If(SynthType==2)	{
+	TrackName = {"Save thr Mars [09: 日常系３] for SC-88 verβ1-2 by H.YAMANOI"}	}Else{If(SynthType==1)	{
+	TrackName = {"Save thr Mars [09: 日常系３] for SC-55 verβ1-1 by H.YAMANOI"}	}Else{
+	TrackName = {"Save thr Mars [09: 日常系３] for GM verβ1-0 by H.YAMANOI"}	}}}}}
+	Copyright = {"05/01/2002  H.YAMANOI @ Circle-K"}
+	TimeSignature = 4,4;
+//_System Setting
+	Include			(stdmsg.h);
+	System.MeasureShift	(4);
+	System.TimeBase		(96);
+	/*	調号メタイベント
+		sf ＝ n:＃の数 -n:♭の数
+		mi ＝ 0:メジャー 1:マイナー	*/
+		Function MetaKey(sf,mi){
+		　　DirectSMF($FF,$59,$02,sf,mi);	}
+	MetaKey( 1,0);　　　　// G Major
+//_Tempo
+	Time(-3:1: 0) Tempo = 450 ;
+	Time( 0:4: 0) Tempo =  95 ;
+//_Header
+	Function Isu(bm,bl,pc,nv,np,ne,e1,e2,e3){ l%1   y0((bm)); r* y32((bl)); r*   @((pc)); r*
+		y7((nv)); r* y10((np)); r* y11((ne)); r* y91((e1)); r* y93((e2)); r* y94((e3)); r* }
+	Function Nr9(n1,n2,n3,n4,n5,n6,n7,n8,n9){ l%1   y99(1); r* y98(  8); r* y6(n1); r*
+		y99(1); r* y98(  9); r* y6(n2); r*  y99(1); r* y98( 10); r* y6(n3); r*
+		y99(1); r* y98( 32); r* y6(n4); r*  y99(1); r* y98( 33); r* y6(n5); r*
+		y99(1); r* y98( 99); r* y6(n6); r*  y99(1); r* y98(100); r* y6(n7); r*
+		y99(1); r* y98(102); r* y6(n8); r* y100(0); r* y101(0); r* y6(n9); r* }
+	Function Vrt(n1)	{ l%1 r*-3 y99( 1); r* y98(  8); r* y6(n1); r* }
+	Function Vdp(n1)	{ l%1 r*-3 y99( 1); r* y98(  9); r* y6(n1); r* }
+	Function Vdl(n1)	{ l%1 r*-3 y99( 1); r* y98( 10); r* y6(n1); r* }
+	Function Cut(n1)	{ l%1 r*-3 y99( 1); r* y98( 32); r* y6(n1); r* }
+	Function Res(n1)	{ l%1 r*-3 y99( 1); r* y98( 33); r* y6(n1); r* }
+	Function Atc(n1)	{ l%1 r*-3 y99( 1); r* y98( 99); r* y6(n1); r* }
+	Function Dec(n1)	{ l%1 r*-3 y99( 1); r* y98(100); r* y6(n1); r* }
+	Function Rel(n1)	{ l%1 r*-3 y99( 1); r* y98(102); r* y6(n1); r* }
+	Function Dpt(n1,n2)	{ l%1 y99(24); r* y98(n1); r* y6(n2); r* }
+	Function Dlv(n1,n2)	{ l%1 y99(26); r* y98(n1); r* y6(n2); r* }
+	Function Dpn(n1,n2)	{ l%1 y99(28); r* y98(n1); r* y6(n2); r* }
+	Function Drs(n1,n2)	{ l%1 y99(29); r* y98(n1); r* y6(n2); r* }
+	Function Dcs(n1,n2)	{ l%1 y99(30); r* y98(n1); r* y6(n2); r* }
+	Function Dds(n1,n2)	{ l%1 y99(31); r* y98(n1); r* y6(n2); r* }
+	Function Null()		{ l%1 y101(127); r* y100(127); r* }
+	Function Mono()		{ l%1 y126(0); r* }
+	Function Poly()		{ l%1 y127(0); r* }
+	Function PL(pt)	{ l%1 y65(127); r* y5(pt); r* }
+	Function Gb(nt)	{	Sub{	p%.onTime=-2048,0,(nt);	}	}
+	Function Vb(nt)	{	Sub{	y1.onTime=0,32,(nt);	}	}
+	Function Mt(nt)	{	Sub{	l%24 r4 y11.onTime=127,43,(nt)-4; r(nt)-4 y11=127; l%24 }}
+	Function EFXvol(B)	{	SysEx = $F0,$41,$10,$42,$12,{$40,$03,$16,(B)}  ,$F7;	}
+	Function MVol(A) { SysEx = $F0,$7F,$7F,$04,$01,$00,A,$F7; }
+	Function Unison(Str S, Int Value){ Sub{ Key(Value); S; Key(0); } S;} // Unison.hより抜粋
+	Function XG_EXCLUSIVE(Array Data){	SysEx	= $F0,$43,$10,$4C,(Data),$F7;	}
+//_Track Name
+	TR( 0) CH( 1) Time(-3:1: 0)
+	TR( 1) CH( 1) Time(-3:1: 0) TrackName = "EP"
+	TR( 2) CH( 2) Time(-3:1: 0) TrackName = "Bass"
+	TR( 3) CH( 3) Time(-3:1: 0) TrackName = "Gt"
+	TR( 4) CH( 4) Time(-3:1: 0) TrackName = "Clavi"
+	TR( 5) CH( 5) Time(-3:1: 0) TrackName = "Str.1"
+	TR( 6) CH( 6) Time(-3:1: 0) TrackName = "Tp (Fall)"
+	TR( 7) CH( 7) Time(-3:1: 0) TrackName = "Tp (Nm)"
+	TR( 8) CH( 8) Time(-3:1: 0) TrackName = "Vox"
+	TR(10) CH(10) Time(-3:1: 0) TrackName = "Rhythm"
+If(SynthType==0){
+	TR( 9) CH(10) Time(-3:1: 0) TrackName = "Snare"
+	TR(11) CH(10) Time(-3:1: 0) TrackName = "Tom"
+}Else{
+	TR( 9) CH( 9) Time(-3:1: 0) TrackName = "Snare"
+	TR(11) CH(11) Time(-3:1: 0) TrackName = "Tom"
+}
+	TR(12) CH(12) Time(-3:1: 0) TrackName = "Str.2(R)"
+	TR(13) CH(13) Time(-3:1: 0) TrackName = "Str.3(L)"
+	TR(14) CH(14) Time(-3:1: 0) TrackName = ""
+	TR(15) CH(15) Time(-3:1: 0) TrackName = ""
+	TR(16) CH(16) Time(-3:1: 0) TrackName = ""
+	TR(17) CH( 1) Time(-3:1: 0) TrackName = "Sys-Ex"
+//_Universal Exclusive
+TR(17) Time( -3:1: 0) SysEx$ = F0,7E,7F,09,01,F7;	// GM System On
+	If(SynthType>=5){
+//_System Exclusive   [ XG ]
+TR(17) Time( -3:2: 0) SysEx$ = F0,43,10,4C, 00,00,7E,00,F7;	// XG System On
+// REVERB : ROOM 2
+	 Time( -3:2:48) XG_EXCLUSIVE(2,1,0,2,1);	// Reverb Type
+	 Time( -3:2:51) XG_EXCLUSIVE(2,1,2,12);	// Reverb Time     0- 69(12)    0.3?`30.0s            T#4
+	 Time( -3:2:54) XG_EXCLUSIVE(2,1,3,10);	// Diffusion       0- 10(10)    0?`10
+	 Time( -3:2:57) XG_EXCLUSIVE(2,1,4,5);	// Initial Delay   0- 63(5)     0.1?`99.3ms           T#5
+	 Time( -3:2:60) XG_EXCLUSIVE(2,1,5,4);	// HPF Cutoff      0- 52(4)     Thru?`8.0kHz          T#3
+	 Time( -3:2:63) XG_EXCLUSIVE(2,1,6,38);	// LPF Cutoff     34- 60(38)    1.0k?`Thru            T#3
+	 Time( -3:2:66) XG_EXCLUSIVE(2,1,16,0);	// Rev Delay       0- 63(0)     0.1?`99.3ms           T#5
+	 Time( -3:2:69) XG_EXCLUSIVE(2,1,17,4);	// Density         0-  4(4)     0?`4
+	 Time( -3:2:72) XG_EXCLUSIVE(2,1,18,50);	// Er/Rev Balance  1-127(50)    E63>R?`E=R?`E<R63
+	 Time( -3:2:75) XG_EXCLUSIVE(2,1,19,8);	// High Damp       1- 10(8)     0.1?`1.0
+	 Time( -3:2:78) XG_EXCLUSIVE(2,1,20,64);	// Feedback Level  1-127(64)    -63?`+63
+	 Time( -3:2:81) XG_EXCLUSIVE(2,1,12,64);	// Reverb Return                0-127(64)
+	 Time( -3:2:84) XG_EXCLUSIVE(2,1,13,64);	// Reverb Pan                   1-127(64)
+// CHORUS : CHORUS 3
+	 Time( -3:3: 0) XG_EXCLUSIVE(2,1,32,65,2);   	// Chorus Type
+	 Time( -3:3: 3) XG_EXCLUSIVE(2,1,34,4);	// LFO Frequency      0-127(4)    0.00Hz?`39.7Hz      T#1
+	 Time( -3:3: 6) XG_EXCLUSIVE(2,1,35,44);	// LFO Depth          0-127(44)   0?`127
+	 Time( -3:3: 9) XG_EXCLUSIVE(2,1,36,64);	// Feedback Level     1-127(64)   -63?`+63
+	 Time( -3:3:12) XG_EXCLUSIVE(2,1,37,110);	// Delay Offset       0-127(110)  0.0?`50             T#2
+	 Time( -3:3:15) XG_EXCLUSIVE(2,1,39,28);	// EQ Low Frequency   4- 40(28)   32Hz?`2.0kHz        T#3
+	 Time( -3:3:18) XG_EXCLUSIVE(2,1,40,64);	// EQ Low Gain       52- 76(64)   -12?`+12dB
+	 Time( -3:3:21) XG_EXCLUSIVE(2,1,41,46);	// EQ High Frequency 28- 58(46)   500Hz?`16.0kHz      T#3
+	 Time( -3:3:24) XG_EXCLUSIVE(2,1,42,66);	// EQ High Gain      52- 76(66)   -12?`+12dB
+	 Time( -3:3:27) XG_EXCLUSIVE(2,1,52,0);	// Input Mode         0-  1(0)    mono/stereo
+	 Time( -3:3:30) XG_EXCLUSIVE(2,1,44,64);	// Chorus Return                0-127(64)
+	 Time( -3:3:33) XG_EXCLUSIVE(2,1,45,64);	// Chorus Pan                   1-127(64)
+	 Time( -3:3:36) XG_EXCLUSIVE(2,1,46,0);	// Send Cho. to Rev.            0-127(0)
+// VARIATION(SYSTEM) : FLANGER 1
+	 Time( -3:3:48) XG_EXCLUSIVE(2,1,90,1);	// Variation Connection         0:Ins. 1:Sys.
+	 Time( -3:3:50) XG_EXCLUSIVE(2,1,64,67,0);	// VARIATION Type
+	 Time( -3:3:52) XG_EXCLUSIVE(2,1,66,0,10);	// LFO Frequency        0-127(14)   0.00Hz～39.7Hz      T#1
+	 Time( -3:3:54) XG_EXCLUSIVE(2,1,68,0,8);	// LFO Depth            0-127(14)   0～127
+	 Time( -3:3:56) XG_EXCLUSIVE(2,1,70,0,80);	// Feedback Level       1-127(104)  -63～+63
+	 Time( -3:3:58) XG_EXCLUSIVE(2,1,72,0,2);	// Delay Offset         0-127(2)    0.0～50             T#2
+	 Time( -3:3:60) XG_EXCLUSIVE(2,1,76,0,28);	// EQ Low Frequency     4- 40(28)   32Hz～2.0kHz        T#3
+	 Time( -3:3:62) XG_EXCLUSIVE(2,1,78,0,60);	// EQ Low Gain         52- 76(64)   -12～+12dB
+	 Time( -3:3:64) XG_EXCLUSIVE(2,1,80,0,46);	// EQ High Frequency   28- 58(46)   500Hz～16.0kHz      T#3
+	 Time( -3:3:66) XG_EXCLUSIVE(2,1,82,0,65);	// EQ High Gain        52- 76(64)   -12～+12dB
+	 Time( -3:3:68) XG_EXCLUSIVE(2,1,84,0,96);	// Dry/Wet              1-127(96)   D63>W～D=W～D<W63         *
+	 Time( -3:3:70) XG_EXCLUSIVE(2,1,112,40);	// EQ Mid Frequency    14- 54(40)   100Hz～10.0kHz      T#3
+	 Time( -3:3:72) XG_EXCLUSIVE(2,1,113,66);	// EQ Mid Gain         52- 76(64)   -12～+12dB
+	 Time( -3:3:74) XG_EXCLUSIVE(2,1,114,10);	// EQ Mid Width        10-120(10)   1.0～12.0
+	 Time( -3:3:76) XG_EXCLUSIVE(2,1,115,4);	// LFO Phase Difference 4-124(4)    -180～+180deg resolution=3deg
+	 Time( -3:3:78) XG_EXCLUSIVE(2,1,86,64);	// Variation Return             0-127(64)
+	 Time( -3:3:80) XG_EXCLUSIVE(2,1,87,64);	// Variation Pan                1-127(64)
+	 Time( -3:3:82) XG_EXCLUSIVE(2,1,88,0);	// Send Variation to Reverb     0-127(0)
+	 Time( -3:3:84) XG_EXCLUSIVE(2,1,89,0);	// Send Variation to Chorus     0-127(0)
+
+}Else{If(SynthType>=1){
+//_System Exclusive   [ GS ]
+TR(17) Time( -3:2: 0) SysEx$ = F0,41,10,42,12, 40,00,7F,00,41,F7;	// GS Reset
+	 Time( -3:2:16) SysEx$ = F0,41,10,42,12, 00,00,7F,00,01,F7;	// SC-88 System Mode Set
+	 Time( -3:2:28) SysEx$ = F0,41,10,42,12,{40,1A,15,02}  ,F7;	// Use For Rythm Part
+	 Time( -3:2:32) SysEx$ = F0,41,10,42,12,{40,19,15,01}  ,F7;	// Use For Rythm Part
+TR(17) Time( -3:3:20) SysEx$ = F0,41,10,42,12,{40,01,30,02}  ,F7;	// Reverb Macro
+	 Time( -3:3:24) SysEx$ = F0,41,10,42,12,{40,01,32,03}  ,F7;	// Reverb Pre-LPF
+	 Time( -3:3:26) SysEx$ = F0,41,10,42,12,{40,01,33,40}  ,F7;	// Reverb Level
+	 Time( -3:3:28) SysEx$ = F0,41,10,42,12,{40,01,34,28}  ,F7;	// Reverb Time
+TR(17) Time( -3:3:32) SysEx$ = F0,41,10,42,12,{40,01,38,00}  ,F7;	// Chorus Macro
+//	 Time( -3:3:36) SysEx$ = F0,41,10,42,12,{40,01,3A,  }  ,F7;	// Chorus Level
+//	 Time( -3:3:40) SysEx$ = F0,41,10,42,12,{40,01,3B,  }  ,F7;	// Chorus Feedback
+//	 Time( -3:3:44) SysEx$ = F0,41,10,42,12,{40,01,3C,  }  ,F7;	// Chorus Delay
+//	 Time( -3:3:48) SysEx$ = F0,41,10,42,12,{40,01,3D,  }  ,F7;	// Chorus Rate
+//	 Time( -3:3:52) SysEx$ = F0,41,10,42,12,{40,01,3E,  }  ,F7;	// Chorus Depth
+}	If(SynthType>=2){
+//_System Exclusive   [ SC-88/88pro ]
+TR(17) Time( -3:3:56) SysEx$ = F0,41,10,42,12,{40,01,50,01}  ,F7;	// Delay Macro
+	 Time( -3:3:60) SysEx$ = F0,41,10,42,12,{40,01,52,60}  ,F7;	// Delay Time Center
+//	 Time( -3:3:64) SysEx$ = F0,41,10,42,12,{40,01,53,  }  ,F7;	// Delay Time Left
+//	 Time( -3:3:68) SysEx$ = F0,41,10,42,12,{40,01,54,  }  ,F7;	// Delay Time Right
+	 Time( -3:3:72) SysEx$ = F0,41,10,42,12,{40,01,55,60}  ,F7;	// Delay Level Center
+//	 Time( -3:3:76) SysEx$ = F0,41,10,42,12,{40,01,56,  }  ,F7;	// Delay Level Left
+//	 Time( -3:3:80) SysEx$ = F0,41,10,42,12,{40,01,57,  }  ,F7;	// Delay Level Right
+//	 Time( -3:3:84) SysEx$ = F0,41,10,42,12,{40,01,58,  }  ,F7;	// Delay Level
+	 Time( -3:3:88) SysEx$ = F0,41,10,42,12,{40,01,59,43}  ,F7;	// Delay Feedbavk
+}	If(SynthType>=3){
+//_System Exclusive   [ SC-88pro ]
+TR(17) Time( -3:2:48) SysEx$ = F0,41,10,42,12,{40,43,22,01}  ,F7;	// EFX On [Ch 3]
+//	 Time( -3:2:52) SysEx$ = F0,41,10,42,12,{40,4 ,22,01}  ,F7;	// EFX On [Ch]
+	 Time( -3:2:56) SysEx$ = F0,41,10,42,12,{40,03,00,02,07},F7;	// EFX Type [EH -> Flanger]
+	 Time( -3:2:60) SysEx$ = F0,41,10,42,12,{40,03,03,40}  ,F7;	// + EH Sens
+	 Time( -3:2:64) SysEx$ = F0,41,10,42,12,{40,03,04,7F}  ,F7;	//   EH Mix
+	 Time( -3:2:68) SysEx$ = F0,41,10,42,12,{40,03,08,35}  ,F7;	//   FL Dly
+	 Time( -3:2:72) SysEx$ = F0,41,10,42,12,{40,03,09,07}  ,F7;	//   FL Rate
+	 Time( -3:2:76) SysEx$ = F0,41,10,42,12,{40,03,0A,10}  ,F7;	//   FL Depth
+	 Time( -3:2:80) SysEx$ = F0,41,10,42,12,{40,03,0B,50}  ,F7;	//   FL Fb
+	 Time( -3:2:84) SysEx$ = F0,41,10,42,12,{40,03,0C,30}  ,F7;	// # FL Bal
+	 Time( -3:2:92) SysEx$ = F0,41,10,42,12,{40,03,13,3B}  ,F7;	//   Low Gain
+	 Time( -3:3: 0) SysEx$ = F0,41,10,42,12,{40,03,14,41}  ,F7;	//   Hi Gain
+	 Time( -3:3: 4) EFXvol(127);	//   Level
+	 Time( -3:3: 8) SysEx$ = F0,41,10,42,12,{40,03,17,1E}  ,F7;	// EFX To Rev
+	 Time( -3:3:12) SysEx$ = F0,41,10,42,12,{40,03,18,00}  ,F7;	// EFX To Cho
+	 Time( -3:3:16) SysEx$ = F0,41,10,42,12,{40,03,19,00}  ,F7;	// EFX To Dly
+//TR(17) Time( -3:3:92) SysEx$ = F0,41,10,42,12,{40,02,00,  }  ,F7;	// EQ Low Freq
+//	 Time( -3:4: 0) SysEx$ = F0,41,10,42,12,{40,02,01,40}  ,F7;	// EQ Low Gain
+//	 Time( -3:4: 4) SysEx$ = F0,41,10,42,12,{40,02,02,  }  ,F7;	// EQ Hi Freq
+//	 Time( -3:4: 8) SysEx$ = F0,41,10,42,12,{40,02,03,40}  ,F7;	// EQ Hi Gain
+}}	If(SynthType==5){
+//_Instulment Setup   [ XG ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  0, 34,  6,127, 39,127, 50, 20,  0);	// DX Legend
+	TR( 2) Time( -2:1:48) Isu(  0, 33, 36,100, 54,127, 10, 40, 20);	// FretlessBass3
+	TR( 3) Time( -2:2: 0) Isu(  0,  0, 28, 65,119,127, 20,  0, 60);	// Clean Guitar
+	TR( 4) Time( -2:2:48) Isu(  0,  1,  8,115, 79,127, 40, 20, 40);	// Clav KSP
+	TR( 5) Time( -2:3: 0) Isu(  0,  3, 49, 75, 99,127, 60,  0,  0);	// StereoStrings
+	TR( 6) Time( -2:3:48) Isu(  0, 35, 62, 75, 24,127, 30, 20,  0);	// Tp&Tb Section
+	TR( 7) Time( -2:4: 0) Isu(  0, 35, 62, 75, 24,127, 30, 20,  0);	// Tp&Tb Section
+	TR( 8) Time( -2:4:48) Isu(  0,  0, 55, 85, 64,127, 60, 10,  0);	// Synth Voice
+	TR( 9) Time( -1:1: 0) Isu(127,  0, 25,100, 64,127, 10, 10,  0);	// #Electro Kit
+	TR(10) Time( -1:1:48) Isu(127,  0, 26,110, 64,127, 10, 10,  0);	// #Analog Kit
+	TR(11) Time( -1:2: 0) Isu(127,  0, 25,110, 64,127, 10,  0,  0);	// #Electro Kit
+	TR(12) Time( -1:2:48) Isu(  0,  0, 49,100, 94,127, 30, 30,  0);	// Strings 1
+	TR(13) Time( -1:3: 0) Isu(  0,  0, 49,100, 34,127, 30, 30,  0);	// Strings 1
+	TR(14) Time( -1:3:48) Isu(  0,  1,  1,100, 64,127,  0,  0,  0);	// 
+	TR(15) Time( -1:4: 0) Isu(  0,  1,  1,100, 64,127,  0,  0,  0);	// 
+	TR(16) Time( -1:4:48) Isu(  0,  1,  1,100, 64,127,  0,  0,  0);	// 
+//_NRPN & RPN         [ XG ]
+//					  VRt,VDp,VDl,Cut,Res,Atc,Dec,Rel,BR
+	TR( 1) Time( -2:1:12) Nr9( 64, 64, 64, 79, 74, 64, 64, 64,12); Null;	// DX Legend
+	TR( 2) Time( -2:1:60) Nr9( 64, 64, 64, 54, 69, 64, 64, 64,12); Null;	// FretlessBass3
+	TR( 3) Time( -2:2:12) Nr9( 64, 64, 64, 69, 69, 59, 62, 59,12); Null;	// Clean Guitar
+	TR( 4) Time( -2:2:60) Nr9( 64, 64, 64, 89, 73, 64, 64, 64,12); Null;	// Clav KSP
+	TR( 5) Time( -2:3:12) Nr9( 64, 64, 64, 67, 64, 64, 64, 64,12); Null;	// StereoStrings
+	TR( 6) Time( -2:3:60) Nr9( 64, 64, 64, 64, 64, 54,  0,  0,12); Null;	// Tp&Tb Section
+	TR( 7) Time( -2:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// Tp&Tb Section
+	TR( 8) Time( -2:4:60) Nr9( 64, 64, 64, 39, 69, 64, 63, 62,12); Null;	// Synth Voice
+	TR( 9) Time( -1:1:12) Cut(55);r4 Res(69);r4 BR(12);r3 Null; p%=2000;	// #Electro Kit
+	TR(10) Time( -1:1:60) 						 BR(12);r3 Null;	// #Analog Kit
+	TR(11) Time( -1:2:12) Dec(69);r4 Rel(69);r4 BR(12);r3 Null; p%=4000;	// #Electro Kit
+	TR(12) Time( -1:2:60) Nr9( 64, 64, 64, 71, 67, 64, 64, 62,12); Null;	// Strings 1
+	TR(13) Time( -1:3:12) Nr9( 64, 64, 64, 71, 67, 64, 64, 62,12); Null;	// Strings 1
+	TR(14) Time( -1:3:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(15) Time( -1:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(16) Time( -1:4:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	}Else{If(SynthType==4){
+//_Instulment Setup   [ SC-8850 ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  9,  4,  6,117, 39,127, 50, 10,  0);	// Detuned EP 3
+	TR( 2) Time( -2:1:48) Isu(  5,  2, 36,127, 54,127, 10, 50,  0);	// Mr.Smooth
+	TR( 3) Time( -2:2: 0) Isu(  3,  3, 28, 77,119,127, 30, 20,  0);	// Open Hard 2
+	TR( 4) Time( -2:2:48) Isu(  1,  4,  8,107, 79,127, 40, 40,  0);	// Clav. 2
+	TR( 5) Time( -2:3: 0) Isu(  0,  4, 49, 77, 99,127, 60,  0,  0);	// Strings
+	TR( 6) Time( -2:3:48) Isu( 17,  3, 62, 87, 24,127, 30, 20, 10);	// Trumpet Fall
+	TR( 7) Time( -2:4: 0) Isu( 14,  4, 62, 87, 24,127, 30, 20, 10);	// FatPop Brass
+	TR( 8) Time( -2:4:48) Isu( 18,  4, 55,107, 64,127, 60, 10, 10);	// JX8P Vox
+	TR( 9) Time( -1:1: 0) Isu(  0,  3, 12,107, 64,127, 10, 10,  0);	// TECHNO
+	TR(10) Time( -1:1:48) Isu(  0,  3, 12,117, 64,127, 10, 10,  0);	// TECHNO
+	TR(11) Time( -1:2: 0) Isu(  0,  2, 25,107, 64,127, 10,  0,  0);	// ELECTRONIC
+	TR(12) Time( -1:2:48) Isu(  2,  4, 49, 97,104,127, 30, 30,  0);	// ChamberStr:
+	TR(13) Time( -1:3: 0) Isu(  2,  4, 49, 97, 24,127, 30, 30,  0);	// ChamberStr:
+	TR(14) Time( -1:3:48) Isu(  0,  4,  1,100, 64,127,  0,  0,  0);	// 
+	TR(15) Time( -1:4: 0) Isu(  0,  4,  1,100, 64,127,  0,  0,  0);	// 
+	TR(16) Time( -1:4:48) Isu(  0,  4,  1,100, 64,127,  0,  0,  0);	// 
+//_NRPN & RPN         [ SC-8850 ]
+//					  VRt,VDp,VDl,Cut,Res,Atc,Dec,Rel,BR
+	TR( 1) Time( -2:1:12) Nr9( 64, 64, 64, 69, 59, 64, 64, 64,12); Null;	// Detuned EP 3
+	TR( 2) Time( -2:1:60) Nr9( 64, 64, 64, 54, 69, 64, 64, 64,12); Null;	// Mr.Smooth
+	TR( 3) Time( -2:2:12) Nr9( 64, 64, 64, 69, 69, 59, 62, 59,12); Null;	// Open Hard 2
+	TR( 4) Time( -2:2:60) Nr9( 64, 64, 64, 69, 61, 64, 64, 64,12); Null;	// Clav. 2
+	TR( 5) Time( -2:3:12) Nr9( 64, 64, 64, 84, 74, 64, 64, 64,12); Null;	// Strings
+	TR( 6) Time( -2:3:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// Trumpet Fall
+	TR( 7) Time( -2:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// FatPop Brass
+	TR( 8) Time( -2:4:60) Nr9( 64, 64, 64, 64, 64, 65, 63, 64,12); Null;	// JX8P Vox
+	TR( 9) Time( -1:1:12) Cut(57);r4 Res(69);r4		 BR(12);r3 Null;	// TECHNO
+	TR(10) Time( -1:1:60) 						 BR(12);r3 Null;	// TECHNO
+	TR(11) Time( -1:2:12) 				 BR(12);r3 Null; p%=5000;	// ELECTRONIC
+	TR(12) Time( -1:2:60) Nr9( 64, 64, 64, 74, 69, 64, 64, 62,12); Null;	// ChamberStr:
+	TR(13) Time( -1:3:12) Nr9( 64, 64, 64, 74, 69, 64, 64, 62,12); Null;	// ChamberStr:
+	TR(14) Time( -1:3:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(15) Time( -1:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(16) Time( -1:4:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	}Else{If(SynthType==3){
+//_Instulment Setup   [ SC-88pro ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  8,  2,  6,127, 39,127, 50, 10,  0);	// Detuned EP2
+	TR( 2) Time( -2:1:48) Isu(  5,  2, 36,127, 54,127, 10, 50,  0);	// Mr.Smooth
+	TR( 3) Time( -2:2: 0) Isu(  3,  3, 28, 77,119,127, 30, 20,  0);	// Open Hard 2
+	TR( 4) Time( -2:2:48) Isu( 24,  3,  8,117, 79,127, 40, 40,  0);	// Clav.o
+	TR( 5) Time( -2:3: 0) Isu( 16,  3, 49, 77, 99,127, 60,  0,  0);	// St. Strings
+	TR( 6) Time( -2:3:48) Isu( 17,  3, 62, 87, 24,127, 30, 20, 10);	// Trumpet Fall
+	TR( 7) Time( -2:4: 0) Isu(  1,  3, 62, 87, 24,127, 30, 20, 10);	// Brass ff
+	TR( 8) Time( -2:4:48) Isu(  0,  1, 55, 87, 64,127, 60, 10, 10);	// SynVox
+	TR( 9) Time( -1:1: 0) Isu(  0,  3, 12,107, 64,127, 10, 10,  0);	// TECHNO
+	TR(10) Time( -1:1:48) Isu(  0,  3, 12,117, 64,127, 10, 10,  0);	// TECHNO
+	TR(11) Time( -1:2: 0) Isu(  0,  2, 25,107, 64,127, 10,  0,  0);	// ELECTRONIC
+	TR(12) Time( -1:2:48) Isu(  2,  3, 49, 87, 94,127, 30, 30,  0);	// ChamberStr:
+	TR(13) Time( -1:3: 0) Isu(  2,  3, 49, 87, 34,127, 30, 30,  0);	// ChamberStr:
+	TR(14) Time( -1:3:48) Isu(  0,  3,  1,100, 64,127,  0,  0,  0);	// 
+	TR(15) Time( -1:4: 0) Isu(  0,  3,  1,100, 64,127,  0,  0,  0);	// 
+	TR(16) Time( -1:4:48) Isu(  0,  3,  1,100, 64,127,  0,  0,  0);	// 
+//_NRPN & RPN         [ SC-88pro ]
+//					  VRt,VDp,VDl,Cut,Res,Atc,Dec,Rel,BR
+	TR( 1) Time( -2:1:12) Nr9( 64, 64, 64, 65, 68, 64, 64, 64,12); Null;	// Detuned EP2
+	TR( 2) Time( -2:1:60) Nr9( 64, 64, 64, 54, 69, 64, 64, 64,12); Null;	// Mr.Smooth
+	TR( 3) Time( -2:2:12) Nr9( 64, 64, 64, 69, 69, 59, 62, 59,12); Null;	// Open Hard 2
+	TR( 4) Time( -2:2:60) Nr9( 64, 64, 64, 74, 69, 64, 64, 64,12); Null;	// Clav.o
+	TR( 5) Time( -2:3:12) Nr9( 64, 64, 64, 84, 74, 64, 64, 64,12); Null;	// St. Strings
+	TR( 6) Time( -2:3:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// Trumpet Fall
+	TR( 7) Time( -2:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// Brass ff
+	TR( 8) Time( -2:4:60) Nr9( 64, 64, 64, 39, 69, 64, 63, 62,12); Null;	// SynVox
+	TR( 9) Time( -1:1:12) Cut(57);r4 Res(69);r4		 BR(12);r3 Null;	// TECHNO
+	TR(10) Time( -1:1:60) 						 BR(12);r3 Null;	// TECHNO
+	TR(11) Time( -1:2:12) 				 BR(12);r3 Null; p%=5000;	// ELECTRONIC
+	TR(12) Time( -1:2:60) Nr9( 64, 64, 64, 74, 69, 64, 64, 62,12); Null;	// ChamberStr:
+	TR(13) Time( -1:3:12) Nr9( 64, 64, 64, 74, 69, 64, 64, 62,12); Null;	// ChamberStr:
+	TR(14) Time( -1:3:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(15) Time( -1:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(16) Time( -1:4:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	}Else{If(SynthType==2){
+//_Instulment Setup   [ SC-88 ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  8,  2,  6,127, 39,127, 50, 10,  0);	// Detuned EP2
+	TR( 2) Time( -2:1:48) Isu(  5,  2, 36,127, 54,127, 10, 50,  0);	// Mr.Smooth
+	TR( 3) Time( -2:2: 0) Isu(  0,  1, 28, 77,119,127, 30, 20,  0);	// Clean Gt.
+	TR( 4) Time( -2:2:48) Isu(  0,  1,  8,117, 79,127, 40, 40,  0);	// Clav.
+	TR( 5) Time( -2:3: 0) Isu( 16,  2, 49, 77, 99,127, 60,  0,  0);	// St.Strings
+	TR( 6) Time( -2:3:48) Isu( 16,  2, 62, 87, 24,127, 30, 20, 10);	// Brass Fall
+	TR( 7) Time( -2:4: 0) Isu(  0,  1, 62, 87, 24,127, 30, 20, 10);	// Brass 1
+	TR( 8) Time( -2:4:48) Isu(  0,  1, 55, 87, 64,127, 60, 10, 10);	// SynVox
+	TR( 9) Time( -1:1: 0) Isu(  0,  2, 27,107, 64,127, 10, 10,  0);	// DANCE
+	TR(10) Time( -1:1:48) Isu(  0,  2, 27,117, 64,127, 10, 10,  0);	// DANCE
+	TR(11) Time( -1:2: 0) Isu(  0,  2, 25,107, 64,127, 10,  0,  0);	// ELECTRONIC
+	TR(12) Time( -1:2:48) Isu(  1,  2, 49, 87, 94,127, 30, 30,  0);	// Strings 2
+	TR(13) Time( -1:3: 0) Isu(  1,  2, 49, 87, 34,127, 30, 30,  0);	// Strings 2
+	TR(14) Time( -1:3:48) Isu(  0,  2,  1,100, 64,127,  0,  0,  0);	// 
+	TR(15) Time( -1:4: 0) Isu(  0,  2,  1,100, 64,127,  0,  0,  0);	// 
+	TR(16) Time( -1:4:48) Isu(  0,  2,  1,100, 64,127,  0,  0,  0);	// 
+//_NRPN & RPN         [ SC-88 ]
+//					  VRt,VDp,VDl,Cut,Res,Atc,Dec,Rel,BR
+	TR( 1) Time( -2:1:12) Nr9( 64, 64, 64, 65, 68, 64, 64, 64,12); Null;	// Detuned EP2
+	TR( 2) Time( -2:1:60) Nr9( 64, 64, 64, 54, 69, 64, 64, 64,12); Null;	// Mr.Smooth
+	TR( 3) Time( -2:2:12) Nr9( 64, 64, 64, 69, 69, 59, 62, 59,12); Null;	// Clean Gt.
+	TR( 4) Time( -2:2:60) Nr9( 64, 64, 64, 74, 69, 64, 64, 64,12); Null;	// Clav.
+	TR( 5) Time( -2:3:12) Nr9( 64, 64, 64, 84, 74, 64, 64, 64,12); Null;	// St.Strings
+	TR( 6) Time( -2:3:60) Nr9( 64, 64, 64, 64, 64, 64,127, 64,12); Null;	// Brass Fall
+	TR( 7) Time( -2:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// Brass 1
+	TR( 8) Time( -2:4:60) Nr9( 64, 64, 64, 39, 69, 64, 63, 62,12); Null;	// SynVox
+	TR( 9) Time( -1:1:12) Cut(55);r4 Res(69);r4 BR(12);r3 Null; p%=350;	// DANCE
+	TR(10) Time( -1:1:60) 						 BR(12);r3 Null;	// DANCE
+	TR(11) Time( -1:2:12) 				  BR(12);r3 Null; p%=5000;	// ELECTRONIC
+	TR(12) Time( -1:2:60) Nr9( 64, 64, 64, 74, 69, 64, 64, 62,12); Null;	// Strings 2
+	TR(13) Time( -1:3:12) Nr9( 64, 64, 64, 74, 69, 64, 64, 62,12); Null;	// Strings 2
+	TR(14) Time( -1:3:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(15) Time( -1:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(16) Time( -1:4:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	}Else{If(SynthType==1){
+//_Instulment Setup   [ SC-55 ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  8,  1,  5,127, 39,127, 50, 10,  0);	// Detuned EP1
+	TR( 2) Time( -2:1:48) Isu(  0,  1, 36,127, 54,127, 10, 50,  0);	// Fretless Bs
+	TR( 3) Time( -2:2: 0) Isu(  0,  1, 28, 77,119,127, 30, 20,  0);	// Clean Gt.
+	TR( 4) Time( -2:2:48) Isu(  0,  1,  8,117, 79,127, 40, 40,  0);	// Clav.
+	TR( 5) Time( -2:3: 0) Isu(  0,  1, 49, 77, 99,127, 60,  0,  0);	// Strings
+	TR( 6) Time( -2:3:48) Isu(127,  1, 97, 87, 24,127, 30, 20,  0);	// Brs Sect 2
+	TR( 7) Time( -2:4: 0) Isu(  0,  1, 62, 87, 24,127, 30, 20,  0);	// Brass 1
+	TR( 8) Time( -2:4:48) Isu(  0,  1, 55, 87, 64,127, 60, 10,  0);	// SynVox
+	TR( 9) Time( -1:1: 0) Isu(  0,  1, 26,107, 64,127, 10, 10,  0);	// TR-808
+	TR(10) Time( -1:1:48) Isu(  0,  1, 26,117, 64,127, 10, 10,  0);	// TR-808
+	TR(11) Time( -1:2: 0) Isu(  0,  1, 25,107, 64,127, 10,  0,  0);	// ELECTRONIC
+	TR(12) Time( -1:2:48) Isu(  0,  1, 49, 87, 94,127, 30, 30,  0);	// Strings
+	TR(13) Time( -1:3: 0) Isu(  0,  1, 49, 87, 34,127, 30, 30,  0);	// Strings
+	TR(14) Time( -1:3:48) Isu(  0,  1,  1,100, 64,127,  0,  0,  0);	// 
+	TR(15) Time( -1:4: 0) Isu(  0,  1,  1,100, 64,127,  0,  0,  0);	// 
+	TR(16) Time( -1:4:48) Isu(  0,  1,  1,100, 64,127,  0,  0,  0);	// 
+//_NRPN & RPN         [ SC-55 ]
+//					  VRt,VDp,VDl,Cut,Res,Atc,Dec,Rel,BR
+	TR( 1) Time( -2:1:12) Nr9( 64, 64, 64, 65, 68, 64, 64, 64,12); Null;	// Detuned EP1
+	TR( 2) Time( -2:1:60) Nr9( 64, 64, 64, 54, 69, 64, 64, 64,12); Null;	// Fretless Bs
+	TR( 3) Time( -2:2:12) Nr9( 64, 64, 64, 69, 69, 59, 62, 59,12); Null;	// Clean Gt.
+	TR( 4) Time( -2:2:60) Nr9( 64, 64, 64, 74, 69, 64, 64, 64,12); Null;	// Clav.
+	TR( 5) Time( -2:3:12) Nr9( 64, 64, 64, 59, 64, 64, 64, 64,12); Null;	// Strings
+	TR( 6) Time( -2:3:60) Nr9( 64, 64, 64, 64, 64, 54,  0,  0,12); Null;	// Brass 1
+	TR( 7) Time( -2:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// Brass 1
+	TR( 8) Time( -2:4:60) Nr9( 64, 64, 64, 39, 69, 64, 63, 62,12); Null;	// SynVox
+	TR( 9) Time( -1:1:12) Cut(55);r4 Res(69);r4		 BR(12);r3 Null;	// TR-808
+	TR(10) Time( -1:1:60) 						 BR(12);r3 Null;	// TR-808
+	TR(11) Time( -1:2:12) Dec(69);r4 Rel(69);r4 BR(12);r3 Null; p%=5000;	// ELECTRONIC
+	TR(12) Time( -1:2:60) Nr9( 64, 64, 64, 69, 64, 64, 64, 62,12); Null;	// Strings
+	TR(13) Time( -1:3:12) Nr9( 64, 64, 64, 69, 64, 64, 64, 62,12); Null;	// Strings
+	TR(14) Time( -1:3:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(15) Time( -1:4:12) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	TR(16) Time( -1:4:60) Nr9( 64, 64, 64, 64, 64, 64, 64, 64,12); Null;	// 
+	}Else{
+//_Instulment Setup   [ GM ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  0,  0,  6,127, 39,127, 50, 10,  0);	// El.Piano 2
+	TR( 2) Time( -2:1:48) Isu(  0,  0, 36,127, 54,127, 10, 50,  0);	// Fretless Bass
+	TR( 3) Time( -2:2: 0) Isu(  0,  0, 28, 77,119,127, 30, 20,  0);	// Clean Guitar
+	TR( 4) Time( -2:2:48) Isu(  0,  0,  8,117, 79,127, 40, 40,  0);	// Clavi
+	TR( 5) Time( -2:3: 0) Isu(  0,  0, 49, 77, 99,127, 60,  0,  0);	// Strings 1
+	TR( 6) Time( -2:3:48) Isu(  0,  0, 62, 87, 24,127, 30, 20,  0);	// Brass Section
+	TR( 7) Time( -2:4: 0) Isu(  0,  0, 62, 87, 24,127, 30, 20,  0);	// Brass Section
+	TR( 8) Time( -2:4:48) Isu(  0,  0, 55, 87, 64,127, 60, 10,  0);	// Synth Voice
+	TR(10) Time( -1:1:48) Isu(  0,  0, 25,117, 64,127, 10, 10,  0);
+							BR(12);r3 Null; p%=1000;	// ELECTRONIC
+	TR(12) Time( -1:2:48) Isu(  0,  0, 49, 87, 94,127, 30, 30,  0);	// Strings 1
+	TR(13) Time( -1:3: 0) Isu(  0,  0, 49, 87, 34,127, 30, 30,  0);	// Strings 1
+	TR(14) Time( -1:3:48) Isu(  0,  0,  1,100, 64,127,  0,  0,  0);	// 
+	TR(15) Time( -1:4: 0) Isu(  0,  0,  1,100, 64,127,  0,  0,  0);	// 
+	TR(16) Time( -1:4:48) Isu(  0,  0,  1,100, 64,127,  0,  0,  0);	// 
+	}}}}}
+//_Macro
+	If(SynthType==5){	$j{n35,} $k{n35,} $K{n36,} $s{n38,} $S{n27,} $a{n40,}	}
+If(SynthType<=4){If(SynthType>=3){
+			$j{n8,} $k{n35,} $K{n36,} $s{n38,} $S{n40,} $a{n108,}	}}
+If(SynthType<=2){	$j{n35,} $k{n35,} $K{n36,} $s{n38,} $S{n27,} $a{n40,}	}
+
+$f{n41,} /* F 2 low tom 2	 */	$l{n43,} /* G 2 low tom 1	 */	$m{n45,} /* B 2 mid tom 2	 */
+$o{n47,} /* C 3 mid tom 1	 */	$t{n48,} /* D 3 high tom 2	 */	$u{n50,} /* E 3 high tom 1	 */
+$h{n42,} /* F#2 closed hi-hat	 */	$i{n44,} /* G#2 Pedal hi-hat	 */	$H{n46,} /* A#2 open hi-hat	 */
+$c{n49,} /* C#3 crash cymbal 1 */	$C{n57,} /* A 3 crash cymbal 2 */
+$R{n51,} /* D#3 Ride Cymbal1	 */	$p{n55,} /* G 3 Splash Cymbal	 */	$N{n52,} /* E 3 ChineseCymbal	 */
+$T{n39,} /* D#2 hand clap	 */	$F{n26,} /* D 1 Finger Snap	 */
+$Q{n27,} /* D#1 High Q		 */	$b{n31,} /* G 1 Sticks		 */	$B{n37,} /* C#2 Side Stick	 */
+//---------------------------------------------------------------------------------------------
+//_Track  9  []
+#dr30={	l%12 v.Random(3);	Rythm{
+	(v100 Sub){	rrrr rrrr arrr rrra  rrra rrrr rrra rrrr  rrrr rrrr arrr rrra  rrra rrrr rrra rrra	}
+	}}
+#dr31={	l%24 v.Random(3);	Rythm{
+	(v100 Sub){	[3 rrrr arrr rrrr arrr ] rrrr arrr rrrr arrr [3 rrrr arrr rrrr arrr ] rrrr rrrr arrr arrr	}
+	}}
+#dr32={	l%24 v.Random(3);	Rythm{
+	(v100 Sub){	[3 rrrr arrr rrrr arrr ] rrrr arrr rrrr arrr [3 rrrr arrr rrrr arrr ] rrrr rrrr rrrr arrr	}
+	}}
+//_Track 10  []
+#dr10={	l%12 v.Random(3);	Rythm{
+	(v120 Sub){	krrr krrr rrrr rrrr  krrr krrr rrrr rrrr  krrr krrr rrrr rrrr  krrr krrr rrrr rrrr	}
+	(v120 Sub){	rrrr rrrr rrrr rrrK  rrrr rrrr rrrr rrrK  rrrr rrrr rrrr rrrK  rrrr rrrr rrrr Krrr	}
+	(v110 Sub){	rrrr rrrr jrrr rrrr  rrrr rrrr jrrr rrrr  rrrr rrrr jrrr rrrr  rrrr rrrr jrrj rrrj	}
+	(v110 Sub){	rrrr rrrr srrr rrrr  rrrr rrrr srrr rrrr  rrrr rrrr srrr rrrr  rrrr rrrr rrrr srrr	}
+	(v100 Sub){	Srrr Srrr rrrr rrrr  rrrr rrrr rrrr rrrS  Srrr Srrr rrrr rrrr  rrrr rrrr Srrr rrrr	}
+	(v110 Sub){	hrrr hrrr irrr Hrrh  rrrH irrr rrrr rrrr  hrrr hrrr irrr Hrrh  rrrH irrr rrrr rrrr	}
+	(v110 Sub){	rrrr rrrr Trrr rrrr  rrrr rrrr Trrr rrrr  rrrr rrrr Trrr rrrr  rrrr rrrr Trrr rrrT	}
+	}}
+#dr11={	l%24 v.Random(3);	Rythm{
+	(v120 Sub){	[3 krrr rrrr krrk rrrr ] krrr rrrr krrk rrrr [3 krrr rrrr krrk rrrr ] krrr rrrr krrk rrrr	}
+	(v120 Sub){	[3 rrrr rrrK rrrr rrrK ] rrrr rrrK rrrr KrKr [3 rrrr rrrK rrrr rrrK ] rrrr rrrK rrKr Krrr	}
+	(v110 Sub){	[3 rrrr rrrr rrjr rrrr ] rrrr rrrr rrjr jrjr [3 rrrr rrrr rrjr rrrr ] rrrr rrrr jrjr jrrr	}
+	(v110 Sub){	[3 rrrr srrr rrrr srrr ] rrrr srrr rrrr srrr [3 rrrr srrr rrrr srrr ] rrrr rrrr srrr srrr	}
+	(v100 Sub){	[3 rrrr rrrS rrrr rrrr ] rrrr rrrS rrrr rrrr [3 rrrr rrrS rrrr rrrr ] rrrr rrrr rrSr rrrr	}
+	(v110 Sub){	[3 Hrrh irrh hrrH irrh ] Hrrh irrh hrrH irir [3 Hrrh irrh hrrH irrh ] Hrrh irrh hrri Hrrr	}
+	(v110 Sub){	[3 rrrr Trrr rrrr Trrr ] rrrr Trrr rrrr Trrr [3 rrrr Trrr rrrr Trrr ] rrrr Trrr TrTr Trrr	}
+	}}
+#dr12={	l%24 v.Random(3);	Rythm{
+	(v120 Sub){	[3 krrr rrrr krrk rrrr ] krrr rrrr krrk rrrr [3 krrr rrrr krrk rrrr ] krkr krrr krrr rrrr	}
+	(v120 Sub){	[3 rrrr rrrK rrrr rrrK ] rrrr rrrK rrrr KrKr [3 rrrr rrrK rrrr rrrK ] rrrr rKrK rrrr Krrr	}
+	(v110 Sub){	[3 rrrr rrrr rrjr rrrr ] rrrr rrrr rrjr jrjr [3 rrrr rrrr rrjr rrrr ] rrrr rrrr jrrr rrrr	}
+	(v110 Sub){	[3 rrrr srrr rrrr srrr ] rrrr srrr rrrr srrr [3 rrrr srrr rrrr srrr ] srsr rsrs srrr rrrr	}
+	(v100 Sub){	[3 rrrr rrrS rrrr rrrr ] rrrr rrrS rrrr rrrr [3 rrrr rrrS rrrr rrrr ] SrSr rSrS Srrr rrrr	}
+	(v110 Sub){	[3 Hrrh irrh hrrH irrh ] Hrrh irrh hrrH irir [3 Hrrh irrh hrrH irrh ] irir hHrh irrr Hrrr	}
+	(v110 Sub){	[3 rrrr Trrr rrrr Trrr ] rrrr Trrr rrrr Trrr [3 rrrr Trrr rrrr Trrr ] rrrr Trrr rrrr Trrr	}
+	}}
+//_Track 11  []
+#dr20={	l%12 v.Random(3);	Rythm{
+	(v127 Sub){	rrrr rrrr rrrr rrrr  rrrr rrrr trrr lrrf  rrrr rrrr rrrr rrrr  rrrr rrrr urro lrrf	}
+	}}
+#dr21={	l%24 v.Random(3);	Rythm{
+	(v127 Sub){	[3 rrrr rrrr rrrr rrrr ] rrrr rrrr rrrr rrtl [3 rrrr rrrr rrrr rrrr ] urto mrlr rmrf rrrr	}
+	}}
+#dr22={	l%24 v.Random(3);	Rythm{
+	(v127 Sub){	[3 rrrr rrrr rrrr rrrr ] rrrr rrrr rrrr rrtl [3 rrrr rrrr rrrr rrrr ] urtr omrl frrr mrrr	}
+	}}
+
+//_Track  1  []
+#ep11={Sub{	o4 q98 l%24 v90 v.Random(3);
+	'gb>d<'120'f+a>c<'^'gb>d<'r192 'gb>d<'120'a>ce<'^'gb>d<'r192
+	'a>ce<'192'b>df+<'^'>cdg<'^'>df+a<'^'>ea>c<<'^ '>cea<'288r96
+	'gb>d<'120'f+a>c<'^'gb>d<'r192 'gb>d<'120'a>ce<'^'gb>d<'r192
+	'>ceg<'96'b>dg<'96'a>df+<'^'gb>d<'^'f+a>d<'^'eg>c<'^
+	'a>df+<'96'g>ce<'48'eg>c<'24'gb>d<'120r96	}
+		o6 q98 l%24 v110 v.Random(3);
+	e^^red^,75er192 e^^rdf+^,75er192 <a^^^>d^e<b^^>d^f+^a^ a^ga216r96
+	e^^red^,75er192 e^^rdf+^,75er192 >c^<b^ar12g12er12c12<a^>d^cr12e12gr12b12 a96g48e24g120r96
+	}
+#ep12={Sub{	o5 q98 l%192 v90 v.Random(3);
+	}
+	}
+//_Track  4  []
+#ep21={	o5 q90 l%24 v110 v.Random(3);
+	r192ga^b>c<r12b12ar12g12 r192rrgr12f+12er12c12<br12g12 r384 >r96ag^a>cr<b>rcrdr<
+	r192ga^b>c<r12b12ar12g12 r192rrgr12a12br12g12ar12b12 r192<a^>d^c^g^ a192'gb>d<'r'f+a>c<'r'gb>d<'rrr
+	}
+#ep22={	o5 q90 l%24 v110 v.Random(3);
+	gr12a12br12g12ar12b12gr12a12b96r96
+	br12>c12dr12<b12br12>c12dr12e12f+96r96
+	er12d12cr12d12<br12>d12f+r12d12c96r96
+	ar12d12gr12c12f+r12<b12>er12<a12>d96r96<
+	gr12a12br12g12ar12b12gr12a12b96r96
+	br12>c12dr12<b12br12>c12dr12e12f+96r96
+	er12d12cr12d12er12d12er12f+12gr12f+12dr12f+12gr12f+12er12a12
+	<'f+a>c<'r'f+a>c<'r'f+a>c<''f+a>c<'r'f+a>c<''f+a>c<'rrr'gb>df<'rrr
+	}
+//_Track  5  []
+#st11={	o5 q95 l%48 v110 v.Random(3);	Unison({
+	[3r384]rrrr>f+edc< b384 a360r24 b192>c192 cdef+g^<
+	},12)	}
+#st12={	o5 q95 l%48 v110 v.Random(3);	Unison({
+	r192b>cd<b r192>agf+e r192ef+gf+ r192f+gec<
+	r192b>cd<b r192>agf+e d192e192 f24r24f24r24f24f24r24f24f24r72g24r72<
+	},12)	}
+//_Track  2  []
+#bs11={	o2 q90 l%24 v120 v.Random(3);
+	g^^r>f+rdc^c<b^a^>d^< g^^r>f+rce^ed^c^<b^	a^^r>gred^dc^<b^>e^ d^^rbr>ed^c<bae^d^<
+	g^^r>f+rdc^c<b^a^>d^< g^^r>f+rce^ed^c^<b^	a^^r>gred^dc^e^g^< a^^r>f+12r12cdrgrergrrr//a^^^>grcf+^f+e^dc<ba
+	}
+#bs12={	o2 q90 l%24 v120 v.Random(3);
+	g^^r>f+rdc^c<b^a^>d^< g^^r>f+rce^ed^c^<b^	a^^r>gred^dc^<b^>e^ d^^rbr>ed^c<bae^d^<
+	g^^r>f+rdc^c<b^a^>d^< g^^r>f+rce^ed^c^<b^ a^^r>gred^dc^e^g^ drc+rc<bra+arrrgrrr
+	}
+//_Track  3  []
+Function G9(len,cut) { If(cut==1){	' t0v-20g  t1v+10b >t2v+5d  t3v+5a<'(len)
+				}Else{	'>t0v-20a  t1v+10d <t2v+5b  t3v+5g '(len)	} }	// G(9)
+Function Am(len,cut) { If(cut==1){	' t0v-20g >t1v+10c  t2v+5e  t3v+5a<'(len)
+				}Else{	'>t0v-20a  t1v+10e  t2v+5c <t3v+5g '(len)	} }	// Am7
+Function Es(len,cut) { If(cut==1){	' t0v-20g  t1v+10b >t2v+5e  t3v+5a<'(len)
+				}Else{	'>t0v-20a  t1v+10e <t2v+5b  t3v+5g '(len)	} }	// Esus4(#9)
+Function D1(len,cut) { If(cut==1){	' t0v-20g >t1v+10d  t2v+5f+ t3v+5a<'(len)
+				}Else{	'>t0v-20a  t1v+10f+ t2v+5d <t3v+5g '(len)	} }	// D(11)
+Function As(len,cut) { If(cut==1){	' t0v-20g >t1v+10d  t2v+5e  t3v+5a<'(len)
+				}Else{	'>t0v-20a  t1v+10e  t2v+5d <t3v+5g '(len)	} }	// A7sus4
+Function Fm(len,cut) { If(cut==1){	' t0v-20f+ t1v+10g >t2v+5c  t3v+5a<'(len)
+				}Else{	'>t0v-20a  t1v+10c <t2v+5g  t3v+5f+'(len)	} }	// F#m(b5)(b9)
+Function F5(len,cut) { If(cut==1){	' t0v-20f+>t1v+10c  t2v+5e  t3v+5a<'(len)
+				}Else{	'>t0v-20a  t1v+10e  t2v+5c <t3v+5a '(len)	} }	// F#m(b5)
+Function G6(len,cut) { If(cut==1){	' t0v-20g >t1v+10d  t2v+5e  t3v+5b<'(len)
+				}Else{	'>t0v-20b  t1v+10e  t2v+5d <t3v+5g '(len)	} }	// G6
+//Function (len,cut) { If(cut==1){	' t0v-20  t1v+10  t2v+5  t3v+5 '(len)
+//				}Else{	' t0v-20  t1v+10  t2v+5  t3v+5 '(len)	} }	// 
+
+#gt11={	o4 l%24 v.Random(3);
+	v120 q99 G9(48,1);  v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);  v110 q99 G9(24,1);
+	v120	   G9(48,0);  v110     G9(24,1);  v80  q25 G9(24,0);           G9(24,1);  v120 q99 G9(48,0);
+	v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);
+	v120 q99 G9(48,0);  v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);  v110 q99 G9(24,0);
+	v120     G9(48,1);  v110     G9(24,0);  v80  q25 G9(24,1);           G9(24,0);  v120 q99 G9(48,1);
+	v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);
+	v120 q99 Am(48,1);  v100     Am(24,0);  v110     Am(24,1);  v80  q25 Am(24,0);  v110 q99 Am(24,1);
+	v120	   Am(48,0);  v110     Am(24,1);  v80  q25 Am(24,0);           Am(24,1);  v120 q99 Am(48,0);
+	v100     Am(24,1);  v110     Am(24,0);  v80  q25 Am(24,1);
+	v120 q99 Es(48,0);  v100     Es(24,1);  v110     Es(24,0);  v80  q25 Es(24,1);  v110 q99 Es(24,0);
+	v120     Es(48,1);  v110     Es(24,0);  v80  q25 Es(24,1);           Es(24,0);  v120 q99 Es(48,1);
+	v100     Es(24,0);  v110     Es(24,1);  v80  q25 Es(24,0);
+	v120 q99 G9(48,1);  v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);  v110 q99 G9(24,1);
+	v120	   G9(48,0);  v110     G9(24,1);  v80  q25 G9(24,0);           G9(24,1);  v120 q99 G9(48,0);
+	v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);
+	v120 q99 G9(48,0);  v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);  v110 q99 G9(24,0);
+	v120     G9(48,1);  v110     G9(24,0);  v80  q25 G9(24,1);           G9(24,0);  v120 q99 G9(48,1);
+	v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);
+	v120 q99 D1(48,1);  v100     D1(24,0);  v110     D1(24,1);  v80  q25 D1(24,0);  v110 q99 D1(24,1);
+	v120	   D1(48,0);  v110     D1(24,1);  v80  q25 D1(24,0);           D1(24,1);  v120 q99 D1(48,0);
+	v100     D1(24,1);  v110     D1(24,0);  v80  q25 D1(24,1);
+	v120 q99 As(48,0);  v100     As(24,1);  v110     As(24,0);  v80  q25 As(24,1);  v110 q99 As(24,0);
+	v100     As(48,1);  v120     As(24,0);  r        Fm(24,1);  r        As(24,0);  rrr
+	}
+#gt12={	o4 l%24 v.Random(3);
+	v120 q99 G9(48,1);  v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);  v110 q99 G9(24,1);
+	v120	   G9(48,0);  v110     G9(24,1);  v80  q25 G9(24,0);           G9(24,1);  v120 q99 G9(48,0);
+	v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);
+	v120 q99 G9(48,0);  v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);  v110 q99 G9(24,0);
+	v120     G9(48,1);  v110     G9(24,0);  v80  q25 G9(24,1);           G9(24,0);  v120 q99 G9(48,1);
+	v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);
+	v120 q99 Am(48,1);  v100     Am(24,0);  v110     Am(24,1);  v80  q25 Am(24,0);  v110 q99 Am(24,1);
+	v120	   Am(48,0);  v110     Am(24,1);  v80  q25 Am(24,0);           Am(24,1);  v120 q99 Am(48,0);
+	v100     Am(24,1);  v110     Am(24,0);  v80  q25 Am(24,1);
+	v120 q99 Es(48,0);  v100     Es(24,1);  v110     Es(24,0);  v80  q25 Es(24,1);  v110 q99 Es(24,0);
+	v120     Es(48,1);  v110     Es(24,0);  v80  q25 Es(24,1);           Es(24,0);  v120 q99 Es(48,1);
+	v100     Es(24,0);  v110     Es(24,1);  v80  q25 Es(24,0);
+	v120 q99 G9(48,1);  v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);  v110 q99 G9(24,1);
+	v120	   G9(48,0);  v110     G9(24,1);  v80  q25 G9(24,0);           G9(24,1);  v120 q99 G9(48,0);
+	v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);
+	v120 q99 G9(48,0);  v100     G9(24,1);  v110     G9(24,0);  v80  q25 G9(24,1);  v110 q99 G9(24,0);
+	v120     G9(48,1);  v110     G9(24,0);  v80  q25 G9(24,1);           G9(24,0);  v120 q99 G9(48,1);
+	v100     G9(24,0);  v110     G9(24,1);  v80  q25 G9(24,0);
+	v120 q99 D1(48,1);  v100     D1(24,0);  v110     D1(24,1);  v80  q25 D1(24,0);  v110 q99 D1(24,1);
+	v120	   D1(48,0);  v110     D1(24,1);  v80  q25 D1(24,0);           D1(24,1);  v120 q99 D1(48,0);
+	v100     D1(24,1);  v110     D1(24,0);  v80  q25 D1(24,1);
+	v110 q99 F5(24,0);r F5(24,1);r F5(24,0);F5(24,1);r F5(24,0); F5(24,1);rrr G6(24,0);
+	}
+
+//_Track  6  []
+#br12={	o6 l%96 v110 v.Random(3); q100
+	'gb>d<'r^^ 'gb>d<'r^^ '>ceg<'r^^ '>ceg<'r^^ 'gb>d<'r^^ 'gb>d<'r^^ r^^^ r288'gb>df<'	}
+//_Track  7  []
+#br22={	o6 l%24 v110 v.Random(3); q75
+	Unison({	r96rgf+rgrrf+grar r96rgf+rgrrf+arbr >r96rc<br>crr<b>drer r96rc<br>crrd<brar
+			r96rgf+rgrrf+grar r96rgf+rgrrf+arbr >cr<br>crcr<b>cr<b>crdr<	},-12)
+	 'f-a>c<'r'f-a>c<'r'f-a>c<''f-a>c<'r'f-a>c<''f-a>c<'
+	}
+//_Track  8  []
+#vx12={	o6 q98 l%192 v80 v.Random(3);
+	r'<b>df+' r'df+a' r'ceg' r'df+b' r'<b>df+' r'df+a'
+	<'df+b''ea>c<'
+	l%24'f+a>c<'r'f+a>c<'r'f+a>c<''f+a>c<'r'f+a>c<''f+a>c<'rrr'gb>df<'rrr
+	}
+
+//_Track 12  []
+#st31={	o5 q100 l%48 v110 v.Random(3);	Unison({
+	[7r96g,50r240]r96g,50r	},12)	}
+//_Track 13  []
+#st21={	o6 q100 l%48 v110 v.Random(3);	Unison({
+	[7r288g,50r]	},12)	}
+//_Track 14  []
+//_Track 15  []
+//_Track 16  []
+//---------------------------------------------------------------------------------------------
+//_Track List
+//	Tr			 1	 2	 3	 4	 5	 6	 7	 8	 9	10	11	12	13	14	15	16
+//				
+Time(  1:1:0)
+[(lp)			Play(;     ;     ;     ;     ;     ;     ;     ;     ;#dr30;#dr10;#dr20;     ;     ;     ;     ;     ;)
+	[2l1r]	Play(;#ep11;#bs11;#gt11;#ep21;#st11;     ;     ;     ;#dr31;#dr11;#dr21;#st31;#st21;     ;     ;     ;)
+	[8l1r]	Play(;#ep12;#bs12;#gt12;#ep22;#st12;#br12;#br22;#vx12;#dr32;#dr12;#dr22;     ;     ;     ;     ;     ;)
+	[8l1r]	] v0 l2 q100 o5 rg
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+Time(  1:1:0)	Play(;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;     ;)
+//	r192v0f
+//		r-4064 r-192
+//		For(Int A=127; A>0; A=A-1){ MVol(A); l%32 r* }
+//If(SynthType<=4){	If(SynthType>=3){
+//		For(Int B=115; B>0; B=B-1){ EFXvol(B); l%32 r* }
+//---------------------------------------------------------------------------------------------
+//_Tool Box
+/*
+	If(SynthType==5){
+	}Else{If(SynthType==4){
+	}Else{If(SynthType==3){
+	}Else{If(SynthType==2){
+	}Else{If(SynthType==1){
+	}Else{
+	}}}}}
+*/

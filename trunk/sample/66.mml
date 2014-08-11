@@ -1,0 +1,127 @@
+/*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【曲　名】クジラ屋の飴玉
+【作曲者】クジラ飛行机
+【連絡先】mine@text2music.com / http://www.text2music.com
+【作成日】2002/03/31
+【転　載】可（但し、事前連絡が必要）
+【製　作】[IBM Thinkpad a21e] with [YAMAHA MU-100]
+【音　源】ＧＭ音源汎用
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ダウンロード感謝です<(^v^)Y
+
+この曲、ヤマハの安いMIDIキーボード(CBX-K1)を買ったところから始ま
+りました。ピアニカに似た小さい鍵盤が可愛くて、しばらく無邪気にひ
+いているうちに、だんだん曲が浮かび上がってきました。
+
+コード進行 C - Dm - Em - F の繰り返しが、脳を甘くしてくれるでしょ
+う！
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*/
+
+//_00:初期設定
+TrackName     = {"クジラ屋の飴玉"}
+Copyright     = {"クジラ飛行机"}
+Tempo         = 90;
+TimeSignature = 4,4;
+System.MeasureShift(1)
+System.TimeBase(96)
+System.KeyFlag+()
+System.vAdd(10)
+System.qAdd(10)
+Include(bend.h);
+Include(chord2.h);
+//-------------------------------------------------
+//_Function
+Function Oct(Str PH){
+	Sub{ Key(12); PH; }; Key(0); PH;
+}
+Function Uni5(Str PH){
+	Sub{ Key(7); PH; }; Key(0); PH;
+}
+
+//-------------------------------------------------
+//_ドラム音
+$b{n(Kick1),}
+$B{n(Kick2),} 
+$s{n(Snare1),}
+$S{'n(Snare2)n(HandClap)'}
+$h{n(ClosedHiHat),}
+$m{n(OpenHiHat),}
+$c{n(CrashCymbal1),}
+$a{n(SideStick),}
+$f{n(LowBongo),}
+$g{n(HighBongo),}
+//-------------------------------------------------
+//フレーズ
+//_A-melo
+Str A01 = { v120 q99 l8 o6 [2 edgd edgd | edgd :fead ] fga`c  }
+Str A02 = { v120 q99 l8 o6 a`cag agfe | edge fgfc | [3 edgd ] fga`c }
+Str B01 = { v110 q99 l2 o5 M.onNoteWave(0,60,!2); cdef cdef M(0) }
+Str C01 = { v120 q99 l16 o6 [2 c^cd e^c^ d^g^ g^^^ :| f^ef g^c^ d^e^ d^^^ ]  fefg c^c^ e^d^ c^^^ }
+Str C02 = { v120 q99 l16 o6 g^ge g^d^ g^ge g^d^ |f^ef g^c^ d^e^ d^^^ | c^cd e^c^ d^g^ g^^^ |  aga`c g^g^ a^b^ `c^^^ }
+Str D01 = { v120 q99 l16 o6 Oct({[2 crcd ercr drgr g^^^| r1]}) }
+Str E01 = { v80 q40 l8  o6  [4 v.onTime(127,40,!1); [8'eg']]}
+Str I01 = { v120 o3 l2 q99 [2 c d e f ] }
+Str I02 = { v120 l16 q100 [4 o3 c^^c,50 `c^^c <earg,70>`c^g^ ] }
+Str J01 = {Rythm{
+    (Sub){ [2 l32 (v.onTime(0,80,!1^2, 80,40,!2))[32 h](v.onTime(40,120,!1^!1))[32 h ] ] }
+    (Sub){ r1r1r1 (v.onTime(0,80,!1))l32 [32 b] }
+}l1rrrr}
+Str J02 = {Rythm{
+    (v90  Sub){ [4 l32 h^hh h^h^ hhhh h^hm | h^^h ^^hh h^h^ hhhh ] }
+    (v100 Sub){ [4 l32 brrr brrb srbr rrrb | rbbb brrr :srbr rrrs ] (v.onTime(40,120,!4)REV(120))ssss ssss (REV=0)}
+}l1rrrr}
+Str J03 = {Rythm{
+    (v90  Sub){ l32 [8 h^hh mhhh ^h^h m^hh  ] }
+    (v100 Sub){ [2 l32 brrb rrrr srbr bbbr | brrr brbr srrr brrs | brrr brrb srbr rrrr | brbr ssrr :bbbb srrr] (v.onTime(40,120,!4)REV(120))ssss ssss (REV=0)}
+}l1rrrr}
+Str J04 = {Rythm{
+    (l1rrr l32 v.onTime(0,80,!1); Sub){[32 s]}
+    (v.onTime(0,127,!1^1^1^1))l32 [4[32 h]]
+}l1rrrr}
+//-------------------------------------------------
+//_MIXER
+Str A00={CH( 1); @018 REV( 20)CHO( 40) M(0) EP(127) V(110);}
+Str B00={CH( 2); @018 REV( 20)CHO( 40) M(0) EP(127) V(110);}
+Str C00={CH( 3); @008 REV( 60)CHO( 40) M(0) EP(127) V( 90);}
+Str D00={CH( 4); @057 REV( 60)CHO( 40) M(0) EP(127) V(100);}
+Str E00={CH( 5); @053 REV( 60)CHO( 40) M(0) EP(127) V(110);}
+Str F00={CH( 6); @001 REV( 60)CHO( 40) M(0) EP(127) V(110);}
+Str G00={CH( 7); @001 REV( 60)CHO( 40) M(0) EP(127) V(110);}
+Str H00={CH( 8); @082 REV( 10)CHO( 60) M(0) EP(127) V( 80);}
+Str I00={CH( 9); @034 REV( 10)CHO( 40) M(0) EP(127) V( 80);}
+Str J00={CH(10); @026 REV( 60)CHO( 40) M(0) EP(127) V(110);}
+
+//-------------------------------------------------
+// PLAY LIST
+Str ___ = {l1 rrrr }
+
+Time(  0:1:0); ResetGS(); ResetXG(); ResetGM();
+Time(  1:1:0);
+PLAY(A00,B00,C00,D00,E00,F00,G00,H00,I00,J00); // 音色定義
+Time(  2:1:0);
+//_PLAY
+//   A   B   C   D   E   F   G   H   I   J  
+
+PLAY(A01,B01,___,___,___,___,___,___,___,___); //A-melo
+PLAY(A01,B01,___,___,___,___,___,___,___,J01); // 
+PLAY(A01,B01,C01,___,___,___,___,___,___,___); //A-melo
+PLAY(A02,B01,C02,___,___,___,___,___,___,J01); // 
+
+PLAY(A01,B01,___,D01,___,___,___,___,___,J02); //A-melo
+PLAY(A02,B01,___,D01,___,___,___,___,___,J02); // 
+PLAY(A01,B01,C01,___,___,___,___,___,___,J03); //A-melo
+PLAY(A02,B01,C02,___,___,___,___,___,___,J03); // 
+
+PLAY(___,___,___,D01,E01,___,___,___,___,___); //B-melo
+PLAY(___,___,___,D01,E01,___,___,I01,___,J04); //
+PLAY(___,___,___,D01,E01,___,___,I02,I02,J02); //
+PLAY(A01,___,___,D01,E01,___,___,I02,I02,J02); //
+PLAY(A01,___,___,D01,E01,___,___,I02,I02,J03); //
+
+PLAY(A01,___,C01,___,___,___,___,I02,I02,J02); //A-melo
+PLAY(A02,___,C02,___,___,___,___,I02,I02,J02); //
+PLAY(C01,I02,___,___,___,___,___,___,___,___); //Last
+
+//PlayFrom(2:1:0);
