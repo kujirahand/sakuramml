@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS"><META name="GENERATOR" content="IBM HomePage Builder 2000 V4.0.2  for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+
+<TITLE>トラックとチャンネルと時間</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H1>トラックとチャンネルと時間</H1>
+<P>・<B>トラックとチャンネルの概念</B></P>
+<BLOCKQUOTE>普通、ＭＩＤＩ音源には、１６個のチャンネルがあり、様々な音色の中から、１６種類の楽器を１度に発音することが出来る仕組みになっています。<BR>
+<BR>
+サクラでは、その16のチャンネルを、0～511のトラックのいずれかに割り振って使います。<BR>
+<BR>
+初期状態では、トラック０にチャンネル１、トラック1にチャンネル１、トラック２にチャンネル２、トラック３にチャンネル３・・・と、割り振られています。<BR>
+<BR>
+これを割り振りなおすには、<FONT color="#ff0000"><B>Track(n)</B></FONT>と<FONT color="#0000ff"><B>Channel(n)</B></FONT> という命令を使います。</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1" width="100%">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc"><FONT color="#ff0000">Track</FONT><FONT color="#ff0000">(0)</FONT> <FONT color="#0000ff">Chan</FONT><FONT color="#0000ff">nel</FONT><FONT color="#0000ff">(1)</FONT><BR>
+      Voice(1)//チャンネルの１番に、音色の１番(ピアノ)を設定。<BR>
+      l4 o5 cdefgfedcegec1<BR>
+      <BR>
+      <FONT color="#ff0000">Track</FONT><FONT color="#ff0000">(1)</FONT> <FONT color="#0000ff">Chann</FONT><FONT color="#0000ff">el(2)</FONT><BR>
+      Voice(33)//チャンネルの２番に、音色の33番(ベース)を設定。<BR>
+      l4 o3 ccccccccccccc1</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+このように、違う楽器を１６種類割り当てることが出来ます。</BLOCKQUOTE>
+<P>・<B>トラックと時間</B></P>
+<BLOCKQUOTE>音というものは、音の高さと、それが発せられる時間によって成り立っています。サクラでは、<FONT color="#ff0000"><B>Time</B></FONT>命令によって、音の発せられる時間を制御できます。<BR>
+この命令には２種類の指定方法があります。<BR>
+<OL>
+  <LI>Time( 小節：拍：ステップ ) 指定<BR>
+  <BR>
+  普通の音楽製作ソフトで利用されている時間の指定方法です。<BR>
+  初期状態では、Time( 1: 1: 0)から始まります。<BR>
+  <TABLE border="1" width="100%">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#ff0000"><B>Time</B></FONT>( 1:1:0 )<FONT color="#0000ff">//１小節目の１拍目に設定。</FONT><BR>
+        l4 cdef<BR>
+        <FONT color="#ff0000"><B>Time</B></FONT>( 2:1:0 )<FONT color="#0000ff">//２小節目の１拍目に設定。</FONT><BR>
+        l4 gfed cdef<BR>
+        <B><FONT color="#ff0000">Time</FONT></B>( 3:1:0 )<FONT color="#0000ff">//３小節目の１拍目に設定。</FONT><BR>
+        l4 efga　　　<FONT color="#ff00ff">//即ち、音が重なる</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  ところが、インターネットなどで他人に公開するためのデータには、音源のリセット命令や、音色エディットの命令を送るために、１、２小節間を空けておきます。<BR>
+  <BR>
+  そこで、<FONT color="#0000ff"><B>System.MeasureShift(n)</B></FONT>を使うと、その開始小節を変えることができます。<BR>
+  <TABLE border="1" width="100%">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#ff0000"><FONT color="#000000">Include(stdmsg.h);//リセット命令のため</FONT><BR>
+        </FONT><FONT color="#0000ff"><B>System.MeasureShift(1);</B></FONT><FONT color="#ff0000"><B><BR>
+        Time(0:1:0)<BR>
+        </B></FONT><FONT color="#000000">ResetXG();</FONT><FONT color="#000000">ResetGS();ResetGM();//音源リセット</FONT><FONT color="#ff0000"><B><BR>
+        Time(1:1:0)<BR>
+        </B></FONT><FONT color="#000000">l4 cdef gfed cege cege cege c1</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  また、音楽と言うのは、だいたい四小節で区切りですので、開始小節を<B>０小節目</B>から始める事にすれば、ちょうど、<B>４の倍数小節目</B>が、区切りの良い小節になるので、計算が楽です。（この辺りは好みの問題になってきますけれど。。。）<BR>
+  <TABLE border="1" width="100%">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#ff0000"><FONT color="#000000">Include(stdmsg.h);//リセット命令のため</FONT><BR>
+        </FONT><FONT color="#0000ff"><B>System.MeasureShift(２);</B></FONT><FONT color="#ff0000"><BR>
+        Time(-1:1:0)<BR>
+        </FONT><FONT color="#000000">ResetXG();</FONT><FONT color="#000000">ResetGS();ResetGM();//音源リセット</FONT><FONT color="#ff0000"><BR>
+        Time( </FONT><FONT color="#0000ff">0</FONT><FONT color="#ff0000">:1:0)<BR>
+        </FONT><FONT color="#000000">l4 cdef gfed cege cege<FONT color="#ff0000"><BR>
+        Time( </FONT><FONT color="#0000ff">4</FONT><FONT color="#ff0000">:1:0)<BR>
+        </FONT><FONT color="#000000">l4 cdef gfed cege cege</FONT><FONT color="#ff0000"><BR>
+        Time( </FONT><FONT color="#0000ff">8</FONT><FONT color="#ff0000">:1:0)</FONT><FONT color="#000000"><B><BR>
+        </B>l4 cdef gfed cege cege<BR>
+        </FONT></FONT><FONT color="#000000"><FONT color="#ff0000">Time(</FONT><FONT color="#0000ff">12</FONT><FONT color="#ff0000">:1:0)</FONT></FONT><FONT color="#000000"><FONT color="#000000"><B><BR>
+        </B>l4 cdef gfed cege cege<BR>
+        </FONT>//...<BR>
+        </FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  
+  <LI>Time = StepTime　指定<BR>
+  <BR>
+  Timeをステップ値を指定します。しかし、考えてみても、時間を四小節目に合わせるのに、四分音符分解能が96だと1小節が96X4=384で、四小節は1小節が４つだから、４を掛けて、384X4=...なんて使い方はしません。<BR>
+  <BR>
+  時間をちょっと進めたいときなどに、相対的に、<BR>
+  <FONT color="#0000ff">Time = Time + !4;</FONT><BR>
+  と、指定します。<BR>
+  <BR>
+  この例では、 r4 とほぼ同じ意味(*1)で、あまり意味がありません。あとで、変数が出てくるのですが、変数をこのTimeと組み合わせると、いろいろと面白いことが出来るようになります。<BR>
+  <FONT color="#6600ff">（*1： r4 では、発音イベントを行ってしまうので、正確には、r*4と同じ意味です。
+  r*で、発音イベントを処理しません。）</FONT> <BR>
+  <TABLE border="1" width="100%">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#ff0000"><FONT color="#3300ff">//変数を使って楽をする例</FONT><FONT color="#000000"><BR>
+        <BR>
+        l4 cdef //...ＭＭＬが続いていて...<BR>
+        Int A;</FONT><FONT color="#3300ff">//変数Ａを宣言。Ａが生まれた。</FONT><FONT color="#ff0000"><BR>
+        A = (Time)</FONT><FONT color="#000000">;</FONT><FONT color="#3300ff">//Aに現在の時間を代入。</FONT><FONT color="#000000"><BR>
+        l4 cdef gfed//...永遠と続くＭＭＬ...<BR>
+        <FONT color="#660000">//あ、Aの位置に戻りたいなぁ・・・</FONT><BR>
+        <FONT color="#660000">//戻ろう！</FONT><BR>
+        </FONT><FONT color="#ff0000">Time = A</FONT><FONT color="#000000">;</FONT><FONT color="#3300ff">//これで、Aの時間に戻れました。</FONT><FONT color="#000000"><BR>
+        l4 efga //...めでたし、めでたし。<BR>
+        </FONT></FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  
+</OL>
+</BLOCKQUOTE>
+<HR>
+<P align="right"><A href="index.htm">戻る</A>｜<A href="mml3.htm">次へ</A></P>
+</BODY>
+</HTML>

@@ -1,0 +1,44 @@
+「command.txt」を、開く。
+NO=0
+目次=「<BLOCKQUOTE>」
+本文=「<TABLE border=1><TR><TD>名前</TD><TD>引数</TD><TD>説明</TD></TR>\n」
+反復(
+	LINE=それ
+	もし、MID(LINE,1,2)="//" ならば(
+		H = MID(LINE,3,100);
+		目次 = 目次 & "<A href=\"#cmd{NO}\">・{H}</A><BR>\n"
+		本文 = 本文 & "<TR bgcolor=\"red\"><TD colspan=3><A name=\"cmd{NO}\"><FONT color=\"white\">{H}</FONT></A></TD></TR>\n"
+		NO=NO+1
+	)違えば(
+		NAME=LINE#0#0
+		ARG=LINE#1#0
+		DESC=LINE#2#0
+		CNO=トリム(LINE#3#0)
+		もし、CNO<>""ならば(
+　　		本文 = 本文 & "<TR><TD><A href=\"./{CNO}.htm\">{NAME}</A></TD><TD>{ARG}</TD><TD>{DESC}</TD></TR>\n"
+		)違えば(
+　　		本文 = 本文 & "<TR><TD>{NAME}</TD><TD>{ARG}</TD><TD>{DESC}</TD></TR>\n"
+		)
+	)。
+)。
+目次=目次&「</BLOCKQUOTE>\n<HR>\n」
+本文=本文&「</TABLE>」
+それ="<HTML>
+<HEAD>
+  <TITLE>命令一覧（機能順）</TITLE>
+</HEAD>
+<BODY>
+<H1>命令一覧(機能順)</H1>
+<P>→50音順は、<A href=\"index.htm\">こちら</A></P>
+<P>索引</P>
+{目次}
+{本文}
+<HR>
+<A href=\"../index.htm\">戻る</A>
+</BODY>
+</HTML>"
+
+F=母艦のパス＆"command\\index2.htm"
+Fへ、保存。
+Fを、起動。
+おわり。

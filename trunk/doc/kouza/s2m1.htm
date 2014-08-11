@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>MMLって何？</TITLE>
+</HEAD>
+<BODY>
+<H1 align="center"><FONT color="#3300cc">MMLって何？</FONT></H1>
+<CENTER>
+<TABLE border="0" width="600" cellpadding="8" cellspacing="0">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FF6633">
+      <TABLE border="0" width="100%" bgcolor="#ffffff" cellpadding="8" cellspacing="0">
+        <TBODY>
+          <TR>
+            <TD>　MMLとは、Music Macro(Markup) Languageの略です。<BR>
+            具体的には、ドレミファソ・・・を、cdefgab
+            というアルファベットで書いていこう！ということです。<BR>
+            <BR>
+            　日本語で、ドレミ・・・と書いていく方法を、ストトン表記と呼んでいますが、このストトン表記では、ドレミと打つのに、（ローマ字入力の人は、do
+            re mi と書いて変換する）と、ワープロに慣れているとは言え、ちょっと時間がかかってしまいます。<BR>
+            <BR>
+            　そこへ行くと、このMMLでは、ドレミが、cde。アルファベットなので、変換作業もいりません。音楽をかじったことがある人なら、このドレミが、cde
+            に対応している訳が分かるかと思いますが、初めての人は、cde
+            を覚えるのが、ちょっと大変かもしれませんね。<BR>
+            <BR>
+            　しかし、ちょっと本格的に、音楽理論でも勉強するかというと、この
+            cdefgab が、すぐに必要になってくるでしょう。少しずつ、ドレミの対応を覚えていけば、そんなに難しいことではないので、頑張ってください。（そもそも、ギターやピアノの楽譜には、『コード譜』が付いていますよね。例えば、Cのコードは、ドの音を根音（ルート）とします。Dのコードはレの音、Eは、ミ・・・という仕組みになっています。）</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+<H2 align="center"><BR>
+<FONT color="#3300CC">MMLを書いてみよう</FONT>！</H2>
+<CENTER>
+<TABLE border="0" width="600" cellpadding="8" cellspacing="0">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FF6633">
+      <TABLE border="0" width="100%" bgcolor="#ffffff" cellpadding="8" cellspacing="0">
+        <TBODY>
+          <TR>
+            <TD>　さっそく、簡単なMMLを書いてみましょう。サクラの使い方は、<A href="index.htm">【ストトン講座】</A>を、眺めてみて、分かってもらえたでしょうか？<BR>
+            <BR>
+            　ここでは、よく使うコマンドを書いて見ます。<BR><BR>
+            <TABLE border="1">
+              <TBODY>
+                <TR>
+                  <TD>abcdefg</TD>
+                  <TD>ラシドレミファソ</TD>
+                </TR>
+                <TR>
+                  <TD>l (エル)</TD>
+                  <TD>音符。音の長さを指定します。</TD>
+                </TR>
+                <TR>
+                  <TD>o(オー）</TD>
+                  <TD>音階。オクターブを指定します。</TD>
+                </TR>
+                <TR>
+                  <TD>q</TD>
+                  <TD>ゲート。実際の音の発音率を％で指定します。</TD>
+                </TR>
+                <TR>
+                  <TD>v</TD>
+                  <TD>音量（ベロシティ）。音の強さを指定します。</TD>
+                </TR>
+                <TR>
+                  <TD>^</TD>
+                  <TD>タイ。ストトンの&quot;ー&quot;にあたります。</TD>
+                </TR>
+              </TBODY>
+            </TABLE>
+            <BR>
+            　まずは、チューリップから、やってみましょう。<BR>
+            <BR>
+            //ストトンだと、<BR>
+            音符４　音階５　ドレミー　ドレミー　ソミレド　レミレー<BR>
+            <BR>
+            //MMLだと、<BR>
+            l4 o5 cde^ cde^ gedc ded^<BR>
+            <BR>
+            どうですか？MMLも、そんなに、抵抗なく使えるんじゃないでしょうか。<BR>
+            <BR>
+            　あと、q のゲートについて説明します。<BR>
+            これは、スタッカートや、フェルマーターの効果を出したいときに、使います。<BR>
+            次の２つのフレーズを聞き比べてみてください。<BR>
+            //(1)<BR>
+            v120 o5 l4 q30 geer fddr cdef gggr<BR>
+            //(2)<BR>
+            v120 o5 l4 q100 gee^ fdd^ cdef
+            ggg^<BR>
+            <BR>
+            <BR>
+            　もちろん、ストトンのように、ド４レ８ミ４．のように、ノート情報の後に、直接、音の長さを記すことも出来ます。例えば、<BR>
+            l4 c8d8e d8e8f e8f8g f8e8d ^^^<BR>
+            のように。<BR><BR>
+            実は、この音の長さのあとに、コンマ(
+            , ) で区切って、ゲートを指定することも出来ます。<BR>
+            例えば、<BR>
+            q100 c4 c4,50 // q100 c4 q50 c4 と同じ<BR>
+            とか、<BR>
+            q50 l8 cc e,100g cc g,100a // q50 l8 cc q100e
+            q50 g cc q100g q50a と同じ<BR>
+            とか・・・。<BR>
+            <BR>
+            ここまで、出来たら、MML使いへの道が開けてきました。<BR>
+            次の扉を開けてみよう！</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+<P align="center"><A href="index.htm">戻る</A></P>
+</BODY>
+</HTML>

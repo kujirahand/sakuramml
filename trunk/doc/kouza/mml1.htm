@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>MMLの基礎</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H1><FONT color="#0000ff">MMLの基礎</FONT></H1>
+<HR>
+<P>　MMLは、基本的にアルファベットを使って、音楽を表記していきます。<BR>
+　MMLとは、MusicMacroLanguageの略で、パソコンが８ビットだった時代から音楽を簡単に表すために使われていました。そのため、基本は非常に簡潔です。<BR>
+　そしてこのソフトサクラは、細かいニュアンスが表現できるように、MMLを拡張したものです。</P>
+<HR>
+<P>・MMLの基本</P>
+<H2>ノート</H2>
+<BLOCKQUOTE><B>ノート</B>（音名）→ストトン表記では、<FONT color="#ffcc00"><FONT color="#cc0000">ドレミファソラシ</FONT></FONT><BR>
+<BR>
+ドレミファソラシをMMLでは、<FONT color="#ff0000"><B><FONT size="+2">cdefgab</FONT></B></FONT>と書きます。半音上（＃）はノートのすぐ後ろに、<FONT color="#ff0000" size="+1"><B>+</B></FONT>か<B><FONT color="#ff0000">#</FONT></B>。半音下（♭）は、<FONT color="#ff0000" size="+1"><B>-</B></FONT>。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc">cdefgab //＝ドレミファソラシ<BR>
+      c+ d e f# g a b-</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+<B>休符</B>→ストトン表記では、<FONT color="#cc0000">ッン</FONT><BR>
+休符は、<FONT color="#ff0000" size="+2"><B>r</B></FONT>で表します。<BR>
+<BR>
+<B>ノート番号指定</B><BR>
+<BR>
+特殊なノートに<FONT color="#ff0000" size="+2"><B>n</B></FONT>があります。これは、<FONT color="#ff0000">n</FONT><FONT color="#6600ff">番号</FONT>と指定して、<FONT color="#6600ff">番号</FONT>のノートナンバーを発音するという意味です。番号に指定できるのは、-1～１２７までです。-1の時は、休符と同じ扱いになります。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc">n36 //o3c と同じ意味<BR>
+      n38 //o3d と同じ意味</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<H2>音長</H2>
+<OL>
+  <LI><B>音長</B>（音の長さ指定）→ストトン表記では、<FONT color="#cc0000">音符</FONT><BR>
+  音の長さ(length)は、<FONT size="+2" color="#ff0000"><B>l</B></FONT>（小文字のL）で指定するか、ノートのすぐ後で指定します。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l8 cdef gfed <FONT color="#cc0000">//音符８　ドレミファ　ソファミレ</FONT><BR>
+        l4 cdef gfed <FONT color="#cc0000">//音符４　ドレミファ　ソファミレ</FONT><BR>
+        c8 d8 e4 d8 e8 f4 e8 f8 g4 <FONT color="#cc0000">//</FONT><FONT color="#cc00ff">ノートのすぐ後で音長指定</FONT><BR>
+        <FONT color="#cc0000">//ド８レ８ミ４レ８ミ８ファ４ミ８ファ８ソ４</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  また、音の長さの表現には、二つの方法があります。<BR>
+  ・<B>ｎ分音符指定</B>：四分音符・八分音符などで指定する方法。<BR>
+  ・<B>ステップ指定</B>：実際の長さを直接ステップ数で指定する方法。TimeBase(96)と指定すれば、四分音符を96ステップとして解釈します。<BR>
+  <BR>
+  <B>変換規則</B><BR>
+  ・ｎ分音符指定から、ステップ指定モードに、ステップ指定からｎ分音符に、（音の長さ指定方法を）切り替えるときは、<FONT color="#ff0000" size="+1">%</FONT>を書きます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l4 cdef g2fe　<FONT color="#cc0000">　　//</FONT><FONT color="#cc00ff">ｎ分音符指定</FONT><BR>
+        l<FONT color="#ff0000">%</FONT>96 cdef g192fe　<FONT color="#cc0000">//</FONT><FONT color="#cc00ff">ステップ指定<BR>
+        </FONT><FONT color="#000000">l</FONT><FONT color="#ff0000">%</FONT><FONT color="#000000">96 cdef c</FONT><FONT color="#ff0000">%</FONT><FONT color="#000000">4d</FONT><FONT color="#ff0000">%</FONT><FONT color="#000000">4e</FONT><FONT color="#ff0000">%</FONT><FONT color="#000000">4f</FONT><FONT color="#ff0000">%</FONT><FONT color="#000000">4<BR>
+        </FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  ・ステップ指定の時、ｎ分音符指定したいときは、数値の前に、<FONT color="#ff0000" size="+1">!</FONT>を書きます。または、<FONT color="#ff0000">Step(n分指定)</FONT>という数値変換用の関数もあります。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l%96 <FONT color="#ff3399">//これ以後、ステップ指定</FONT><BR>
+        c192d48e48<BR>
+        c!2 d!8e!8 <FONT color="#ff3399">//TimeBaseが96のとき、上と同じ意味</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <BR>
+  <B>付点音符</B>を表現したいときは、l4<FONT color="#ff0000"><B>.</B></FONT> l2<FONT color="#ff0000"><B>.</B></FONT> のように、. をつけます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l4. ceg4 <FONT color="#3300ff">//付点四分音符</FONT><BR>
+        l4 c.e.g <FONT color="#3300ff">//音長省略しても付点四分音符</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <B>タイ</B>指定（→ストトンでは<FONT color="#cc0000">ー</FONT>）には、<B><FONT size="+1" color="#ff0000">^</FONT></B> (日本語キーボードなら0の２つ右隣のキー）を使います。<FONT color="#ff0000">^</FONT><FONT color="#3300ff">音長</FONT><FONT color="#ff0000">^</FONT><FONT color="#3300ff">音長</FONT><FONT color="#ff0000">^</FONT><FONT color="#3300ff">音長..</FONT>.で同じ高さの音をつなぐのが目的ですが、実際は、一つ以上の音長指定を<FONT color="#9900ff"> </FONT><FONT color="#9900ff">l2^4</FONT> のように、つなぐのに使います。音長は省略すると、音長指定<FONT color="#ff0000"><B>l</B></FONT>で指定した値が省略値となります。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l<FONT color="#ff0000">4^4</FONT> <FONT color="#0000ff">// l2 と同じ意味<BR>
+        </FONT>c d8 e8<BR>
+        f<FONT color="#ff0000">8^8</FONT> <FONT color="#0000ff">// f4 と同じ意味<BR>
+        </FONT>l8 cde<FONT color="#ff0000">^</FONT> fg<FONT color="#ff0000">^^</FONT> <FONT color="#3300ff">// l8cde4 fg4. と同じ意味</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  または、音の長さの加算減算に+,-を使うことも出来ます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">q100 d+<FONT color="#ff0000">%3</FONT>e<FONT color="#ff0000">1-%3</FONT> f+<FONT color="#ff0000">%3</FONT>g<FONT color="#ff0000">1-%3<BR>
+        </FONT><FONT color="#000000">c</FONT><FONT color="#ff0000">1+1+1+1</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+</OL>
+<H2>ベロシティ</H2>
+<OL>  
+  <LI><B>ベロシティー</B>（音の強さ）→ストトン表記では、<FONT color="#cc0000">音量</FONT><BR>
+  音の強さを表すベロシティー(velocity)は、<FONT color="#ff0000" size="+2"><B>v</B></FONT>で指定します。初期状態で、vの範囲は、０～１２７です。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l4 <FONT color="#ff0000">v</FONT>100 cdef <FONT color="#ff0000">v</FONT>70 cdef <FONT color="#ff0000">v</FONT>120 cdef</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  相対的に v を変えることもできます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">v80 c <FONT color="#ff0000">v+10</FONT> c <FONT color="#ff0000">v+10</FONT> c <FONT color="#ff0000">v+10</FONT> c <FONT color="#ff0000">v+10</FONT> c <FONT color="#0000ff">//相対的に指定</FONT><BR>
+        <BR>
+        <FONT color="#9900ff">System.vAdd(10)</FONT>;<FONT color="#0000ff">//</FONT><FONT color="#ff0000">v++</FONT><FONT color="#0000ff">の値決定</FONT><BR>
+        v80 c <FONT color="#ff0000">v++</FONT> c <FONT color="#ff0000">v++</FONT> c <FONT color="#ff0000">v++</FONT> c <FONT color="#ff0000">v++</FONT> c <FONT color="#0000ff">//省略指定</FONT><BR>
+        v80 c <FONT color="#ff0000">v+++</FONT> c <FONT color="#0000ff">// = v+20</FONT><BR>
+        v80 c <FONT color="#ff0000">v++++</FONT> c <FONT color="#0000ff">// = v+30</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+</OL>
+<H2>オクターブ</H2>
+<UL>
+  <LI><B>オクターブ</B>　→ストトン表記では、<FONT color="#cc0000">音階</FONT><BR>
+  オクターブ(octave)を設定するのは、<FONT color="#ff0000" size="+2"><B>o</B></FONT>です。範囲は０～１１です。<BR>
+  １オクターブだけ変えるには、<FONT color="#ff0000"><B>&gt;&lt;</B></FONT>の記号を使います。<BR>
+  初期状態では、<B><FONT color="#ff0000">&gt;</FONT></B>が１オクターブ上げる、<FONT color="#ff0000"><B>&lt;</B></FONT>が１オクターブ下げるになっています。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l8<FONT color="#ff0000">o4</FONT> cdefgab <FONT color="#ff0000">o5</FONT> cdefgab <FONT color="#ff0000">o6</FONT> cdefgab<BR>
+        l8<FONT color="#ff0000">o4</FONT> cdefgab <FONT color="#ff0000">&gt;</FONT> cdefgab <FONT color="#ff0000">&gt;</FONT> cdefgab<BR>
+        l8<FONT color="#ff0000">o6</FONT> gec4 <FONT color="#ff0000">o5</FONT> gec4 <FONT color="#ff0000">o4</FONT> gec4<BR>
+        l8<FONT color="#ff0000">o6</FONT> gec4 <FONT color="#ff0000">&lt;</FONT> gec4 <FONT color="#ff0000">&lt;</FONT> gec4</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+</UL>
+<H2>ゲートタイム</H2>
+<UL>
+  <LI><B>ゲートタイム</B>　→ストトン表記では、<FONT color="#cc0000">ゲート</FONT><BR>
+  音長に対する実発音時間をゲートタイムと言い、<B><FONT size="+2" color="#ff0000">q</FONT></B> で表します。<BR>
+  <TABLE border="0" cellpadding="3">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#6666ff" style='font-family : "ＭＳ ゴシック";font-size : 16px;'><FONT color="#ffffff">音長</FONT><FONT color="#66ffff" face="ＭＳ ゴシック">+---+---+---+---</FONT><BR>
+        <FONT color="#ffffff">発音</FONT><FONT color="#ff0000">o===+===</FONT><BR>
+        <FONT color="#ffffff">Note</FONT><FONT color="#66ff99">On</FONT>.....<FONT color="#66ff99">Off</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <FONT color="#cc33ff">( q50 の時の音長対発音時間の図 )</FONT><BR>
+  実際 <FONT color="#ff0000"><B>q</B></FONT> は、音長に対する発音時間の割合を100分のいくつで表します。また、<FONT color="#ff0000">%</FONT> をつけると、ステップ指定もできます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">l4 <FONT color="#ff0000">q100</FONT> cdef <FONT color="#ff0000">q50</FONT> cdef <FONT color="#ff0000">q10</FONT> cdef<BR>
+        l4 <FONT color="#ff0000">q%96</FONT> cdef <FONT color="#ff0000">q%48</FONT> cdef <FONT color="#ff0000">q%10</FONT> cdef</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  また、ゲートタイムに対する、ステップ値の<B>減算補正</B>コマンドとして、&quot;<B><FONT color="#ff6600">h</FONT></B>&quot;があります。<BR>
+  <BR>
+  例えば、&quot; l4 q100 c &quot; と書いたとき、c のゲート長は、96 ステップですが、&quot;
+  l4 q100 h1 c &quot; と、書くと、96 - 1 = 95 として、ゲート長は、95ステップになります。<BR>
+</UL>
+<H2>タイミング</H2>
+<BLOCKQUOTE><B>タイミング</B><BR>
+発音のタイミングをステップ値で <FONT color="#ff0000" size="+2"><B>t</B></FONT><FONT color="#9900ff">値</FONT> のように指定します。<BR>
+微妙なニュアンスを表現したり、次の章で扱う<B>オプション</B>と組み合わせてシャッフルやグルーブの調整をします。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc">o4 l16 <FONT color="#ff0000">t0</FONT> c <FONT color="#ff0000">t8</FONT> d <FONT color="#ff0000">t0</FONT> c <FONT color="#ff0000">t8</FONT> e <FONT color="#ff0000">t0</FONT> c <FONT color="#ff0000">t8</FONT> g</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<H2>和音</H2>
+<BLOCKQUOTE>MMLで和音を表現する方法は、３つあります。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">'ceg'</TD>
+      <TD>シングルコーテーションで括る</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffff99">c0e0g</TD>
+      <TD>音長さを、０にする</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffff99">Sub{ c }Sub{ e } g</TD>
+      <TD>Sub{ } を使うとタイムポインタを Subの前に戻します。</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<P align="right"><A href="index.htm">戻る</A>｜<A href="mml2.htm">次へ</A></P>
+</BODY>
+</HTML>

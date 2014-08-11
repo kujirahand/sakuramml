@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>DataMSB</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">DataMSB/Y</TD>
+      <TD align="left">DataMSB(n)<BR>
+      Y(n)</TD>
+      <TD align="left">RPN/NRPNのデータMSBを書き込む</TD>
+      <TD align="left">音色・コントロールチェンジ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>RPN/NRPNのデータMSBを書き込む。&quot;Y&quot;と&quot;DataMSB&quot;は同じ意味。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//DataMSB のサンプル</FONT></B><BR>
+      <BR>
+      <FONT color="#006633">//以下のサンプルは、音源が<BR>
+      //フィルター/レゾナンスに<BR>
+      //対応している必要がある<BR>
+      </FONT><BR>
+      ResetXG(); ResetGS();<BR>
+      r2<BR>
+      FilterResonance(127) r%3<BR>
+      FilterCutoff(50) r%3<BR>
+      [8 <BR>
+      　　Y.onTime(10,127,!1)<BR>
+      　　l8 cccc cccc<BR>
+      ]<BR>
+      <BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="../reference/rpn.htm">RPN/NRPN 一覧表</A> / <A href="48.htm">DataLSB</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

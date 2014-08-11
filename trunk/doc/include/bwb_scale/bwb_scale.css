@@ -1,0 +1,50 @@
+body{
+	background: black;	/*背景*/
+	color: white;		/*文字色*/
+}
+hr.psub{
+	color: black;			/* 線の色(IE用) */
+	background-color: black;	/* 線の色(NN用) */
+	border: 0px;				/* 枠の太さ */
+}
+span.scale{
+	color: green;		/*スケールの文字色は緑色*/
+}
+span.chord{
+	color: #EECC00;
+	text-decoration: underline;		/*下線*/
+}
+span.chordprogression{
+	color: #FF0000;
+	text-decoration: underline;		/*下線*/
+}
+span.mmlsample{
+	font-style:oblique;			/*斜体*/
+
+}
+span.function{
+	color: #0033FF;
+	text-decoration: underline;		/*関数は下線*/
+	font-weight: bolder;			/*太字*/
+}
+
+span.note_c{color:#002299;}
+span.note_db{color:#003399;}
+span.note_d{color:#004488;}
+span.note_eb{color:#005588;}
+span.note_e{color:#006677;}
+span.note_f{color:#007777;}
+span.note_fp{color:#008866;}
+span.note_g{color:#009966;}
+span.note_ab{color:#00AA55;}
+span.note_a{color:#00BB55;}
+span.note_bb{color:#00CC44;}
+span.note_b{color:#00DD44;}
+
+span.note_cp{color:#003399;}
+span.note_dp{color:#005588;}
+span.note_gb{color:#008866;}
+span.note_gp{color:#00AA55;}
+span.note_ap{color:#00CC44;}
+
+span.note_bar{color:#FFFFFF;}

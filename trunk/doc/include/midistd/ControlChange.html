@@ -1,0 +1,434 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='index.html'>MIDI Standard</a>＼
+	<a href='voice.html'>Channel Voice Message</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2 align='center'>Control Change Message</h2>
+
+MIDIの各チャンネルを制御する為のメッセージです。<br>
+<br>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='00'>Bank Select</a></h3>
+Program（Sound, Voice Tone, Preset, Patch）のバンクを選択するメッセージです。<br>
+このメッセージの送信後、<a href='voice.html#program'>プログラム・チェンジ・メッセージ</a>を送信する事で、
+選択したバンクのプログラムの音色を鳴らすことが出来ます。<br>
+バンクセレクトでは音色は変わらず、その後に<a href='voice.html#program'>プログラム・チェンジ・メッセージ</a>が必要です。<br>
+<br>
+General MIDI Level.2(GM2)では、
+バンク$78/$00が指定されその後にプログラム・チェンジする事でリズム・チャンネルになります。<br>
+又、バンク$79/xxが指定されその後にプログラム・チェンジする事でメロディー・チャンネルになります。<br>
+<br>
+サクラの@命令及びvoice()命令は、バンクセレクトを指定してからプログラム・チェンジを指定する仕様になっています。<br>
+従って、ユーザーが特に意識する必要はありません。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>@<var>Program No.</var>[,<var>Bank LSB</var>,<var>Bank MSB</var>]<br>
+<li>Voice(<var>Program No.</var>[,<var>Bank LSB</var>,<var>Bank MSB</var>])<br>
+<li>音色(<var>Program No.</var>[,<var>Bank LSB</var>,<var>Bank MSB</var>])<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='01'>Modlation</a></h3>
+ビブラート(音程LFO)の深さを変化させます。<br>
+最大値を指定したときのビブラートの深さは、<a href='ControlChange.html#100'>Registered Paramete</a> No.5の<a href='ControlChange.html#RPN05'>Modlation Depth</a>で指定します。<br>
+指定値と深さはcent単位で比例します。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>M(<var>Depth</var>)<br>
+<li>Modulation(<var>Depth</var>)<br>
+<li>ビブラート<br>
+<li>ビブラートオフ<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='05'>Portamento Time</a></h3>
+ポルタメント時のピッチの変化の早さを指定します。<br>
+<br>
+General MIDI Level.2(GM2)では、モノ・モード（モード４）の時に使用する事ができます。<br>
+また、ポリ・モード（モード３）の時でも、使用できる楽器もあります。<br>
+General MIDI Level.2(GM2)では、指定値によるピッチの変化のレートは、以下の表の通りとする事が推奨されています。<br>
+縦軸は変化のスピード（単位[cent/msec]）で、横軸は指定値です。<br>
+<img src='PortamentoRate.jpg'>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>PT(<var>Time</var>)<br>
+<li>PortamentoTime(<var>Time</var>)<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='07'>Channel Volume</a></h3>
+チャンネルの音量を変化させるメッセージで、各チャンネル間との音量バランスを設定する目的として使われます。<br>
+音量の式は、以下のとおりです。<br>
+<br>
+gain [dB] = 40 × log（ <var>指定値</var> ÷ 127 ）<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>V(<var>Volume</var>)<br>
+<li>MainVolume(<var>Volume</var>)<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='10'>Panpot</a></h3>
+チャンネルのステレオの音場位置を設定します。<br>
+リズムチャンネルの場合は、相対的に変化します。<br>
+リズムチャンネルの各パーカッションの音場を設定する為には、<br>
+<a href='exclusive.html#RT'>Universal Real Time Exclusive Message</a>の<a href='KeyBasedInstrument.html'>Key-Based Instrument Controllers(Sub ID#1=$0A)</a>を使用します。<br>
+<br>
+General MIDI Level.2(GM2)で推奨される、左右の音量の計算式は以下の通りです。<br>
+Gain(Left) [dB] = 20 × log（ cos（ π ÷ 2 × max（ 0, <var>指定値</var> － 1 ） ÷ 126 ） ）<br>
+Gain(Right) [dB] = 20 × log（ sin（ π ÷ 2 × max（ 0, <var>指定値</var> － 1 ） ÷ 126 ） ）<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>P(<var>Panpot</var>)<br>
+<li>Panpot(<var>Panpot</var>)<br>
+<li>方向左<br>
+<li>方向左前<br>
+<li>方向前<br>
+<li>方向右前<br>
+<li>方向右<br>
+<li>方向回す<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='11'>Expression</a></h3>
+チャンネルの音量を変化させるメッセージで、
+クレッシェンド、デクレッシェンド等の音楽表現を行う為に使用されます。<br>
+音量の式は、以下のとおりです。<br>
+<br>
+gain [dB] = 40 × log（ <var>指定値</var> ÷ 127 ）<br>
+<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>EP(<var>Volume</var>)<br>
+<li>Expression(<var>Volume</var>)<br>
+<li>Cresc([[[<var>len</var>], <var>v1</var>], <var>v2</var>])<br>
+<li>Decresc([[[<var>len</var>], <var>v1</var>], <var>v2</var>])<br>
+<li>大きく(<var>len</var>, <var>v2</var>)<br>
+<li>小さく(<var>len</var>, <var>v2</var>)<br>
+<li>クレッシェンド(<var>len</var>, <var>v2</var>)<br>
+<li>デクレッシェンド(<var>len</var>, <var>v2</var>)<br>
+<li>音量戻す<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='64'>Hold (Dumper pedal, Sustain)</a></h3>
+ハーフペダルを導入しない場合は、0～63がOff,64～127がOnとします。<br>
+このメッセージは、ダンパーペダル（若しくは、サスティンペダル）のOn/Offをします。<br>
+General MIDI Level.2(GM2)のピアノ系の音色では、リダンパーに対応しています。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>ペダル<br>
+<li>放す<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='65'>Portamento on/off</a></h3>
+指定値は、0～63がOff,64～127がOnとなります。<br>
+このメッセージは、ポルタメントのOn/Offを指定します。<br>
+ポルタメントがOnの状態では、全てのノート・オンされた音について、
+ポルタメントコントローラーにて指定されたノートNo.の音程から
+ノートオンした音程まで、ポルタメントタイムで指定した速度でポルタメントします。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>PS(<var>switch</var>)<br>
+<li>PortamentoSwitch(<var>switch</var>)<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='66'>Sostenuto</a></h3>
+指定値は、0～63がOff,64～127がOnとなります。<br>
+ダンパーペダルの効果と似ているが、このメッセージは、
+Onになったときにノートオンされていた音のみを保持します。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='67'>Soft</a></h3>
+指定値は、0～63がOff,64～127がOnとなります。<br>
+このメッセージは、発音する音を柔らかくする為に用います。<br>
+具体的には、音量を小さくし、カットオフ周波数を下げる等の操作がMIDI内部で行われます。<br>
+General MIDI Level.2(GM2)では、ピアノ系の音色のみの対応が義務つけられています。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='71'>Sound Controller 2 (Timbre / Harmonic Intensity)</a></h3>
+ローパスフィルタのレゾナンスの強さを指定します。<br>
+64を標準とし、値が小さい程効果が弱くなり、大きいほど効果が大きくなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='72'>Sound Controller 3 (Release time)</a></h3>
+エンベロープのリリースタイムを指定します。
+64を標準とし、値が小さい程効果が短くなり、大きいほど効果が長くなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='73'>Sound Controller 4 (Attack time)</a></h3>
+エンベロープのアタックタイムを指定します。
+64を標準とし、値が小さい程効果が短くなり、大きいほど効果が長くなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='74'>Sound Controller 5 (Brightness)</a></h3>
+ローパスフィルタのカットオフ周波数を指定します。<br>
+64を標準とし、値が小さい程周波数が低くなり、大きいほど周波数が高くなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='75'>Sound Controller 6 (Decay Time)</a></h3>
+エンベロープのディケイタイムを指定します。<br>
+64を標準とし、値が小さい程効果が短くなり、大きいほど効果が長くなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='76'>Sound Controller 7 (Vibrato Rate)</a></h3>
+ビブラートの周期を指定します。<br>
+64を標準とし、値が小さい程周期が長くなり、大きいほど周期が短くなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='77'>Sound Controller 8 (Vibrato Depth)</a></h3>
+ビブラートの深さを指定します。<br>
+64を標準とし、値が小さい程効果が弱くなり、大きいほど効果が大きくなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='78'>Sound Controller 9 (Vibrato Decay)</a></h3>
+ビブラートのディケイタイムを指定します。<br>
+64を標準とし、値が小さい程効果が短くなり、大きいほど効果が長くなります。<br>
+<h4>命令一覧</h4>
+<ul>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='91'>Effect Depth 1 (Reverb)</a></h3>
+リバーブへのセンド・レベルを設定します。<br>
+指定値とセンド・レベルは比例関係です。<br>
+<br>
+細かいを設定する為には、<a href='exclusive.html#RT'>Universal Real Time Exclusive Message</a>の<a href='DeviceControl.html'>Device Control(Sub ID#1=$04)</a>を使用します。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>REV(<var>value</var>)<br>
+<li>Reverb(<var>value</var>)<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='93'>Effect Depth 3 (Chorus)</a></h3>
+指定値とセンド・レベルは比例関係で、127の時に100%となります。<br>
+<br>
+細かいを設定する為には、<a href='exclusive.html#RT'>Universal Real Time Exclusive Message</a>の<a href='DeviceControl.html'>Device Control(Sub ID#1=$04)</a>を使用します。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>CHO(<var>value</var>)<br>
+<li>Chorus(<var>value</var>)<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='98'>Non Registered Parameter</a></h3>
+各MIDIデバイス個別に規定されている各パラメータの設定を行います。<br>
+このパラメータは、各メーカが独自に設計する為、各MIDIデバイスで互換性が無い場合があります。<br>
+パラメータを設定する方法は、
+Non Registered Parameter LSB(cc98)及び、Non Registered Parameter MSB(cc99)を指定し、
+Data Entry MSB(cc6)及び、Data Entry LSB(cc38)を送信する事で可能です。<br>
+又、Data Increment(cc96)及びData Decrement(cc97)にて、MSB単位で値のインクリメント(+1)及びデクリメント(-1)する事が可能です。<be>
+この２つのコントロールは、第2Byteは意味を持ちません。<br>
+<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>NRPN(<var>NoMSB</var>, <var>NoLSB</var>, <var>DataMSB</var>)<br>
+<li>DataMSB(<var>DataMSB</var>)<br>
+<li>DataLSB(<var>DataLSB</var>)<br>
+<li>Y(<var>DataMSB</var>)<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='100'>Registered Parameter</a></h3>
+MIDI規格によって標準化されている、全てのMIDIデバイスに共通する各パラメータの設定を行います。<br>
+パラメータを設定する方法は、
+Registered Parameter LSB(cc100)及び、Registered Parameter MSB(cc101)を指定し、
+Data Entry MSB(cc6)及び、Data Entry LSB(cc38)を送信する事で可能です。<br>
+又、Data Increment(cc96)及びData Decrement(cc97)にて、MSB単位で値のインクリメント(+1)及びデクリメント(-1)する事が可能です。<be>
+この２つのコントロールは、第2Byteは意味を持ちません。<br>
+<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>RPN(<var>NoMSB</var>, <var>NoLSB</var>, <var>DataMSB</var>)<br>
+<li>DataMSB(<var>DataMSB</var>)<br>
+<li>DataLSB(<var>DataLSB</var>)<br>
+<li>Y(<var>DataMSB</var>)<br>
+</ul>
+
+現在、MIDI規格にて標準化されているパラメータは以下のとおりです。<br>
+<table>
+<caption>Registered Parameter<caption>
+<tr><th>Parameter				</th><th>MSB</th><th>LSB</th><th>GM1</th><th>GM2</th><th>Command</th><th>Define</th></tr>
+<tr><td>Pitch Bend Sensitivity	</td><td>0	</td><td>0	</td><td>○	</td><td>○	</td>
+	<td>PitchBendSensitivity<br>BR	</td><td>stdmsg.h</td>
+</tr>
+<tr><td>Fine Tuning				</td><td>0	</td><td>1	</td><td>×	</td><td>○	</td>
+	<td>FineTune					</td><td>stdmsg.h</td>
+</tr>
+<tr><td>Corse Tuing				</td><td>0	</td><td>2	</td><td>×	</td><td>○	</td>
+	<td>CoarseTune					</td><td>stdmsg.h</td>
+</tr>
+<tr><td>Tuning Preset			</td><td>0	</td><td>3	</td><td>×	</td><td>×	</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Tuning Bank				</td><td>0	</td><td>4	</td><td>×	</td><td>×	</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Modlation Depth			</td><td>0	</td><td>5	</td><td>×	</td><td>○	</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Null					</td><td>127</td><td>127</td><td>○	</td><td>○	</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+</table>
+<br><br>
+
+<br>
+<h4><a name='RPN00'>$00/ $00：Pitch Bend Sensitivity</a></h4>
+<a href='voice.html#bend'>Pitch Bend Change Message</a>での感度の量を指定します。<br>
+Data EntryのMSBが半音単位、LSBがcent単位となります。<br>
+General MIDI Level.1及び2(GM1,GM2)では、±12以上の対応が義務つけられています。<br>
+<br>
+<li>命令一覧 ("stdmsg.h"にて定義されています。)
+<ul>
+<li>PitchBendSensitivity(<var>ValueMSB</var>)<br>
+<li>BR(<var>ValueMSB</var>)<br>
+</ul>
+
+<br>
+<h4><a name='RPN01'>$00/ $01：Fine Tuning</a></h4>
+チャンネルのチューニングを、細かいレベルで設定します。<br>
+MSB=$40, LSB=$00で中央となり、100/8192[cent]単位で調整可能です。<br>
+<br>
+<li>命令一覧 ("stdmsg.h"にて定義されています。)
+<ul>
+<li>FineTune(<var>ValueMSB</var>)<br>
+</ul>
+
+<br>
+<h4><a name='RPN02'>$00/ $02：Corse Tuing</a></h4>
+チャンネルのチューニングを、粗いレベルで設定します。<br>
+LSBは無効で、MSB=$40で中央となります。半音単位で調整可能です。<br>
+General MIDI Level.2(GM2)では、±12以上の対応が義務つけられています。<br>
+キーシフトとしても利用可能です。<br>
+<br>
+<li>命令一覧 ("stdmsg.h"にて定義されています。)
+<ul>
+<li>CoarseTune(<var>Value</var>)<br>
+</ul>
+
+<br>
+<h4><a name='RPN03'>$00/ $03：Tuning Preset No.</a><br>
+	<a name='RPN04'>$00/ $04：Tuning Bank No.</a></h4>
+チューニング・プログラムのPreset No及びBank No.を指定します。<br>
+チューニング・プログラムについての詳細は、
+<a href='TuningStandard.html'>MIDI Tuning Standard</a>を参照して下さい。<br>
+<ul>
+</ul>
+
+<br>
+<h4><a name='RPN05'>$00/ $05：Modlation Depth</a></h4>
+<a href='ControlChange.html#01'>Modlation(Control Change No.1)</a>で最大値が指定されたときビブラートの深さを設定します。<br>
+Data EntryのMSBが半音単位、LSBがcent単位となります。<br>
+General MIDI Level.1及び2(GM1,GM2)では、±12以上の対応が義務つけられています。<br>
+<ul>
+</ul>
+
+<h4>$7F/ $7F：Null</h4>
+Data Entryで指定された値は無視されます。<br>
+<ul>
+</ul>
+
+<br><br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

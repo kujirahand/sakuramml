@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>リズムパートを入力しよう</TITLE>
+</HEAD>
+<BODY>
+<CENTER>
+<TABLE border="0" width="380" style='font-family : "ＭＳ Ｐゴシック";font-size : 16px;line-height : 18px;'>
+  <TBODY>
+    <TR>
+      <TD align="left"><FONT size="+3" color="#3300ff"><BR>
+      リズムパートを入力しよう！</FONT><BR>
+      <BR>
+      　ここでは、リズムパートを入力する方法を説明します。普通マルチ音源には、鍵盤の音程に合った音程で発音するノーマルパートと、１ボイスの中に多数のドラムやパーカッションの音色が鍵盤の１つ１つに割り当てられているリズムパートがあります。
+      <HR>
+      <FONT color="#ff0000"><B>リズムトラックに設定する方法</B></FONT><BR>
+      <BR>
+      　実は、音源の種類によって、リズムパートを指定する方法が違います。（内臓音源ご利用の方は、たぶんＧＭ音源で良いと思います。）<BR>
+      <BR>
+      　ＧＳ、ＧＭ音源の場合は、トラック１０が、リズムパートになっていますので、<B><FONT color="#3300ff">トラック１０</FONT></B>と書けば、それ以降がリズムパートになります。（トラック１０以外をリズムパートにするには、<FONT color="#3300ff"><B>チャンネル１０</B></FONT>と書きます。）<BR>
+      <BR>
+      　ＸＧ音源の場合は、リズムパートとして使いたいトラックで、<B><FONT color="#3300ff">Voice(1,127,0)</FONT></B>と書いてください。それ以降がリズムパートになります。（Voiceの１番目の数字は、音色番号を、２番目、３番目が、リズムパート設定を表しています。）<BR>
+      <HR>
+      <FONT color="#ff0000"><B>リズムトラックの概念<BR>
+      </B></FONT><BR>
+      <FONT color="#ff0000">　</FONT>リズムトラックは、音程の１つ１つに、違う音色のリズム楽器が割り当てられています。<BR>
+      <FONT color="#ffff99"><FONT color="#330000">例）</FONT></FONT><BR>
+      <TABLE border="1">
+        <TBODY>
+          <TR>
+            <TD bgcolor="#99ccff" align="center">ノート番号</TD>
+            <TD bgcolor="#ffffcc" align="center">36</TD>
+            <TD bgcolor="#ffffcc" align="center">37</TD>
+            <TD bgcolor="#ffffcc" align="center">38</TD>
+            <TD bgcolor="#ffffcc" align="center">39</TD>
+            <TD bgcolor="#ffffcc" align="center">40</TD>
+            <TD bgcolor="#ffffcc" align="center">41</TD>
+            <TD bgcolor="#ffffcc" align="center">42</TD>
+            <TD bgcolor="#ffffcc" align="center">43</TD>
+          </TR>
+          <TR>
+            <TD bgcolor="#99ccff" align="center">音程</TD>
+            <TD align="center">音階３<BR>
+            ド</TD>
+            <TD bgcolor="#cccccc" align="center">音階３<BR>
+            ド＃</TD>
+            <TD align="center">音階３<BR>
+            レ</TD>
+            <TD bgcolor="#cccccc" align="center">音階３<BR>
+            レ＃</TD>
+            <TD align="center">音階３<BR>
+            ミ</TD>
+            <TD align="center">音階３<BR>
+            ファ</TD>
+            <TD bgcolor="#cccccc" align="center">音階３<BR>
+            ファ＃</TD>
+            <TD align="center">音階３<BR>
+            ソ</TD>
+          </TR>
+          <TR>
+            <TD bgcolor="#99ccff" align="center">楽器名</TD>
+            <TD align="center">Kick</TD>
+            <TD bgcolor="#cccccc" align="center">Stick</TD>
+            <TD align="center">Snare</TD>
+            <TD bgcolor="#cccccc" align="center">Clap</TD>
+            <TD align="center">Snare2</TD>
+            <TD align="center">Tom</TD>
+            <TD bgcolor="#cccccc" align="center">HiHat</TD>
+            <TD align="center">Tom</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      ＊<FONT color="#ffff99"><FONT color="#330000">詳しくはお使いの音源の説明書を。</FONT></FONT><BR>
+      <BR>
+      <BR>
+      <B><FONT color="#ff0000">リズム割り当て</FONT><BR>
+      </B><BR>
+      これをドレミで書いていくのは大変です。<BR>
+      <BR>
+      　そこで、これを簡単にするために、マクロへ割り当てるということをします。マクロを割り当ての方法はこうです。<BR>
+      <TABLE border="1" width="100%">
+        <TBODY>
+          <TR>
+            <TD bgcolor="#3300ff"><FONT color="#ff0000">~{</FONT><FONT color="#ffffff">句</FONT><FONT color="#ff0000">} = {</FONT><FONT color="#ffffff">内容</FONT><FONT color="#ff0000">}</FONT></TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      さて、リズムを割り当てるには、<BR>
+      <TABLE border="1">
+        <TBODY>
+          <TR>
+            <TD bgcolor="#ffffcc">~{<FONT color="#9900ff">句</FONT>} = { n<FONT color="#9900ff">リズム番号</FONT> }</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      と、やります。nというのは、番号の音程を発音するというＭＭＬコマンドです。<BR>
+      <BR>
+      以下は、リズム割り当ての例です。<BR>
+      <TABLE border="1" width="100%" bgcolor="#ffffcc">
+        <TBODY>
+          <TR>
+            <TD><FONT color="#330000">トラック１０</FONT><FONT color="#330000">//トラック１０が、ドラム専用チャンネル。</FONT><BR>
+            <FONT color="#330000">//Voice(1,127,0)　</FONT><FONT color="#330000">//XG音源の場合。</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ど} = {n36,} //Bass-drum</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{た} = {n38,} //Snare</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{つ} = {n42,} //Hi-hat close</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{く} = {n44,} //Hi-hat half open</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ち} = {n46,} //Hi-hat open</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ぱ} = {n49,} //Crash cymbal</FONT></TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      このように、好きな字句に、好きな楽器を割り当てることが出来ます。<BR>
+      <BR>
+      さて、実際になにか鳴らしてみましょう。<BR>
+      <TABLE border="1" width="100%">
+        <TBODY>
+          <TR>
+            <TD bgcolor="#ffffcc"><FONT color="#330000">トラック１０</FONT><FONT color="#330000">//トラック１０が、ドラム専用チャンネル。</FONT><BR>
+            <FONT color="#330000">//Voice(1,127,0)　</FONT><FONT color="#330000">//XG音源の場合。</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ど} = {n36,} //Bass-drum</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{た} = {n38,} //Snare</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{つ} = {n42,} //Hi-hat close</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{く} = {n44,} //Hi-hat half open</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ち} = {n46,} //Hi-hat open</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ぱ} = {n49,} //Crash cymbal<BR>
+            <BR>
+            音符８<BR>
+            【３　どつたつどつたつ】どつたつたたたた<BR>
+            </FONT></TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      ２つ以上の楽器を重ねたい場合は、和音命令<FONT color="#3300ff"><B>「」</B></FONT>を使います。<BR>
+      <TABLE border="1" width="100%" bgcolor="#ffffcc">
+        <TBODY>
+          <TR>
+            <TD>【４　「ぱど」つ「たく」つ　どどたた　】</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      しかし、「」は、たくさん打ちこむのは、面倒なので、もう一つリズムパートを作ると簡単です。そのためには、<FONT color="#3300ff">チャンネル１０</FONT>を書きます。<BR>
+      <TABLE border="1" width="100%">
+        <TBODY>
+          <TR>
+            <TD bgcolor="#ffffcc"><FONT face="ＭＳ ゴシック">~{ど} = {n36,} //Bass-drum</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{た} = {n38,} //Snare</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{つ} = {n42,} //Hi-hat close</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{く} = {n44,} //Hi-hat half open</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ち} = {n46,} //Hi-hat open</FONT><BR>
+            <FONT face="ＭＳ ゴシック">~{ぱ} = {n49,} //Crash cymbal</FONT><BR>
+            <BR>
+            <FONT face="ＭＳ ゴシック">トラック１０　チャンネル１０</FONT><BR>
+            <FONT face="ＭＳ ゴシック">【４　音符８　ぱくつくつくつち】</FONT><BR>
+            <FONT face="ＭＳ ゴシック">トラック１１　チャンネル１０</FONT><BR>
+            <FONT face="ＭＳ ゴシック">【４　音符４　どたどた】</FONT></TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      ＊リズムは作り出すと面白くて、ついつい夜更かししてしまうので気をつけましょう。<BR>
+      <BR>
+      最後に、何番が何の音かわからない人の為に、対応表を載せておきます。（エディタ版ver0.999+2以降からは、エディタの「一覧から貼り付け」の「音色一覧」の「Drum
+      Note」から貼り付けられます。）<BR>
+      <TABLE border="1" width="100%">
+        <TBODY>
+          <TR>
+            <TD bgcolor="#ccffff">No　　楽器名<BR>
+            -----------------------------<BR>
+            25　　Snare Roll<BR>
+            26　　Finger Snap<BR>
+            27　　High Q<BR>
+            28　　Slap<BR>
+            29　　Scratch Push [EXC7]<BR>
+            30　　Scratch Pull [EXC7]<BR>
+            31　　Sticks<BR>
+            32　　Square Click<BR>
+            33　　Metronome Click<BR>
+            34　　Metronome Bell<BR>
+            35　　Kick Drum2<BR>
+            36　　Kick Drum1<BR>
+            37　　Side Stick<BR>
+            38　　Snare Drum1<BR>
+            39　　Hand Clap<BR>
+            40　　Snare Drum2<BR>
+            41　　Low Tom2<BR>
+            42　　Closed Hi-hat [EXC1]<BR>
+            43　　Low Tom1<BR>
+            44　　Pedal Hi-hat [EXC1]<BR>
+            45　　Mid Tom2<BR>
+            45　　Mid Tom2<BR>
+            46　　Open Hi-hat [EXC1]<BR>
+            47　　Mid Tom1<BR>
+            48　　High Tom2<BR>
+            49　　Crash Cymbal1<BR>
+            50　　High Tom1<BR>
+            51　　Ride Cymbal1<BR>
+            52　　Chinese Cymbal<BR>
+            53　　Ride Bell<BR>
+            54　　Tambourine<BR>
+            55　　Splash Cymbal<BR>
+            56　　Cowbell<BR>
+            57　　Crash Cymbal2<BR>
+            58　　Vibra-slap<BR>
+            59　　Ride Cymbal2<BR>
+            60　　High Bongo<BR>
+            61　　Low Bongo<BR>
+            62　　Mute High Conga<BR>
+            63　　Open High Conga<BR>
+            64　　Low Conga<BR>
+            65　　High Timbale<BR>
+            66　　Low Timbale<BR>
+            66　　Low Timbale<BR>
+            67　　High Agogo<BR>
+            68　　Low Agogo<BR>
+            69　　Cabasa<BR>
+            70　　Maracas<BR>
+            71　　Short Hi Whistle [EXC2]<BR>
+            72　　Long Low Whistle [EXC2]<BR>
+            73　　Short Guiro [EXC3]<BR>
+            74　　Long Guiro [EXC3]<BR>
+            75　　Claves<BR>
+            76　　High Wood Block<BR>
+            77　　Low Wood Block<BR>
+            78　　Mute Cuica [EXC4]<BR>
+            79　　Open Cuica [EXC4]<BR>
+            80　　Mute Triangle [EXC5]<BR>
+            81　　Open Triangle [EXC5]<BR>
+            82　　Shaker<BR>
+            83　　Jingle Bell<BR>
+            84　　Bell Tree<BR>
+            85　　Castanets<BR>
+            85　　Castanets<BR>
+            86　　Mute Surdo [EXC6]<BR>
+            87　　Open Surdo [EXC6]<BR>
+            87　　Open Surdo [EXC6]</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <HR>
+      <P align="right"><A href="page8.htm">次へ</A>｜<A href="index.htm">表紙へ戻る</A></P>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,836 @@
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+ <style type="text/css">
+ <!--
+  body{font-size:small;background-color:#000000;color:#ffffff;margin:0px;padding:16px;
+        scrollbar-face-color: #000000;
+        scrollbar-highlight-color: #000000;
+        scrollbar-shadow-color: #000000;
+        scrollbar-3dlight-color: #000000;
+        scrollbar-arrow-color: #ffffff;
+        scrollbar-track-color: #000000;
+        scrollbar-darkshadow-color: #000000;}
+  p          {font-size:small;margin-left:24px;}
+  blockquote {font-size:small;margin-left:48px;}
+  h2{color:#ff9999;font-size:large;font-weight:normal;padding:1px 4px;
+     border-width:0px 0px 3px 0px;border-color:#f0f0f0;border-style:double;}
+  h3{color:#9999ff;font-size:medium;font-weight:normal;padding:1px 4px;
+     border-width:0px 0px 1px 0px;border-color:#f0f0f0;border-style:solid;}
+  code {color:#ff9900;font-weight:bold;font-style:normal;}
+  var  {color:#00ff99;font-weight:normal;font-style:normal;}
+  samp {color:#0099ff;font-weight:normal;font-style:normal;}
+  cite {color:#99ff00;font-weight:bold;font-style:normal;}
+  b    {color:#ffaaaa;font-weight:bold;font-style:normal;}
+  span.strike{text-decoration:line-through;}
+  a:link    {color:#22aaff;text-decoration:none;}
+  a:visited {color:#ffaa22;text-decoration:none;}
+  a:active  {color:#22aaff;text-decoration:none;}
+  a:hover   {color:#22aaff;text-decoration:underline;}
+ -->
+ </style>
+ <title>MU1000.h : YAMAHA MU1000(XG汎用)関数セット マニュアル</title>
+ <base target="_blank">
+</head>
+<body>
+
+ <hr noshade size="1" color="#f0f0f0">
+ <div style="color:#00ffbb;font-size:large;font-weight:bold;margin-left:12px;">
+  YAMAHA MU1000(XG汎用)関数セット &quot;MU1000.h&quot; ver.1.0<br>
+ </div>
+ <hr noshade size="1" color="#f0f0f0">
+
+ <p>
+  YAMAHA MUシリーズのエクスクルーシブを簡単に送信する為の関数セットです。 全ての情報はエクスクルーシブによって送信されます。<br>
+  コントロールチェンジによる送信には対応していません。コントロールチェンジによるデータ送信は、&quot;GM2CC.h&quot;(作成中)を使用してください。<br>
+  <br>
+  対象音源はYAMAHA MUシリーズ全てです。エクスクルーシブには下位互換があります。下位の機種で使用する場合には、その機種で<br>
+  使えるエクスクルーシブのみを使 えば問題ありません。<br>
+  <br>
+  なお、ソフトウェアシンセサイザー S-YXGシリーズや、サウンドカード用チップ YMFシリーズに搭載されているXG音源(DS-XG?)は、<br>
+  MIDIインプリメンテーションなどの詳細がわかりませんのでサポート致しません。一応、MU50相当の命令は認識すると思います。<br>
+  <br>
+  現時点ではパラメータ値の解説などは記載しておりませんので、マニュアル片手に使うことになります。<br>
+  まぁ、ある程度使い込めば体で覚えるはずですから大丈夫でしょう。<br>
+  <br>
+  関数名はMIDIインプリメンテーションに記載されている名称をそのまま使っていますので、参照しやすいかと思います。<br>
+  ちょっと長ったらしい関数名の物もありますが、サクラのエディターから挿入することを前提にしているので問題ないでしょう。<br>
+  <br>
+  <b>※重要※</b><br>
+  当関数セットを使用する際には汎用関数セット"<cite>4neria.h</cite>"をインクルードする必要があります。<br>
+  使用される際には下記の２行を<b>MMLの出来る限り先頭(タイトル情報の後など)に記述</b>してください。<br>
+  <br>
+  Include(4neria.h);<br>
+  Include(MU1000.h);<br>
+ </p>
+
+ <h2>▼対応音源</h2>
+ <blockquote> 
+  MU2000EX R1, MU2000EX, MU2000, MU1000EX R1, MU1000EX, MU1000<br>
+  MU500, MU128, MU100, MU100B, MU100Bs, MU100R, SW1000XG, SW1000XG/P, MU90, MU90B, MU90R<br>
+  MU80, MU50, MU15, MU10, DB50XG, DB60XG, その他XG互換音源<br>
+ </blockquote>
+
+ <h2>▼非対応エクスクルーシブ</h2>
+ <blockquote> 
+  ・MODULAR SYNTHESIS PLUG-IN SYSTEM(PLUG-IN BOARD)に関わるエクスクルーシブ<br>
+  ・ADインプット(装備している機種のみ)に関わるエクスクルーシブ<br>
+  ・MUのシステムに関わるエクスクルーシブ<br>
+  ・MU1000EX/MU2000EXで追加されたデジタル出力に関わるエクスクルーシブ<br>
+  ・ディスプレイパラメータに関わるエクスクルーシブ<br>
+  ・MU80のパフォーマンスモードに関わるエクスクルーシブ<br>
+  ・MU100以降のパフォーマンスモードに関わるエクスクルーシブ<br>
+  ・DB50XG, DB60XG(?), MU10に搭載されているQS300モードのエクスクルーシブ
+ </blockquote>
+
+ <p>
+  上記のエクスクルーシブに関しては今後も対応予定はありません。プラグインボードに関するエクスクルーシブについては、<br>
+  私がボードを入手すれば対応する可能性はあります(でも買ったとしてもANボードくらいだろうなぁ…)
+ </p>
+
+ <h2>▼音源とエクスクルーシブの対応状況</h2>
+ <p>
+  MU90以降であれば、インサーションエフェクトとポート数の設定さえ行えば(後述)、実装されている関数の99%は動作します。<br>
+  <br>
+  MU80以下は比較するのがかなり大変なので、ユーザーさん側でマニュアルを読んで把握しておいて下さい。<br>
+  例を挙げるなら、MU90以降ではパートEQやHPFが実装されたがMU80以前には無いので、MU80以前ではパートEQやHPFに関わるエクスクルーシブが動作しない…など。<br>
+ </p>
+ <p>
+  マニュアルをお持ちでない方は、<a href="http://www2.yamaha.co.jp/manual/japan/index.html">YAMAHA マニュアルライブラリ</a>からPDFを取得することができす。<br>
+ </p>
+ <p>
+  MU2000/MU1000系以外で使用される方は、MU1000.hファイル内の下記の行を書き換えて使ってください。エラーチェックが少しだけ強化されます。
+ </p>
+ <p>
+  先ずは25行目の「<b>Int</b> <code>PortNumberXG_MAX</code> = <var>4</var>;」で、使用される音源のポート数を記述してください。<br>
+  各音源のポート数は、25行目の上にコメントで書いてあります。<br>
+  次に39行目の「<b>Int</b> <code>XG_InsertionType_MAX</code> = <var>4</var>;」で、使用される音源のインサーションエフェクトの数を記述してください。<br>
+  各音源のエフェクト数は39行目の上にコメントで書いてあります。<br>
+  <br>
+  また、デバイスナンバーを変更されている方は12行目を変更してください。
+ </p>
+
+ <h2>▼実装しているエクスクルーシブ関数一覧</h2>
+ <blockquote>
+  <h3>■エクスクルーシブ送信</h3>
+  <blockquote>
+   <code>XG_EX</code>(<var>data</var>)<br>
+   XG仕様のエクスクルーシブを送信します。内部で下記のように展開されます。(<var>data</var>はいくつでも記述できます)<br>
+   <samp>＞ SysEx=$F0,$43,(DeviceNumberXG),$4C,(data),$F7;</samp><br>
+   デバイスナンバーは自動的に取得されます。<br>
+   <br>
+   <code>XG_BLK</code>(<var>data</var>)<br>
+   XG仕様のエクスクルーシブダンプを送信します。内部で下記のように展開されます。(<var>data</var>はいくつでも記述できます)<br>
+   <samp>＞ SysEx=$F0,$43,(DeviceNumberXG_Blk),$4C,{(_DataSizeMSB),(_DataSizeLSB),(daata)},$F7;</samp><br>
+   デバイスナンバーとデータサイズは自動的に取得されます。<br>
+   <br>
+   <code>MU_EX</code>(<var>data</var>)<br>
+   MU固有のパラメータを変更するエクスクルーシブを送信します。<br>
+   内部で下記のように展開されます。(<var>data</var>はいくつでも記述できます)<br>
+   <samp>＞ SysEx=$F0,$43,(DeviceNumberXG),$49,(data),$F7;</samp><br>
+   デバイスナンバーは自動的に取得されます。<br>
+  </blockquote>
+  <h3>■MU100以降専用</h3>
+  <blockquote>
+   <code>VOICE_MAP</code>(<var>n</var>) <samp>n:0～1 (MU Basic/MU100 Native)</samp><br>
+   これはシステムに関わるエクスクルーシブですが、必要だと判断したので実装されています。<br>
+   MU100以降で動作します。MU100以降をお使いの方はMU100 Nativeマップを使った方が良いでしょう。<br>
+  </blockquote>
+  <h3>■マスターパート</h3>
+  <blockquote>
+   <code>MASTER_TUNE</code>(<var>a,b,c,d</var>)<br>
+   マスターチューンの設定。パラメータは４つ必須。<br>
+   <br>
+   <code>MASTER_VOLUME</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   マスターヴォリュームの設定。<br>
+   <br>
+   <code>MASTER_ATTENUATOR</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   マスターアッテネータの設定。<br>
+   <br>
+   <code>TRANSPOSE</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   トランスポーズの設定。全てのチャンネルに効きます。<br>
+   <br>
+   <code>DRUM_SETUP_RESET</code>(<var>n</var>) <samp>n:0-3 (DrumSetup1～4)</samp><br>
+   指定された番号のDrumSetupをリセットします。<br>
+   <br>
+   <code>XG_SYSTEM_ON</code>()<br>
+   所謂、XGリセットです。パラメータはありません。<br>
+   <br>
+   <code>ALL_PARAMETER_RESET</code>()<br>
+   オールリセットです。パラメータはありません。<br>
+   </blockquote>
+  <h3>■リバーブ</h3>
+  <blockquote>
+   <code>REVERB_TYPE</code>(<var>a,b</var>)<br>
+   リバーブタイプを設定します。パラメータは２つ必須。<br>
+   <br>
+   <code>REVERB_RETURN</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   リバーブのリターンを設定します。<br>
+   <br>
+   <code>REVERB_PAN</code>(<var>n</var>) <samp>n:1～127</samp><br>
+   リバーブのパンを設定します。値に0は受け付けません。<br>
+   <br>
+   <code>REVERB_PARAMETER</code>(<var>Number,n</var>) <samp>n:$00～$7F</samp><br>
+   リバーブパラメータを設定します。<var>Number</var>は<cite>1～16</cite>までです。<br>
+   <var>Number</var>はマニュアルに記載されている<cite>パラメータナンバー</cite>に対応します。<br>
+   <br>
+   <code>REVERB_PARAMETER_ALL</code>(<var>data</var>) <samp>data:総計16個</samp><br>
+   リバーブパラメータ1～16を一気に設定します。パラメータは<b>16個分必須</b>。<br>
+   使用されないパラメータナンバーの値は受信しないので、<cite>$00</cite>で埋めてください。<br>
+   (<b>この命令はバルクダンプをマニュアル通りに送信していないので正常に動作しない可能性があります</b>)<br>
+  </blockquote>
+  <h3>■コーラス</h3>
+  <blockquote>
+   <code>CHORUS_TYPE</code>(<var>a,b</var>)<br>
+   コーラスタイプを設定します。パラメータは２つ必須。<br>
+   <br>
+   <code>CHORUS_RETURN</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   コーラスのリターンを設定します。<br>
+   <br>
+   <code>CHORUS_PAN</code>(<var>n</var>) <samp>n:1～127</samp><br>
+   コーラスのパンを設定します。値に0は受け付けません。<br>
+   <br>
+   <code>SEND_CHORUS_TO_REVERB</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   コーラスからリバーブへの送り値を設定します。<br>
+   <br>
+   <code>CHORUS_PARAMETER</code>(<var>Number,n</var>) <samp>n:$00～$7F</samp><br>
+   コーラスパラメータを設定します。<var>Number</var>は<cite>1～16</cite>までです。<br>
+   <var>Number</var>はマニュアルに記載されている<cite>パラメータナンバー</cite>に対応します。<br>
+   <br>
+   <code>CHORUS_PARAMETER_ALL</code>(<var>data</var>) <samp>data:総計16個</samp><br>
+   コーラスパラメータ1～16を一気に設定します。パラメータは<b>16個分必須。</b><br>
+   使用されないパラメータナンバーの値は受信しないので、<cite>$00</cite>で埋めてください。<br>
+    (<b>この命令はバルクダンプをマニュアル通りに送信していないので正常に動作しない可能性があります</b>)<br>
+  </blockquote>
+  <h3>■ヴァリエーション</h3>
+  <blockquote>
+   <code>VARIATION_TYPE</code>(<var>a,b</var>)<br>
+   ヴァリエーションタイプを設定します。パラメータは２つ必須。<br>
+   <br>
+   <code>VARIATION_RETURN</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   ヴァリエーションのリターンを設定します。<br>
+   <br>
+   <code>VARIATION_PAN</code>(<var>n</var>) <samp>n:1～127</samp><br>
+   ヴァリエーションのパンを設定します。値に0は受け付けません。<br>
+   <br>
+   <code>SEND_VARIATION_TO_REVERB</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   ヴァリエーションからリバーブへの送り値を設定します。<br>
+   <br>
+   <code>SEND_VARIATION_TO_CHORUS</code>(<var>n</var>) <samp>n:0～127</samp><br>
+   ヴァリエーションからコーラスへの送り値を設定します。<br>
+   <br>
+   <code>VARIATION_CONNECTION</code>(<var>n</var>) <samp>n:0～1 (INSERTION/VARIATION)</samp><br>
+   ヴァリエーションをインサーションとして使用するか、ヴァリエーションとして使うかの設定をします。<br>
+   <br>
+   <code>VARIATION_PART_NUMBER</code>(<var>n</var>) <samp>n:0～127 (0～63はPart1～64、64～65はAD1/2、127でOFFに対応)</samp><br>
+   ヴァリエーションをインサーションとして使用した場合のエフェクトをかけるパートを設定します。<br>
+   この値は音源によってパート数が異なりますので注意してください。音源毎のエラーチェックは行っていません。<br>
+   <br>
+   <code>MW_VARIATION_COTROL_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (-64～0～+64)</samp><br>
+   モジュレーションによる、ヴァリエーションの変化値を設定します。<br>
+   <br>
+   <code>BEND_VARIATION_COTROL_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (-64～0～+64)</samp><br>
+   ピッチベンドによる、ヴァリエーションの変化値を設定します。<br>
+   <br>
+   <code>CAT_VARIATION_COTROL_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (-64～0～+64)</samp><br>
+   チャンネルアフタータッチによる、ヴァリエーションの変化値を設定します。<br>
+   <br>
+   <code>AC1_VARIATION_COTROL_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (-64～0～+64)</samp><br>
+   アサイナブルコントローラ１による、ヴァリエーションの変化値を設定します。<br>
+   <br>
+   <code>AC2_VARIATION_COTROL_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (-64～0～+64)</samp><br>
+   アサイナブルコントローラ２による、ヴァリエーションの変化値を設定します。<br>
+   <br>
+   <code>VARIATION_PARAMETER</code>(<var>Number,n</var>) <samp>n:$00～$7F</samp><br>
+   ヴァリエーションパラメータを設定します。<var>Number</var>は<cite>1～16</cite>までです。<br>
+   <var>Number</var>はマニュアルに記載されている<cite>パラメータナンバー</cite>に対応します。<br>
+   ヴァリエーションパラメータ<cite>1～10</cite>のパラメータ値は、MSB,LSBを送信する必要があるので<b>2個必須</b>です。<br>
+   ヴァリエーションパラメータ<cite>11～16</cite>のパラメータ値は、LSBだけを送信するので<b>1個</b>です。<br>
+   <br>
+   <code>VARIATION_PARAMETER_ALL</code>(<var>data</var>) <samp>data:総計26個</samp><br>
+   ヴァリエーションパラメータ<cite>1～16</cite>を一気に設定します。パラメータは<b>26個分必須</b>。<br>
+   使用されないパラメータナンバーの値は受信しないので、<cite>$00</cite>で埋めてください。<br>
+   ヴァリエーションパラメータ<cite>1～10</cite>のパラメータ値は、MSB,LSBを送信する必要があるので<b>合計20個必須</b>です。<br>
+   ヴァリエーションパラメータ<cite>11～16</cite>のパラメータ値は、LSBだけを送信するので<b>合計6個必須</b>です。<br>
+    (<b>この命令はバルクダンプをマニュアル通りに送信していないので正常に動作しない可能性があります</b>)<br>
+  </blockquote>
+  <h3>■ＥＱ</h3>
+  <blockquote>
+   <code>EQ_TYPE</code>(<var>n</var>) <samp>n:0～4</samp><br>
+   EQタイプを設定します。<br>
+   <br>
+   <code>EQ_GAIN1</code>(<var>n</var>) <samp>n:$34～$40～$4C (-12～0～+12)</samp><br>
+   EQゲイン1を設定します。<br>
+   <br>
+   <code>EQ_FREQUENCY1</code>(<var>n</var>) <samp>n:$04～$28</samp><br>
+   EQ FREQUENCY1を設定します。<br>
+   <br>
+   <code>EQ_Q1</code>(<var>n</var>) <samp>n:$01～$78</samp><br>
+   EQ Q1を設定します。<br>
+   <br>
+   <code>EQ_SHAPE1</code>(<var>n</var>) <samp>n:$00～$01 (shelving/peaking)</samp><br>
+   EQ SHAPE1を設定します。<br>
+   <br>
+   <code>EQ_GAIN2</code>(<var>n</var>) <samp>n:$34～$40～$4C (-12～0～+12)</samp><br>
+   EQゲイン2を設定します。<br>
+   <br>
+   <code>EQ_FREQUENCY2</code>(<var>n</var>) <samp>n:$0E～$36</samp><br>
+   EQ FREQUENCY2を設定します。<br>
+   <br>
+   <code>EQ_Q2</code>(<var>n</var>) <samp>n:$01～$78</samp><br>
+   EQ Q2を設定します。<br>
+   <br>
+   <code>EQ_GAIN3</code>(<var>n</var>) <samp>n:$34～$40～$4C (-12～0～+12)</samp><br>
+   EQゲイン3を設定します。<br>
+   <br>
+   <code>EQ_FREQUENCY3</code>(<var>n</var>) <samp>n:$0E～$36</samp><br>
+   EQ FREQUENCY3を設定します。<br>
+   <br>
+   <code>EQ_Q3</code>(<var>n</var>) <samp>n:$01～$78</samp><br>
+   EQ Q3を設定します。<br>
+   <br>
+   <code>EQ_GAIN4</code>(<var>n</var>) <samp>n:$34～$40～$4C (-12～0～+12)</samp><br>
+   EQゲイン4を設定します。<br>
+   <br>
+   <code>EQ_FREQUENCY4</code>(<var>n</var>) <samp>n:$0E～$36</samp><br>
+   EQ FREQUENCY4を設定します。<br>
+   <br>
+   <code>EQ_Q4</code>(<var>n</var>) <samp>n:$01～$78</samp><br>
+   EQ Q4を設定します。<br>
+   <br>
+   <code>EQ_GAIN5</code>(<var>n</var>) <samp>n:$34～$40～$4C (-12～0～+12)</samp><br>
+   EQゲイン5を設定します。<br>
+   <br>
+   <code>EQ_FREQUENCY5</code>(<var>n</var>) <samp>n:$1C～$3A</samp><br>
+   EQ FREQUENCY5を設定します。<br>
+   <br>
+   <code>EQ_Q5</code>(<var>n</var>) <samp>n:$01～$78</samp><br>
+   EQ Q5を設定します。<br>
+   <br>
+   <code>EQ_SHAPE5</code>(<var>n</var>) <samp>n:$00～$01 (shelving/peaking)</samp><br>
+   EQ SHAPE5を設定します。<br>
+   <br>
+   <code>EQ_ALL</code>(<var>data</var>) <samp>data:総計17個</samp><br>
+   上記のEQの設定を一気に設定します。パラメータは<b>17個必須</b>です。パラメータの順番は上記の通りですが<br>
+   EQタイプは自動で0が挿入されますので<b>EQ GAIN1～EQ SHAPE5</b>までのパラメータが必要です。<br>
+  </blockquote>
+  <h3>■インサーション</h3>
+  <blockquote>
+   インサーションに関するエクスクルーシブには共通のパラメータ<var><var>INumber</var></var>を設定します。<br>
+   <var><var>INumber</var></var>は変更したい<cite>インサーションエフェクトの番号</cite>を設定します。<br>
+   <br>
+   <code>INSERTION_EFFECT_TYPE</code>(<var>INumber,a,b</var>)<br>
+   インサーションタイプを設定します。<br>
+   <br>
+   <code>INSERTION_EFFECT_PART_NUMBER</code>(<var>INumber,n</var>) <samp>n:0～127 (0～63はPart1～64、64～65はAD1/2、127でOFFに対応)</samp><br>
+   インサーションエフェクトをかけるパートを設定します。<br>
+   この値は音源によってパート数が異なりますので注意してください。音源毎のエラーチェックは行っていません。<br>
+   <br>
+   <code>MW_INSERTION_CONTROL_DEPTH</code>(<var>INumber,n</var>)<br>
+   モジュレーションによる、インサーションの変化値を設定します。<br>
+   <br>
+   <code>BEND_INSERTION_CONTROL_DEPTH</code>(<var>INumber,n</var>)<br>
+   ピッチベンドによる、インサーションの変化値を設定します。<br>
+   <br>
+   <code>CAT_INSERTION_CONTROL_DEPTH</code>(<var>INumber,n</var>)<br>
+   チャンネルアフタータッチによる、インサーションの変化値を設定します。<br>
+   <br>
+   <code>AC1_INSERTION_CONTROL_DEPTH</code>(<var>INumber,n</var>)<br>
+   アサイナブルコントローラ１による、インサーションの変化値を設定します。<br>
+   <code>AC2_INSERTION_CONTROL_DEPTH</code>(<var>INumber,n</var>)<br>
+   アサイナブルコントローラ２による、インサーションの変化値を設定します。<br>
+   <br>
+   <code>INSERTION__EFFECT_PARAMETER</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$7F</samp><br>
+   インサーションパラメータを設定します。<var>PNumber</var>は<cite>1～16</cite>までです。<br>
+   <var>PNumber</var>は、マニュアルに記載されている<cite>パラメータナンバー</cite>に対応します(以下同様)<br>
+   この命令では、パラメータ値は<b>LSBしか送信しません</b>。<br>
+   パラメータナンバー<cite>1～10</cite>に、<b>MSB,LSBが必要な</b>エフェクトを使う時は下記の命令を使ってください。<br>
+   <br>
+   <code>INSERTION__EFFECT_PARAMETER_DOUBLE</code>(<var>INumber,data</var>) <samp>data:$00～$7F</samp><br>
+   インサーションパラメータを設定します。<var>PNumber</var>は<cite>1～10</cite>までです。<br>
+   この命令では、<b>MSB,LSBが必要な</b>パラメータナンバー<cite>1～10</cite>のパラメータ値を設定します。<br>
+   パラメータ値は<b>2つ必須</b>になります。<br>
+   <br>
+   <code>INSERTION__EFFECT_PARAMETER_ALL</code>(<var>INumber,data</var>) <samp>data:総計17個</samp><br>
+   インサーションパラメータ<cite>1～16</cite>を一気に設定します。<b>パラメータは17個分必須</b>。<br>
+   使用されないパラメータナンバーの値は受信しないので、<cite>$00</cite>で埋めてください。<br>
+   インサーションパラメータ<cite>1～10</cite>のパラメータには、<b>LSBだけを送信</b>するので<b>合計10個必須</b>です。<br>
+   インサーションパラメータ<cite>11～16</cite>のパラメータは、<b>LSBだけで良い</b>ので<b>合計6個必須</b>です。<br>
+   (<b>この命令はバルクダンプをマニュアル通りに送信していないので正常に動作しない可能性があります</b>)<br>
+   <br>
+   <code>INSERTION__EFFECT_PARAMETER_DOUBLE_ALL</code>(<var>INumber,data</var>) <samp>data:総計27個</samp><br>
+   インサーションパラメータ<cite>1～16</cite>を一気に設定します。<b>パラメータは27個分必須</b>。<br>
+   使用されないパラメータナンバーの値は受信しないので、<cite>$00</cite>で埋めてください。<br>
+   この命令ではパラメータナンバー<cite>1～10</cite>の値は、<b>MSB,LSBを送信します</b>。<br>
+   インサーションパラメータ<cite>1～10</cite>のパラメータには、<b>MSB,LSBを送信する必要</b>があるので<b>合計20個必須</b>です。<br>
+   インサーションパラメータ<cite>11～16</cite>のパラメータは、<b>LSBだけで良い</b>ので<b>合計6個必須</b>です。<br>
+   (<b>この命令はバルクダンプをマニュアル通りに送信していないので正常に動作しない可能性があります</b>)<br>
+  </blockquote>
+  <h3>■パート情報</h3>
+  <blockquote>
+   パート情報に関するエクスクルーシブは送信先チャンネルとポートを指定する事ができます。<br>
+   デフォルトでは関数が呼び出されたトラックのチャンネル、ポートを自動的に読みとって送信先を取得します。<br>
+   これらを変更するには、下記の変数を変更します(これらの変数はMU1000.h内で定義済みです)<br>
+   <br>
+   <samp>＞ PortNumberXG</samp><br>
+   <samp>＞ ChannelNumberXG</samp><br>
+   <br>
+   ポートを変更するには<code>PortNumberXG</code>の値を変更します。&quot;0&quot;で自動取得になります。&quot;1&quot;以降でポート1以降を指定できます。<br>
+   サクラのPort()命令は&quot;0&quot;から定義できますが、&quot;0&quot;でポート1に対応する事に注意してください。以後も1つずつズレます。<br>
+   チャンネルを変更するには<code>ChannelNumberXG</code>の値を変更します。&quot;0&quot;で自動取得になります。&quot;1～16&quot;でチャンネル1-16に対応します。<br>
+   <br>
+   <samp>
+   ＞ Track(1) Channel(1) Port(0)<br>
+   ＞ ELEMENT_RESERVE(2);<br>
+   </samp>
+   　この場合、ELEMENT_RESERVEは<b>ポート1のチャンネル1</b>に送信されます(デフォルト状態)<br>
+   <br>
+   <samp>
+   ＞ Track(1) Channel(1) Port(0)<br>
+   ＞ PortNumberXG = 2; ChannelNumberXG = 3;<br>
+   ＞ ELEMENT_RESERVE(2);<br>
+   </samp>
+   　この場合、ELEMENT_RESERVEは<b>ポート2のチャンネル3</b>に送信されます。<br>
+   <br>
+   <code>PortNumberXG</code>と<code>ChannelNumberXG</code>の値を変更した時は、必要がなくなったら<b>&quot;0&quot;の自動取得に戻す</b>事を忘れないでください。<br>
+   忘れると以後のエクスクルーシブはずっとそのポートとチャンネルに送信されてしまいます。<br>
+   <br>
+   ※上記の変数と<code>RCV_CHANNEL</code>を活用することで、1ポートだけで複数のポート/チャンネルを操ることができます。<br>
+   <br>
+   <br>
+   <code>ELEMENT_RESERVE</code>(<var>n</var>) <samp>n:0～64</samp><br>
+   ヴォイスエレメントリサーブを設定します。この命令は<b>同時発音数が64音以下の音源で有効</b>です。<br>
+   MU2000/MU1000/MU128では受信しても動作しないハズです(マニュアルではNOT USEDになっている)<br>
+   また、値nは同時発音数が32音の音源では最大値が32に制限されます。<br>
+   <br>
+   <code>BANK_SELECT_MSB</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   バンクセレクトのMSBを設定します。<br>
+   <br>
+   <code>BANK_SELECT_LSB</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   バンクセレクトのLSBを設定します。<br>
+   <br>
+   <code>PROGRAM_NUMBER</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   プログラムチェンジを行います。<br>
+   <br>
+   <code>RCV_CHANNEL</code>(<var>n</var>) <samp>n:$00-$3F,$7F (Part1-64,off)</samp><br>
+   レシーブチャンネルを変更します。この値は音源の<b>ポート数によって変動</b>します。<br>
+   <br>
+   <code>MONO_POLY_MODE</code>(<var>n</var>) <samp>n:0-1 (MONO/POLY)</samp><br>
+   モノフォニック／ポリフォニックを設定します。<br>
+   <br>
+   <code>SAME_NOTE_NUMBER_KEY_ON_ASSIGN</code>(<var>n</var>) <samp>n:0-2 (SINGLE,MULTI,INST(forDrum))</samp><br>
+   セームノートナンバーキーオンアサインを設定します。<br>
+   <br>
+   <code>PART_MODE</code>(<var>n</var>) <samp>n:0-5 (NORMAL,DRUM,DRUMS1-4)</samp><br>
+   パートモードを設定します。<br>
+   <br>
+   <code>NOTE_SHIFT</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   ノートシフトを設定します。該当パートのみ変動します。<br>
+   <br>
+   <code>DETUNE</code>(<var>a,b</var>)<br>
+   ディチューンを設定します。<br>
+   <br>
+   <code>VOLUME</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴォリュームを設定します。<br>
+   <br>
+   <code>VELOCITY_SENSE_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴェロシティセンスデプスを設定します。<br>
+   <br>
+   <code>VELOCITY_SENSE_OFFSET</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴェロシティセンスオフセットを設定します。<br>
+   <br>
+   <code>PAN</code>(<var>n</var>) <samp>n:0-127 (0:RND,L63～0～R63)</samp><br>
+   パンを設定します。<br>
+   <br>
+   <code>NOTE_LIMIT_LOW</code>(<var>n</var>) <samp>n:$00-$7F (C-2～G8)</samp><br>
+   発音可能なノートの下限を設定します。<br>
+   <br>
+   <code>NOTE_LIMIT_HIGH</code>(<var>n</var>) <samp>n:$00-$7F (C-2～G8)</samp><br>
+   発音可能なノートの上限を設定します。<br>
+   <br>
+   <code>DRY_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴァリエーションがインサーションとして機能している場合のDRY/WET LEVELを設定します。<br>
+   <br>
+   <code>CHORUS_SEND</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスへの送り値を設定します。<br>
+   <br>
+   <code>REVERB_SEND</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   リバーブへの送り値を設定します。<br>
+   <br>
+   <code>VARIATION_SEND</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴァリエーションへの送り値を設定します。<br>
+   <br>
+   <code>VIBRATO_RATE</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートレートの設定をします。<br>
+   <br>
+   <code>VIBRATO_DEPTH</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートデプスの設定をします。<br>
+   <br>
+   <code>VIBRATO_DELAY</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートディレイの設定をします。<br>
+   <br>
+   <code>LOW_PASS_FILTER_CUTOFF_FREQUENCY</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ローパスフィルターの設定をします。<br>
+   <br>
+   <code>LOW_PASS_FILTER_RESONANCE</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   レゾナンスの設定をします。<br>
+   <br>
+   <code>EG_ATTACK_TIME</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   アタックタイムの設定をします。<br>
+   <br>
+   <code>EG_DECAY_TIME</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ディケイタイムの設定をします。<br>
+   <br>
+   <code>EG_RELEASE_TIME</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   リリースタイムの設定をします。<br>
+   <br>
+   <code>MW_PITCH_COTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   モジュレーションによるピッチコントロールの設定をします。<br>
+   <br>
+   <code>MW_LOW_PASS_FILTER_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   モジュレーションによるフィルターコントロールの設定をします。<br>
+   <br>
+   <code>MW_AMPLITUDE_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   モジュレーションによるアンプリチュードの設定をします。<br>
+   <br>
+   <code>MW_LFO_PMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   モジュレーションによるピッチ変化の深さの設定をします。<br>
+   <br>
+   <code>MW_LFO_FMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   モジュレーションによるフィルター変化の深さの設定をします。<br>
+   <br>
+   <code>MW_LFO_AMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   モジュレーションによる音量変化の深さの設定をします。<br>
+   <br>
+   <code>BEND_PITCH_COTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   ピッチベンドによるピッチコントロールの設定をします。<br>
+   <br>
+   <code>BEND_LOW_PASS_FILTER_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ピッチベンドによるフィルターコントロールの設定をします。<br>
+   <br>
+   <code>BEND_AMPLITUDE_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ピッチベンドによるアンプリチュードの設定をします。<br>
+   <br>
+   <code>BEND_LFO_PMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ピッチベンドによるピッチ変化の深さの設定をします。<br>
+   <br>
+   <code>BEND_LFO_FMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ピッチベンドによるフィルター変化の深さの設定をします。<br>
+   <br>
+   <code>BEND_LFO_AMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ピッチベンドによる音量変化の深さの設定をします。<br>
+   <br>
+   <code>RCV_PITCH_BEND</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ピッチベンドを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_CH_AFTER_TOUCH</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   チャンネルアフタータッチを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_PROGRAM_CHANGE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   プログラムチェンジを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_COTROL_CHANGE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   コントロールチェンジを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_POLY_AFTER_TOUCH</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ポリフォニックアフタータッチを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_NOTE_MESSAGE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートメッセージを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_RPN</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   RPNを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_NRPN</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   NRPNを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_MODURATION</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   モジュレーションを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_VOLUME</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ヴォリュームを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_PAN</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   パンを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_EXPRESSION</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   エクスプレッションを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_HOLD1</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ホールド1を受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_PORTAMENTO</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ポルタメントを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_SOSTENUTO</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ソステヌートを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_SOFT_PEDAL</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ソフトペダルを受信するか否かの設定をします。<br>
+   <br>
+   <code>RCV_BANK_SELECT</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   バンクセレクトを受信するか否かの設定をします。<br>
+   <br>
+   <code>SCALE_TUNING_C</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ドのスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_C_Sharp</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ド＃のスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_D</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   レのスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_D_Sharp</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   レ＃のスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_E</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ミのスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_F</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ファのスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_F_Sharp</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ファ＃のスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_G</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ソのスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_G_Sharp</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ソ＃のスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_A</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ラのスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_A_Sharp</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ラ＃のスケールチューニングを設定します。<br>
+   <br>
+   <code>SCALE_TUNING_B</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   シのスケールチューニングを設定します。<br>
+   <br>
+   <code>CAT_PITCH_COTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   チャンネルアフタータッチによるピッチコントロールの設定をします。<br>
+   <br>
+   <code>CAT_LOW_PASS_FILTER_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   チャンネルアフタータッチによるフィルターコントロールの設定をします。<br>
+   <br>
+   <code>CAT_AMPLITUDE_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   チャンネルアフタータッチによるアンプリチュードの設定をします。<br>
+   <br>
+   <code>CAT_LFO_PMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   チャンネルアフタータッチによるピッチ変化の深さの設定をします。<br>
+   <br>
+   <code>CAT_LFO_FMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   チャンネルアフタータッチによるフィルター変化の深さの設定をします。<br>
+   <br>
+   <code>CAT_LFO_AMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   チャンネルアフタータッチによる音量変化の深さの設定をします。<br>
+   <br>
+   <code>PAT_PITCH_COTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   ポリフォニックアフタータッチによるピッチコントロールの設定をします。<br>
+   <br>
+   <code>PAT_LOW_PASS_FILTER_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ポリフォニックアフタータッチによるフィルターコントロールの設定をします。<br>
+   <br>
+   <code>PAT_AMPLITUDE_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   ポリフォニックアフタータッチによるアンプリチュードの設定をします。<br>
+   <br>
+   <code>PAT_LFO_PMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ポリフォニックアフタータッチによるピッチ変化の深さの設定をします。<br>
+   <br>
+   <code>PAT_LFO_FMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ポリフォニックアフタータッチによるフィルター変化の深さの設定をします。<br>
+   <br>
+   <code>PAT_LFO_AMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ポリフォニックアフタータッチによる音量変化の深さの設定をします。<br>
+   <br>
+   <code>AC1_COTROLLER_NUMBER</code>(<var>n</var>) <samp>n:$00-$5F (0-95)</samp><br>
+   アサイナブルコントローラ１に割り当てるコントロールチェンジの番号を設定します。<br>
+   <br>
+   <code>AC1_PITCH_COTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   アサイナブルコントローラ１によるピッチコントロールの設定をします。<br>
+   <br>
+   <code>AC1_LOW_PASS_FILTER_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   アサイナブルコントローラ１によるフィルターコントロールの設定をします。<br>
+   <br>
+   <code>AC1_AMPLITUDE_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   アサイナブルコントローラ１によるアンプリチュードの設定をします。<br>
+   <br>
+   <code>AC1_LFO_PMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   アサイナブルコントローラ１によるピッチ変化の深さの設定をします。<br>
+   <br>
+   <code>AC1_LFO_FMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   アサイナブルコントローラ１によるフィルター変化の深さの設定をします。<br>
+   <br>
+   <code>AC1_LFO_AMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   アサイナブルコントローラ１による音量変化の深さの設定をします。<br>
+   <br>
+   <code>AC2_COTROLLER_NUMBER</code>(<var>n</var>) <samp>n:$00-$5F (0-95)</samp><br>
+   アサイナブルコントローラ２に割り当てるコントロールチェンジの番号を設定します。<br>
+   <br>
+   <code>AC2_PITCH_COTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   アサイナブルコントローラ２によるピッチコントロールの設定をします。<br>
+   <br>
+   <code>AC2_LOW_PASS_FILTER_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   アサイナブルコントローラ２によるフィルターコントロールの設定をします。<br>
+   <br>
+   <code>AC2_AMPLITUDE_COTROL</code>(<var>n</var>) <samp>n:$00-$7F</samp><br>
+   アサイナブルコントローラ２によるアンプリチュードの設定をします。<br>
+   <br>
+   <code>AC2_LFO_PMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   アサイナブルコントローラ２によるピッチ変化の深さの設定をします。<br>
+   <br>
+   <code>AC2_LFO_FMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   アサイナブルコントローラ２によるフィルター変化の深さの設定をします。<br>
+   <br>
+   <code>AC2_LFO_AMOD_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   アサイナブルコントローラ２による音量変化の深さの設定をします。<br>
+   <br>
+   <code>PORTAMENTO_SWITCH</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ポルタメントをON/OFFします。<br>
+   <br>
+   <code>PORTAMENTO_TIME</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ポルタメントタイムの設定をします。<br>
+   <br>
+   <code>PITCH_EG_INITIAL_LEVEL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ピッチEGのイニシャルレベルの設定をします。<br>
+   <br>
+   <code>PITCH_EG_ATTACK_TIME</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ピッチEGのアタックタイムの設定をします。<br>
+   <br>
+   <code>PITCH_EG_RELEASE_LEVEL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ピッチEGのリリースレベルの設定をします。<br>
+   <br>
+   <code>PITCH_EG_RELEASE_TIME</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ピッチEGのリリースタイムの設定をします。<br>
+   <br>
+   <code>VELOCITY_LIMIT_LOW</code>(<var>n</var>) <samp>n:1-127</samp><br>
+   発音するヴェロシティの下限を設定します。<br>
+   <br>
+   <code>VELOCITY_LIMIT_HIGH</code>(<var>n</var>) <samp>n:1-127</samp><br>
+   発音するヴェロシティの上限を設定します。<br>
+   <br>
+   <code>EQ_BASS_GAIN</code>(<var>n</var>) <samp>n:$00-$7F (-12～0～+12)</samp><br>
+   EQ BASSゲインを設定します。<br>
+   <br>
+   <code>EQ_TREBLE_GAIN</code>(<var>n</var>) <samp>n:$00-$7F (-12～0～+12)</samp><br>
+   EQ TREBLEゲインを設定します。<br>
+   <br>
+   <code>EQ_BASS_FREQUENCY</code>(<var>n</var>) <samp>n:$04-$28</samp><br>
+   EQ BASS FREQUENCYを設定します。<br>
+   <br>
+   <code>EQ_TREBLE_FREQUENCY</code>(<var>n</var>) <samp>n:$1C-$3A</samp><br>
+   EQ TREBLE FREQUENCTを設定します。<br>
+   <br>
+   <code>HIGH_PASS_FILTER_CUTOFF_FREQUENCY</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ハイパスフィルターの設定をします。<br>
+  </blockquote>
+  <h3>■ドラムセット</h3>
+  <blockquote>
+   ドラムセットに関するエクスクルーシブには共通のパラメータ&quot;DNumber&quot;,&quot;NNumber&quot;を設定します。<br>
+   <var>DNumber</var>はパラメータを変更したい<cite>DrumSetupのナンバー</cite>を記述します。値は<cite>1～4</cite>の範囲です。<br>
+   <var>NNumber</var>はパラメータを変更したい<cite>ノートナンバー</cite>を記述します値の範囲は&quot;<cite>$0D-$5B</cite>&quot;(<cite>o1c+～o7g</cite>に対応)です。<br>
+   また、<b>{}で括って</b>o4cなどと記述すると自動的にノートナンバーに変換します。<br>
+   <br>
+   <samp>
+   ＞ DRUM_PITCH_COARSE(1,{o2c},$40)<br>
+   ＞ DRUM_PITCH_COARSE(1,24,$40)<br>
+   </samp>
+   <br>
+   どちらもDrumSetup1のノートナンバー24のピッチコースを$40に設定します。<br>
+   <br>
+   <b>※重要※</b><br>
+   <var>NNumber</var>を{o4c}のような形式で指定した場合、NoteNo()関数を用いて数値に変換します。<br>
+   NoteNo()関数はKeyFlagの影響などを受けますので注意して使用してください。<br>
+   <br>
+   <br>
+   <code>DRUM_PITCH_COARSEM</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ピッチコースの設定をします。<br>
+   <br>
+   <code>DRUM_PITCH_FINE</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ピッチファインチューニングの設定をします。<br>
+   <br>
+   <code>DRUM_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   ヴォリュームの設定をします。<br>
+   <br>
+   <code>DRUM_ALTERNATE_GROUP</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127 (OFF,1-127)</samp><br>
+   オルタネートグループの設定をします。<br>
+   <br>
+   <code>DRUM_PAN</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127 (RND,L63～C～R63)</samp><br>
+   パンの設定をします。<br>
+   <br>
+   <code>DRUM_REVERB_SEND</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   リバーブへの送り値の設定をします。<br>
+   <br>
+   <code>DRUM_CHORUS_SEND</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   コーラスへの送り値の設定をします。<br>
+   <br>
+   <code>DRUM_VARIATION_SEND</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   ヴァリエーションへの送り値の設定をします。<br>
+   <br>
+   <code>DRUM_KEY_ASSIGN</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-1 (SINGLE/MULTI)</samp><br>
+   キーアサインの設定をします。<br>
+   <br>
+   <code>DRUM_RCV_NOTE_OFF</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートオンを受信するか否かの設定をします。<br>
+   <br>
+   <code>DRUM_RCV_NOTE_ON</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートオフを受信するか否かの設定をします。<br>
+   <br>
+   <code>DRUM_LOW_PASS_FILTER_CUTOFF_FREQUENCY</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ローパスフィルターの設定をします。<br>
+   <br>
+   <code>DRUM_LOW_PASS_FILTER_RESONANCE</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   レゾナンスの設定をします。<br>
+   <br>
+   <code>DRUM_EG_ATTACK_RATE</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   アタックレートの設定をします。<br>
+   <br>
+   <code>DRUM_EG_DECAY1_RATE</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ディケイ１レートの設定をします。<br>
+   <br>
+   <code>DRUM_EG_DECAY2_RATE</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ディケイ２レートの設定をします。<br>
+   <br>
+   <code>DRUM_EQ_BASS_GAIN</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00-$7F (-12～0～+12)</samp><br>
+   EQ BASSゲインの設定をします。<br>
+   <br>
+   <code>DRUM_EQ_TREBLE_GAIN</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00-$7F (-12～0～+12)</samp><br>
+   EQ TREBLEゲインの設定をします。<br>
+   <br>
+   <code>DRUM_EQ_BASS_FREQUENCY</code>(<var>DNumber,NNumber,n</var>) <samp>n:$04-$28</samp><br>
+   EQ BASS FREQUENCYの設定をします。<br>
+   <br>
+   <code>DRUM_EQ_TREBLE_FREQUENCY</code>(<var>DNumber,NNumber,n</var>) <samp>n:$1C-$3A</samp><br>
+   EQ TREBLE FREQUENCYの設定をします。<br>
+   <br>
+   <code>DRUM_HIGH_PASS_FILTER_CUTOFF_FREQUENCY</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ハイパスフィルターの設定をします。<br>
+   <br>
+   <code>DRUM_VELOCITY_SENSE_PITCH</code>(<var>DNumber,NNumber,n</var>) <samp>n:$30-$50 (-16～0～+16)</samp><br>
+   ヴェロシティセンスピッチの設定をします。<br>
+   <br>
+   <code>DRUM_VELOCITY_SENSE_LPF_CUTOFF</code>(<var>DNumber,NNumber,n</var>) <samp>n:$30-$50 (-16～0～+16)</samp><br>
+   ヴェロシティセンスローパスフィルターの設定をします。<br>
+  </blockquote>
+ </blockquote>
+
+ <h2>SPECIAL THANKS</h2>
+ <p>
+  制作の際にお手伝いして頂いた、<a href="http://www.wiztext.net/~mizinco//">Mizinco foundry</a>のみじんこさん。<br>
+  またこちらの要望に何度も応えてくださった、<a href="http://oto.chu.jp/">テキスト音楽「サクラ」</a>の作者、クジラ飛行机さん。<br>
+  <br>
+  お二人に感謝いたします。この関数セットがサクラの発展に少しでも貢献できることを願っております。<br>
+ </p>
+
+ <h2>サポート</h2>
+ <p>
+  当関数セットのサポートは、<a href="mailto:4neria@mcn.ne.jp">4neria</a>が行います。<br>
+  バグ情報や要望などは、メールでお願いいたします(サクラの掲示板だと見落とす可能性があるかもしれません…)<br>
+  <br>
+  なお、HTMLメールは送らないでください。メーラーの設定により表示せずに削除されます(ウィルス対策です)<br>
+ </p>
+
+ <hr noshade size="1" color="#f0f0f0">
+
+</body>
+</html>

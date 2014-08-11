@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='../midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='../index.html'>MIDI Standard</a>＼
+	<a href='../exclusive.html'>Exclusive Message</a>＼
+	<a href='../GeneralMIDI_EX.html'>General MIDI</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>General MIDI</h2>				<!--（コマンドの名前。）-->
+<!------------------------------------------------------------->
+<h3>■概要</h3>
+　この機能は、MIDIデバイスのモードを切り換える命令です。<br>
+
+
+<br>
+<h3>■書式</h3>
+<code>
+GM_SystemOff();<br>
+GM_SystemOn();<br>
+GM_SystemOn1();<br>
+GM_SystemOn2();<br>
+</code>
+
+<br>
+[備考]<br>
+※この命令は、コンパイラ内部で以下のMMLに変換されます。<br>
+<code>
+GM_SystemOff ：	SysEx = $F0, MakerID_NonRealTime, $7F, NRT_GM, NRT_GM_SystemOff, $F7<br>
+GM_SystemOn ：	SysEx = $F0, MakerID_NonRealTime, $7F, NRT_GM, NRT_GM_SystemOn1, $F7<br>
+GM_SystemOn1 ：	SysEx = $F0, MakerID_NonRealTime, $7F, NRT_GM, NRT_GM_SystemOn1, $F7<br>
+GM_SystemOn2 ：	SysEx = $F0, MakerID_NonRealTime, $7F, NRT_GM, NRT_GM_SystemOn2, $F7<br>
+</code>
+
+<br>
+<h3>■引数</h3>
+無し<br>
+<br>
+
+
+<br>
+<h3>■返り値</h3>
+無し<br>
+<br>
+
+<br>
+<h3>■説明</h3>
+<h4>GM_SystemOff</h4>
+MIDIデバイスを、General MIDIモードから楽器固有のモードへ戻ります。<br>
+<br><br>
+
+<h4>GM_SystemOn1</h4>
+MIDIデバイスを、General MIDI Level.1(GM1)モードに切り換えます。<br>
+<br><br>
+
+<h4>GM_SystemOn2</h4>
+MIDIデバイスを、General MIDI Level.2(GM2)モードに切り換えます。<br>
+<br><br>
+
+<br>
+<br>
+<h3>■使用例</h3>
+<table>
+<caption>List.1 </caption>
+<tr><td><pre><code>
+GM_SystemOn
+TR(1)	o4 l4 cdefgabc
+</code></pre></td></tr>
+</table><br>
+
+
+<br>
+<!------------------------------------------------------------->
+<h3>■関連項目</h3>
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

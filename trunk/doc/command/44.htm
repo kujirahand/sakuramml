@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>SysEx</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">SysEx</TD>
+      <TD align="left">SysEx[$]($F0,v1,v2,v3...,$F7)</TD>
+      <TD align="left">SysExを書き込む。$をつけた時は全ての数値を16進数として扱う</TD>
+      <TD align="left">音色・コントロールチェンジ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>システムエクスクルーシブメッセージを書き込む。<BR><BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">SysEx=$f0,$43,10,40,30,40,50,60,$f7</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+のように書くと、10進と16進の混同モードで、エクスクルーシブを記述できる。10進数はそのまま、16進数には、'$'をつけて記述。<BR>
+<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF99">SysEx$=f0,43,10,4c,00,00,7e,00,f7</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+のように書くと、全ての数値は16進数で書かれたものとして扱う。<BR>
+<BR>
+<B>チェックサムの自動計算機能</B><BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF99">SysEx$=f0,43,10,4c,00,{00,00,30,f0},f7</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+{ ... } で計算する個所を囲うと、'}'のすぐ後ろにチェックサムを自動計算付加して出力する。<BR>
+</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//SysEx のサンプル</FONT></B><BR>
+      SysEx$=f0,43,10,4c,00,00,7e,00,f7<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

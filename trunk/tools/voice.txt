@@ -1,0 +1,420 @@
+#ピアノ系
+音色(GrandPiano)
+1:Grand Piano (グランドピアノ) … 標準的なグランドピアノ。
+音色(BrightPiano)
+2:Bright Piano (ブライトピアノ) … 明るめの（アタックが強めの）ピアノ。 
+音色(ElectricGrandPiano)
+3:Electric Grand Piano (エレクトリック･グランドピアノ) … 音をピックアップで電気増幅させるピアノ。かなり明るめ。
+音色(HonkyTonkPiano)
+4:Honky-tonk Piano (ホンキートンクピアノ) … 調律のずれたピアノ。
+音色(ElectricPiano1)
+5:Electric Piano 1 (エレクトリックピアノ１) … Rhodes系のコロコロしたエレピ。
+音色(ElectricPiano2)
+6:Electric Piano 2 (エレクトリックピアノ２) … FMシンセサイザー系のキラキラしたエレピ。
+音色(Harpsichord)
+7:Harpsichord (ハープシコード) … バロック音楽の代表楽器。別名チェンバロ。
+音色(Clavi)
+8:Clavi (クラビネット) … 鍵盤の裏側に付いたハンマーで弦を叩き、その音をピックアップで電気増幅させる電気キーボード。
+#クロマチック系
+音色(CelestaStrings)
+9:Celesta Strings (チェレスタ) … 鉄琴を鍵盤で演奏する楽器。クラシック向け。
+音色(Glockenspiel)
+10:Glockenspiel (グロッケンシュピール) … 鉄琴の一種。演歌や一昔前のソウルミュージックに。
+音色(MusicBox)
+11:Music Box (ミュージックボックス) … いわゆるオルゴール。
+音色(Vibraphone)
+12:Vibraphone (ビブラフォン) … 大型の鉄琴に共鳴管を付けた楽器。スタンダードジャズに良く使われます。
+音色(Marimba)
+13:Marimba (マリンバ) … 大型の木琴に大きな金属製の共鳴管を付けた楽器。
+音色(Xylophone)
+14:Xylophone (シロフォン) … 木琴の一種。別名ザイロフォン。
+音色(TubularBells)
+15:Tubular Bells (チューブラーベル) … 教会の鐘の音を再現するための楽器。 
+音色(Dulcimer)
+16:Dulcimer (ダルシマー) … ２本のバチで弦を叩いて音を鳴らすイギリスの民族楽器。
+#オルガン系
+音色(DrawbarOrgan)
+17:Drawbar Organ (ドローバーオルガン) … Hammond風のオルガン。
+音色(PercussiveOrgan)
+18:Percussive Organ (パーカッシブオルガン) … アタックの強いHammond風オルガン。
+音色(RockOrgan)
+19:Rock Organ (ロックオルガン) … ハードロック向け。オーバードライブをかけてレズリースピーカーに繋いだHammond風オルガン。
+音色(ChurchOrgan)
+20:Church Organ (チヤーチオルガン) … 大型のパイプオルガン。バロック音楽に良く使われる。
+音色(ReedOrgan)
+21:Reed Organ (リードオルガン) … 幼稚園や小学校でお馴染みの足踏み式オルガン。
+音色(Accordion)
+22:Accordion (アコーディオン) … フレンチ･アコーディオン。
+音色(Hamonica)
+23:Hamonica (ハーモニカ) … お馴染みのハーモニカ。
+音色(TangoAccordion)
+24:Tango Accordion (タンゴアコーディオン) … アコーディオンの鍵盤がボタンに置き換えられた楽器。 
+#ギター系
+音色(NylonGuitar)
+25:Nylon Guitar (ナイロンギター) … ナイロン弦を使用したクラシックギター。
+音色(SteelcGuitar)
+26:Steelc Guitar (スティールギター) … スティール弦を使用したフォークギター。
+音色(JazzGuitar)
+27:Electric Guitar(jazz) (ジャズギター) … ジャズやフュージョン向けのエレキギター。(フルアコorセミアコ)
+音色(CleanGuitar)
+28:Electric Guitar(clean) (クリーンギター) … クリーン系のエレキギター。
+音色(MutedGuitar)
+29:Electric Guitar(muted) (ミュートギター) … ミュート奏法で弾いたクリーン系のギター。
+音色(OverdrivenGuitar)
+30:Overdriven Guitar (オーバードライブギター) … 甘い歪みのついたギター。
+音色(DistortionGuitar)
+31:Distortion Guitar (ディストーションギター) … ハードロック向けの過激な歪みのついたギター。
+音色(GuitarHarmonics)
+32:Guitar Harmonics (ギターハーモニクス) … ハーモニクス奏法で弾いたエレキギター。
+#ベース系
+音色(AcousticBass)
+33:Acoustic Bass (アコースティクベース) … ジャズなどで使われるウッドベース。
+音色(FingerBass)
+34:Electric Bass(finger) (フィンガーベース) … 指弾きのエレキベース。
+音色(PickBass)
+35:Electric Bass(pick) (ピック･ベース) … ピック弾きのエレキベース。ロック向け。
+音色(FretlessBass)
+36:Fretless Bass (フレットレスベース) … ジャズやフュージョンで使われるフレットのないベース。
+音色(SlapBass1)
+37:Slap Bass 1 (スラップベース１) … スラッピングで演奏したエレキベース。
+音色(SlapBass2)
+38:Slap Bass 2 (スラップベース２) … スラッピングで演奏したエレキベース。
+音色(SynthBass1)
+39:Synth Bass 1 (シンセベース１) … テクノ向けのミョンミョンした(?)アナログシンセ風のベース。
+音色(SynthBass2)
+40:Synth Bass 2 (シンセベース２) … ハウス向けの倍音の多いアナログシンセ風のベース。
+#ストリングス系
+音色(Violin)
+41:Violin (バイオリン) … ストリングスの高音域を担当するバイオリンのソロ。
+音色(Viola)
+42:Viola (ビオラ) … ストリングスの中音域を担当するビオラのソロ。
+音色(Cello)
+43:Cello (チェロ) … ストリングスの低音域を担当するチェロのソロ。
+音色(Contrabass)
+44:Contrabass (コントラバス) … ストリングスの最低音域を担当するコントラバスのソロ。
+音色(TremoloStrings)
+45:Tremolo Strings (トレモロストリングス) … ストリングス･セクションでトレモロを演奏した音色。ホラー系の音楽で良く使います。
+音色(PizzicatoStrings)
+46:Pizzicato Strings (ピチカートストリングス) … ストリングス･セクションでピチカートを演奏した音色。
+音色(OrchestralHarp)
+47:Orchestral Harp (オーケストラハープ) … いわゆるハープ。
+音色(Timpani)
+48:Timpani (ティンパニ) … オーケストラで使われるティンパニ。
+#アンサンブル系
+音色(Strings1)
+49:Strings 1 (ストリングス１) … バイオリン･ビオラ･チェロ･コントラバスを混ぜた、ストリングス･セクションの音色。
+音色(Strings2)
+50:Strings 2 (ストリングス２) … ストリングス１よりもゆったりとしたストリングス･セクション。
+音色(SynthStrings1)
+51:Synth Strings 1 (シンセ･ストリングス１) … アナログシンセサイザー風の温かみのあるストリングス。
+音色(SynthStrings2)
+52:Synth Strings 2 (シンセ･ストリングス２) … 音色変化のついたシンセ･ストリングス。
+音色(ChoirAahs)
+53:Choir Aahs (クワイア) … “アー”と発音する合唱(クワイア)の音色。
+音色(VoiceOohs)
+54:Voice Oohs (ボイス) … “オー”もしくは“ドゥー”と発音する声の音色。
+音色(SynthVoice)
+55:Synth Voice (シンセ･ボイス) … シンセサイザーで合成した“ウー”という声の音色。
+音色(OrchestraHit)
+56:Orchestra Hit (オーケストラヒット) … オーケストラでメジャーコードを“ジャン！”と演奏した音色。テクノやユーロビートにも良く使われます。
+#ブラス系
+音色(Trumpet)
+57:Trumpet (トランペット) … ブラス･セクションの高音域を担当するトランペットのソロ。
+音色(Trombone)
+58:Trombone (トロンボーン) … ブラス･セクションの中低音域を担当するトロンボーンのソロ。
+音色(Tuba)
+59:Tuba (チューバ) … ブラス･セクションの低音域を担当するチューバのソロ。
+音色(MutedTrumpet)
+60:Muted Trumpet (ミュート･トランペット) … ミュート(弱音器)を取り付けたトランペットのソロ。 
+音色(FrenchHorn)
+61:French Horn (フレンチホルン) … いわゆる、オーケストラで使われるホルン。
+音色(BrassSection)
+62:Brass Section (ブラス･セクション) … トランペット･トロンボーン･チューバ･ホルンを混ぜた、ブラス･セクションの音色。
+音色(SynthBrass1)
+63:Synth Brass 1 (シンセ･ブラス１) … 音色変化の少ないアナログシンセ風のシンセブラス。
+音色(SynthBrass2)
+64:Synth Brass 2 (シンセ･ブラス２) … 柔らかめのアナログシンセ風ブラス。
+#リード（サックス）系
+音色(SopranoSax)
+65:Soprano Sax (ソプラノ･サックス) … 甘く切ないソプラノ･サックス。
+音色(AltoSax)
+66:Alto Sax (アルト･サックス) … サックス･セクションでは高音域を担当。
+音色(TenorSax)
+67:Tenor Sax (テナー･サックス) … サックス･セクションでは中低音域を担当。
+音色(BaritoneSax)
+68:Baritone Sax (バリトン･サックス) … サックス･セクションでは最低音域を担当。
+音色(Oboe)
+69:Oboe (オーボエ) … ダブルリードの木管楽器。オーケストラではメロディにも使われます。
+音色(EnglishHorn)
+70:English Horn (イングリッシュ･ホルン) … “ホルン”とあるけどダブルリードの木管楽器。オーボエより低い音域を担当。別名コーラングレ。
+音色(Bassoon)
+71:Bassoon (バスーン) … ダブルリードの木管楽器。イングリッシュ･ホルンよりもさらに低い音域を担当。別名ファゴット。
+音色(Clarinet)
+72:Clarinet (クラリネット) … シングルリードの木管楽器。オーケストラだけでなくカントリーやジャズにも使えます。
+#パイプ系（フルート）
+音色(Piccolo)
+73:Piccolo (ピッコロ) … フルートの１オクターブ高い音域を担当。
+音色(Flute)
+74:Flute (フルート) … オーケストラだけでなくジャズやフュージョンにもどうぞ。
+音色(Recorder)
+75:Recorder (リコーダー) … ルネッサンスやバロック時代には伴奏用として頻繁に使われました。
+音色(PanFlute)
+76:Pan Flute (パンフルート) … 長さの異なる竹や木の筒を横に繋ぎあわせた笛。素朴なかすれた音が特長。
+音色(BlownBottle)
+77:Blown Bottle (ブロウ･ボトル) … 空き瓶の口に息を吹き込んだ音色。
+音色(Shakuhachi)
+78:Shakuhachi (尺八) … 日本の尺八。標準的な楽器の長さが１尺８寸(54.5cm)あるので尺八と言う。
+音色(Whistle)
+79:Whistle (ホイッスル) … 口笛。
+音色(Ocarina)
+80:Ocarina (オカリナ) … 陶や粘土で作られる原始的な笛。
+#シンセ系
+音色(SquareLead)
+81:Square Lead (スクウェア･リード) … 短形波を元にしたリードシンセの音色。メロディだけでなくテクノ風の“ピコピコ”にも使えます。
+音色(SawtoothLead)
+82:Sawtooth Lead (ソートゥース･リード) … ノコギリ波を元にしたリードシンセの音色。シンセベースやシンセブラス風にも使えます。
+音色(CalliopeLead)
+83:Calliope Lead (カリオペ) … シンセサイザーで作った蒸気オルガン“カリオペ”の音色。パンフルートに似たかすれた響きが特長。
+音色(ChiffLead)
+84:Chiff Lead (チフ･リード) … アタック部にピッチ変化のついたシンセリード。
+音色(CharangLead)
+85:Charang Lead (チャランゴ) … シタールとディストーションギターを足したようなシンセリード。
+音色(VoiceLead)
+86:Voice Lead (ボイス･リード) … ボイス風シンセ･リード。シンセ･パッドとしても使えます。
+音色(FifthsLead)
+87:Fifths Lead (フィフスリード) … 短形波を元にしたシンセリードを完全５度で重ねた音色。
+音色(BassLead)
+88:Bass & Lead (ベース&リード) … シンセベースとしてもリードシンセとしても使えます。
+#パッド系
+音色(NewAgePad)
+89:New Age Pad (ニューエイジパッド) … キラキラしたベルのような音を加えたシンセパッド。
+音色(WarmPad)
+90:Warm Pad (ワームパッド) … アタックの弱く暖かみのあるシンセパッド。
+音色(PolySynthPad)
+91:Poly Synth Pad (ポリシンセパッド) … アタックの弱いシンセブラス風の音色。
+音色(ChoirPad)
+92:Choir Pad (クワイアパッド) … ノイズっぽいかすれた響きのボイス系シンセパッド。
+音色(BowedPad)
+93:Bowed Pad (ボウドパッド) … シンセサイザーで合成したグラスハーモニカの音色。
+音色(MetallicPad)
+94:Metallic Pad (メタリックパッド) … 金属的なざらざらした響きのシンセパッド。ピアノの波形のアタックを遅くしたもの。
+音色(HaloPad)
+95:Halo Pad (ハロパッド) … 厚みのあるボイス系シンセパッド。
+音色(SweepPad)
+96:Sweep Pad (スウィープパッド) … “ミュワ～ン”と変化していくアナログシンセ風パッド。
+#SFX系
+音色(Rain)
+97:Rain (アイスレイン) … コロコロとした音が一緒に聞こえるシンセパッド。
+音色(SoundTrack)
+98:Sound Track (サウンドトラック) … 徐々に変化するシンセパッドを完全５度で重ねた音色。
+音色(Crystal)
+99:Crystal (クリスタル) … ベル風のシンセ音色。高音域で使うとキラキラして心地よい。
+音色(Atmosphere)
+100:Atmosphere (アトモスフィア) … クラシックギターとハープを足して２で割ったような、ハープ風のシンセ音色。
+音色(Brightness)
+101:Brightness (ブライトネス) … デジタルシンセ風のキラキラした、ベルのように減衰する音色。
+音色(Goblins)
+102:Goblins (ゴブリン) … シンセパッドに“クシュクシュ…”というSEの混ざる不思議な音色。
+音色(Echoes)
+103:Echoes (エコードロップ) … 鍵盤を放した後に急激に変化するシンセ音色。
+音色(Sci_Fi)
+104:Sci-Fi (ＳＦ) … メタルパッドに似た、金属的なざらさらしたシンセパッド。
+#エスニック
+音色(Sitar)
+105:Sitar (シタール) … インドの民族楽器。
+音色(Banjo)
+106:Banjo (バンジョー) … アメリカのバンジョー。ブルーグラスに欠かせない楽器。
+音色(Shamisen)
+107:Shamisen (三味線) … 日本の三味線。
+音色(Koto)
+108:Koto (琴) … 日本の長琴。
+音色(Kalimba)
+109:Kalimba (カリンバ) … アフリカの民族楽器。共鳴箱に取り付けた長さの異なる金属の棒を親指で弾いて演奏する。
+音色(Bagpipe)
+110:Bagpipe (バグパイプ) … イギリスの楽器。ゴムや動物の内臓で出来た袋に２本の管を差込み、口やフイゴで中に空気を送ってメロディとベースを同時に演奏する。
+音色(Fiddle)
+111:Fiddle (フィドル) … 弓で演奏するリュート風の民族楽器の総称で、バイオリンの先祖。
+音色(Shanai)
+112:Shanai (シャナイ) … インドの民族楽器。ダブルリードの木管楽器でオーボエの先祖とも言われています。
+#パーカッション
+音色(TinkleBell)
+113:Tinkle Bell (ティンクルベル) … 小さ目のベルを集めて音階を演奏する楽器。
+音色(Agogo)
+114:Agogo (アゴゴ) … サンバで良く使われるラテン･パーカッション。
+音色(SteelDrums)
+115:Steel Drums (スティールドラム) … カリプソで良く使われる楽器。
+音色(Woodblock)
+116:Woodblock (ウッドブロック) … アゴゴと共にサンバで良く使われるラテン･パーカッション。
+音色(TaikoDrum)
+117:Taiko Drum (太鼓) … 盆踊りなどに使われる大太鼓。
+音色(MelodicTom)
+118:Melodic Tom (メロティックタム) … ドラムセットのSTANDARDに使われるタム。数を増やしたいときにどうぞ。
+音色(SynthDrum)
+119:Synth Drum (シンセドラム) … ドラムセットのELECTORONICに使われるタム。“デュン”という響きが特長。
+音色(ReverseCymbal)
+120:Reverse Cymbal (リバースシンバル) … シンバルを逆再生した音色。シンバルロールの代わりに使えます。
+#その他
+音色(FretNoise)
+121:Fret Noise (ギターフレットノイズ) … 左手の指を弦の上で滑らせたときに起こるノイズ。
+音色(BreathNoise)
+122:Breath Noise (ブレスノイズ) … フルートに息を吹き込んだときに起こるノイズ。
+音色(Seashore)
+123:Seashore (シーショア) … さざなみの音。海辺の表現に。
+音色(BirdTweet)
+124:Bird Tweet (バード) … 小鳥のさえずり。
+音色(TelephoneRing)
+125:Telephone Ring (テレフォン) … 電話の呼鈴。
+音色(Helicopter)
+126:Helicopter (ヘリコプター) … ヘリコプターの音。
+音色(Applause)
+127:Applause (アプローズ) … 拍手の音。ライブハウスの雰囲気を出すのに効果的です。
+音色(Gunshot)
+128:Gunshot (ガンショット) … 銃声。
+#ドラムセット(チャンネル10で)
+音色(StandardSet)
+StandardSet
+音色(StandardSet2)
+StandardSet2
+音色(RoomSet)
+RoomSet
+音色(PowerSet)
+PowerSet
+音色(ElectronicSet)
+ElectronicSet
+音色(AnalogSet)
+AnalogSet
+音色(DanceSet)
+DanceSet
+音色(JazzSet)
+JazzSet
+音色(BrushSet)
+BrushSet
+音色(OrchestraSet)
+OrchestraSet
+#ドラムノート
+(SnareRoll)
+25:SnareRoll$
+(FingerSnap)
+26:FingerSnap$
+(HighQ)
+27:HighQ$
+(Slap)
+28:Slap$
+(ScratchPush)
+29:ScratchPush$
+(ScratchPull)
+30:ScratchPull$
+(Sticks)
+31:Sticks$
+(SquareClick)
+32:SquareClick$
+(MetronomeClick)
+33:MetronomeClick$
+(MetronomeBell)
+34:MetronomeBell$
+(Kick2)
+35:Kick2$
+(Kick1)
+36:Kick1$
+(SideStick)
+37:SideStick$
+(Snare1)
+38:Snare1$
+(HandClap)
+39:HandClap$
+(Snare2)
+40:Snare2$
+(LowTom2)
+41:LowTom2$
+(ClosedHiHat)
+42:ClosedHHat$
+(LowTom1)
+43:LowTom1$
+(PedalHiHat)
+44:PedalHiHat$
+(MidTom2)
+45:MidTom2$
+(OpenHiHat)
+46:OpenHiHat$
+(MidTom1)
+47:MidTom1$
+(HighTom2)
+48:HighTom2$
+(CrashCymbal1)
+49:CrashCymbal1$
+(HighTom1)
+50:HighTom1$
+(RideCymbal1)
+51:RideCymbal1$
+(ChineseCymbal)
+52:ChineseCymbal$
+(RideBell)
+53:RideBell$
+(Tambourine)
+54:Tambourine$
+(SplashCymbal)
+55:SplashCymbal$
+(Cowbell)
+56:Cowbell$
+(CrashCymbal2)
+57:CrashCymbal2$
+(VibraSlap)
+58:VibraSlap$
+(RideCymbal2)
+59:RideCymbal2$
+(HighBongo)
+60:HighBongo$
+(LowBongo)
+61:LowBongo$
+(MuteHighConga)
+62:MuteHighConga$
+(OpenHighConga)
+63:OpenHighConga$
+(LowConga)
+64:LowConga$
+(HighTimbale)
+65:HighTimbale$
+(LowTimbale)
+66:LowTimbale$
+(HighAgogo)
+67:HighAgogo$
+(LowAgogo)
+68:LowAgogo$
+(Cabasa)
+69:Cabasa$
+(Maracas)
+70:Maracas$
+(ShortHiWhistle)
+71:ShortHiWhistle$
+(LongLowWhistle)
+72:LongLowWhistle$
+(ShortGuiro)
+73:ShortGuiro$
+(LongGuiro)
+74:LongGuiro$
+(Claves)
+75:Claves$
+(HighWoodBlock)
+76:HighWoodBlock$
+(LowWoodBlock)
+77:LowWoodBlock$
+(MuteCuica)
+78:MuteCuica$
+(OpenCuica)
+79:OpenCuica$
+(MuteTriangle)
+80:MuteTriangle$
+(OpenTriangle)
+81:OpenTriangle$
+(Shaker)
+82:Shaker$
+(JingleBell)
+83:JingleBell$
+(BellTree)
+84:BellTree$
+(Castanets)
+85:Castanets$
+(MuteSurdo)
+86:MuteSurdo$
+(OpenSurdo)
+87:OpenSurdo$

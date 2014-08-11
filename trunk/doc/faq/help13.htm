@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>ベロシティ</TITLE>
+</HEAD>
+<BODY background="cta03.gif">
+<TABLE width="100%">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#004d00"><B><FONT size="+2" color="#ffffff">　ベロシティ・フェーダ</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE><B><FONT color="#004d00"><BR>
+シンセサイザは様々な音量調整機能がついています。<BR>
+<BR>
+演奏に使うものだけで３種類、その他シンセ全体やパート用などに２種類あります。<BR>
+<BR>
+取り合えず演奏に必要なものだけを紹介しましょう。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+１．ベロシティ<BR>
+<BR>
+鍵盤（けんばん）を</FONT><FONT color="#ff0000">叩く強さ</FONT><FONT color="#004d00">を調整します。<BR>
+音の大きい小さいは勿論、音色が変わったりもします。<BR>
+弱く叩けばソフトな音、強く叩けばするどい音、のような感じ。<BR>
+<BR>
+ストトンは</FONT><FONT color="#ff0000">音量○○</FONT><FONT color="#004d00">、ＭＭＬは </FONT><FONT color="#ff0000">v??</FONT><FONT color="#004d00"> と書けばベロシティを変えられます。<BR>
+<BR>
+範囲は０～１２７。<BR>
+０が最小で１２７が最大です。<BR>
+<BR>
+音符とワンセットで扱えるので、<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">音量８０　ドレミファ</FONT><FONT color="#ff0000" size="-1">ソ，，１２７</FONT><FONT color="#000000" size="-1">ラシ↑ド<FONT color="#000000" size="-1"><BR>
+</FONT></FONT><FONT color="#000000">v80 cdef</FONT><FONT color="#ff0000">g,,127</FONT><FONT color="#000000">ab&gt;c<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">のようにある音符だけを狙って変える事も出来ます。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+２．ボリューム<BR>
+<BR>
+ベロシティとは違い、</FONT><FONT color="#ff0000">チャンネル（楽器）全体の音量</FONT><FONT color="#004d00">を変えます。<BR>
+よくスタジオの映像などでみかける<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="fader.gif" width="150" height="132" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+こういうやつと同じ物がシンセの中にあると思ってください。<BR>
+<BR>
+こちらはストトンで使う事が出来ないので、半角で </FONT><FONT color="#ff0000">V(??)</FONT><FONT color="#004d00"> と書いてください。<BR>
+最初は１００になっているので、変えたい場合は０～１２７で指定します。<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">V(127)　ドレミファソラシ↑ド</FONT><FONT color="#000000"><FONT color="#000000"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">主に楽器同士のバランス調整に使うだけなので、</FONT><FONT color="#ff0000">トラックの最初に一個書けばＯＫ</FONT><FONT color="#004d00">でしょう。<BR>
+（使わないなら書かなくても大丈夫です）<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+３．エクスプレッション<BR>
+<BR>
+ボリュームと全く同じ機能ですが、こちらは主に</FONT><FONT color="#ff0000">演出的な使い方</FONT><FONT color="#004d00">をします。<BR>
+<BR>
+これもストトンで使う事が出来ないので、半角で </FONT><FONT color="#ff0000">EP(??)</FONT><FONT color="#004d00"> と書いてください。<BR>
+最初は１２７になっていて、変えたい場合は０～１２７で指定します。<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">EP(60)　ドレミファソラシ↑ド<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">「演出的な使い方」と書きましたが例えばどういう事かと言うと、<BR>
+<BR>
+○フェードイン・アウト<BR>
+○クレッシェンド・デクレッシェンド<BR>
+○エンベロープ（波形操作）<BR>
+<BR>
+というような事に使えます。<BR>
+どれも「少しずつ上げたり下げたり」という演出です。<BR>
+<BR>
+EP(??) と書くとパッとその音量になってしまいますが、少しずつ上げ下げするには<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">EP.T( 0 , 127 , !2 )　ド１</FONT><FONT color="#000000"><FONT color="#000000"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">というように　</FONT><FONT color="#ff0000">ＥＰ．Ｔ（始まりの音量，終わりの音量，！長さ）</FONT><FONT color="#004d00">　という風に書きます。<BR>
+<BR>
+サンプルは２分音符の長さで０から１２７まで上がっていく、というように書いてありますからフェードインという事になりますね。<BR>
+<BR>
+これを逆にすればフェードアウトになるし、６０→１２７くらいだったらクレッシェンド、１２７→６０くらいだったらデクレッシェンドという事になります。<BR>
+<BR>
+エクスプレッションはほとんどの場合単発では使わず、このように「段々変化させる」という使い方になるでしょう。<BR>
+<BR>
+<BR>
+あとはこんな使い方も出来ます。<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="EP_01.gif" width="288" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+ブラスなどではこういうボリュームの上がり下がりが多いですが、これをいちいちＥＰ．Ｔでやっていたのではきりがないので　</FONT><FONT color="#ff0000">ＥＰ．Ｗ</FONT><FONT color="#004d00">　というのを使います。<BR>
+<BR>
+</FONT></B>
+<HR>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ResetGM; r4<FONT color="#000000" size="-1">　// シンセをリセット<BR>
+</FONT><BR>
+音色(BrassSection)　音量１２７<BR>
+EP.W　(　127,60,!16,　60,127,!4　)<BR>
+ド４．ソ８＋２　ファ４．↓シ♭８＋２<BR>
+<BR>
+</FONT>
+<HR>
+</BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">音符が来る度に同じ動きをしてくれる自動モードです。<BR>
+（）の中の指定は</FONT><FONT color="#ff0000">始まり，終わり，！長さ</FONT><FONT color="#004d00">の３点セットですが、何セットでも指定出来ますから、ゆっくり立ち上げて時間がたったら消えていく…というような事もＯＫです。<BR>
+<BR>
+<BR>
+</FONT></B><BR>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

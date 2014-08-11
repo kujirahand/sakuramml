@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<body>
+
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='index.html'>MIDI Standard</a>＼
+	<a href='exclusive.html'>Exclusive Message</a>＼
+</td>
+</tr>
+</table>
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>Controller Destination Setting</h2>
+<!----------------------------------------------------------------------->
+
+<h3>概要</h3>
+Control Change Message, Channel Pressure及びPolyphonic Key Pressureによる機能の設定を可能にします。<br>
+<br>
+
+<h3>詳細</h3>
+コントロールチェンジ、アフタータッチ等のコントローラ・ソースに、１つ以上の機能を割当てます。
+このメッセージは、セットに機能と可変範囲の両方を含み、MIDIデバイスの応答の大きさを定義します。
+例えば、ピッチかもしれないし、ＬＦＯかもしれないし、カットオフ周波数かもしれません。
+<br>
+このController Destination Settingメッセージは、
+単一のメッセージで複数のセット（機能と可変範囲）を含むことが出来るので、メッセージの長さは可変です。<br>
+<br>
+各チャンネルにおいては、最後に受信したメッセージのみ有効となります。
+すなわち、以前に別の機能が設定されている場合でも、
+最後に受信したコントローラー・ディスティネーション・セッティングのみが有効になります。<br>
+<br>
+又、GM System Level.2(GM2)では、リズム・トラックでは受信しない事を推奨しています。<br>
+<br>
+以下に、コントロールド・パラメーターと，値の範囲を示す。<br>
+<br>
+<table>
+<caption>Controlled Parameters and Ranges</caption>
+<tr><th colspan='2'>Controlled parameter	</th><th>GM1</th><th>GM2</th><th>Value		</th><th>Description				</th><th>Default</th></tr>
+<tr><td>00	</td><td>Pitch Control			</td><td>×	</td><td>○	</td><td>$28 ～ $58	</td><td>-24 ～ +24 [semitone]		</td><td>64 ($40)	</td></tr>
+<tr><td>01	</td><td>Filter Cutoff Control	</td><td>×	</td><td>○	</td><td>$00 ～ $7F	</td><td>-9600 ～ +9450 [cent]		</td><td>64 ($40)	</td></tr>
+<tr><td>02	</td><td>Amplitude Control		</td><td>×	</td><td>○	</td><td>$00 ～ $7F	</td><td>0 ～ (127÷64)×100.0 [%]	</td><td>64 ($40)	</td></tr>
+<tr><td>03	</td><td>LFO Pitch Depth		</td><td>×	</td><td>○	</td><td>$00 ～ $7F	</td><td>0 ～ 600 [cent]			</td><td>0			</td></tr>
+<tr><td>04	</td><td>LFO Filter Depth		</td><td>×	</td><td>○	</td><td>$00 ～ $7F	</td><td>0 ～ 2400 [cent]			</td><td>0			</td></tr>
+<tr><td>05	</td><td>LFO Amplitude Depth	</td><td>×	</td><td>○	</td><td>$00 ～ $7F	</td><td>0 ～ 100 [%]				</td><td>0			</td></tr>
+</table>
+<br>
+
+<br>
+<h4>■Channel Pressure</h4>
+各チャンネルに対して、チャンネル・プレッシャーの効果を割り当てます。<br>
+<ul>
+<li><a href='./Function/RT_CD_ChPressure.html'>RT_CD_ChPressure</a><br>
+</ul>
+
+<br>
+<h4>■Polyphonic Key Pressure</h4>
+各チャンネルに対して、ポリフォニック・キー・プレッシャーの効果を割り当てます。<br>
+GM System Level.2(GM2)では、この機能は要求されていません。<br>
+<ul>
+<li><a href='./Function/RT_CD_PolyPressure.html'>RT_CD_PolyPressure</a><br>
+</ul>
+
+<br>
+<h4>■Control Change message</h4>
+各チャンネルに対し、コントローラー１種の効果を割り当てます。<br>
+各チャンネルにおいて、同時に複数のコントローラーを設定することはできません。
+他のコントローラーのコントローラー・ディスティネーション・セッティングが
+既に設定されている場合には、それはリセットされます。
+ただしチャンネル・プレッシャーのコントローラー・ディスティネーション・セッティングの設定は変化しません。<br>
+<ul>
+<li><a href='./Function/RT_CD_CC.html'>RT_CD_CC</a><br>
+</ul>
+
+<br><br>
+<!----------------------------------------------------------------------->
+<h3>Reference</h3>
+
+
+<br>
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>
+

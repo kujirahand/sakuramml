@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>Stretch</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">Stretch</TD>
+      <TD align="left">Stretch{ mml }(len)</TD>
+      <TD align="left">フレーズmmlを、lenの長さにストレッチして書き込む</TD>
+      <TD align="left">トラック・チャンネル</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>フレーズmmlを、lenの長さにストレッチして書き込む。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//Stretch のサンプル</FONT></B><BR>
+      #P1 = {l8 c^cd eeg^ eedd c^^^}<BR>
+      <BR>
+      #P1 // 普通に再生<BR>
+      Stretch{ #P1 }1 //全音符内で再生<BR>
+      Stretch{ #P1 }2 //二分音符内で再生<BR>
+      Stretch{ #P1 }4 //四分音符内で再生<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

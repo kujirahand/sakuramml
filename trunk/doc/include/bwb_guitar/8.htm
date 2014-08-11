@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<meta http-equiv="Content-Style-Type" content="text/html; charset=Shift_JIS">
+	<link rel="stylesheet" type="text/css" href="bwb_guitar.css">
+	<link rev="made" href="mailto:bluewhitebear@hotmail.com">
+	<link rel="index"	href="../bwb_guitar.htm">
+	<link rel="prev" 	href="7.htm">
+	<title>bwb_guitar.h マニュアル 「８．開発雑談」</title>
+</head>
+<body>
+<h1>８．開発雑談</h1>
+<h2>製作において</h2>
+<p>今回のbwb_guitar.hを作った動機は、<br>
+あるゲーム曲を耳コピしようかと思ったところからはじまりました。<br>
+その曲ではサビ部分でアコースティックギターがこれでもかと採用され、<br>
+当初、そのときの僕は、その場の勢いで何とかなるかと考えてましたが、<br>
+所詮ピアノ育ちの僕がギターのコードフォームなぞ想像することもできず、<br>
+かといって、ピアノみたいに、ただ「ドミソ」とか打ち込んで、<br>
+和音出すというのもプライドが許さなかったので、<br>
+ヘッダーを作るという作業からはじめたわけです。</p>
+<p>途中、ソースコードの紛失などもあり、<br>
+製作は難航しましたが、<br>
+逆に関数を一度最初から作り直せたので、<br>
+ある程度スマートな仕組みになったと思います。</p>
+<p>今までのマニュアルを見返してみればわかると思いますが、<br>
+bwb_guitar.hではそこらのDAWやVSTにひけをとらない<br>
+ギターの再現度を保っています。（あくまでもMIDIデータ上でですが）<br>
+このbwb_guitar.hをぜひ使いこなしてくださいね。</p>
+
+<hr class="psub">
+
+<h2>参考にした文献、書庫、情報。</h2>
+<ul>
+	<li><strong><a href="http://www.musicians-st.com/chord/ch-index.html">オンラインコードブック</a></strong><br>
+	基本的にここのコードフォームを採用させていただきます。<br>
+	（ただしこのホームページのコードフォームは一部ミスがありますので、注意してください。<br>
+	　もちろんbwb_guitar.hではその点は改善されています。）</li>
+	<li><strong><a href="http://www.cakewalk.jp/MC/ctech/ctech04.shtml">Cakewalk MIDIデータ製作チョイテク講座</a></strong><br>
+	アコギの再現の仕組みについて<a href="http://monochromeno5.nobody.jp/">やまちんさん</a>に尋ねたところ、<br>
+	このホームページを教えてくださいました。<br>
+	ベロシティ差の仕組みはこのホームページの内容を再現させたものです</li>
+
+</ul>
+
+
+<hr class="psub">
+
+<p><a href="../bwb_guitar.htm">戻る</a></p>
+</body>
+</html>

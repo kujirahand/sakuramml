@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='../midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='../index.html'>MIDI Standard</a>＼
+	<a href='../exclusive.html'>Exclusive Message</a>＼
+	<a href='../KeyBasedInstrument.html'>Key Based Instrument</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>RT_KeyBased_Basic</h2>				<!--（コマンドの名前。）-->
+<!------------------------------------------------------------->
+<h3>■概要</h3>
+　この機能は、リズムセット等のキーベースの楽器に、
+<a href='../ControlChange.html#after'>コントロールチェンジ</a>同様の機能を提供します。<br>
+<br>
+
+<br>
+<h3>■書式</h3>
+<code>
+RT_KeyBased_Basic(<var>INT I_Key</var>, <var>Array A_Data</var>);<br>
+</code>
+
+<br>
+[備考]<br>
+※この命令は、コンパイラ内部で以下のMMLに変換されます。<br>
+<code>
+SysEx = $F0, MakerID_RealTime,
+	<var>idDevice</var>, 
+	RT_KeyBasedInstrument, 
+	RT_KeyBasedInstrument_Basic, 
+	<var>Channel</var>-1, 
+	<var>INT I_Key</var> ,
+	<var>Array A_Data</var>, 
+	$F7
+</code>
+
+<br>
+<h3>■引数</h3>
+<table>
+<tr><th width='64pt'>引数名	</th>
+	<th width='64pt'>初期値	</th>
+	<th width='64pt'>範囲	</th>
+	<th width='448pt'>機能	</th></tr>
+<tr><td><var>INT I_Key</var>	</td>
+	<td> - </td>
+	<td>0～127</td>
+	<td>コントロールを指定するノート・ナンバーを指定します。</td></tr>
+<tr><td><var>Array A_Data</var>	</td>
+	<td> - </td>
+	<td> - </td>
+	<td>この配列は、コントロールチェンジ同様の番号<var>cc</var>及び、値<var>nn</var>を指定します。<br>
+		上記の２つで1セットとなり、複数のセットを指定することが可能です。<br>
+		番号<var>cc</var>及び、値<var>nn</var>の詳細は、以下の「■説明」を参照して下さい。</td></tr>
+<tr><td><var>INT idDevice</var>	</td>
+	<td>$7F</td>
+	<td>$00 ～ $7F</td>
+	<td>MIDIデバイスのDeviceIDを指定します。<br>
+		MIDI規格では、Bloadcastである$7Fを推奨しています。</td></tr>
+</table><br>
+
+
+<br>
+<h3>■返り値</h3>
+無し<br>
+<br>
+
+<br>
+<h3>■説明</h3>
+現在のチャンネル（リズム・チャンネル等）の<var>INT I_Key</var>のノート・ナンバーに割り当てられた楽器について、
+チャンネルベースの<a href='../ControlChange.html#after'>コントロールチェンジ</a>と同様の機能を提供します。<br>
+以下の表は、キーベースド・コントローラーに一般的に使用されるコントロールです。<br>
+<br>
+<table>
+<caption>一般的に使用される制御装置</caption>
+<tr><th>No.<var>cc</var></th><th>名称				</th><th>指定可能値	<var>vv</var></th></tr>
+<tr><td>7		</td><td>Note Volume				</td><td>0～64～127	</td></tr>
+<tr><td>10		</td><td>*Pan						</td><td>0～127 (絶対値)	</td></tr>
+<tr><td>33～63	</td><td>LSB for 01H-1FH			</td><td>0～64～127	</td></tr>
+<tr><td>71		</td><td>Timbre/Harmonic Intensity	</td><td>0～64～127	</td></tr>
+<tr><td>72		</td><td>Release Time				</td><td>0～64～127	</td></tr>
+<tr><td>73		</td><td>Attack Time				</td><td>0～64～127	</td></tr>
+<tr><td>74		</td><td>Brightness					</td><td>0～64～127	</td></tr>
+<tr><td>75		</td><td>Decay Time					</td><td>0～64～127	</td></tr>
+<tr><td>76		</td><td>Vibrato Rate				</td><td>0～64～127	</td></tr>
+<tr><td>77		</td><td>Vibrato Depth				</td><td>0～64～127	</td></tr>
+<tr><td>78		</td><td>Vibrato Delay				</td><td>0～64～127	</td></tr>
+<tr><td>91		</td><td>*Reverb Send				</td><td>0～127 (絶対値)	</td></tr>
+<tr><td>93		</td><td>*Chorus Send				</td><td>0～127 (絶対値)	</td></tr>
+<tr><td>120		</td><td>**Fine Tuning				</td><td>0～64～127	</td></tr>
+<tr><td>121		</td><td>**Coarse Tuning			</td><td>0～64～127	</td></tr>
+</table>
+<ul>
+* 値<var>vv</var>は、絶対値か、音のデフォルト設定の相対値（比例関係）です。<br>
+　これはMIDI規格では標準化されておらず、General MIDI Level.2等の、推奨案・規格に依存します。<br>
+　*でマークされた項目は、多くの場合、絶対値となります。<br>
+** パラメータ120($78)と121($79)(Mode Changeメッセージ)は、Control Changeと同様ではありません。<br>
+　このパラメータは、Fine TuningとCoarse Tuningに再定義されます。<br>
+</ul>
+Bank Select MSB/LSB(00H,20H)、
+Data Entry MSB/LSB(06H,26H)、
+RPN/NRPN Message(60H,65H)、
+Mode Change Message(78H～7FH)を除き、
+どんなコントローラー(Control Change)も<var>cc</var>に使用されます。<br>
+これらの除外されるコントローラーのナンバーは、未使用且つ他の用途に有効であるので、
+それらのいくつかは再定義され、２つのアスタリスク(**)で示されます。<br>
+<br>
+一つのメッセージで、複数の制御装置及び値の組を送ることができます。<br>
+<br>
+一般に、Key-Based Instrument Controlメッセージは、
+規定されている(プリセット)パラメーター値に対して、相対的に調整されます。<br>
+例外は、１つのアスタリスク(*)で示されます。<br>
+<br>
+MIDI規格では、<a href='../voice.html#program'>Program Changeメッセージ</a>によって新しい音色（パーカッション・サウンド・セット等）が選択された時は、
+MIDIデバイスは各キーに割り当てられた音色に、規定されている(プリセット)パラメーター値を設定します。<br>
+値<var>vv</var>に64($40)を指定した時は、そのMIDIデバイスのデフォルト設定となります。<br>
+64未満を設定した時は減少し、64を越える値を設定した時は増加します。<br>
+ユニットとMIDIデバイスの精密な動作は、以下に定義される推奨案を除いてメーカーの判断に任されています。<br>
+General MIDI Level.2(GM2)での推奨案は、以下の通りです。<br>
+
+<br>
+<table>
+<caption>The recommended practice for the General MIDI Level.2</caption>
+<tr><th><var>cc</var></th><th>名称	</th><th><var>vv</var>	</th><th>Description							</th><th>Default		</th></tr>
+<tr><td>7		</td><td>Note Volume</td><td>0～64～127		</td><td>0 ～ (127÷64)×100.0 [%] (相対変化)	</td><td>64 ($40)		</td></tr>
+<tr><td>10		</td><td>Pan		</td><td>0～64～127		</td><td>左～中央～右 (絶対変化)				</td><td>プリセット値	</td></tr>
+<tr><td>91		</td><td>Reverb Send</td><td>0～127			</td><td>0～Max (絶対変化)						</td><td>プリセット値	</td></tr>
+<tr><td>93		</td><td>Chorus Send</td><td>0～127			</td><td>0～Max (絶対変化)						</td><td>プリセット値	</td></tr>
+</table>
+<br>
+尚、General MIDI Level.2では、リズムチャンネル以外で受信しない事を推奨しています。<br>
+
+<br>
+<h3>■使用例</h3>
+<table>
+<caption>List.1 </caption>
+<tr><td><pre><code>
+//-----------------------------------
+TR(10)	CH(10)	@1	EP(127)	V(100)
+	RT_KeyBased_Basic(NoteNo("o3c"),10,43);	//"o3c"のパンポットを43に設定する。
+	RT_KeyBased_Basic(NoteNo("o3e"),10,56);	//"o3e"のパンポットを56に設定する。
+	o3 l4 c4 e8c8 ^8c8 e4
+</code></pre></td></tr>
+</table><br>
+
+
+<br>
+<!------------------------------------------------------------->
+<h3>■関連項目</h3>
+
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

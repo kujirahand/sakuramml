@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>リズムモード</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H2>リズムモード</H2>
+<HR>
+<P>リズムモードでは、任意のアルファベット(A-Z,
+a-z)の１文字に、マクロ文字列を割り当てることが出来ます。これは、リズム楽器を記述するのに適しています。</P>
+<HR>
+<P>普通ＭＩＤＩ楽器のリズムチャンネルでは、以下のようにキーボードの１音１音に違う音が割り当てられています。</P>
+<TABLE border="1" bgcolor="#ffffff">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffcc99" align="center">ノート番号</TD>
+      <TD bgcolor="#ffcc99" align="center">36</TD>
+      <TD bgcolor="#ffcc99" align="center">37</TD>
+      <TD bgcolor="#ffcc99" align="center">38</TD>
+      <TD bgcolor="#ffcc99" align="center">39</TD>
+      <TD bgcolor="#ffcc99" align="center">40</TD>
+      <TD bgcolor="#ffcc99" align="center">41</TD>
+      <TD bgcolor="#ffcc99" align="center">42</TD>
+      <TD bgcolor="#ffcc99" align="center">43</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ff9999" align="center">MMLノート名</TD>
+      <TD bgcolor="#ffffff" align="center">o3c</TD>
+      <TD bgcolor="#ccccff" align="center">o3c+</TD>
+      <TD bgcolor="#ffffff" align="center">o3d</TD>
+      <TD bgcolor="#ccccff" align="center">o3d+</TD>
+      <TD bgcolor="#ffffff" align="center">o3e</TD>
+      <TD bgcolor="#ffffff" align="center">o3f</TD>
+      <TD bgcolor="#ccccff" align="center">o3f+</TD>
+      <TD bgcolor="#ffffff" align="center">o3g</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffff99" align="center">割り当て楽器</TD>
+      <TD bgcolor="#ffff99" align="center">Kick</TD>
+      <TD bgcolor="#ffff99" align="center">Stick</TD>
+      <TD bgcolor="#ffff99" align="center">Snare</TD>
+      <TD bgcolor="#ffff99" align="center">Clap</TD>
+      <TD bgcolor="#ffff99" align="center">Snare2</TD>
+      <TD bgcolor="#ffff99" align="center">Tom</TD>
+      <TD bgcolor="#ffff99" align="center">Hi-Hat</TD>
+      <TD bgcolor="#ffff99" align="center">Tom</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>そのため、これをＭＭＬで記述すると、o3c o4d+
+o5g o2f+と、１音ごとにオクターブを変えたりシャープをつけたりと、煩わしいことこの上なく、どの音程が何のリズム楽器なのか、後で見てもさっぱりわからないという状況になってしまいます。</P>
+<P>そこで、あらかじめ、スネアの音は、アルファベットのsに、ハイハットの音は、hに割り当てると決めておけば、リズム楽器の表記が簡単になります。</P>
+<P>＊注意＊<BR>
+リズムモードにしたからと言って、自動的に　リズム楽器チャンネルに設定されるわけではありません。<BR>
+リズム楽器を鳴らす場合には、<B>ＧＭ</B>音源、<B>ＧＳ</B>音源の場合は、<B>チャンネル１０</B>がリズム楽器チャンネルになっています。そして<B>ＸＧ</B>音源の場合には、プログラムチェンジとバンクチェンジを使います。<B>Voice(</B>リズムマップ番号<B>,127,0)</B>を書きこんでください。→詳しくはお使いのMIDI音源のマニュアルを。</P>
+<HR>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ff0000">宣言：</FONT><BR>
+      <FONT color="#ffffff">Rhythm{ ... }</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffff">リズムモードにするには、そうしたい部分を<BR>
+      <FONT color="#ff0000"><B>Rhythm{ ～ }</B></FONT><BR>
+      で囲います。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">Rhythm{<BR>
+      <FONT color="#ff0000">　　//　何にもないけど、ここはリズムモード</FONT><BR>
+      }</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ff0000">マクロ定義：</FONT><BR>
+      <FONT color="#ffffff">$(char){ 文字列 }</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffff">アルファベット一文字(char)に、文字列を割り当てます。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">Channel(10);//リズムチャンネルに<BR>
+      //リズムマクロの定義<BR>
+      $b{n36,}//bにn36,を割り当てる<BR>
+      $s{n38,}//sにn38,を割り当てる<BR>
+      Rhythm{ //リズムモード<BR>
+      　　[4 l4 b s b s8s8 | b s b s16s16s8
+      ]<BR>
+      }</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ccffff">リズムモード内で、関数呼び出しや、変数を使いたいときは、それらの文を、(...)で囲ってください。<BR>
+      (...)の中は、リズムモードと見なしません。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">Channel(10);//リズムチャンネルに<BR>
+      Rhythm{<BR>
+      　　$b{n35,} $s{n40,}<BR>
+      　　<FONT color="#ff0000">(v.onNote(80,60); q.Random(10);)</FONT><BR>
+      　　<FONT color="#6699ff">//（）の中は、リズムモードと見なさない。</FONT><BR>
+      　　[4<BR>
+      　　　　l16 bbsb bssb<BR>
+      　　　　<FONT color="#ff0000">(EP.onTime(40,127,2))</FONT> <BR>
+      　　　　sbbb sbbs<BR>
+      　　]<BR>
+      }</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ccffff">ところで、同時にいろいろな音を鳴らしたい場合は、どうすれば良いのでしょうか？<BR>
+      トラックをいくつも作れば、良いのでしょうけど、それも面倒だという場合があります。<BR>
+      そんなときは、&quot;r-1&quot;などのようにすると、１小節分タイムポインタを戻すことが出来ます。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">Track(10) Channel(10)<BR>
+      <BR>
+      $b{n36,}<BR>
+      $s{n38,}<BR>
+      $h{n42,}<BR>
+      $c{n49,}<BR>
+      <BR>
+      Rhythm{l16 [4<BR>
+      　　c1 <B>r-1</B><BR>
+      　　hhhh hhhh hhhh hhhh <B>r-1</B><BR>
+      　　brrb srrb rrbr srrr<BR>
+      ]}<BR>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ccffff">次は、ノートオンオプションを使って、リズムにグルーブ感をつけてみましょう！</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">//----------------------------------------<BR>
+      //リズムで遊ぼう！<BR>
+      Track(10);Channel(10)<BR>
+      $b={n36,};$s={n38,};$h={n42,};$m={n44,};<BR>
+      //サンプルフレーズをマクロ文字列に登録。<BR>
+      #sample = { l16<BR>
+      　　Sub{ Rhythm{<BR>
+      　　　　[4 hhhh hhhh rhrh mrhh ]<BR>
+      　　}}<BR>
+      　　Rhythm{<BR>
+      　　　　[2 [2 brbr srrb rrbr :srrr
+      ] ssss]
+      <BR>
+      　　}<BR>
+      }<BR>
+      //さぁ、タイミングを使って遊ぼう！<BR>
+      t.onNote(0,2);#sample;r4<BR>
+      t.onNote(0,8);#sample;r4<BR>
+      t.onNote(0,8,4,-2);#sample;r4;//めくるめくゆらめく<BR>
+      //次は、ベロシティだ！<BR>
+      t.onNote(0,4);<BR>
+      v.onNote(120,70);#sample;r4//表にアクセント<BR>
+      v.onNote(70,120);#sample;r4//裏にアクセント<BR>
+      v.onNote(100,60,80,60,120,50,80,60);#sample;//１拍３拍にアクセント<BR>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+リズムに関しては、<FONT color="#9900ff">\Sample\Rhythm\</FONT>フォルダーの中にサンプルをたっぷり入れておきましたので、遊んでみてください。</BLOCKQUOTE>
+<BLOCKQUOTE>●リズムマクロに引数を付ける。</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#99ff99">$b{n36,?,,100} と定義して、Rhythm{ b4 }で、 n36,4,,100 と展開される</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+リズムマクロの中に、？を書くと、もし、Rhythmモードで、その後ろに数字があったとき、？を、数字に置換して展開するようになってます。</BLOCKQUOTE>
+<BLOCKQUOTE>これで、ベロシティ付きリズムや、タイミング付きリズムを表現できます。
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">$S{n38,?,,127}<BR>
+      Rhythm{ l8[4 ssSs ssS16S16s ] }</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE>●リズムモードの中の &quot;Sub&quot;</BLOCKQUOTE>
+<BLOCKQUOTE>　リズムモードで、&quot;Sub&quot;を使うには、&quot;(Sub)&quot;のように、カッコで括る必要があります。<BR>
+しかし、毎回これを書くのは、非常に面倒なので、以下のように、(Sub)を省略することができます。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">CH(10);l16<BR>
+      Rhythm{<BR>
+      [4<BR>
+      　　{ hhhh hhhh hhhh hhhh }<BR>
+      　　{ b__b s__s b_s_ s__s }<BR>
+      　　c1<BR>
+      ]</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+</BLOCKQUOTE>
+<HR>
+<P align="right"><A href="index.htm">戻る</A>｜<A href="mml7.htm">次へ</A></P>
+</BODY>
+</HTML>

@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>モジュレーション</TITLE>
+</HEAD>
+<BODY background="cta03.gif">
+<TABLE width="100%">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#004d00"><B><FONT size="+2" color="#ffffff">　モジュレーション</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE><B><FONT color="#004d00"><BR>
+<BR>
+シンセサイザではビブラートの事をモジュレーションと呼びます。<BR>
+<BR>
+そもそもビブラートというのはどういうものかというと、<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="vib_01.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+と、このようにピッチを振るわせるように演奏したり歌ったりする事をビブラートという訳ですね。<BR>
+<BR>
+<BR>
+ストトンではこのような事をする為のコマンドが無いのでＭＭＬから借りてきて半角で<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">M( ? )<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">と書くとビブラートがかかります。<BR>
+？には０～１２７の数字で揺れ幅を書くのですが<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="vib_02.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+０で変化無し、１２７で揺れ幅最大です。<BR>
+<BR>
+<BR>
+ただし、ただ<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">M( 96 )<FONT color="#000000" size="-1">　ドーーー<BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">という風に指定しても、指定した瞬間からすぐビブラートがかかってしまうので<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="vib_03.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+こんな感じになってしまいます。<BR>
+<BR>
+音符の途中からかけるには<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ん２　M( 96 )　ん－２　ドーーー<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">と、「ん」や「ん－(マイナス)」を使って時間を進めたり戻したり<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ゲート２００　ドー　M( 96 )　ん２<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">などと余韻を倍にして強引に間を取る事は可能ですが、毎回これではたまりません。(笑)<BR>
+<BR>
+１，２回だったらこれでもいいですが、取り敢えずメロディ全部にかけて様子を見よう…といったような事はちょっと難しいでしょう。<BR>
+<BR>
+<BR>
+そこで自動化する方法を紹介します。<BR>
+以下の方法を使えば、発音するたびにビブラートがかかります。<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">M.W( 0, 0, !2, 0, 96, !32)　ドーーーソーーー<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#ff0000">Ｍ．Ｗ(始まりの幅，終わりの幅，！長さ)</FONT><FONT color="#004d00">と書いてあります。<BR>
+<BR>
+カッコの中の数字は３つでワンセットで、何セットでも書く事が出来ます。<BR>
+<BR>
+最初の３つは始まり・終わり共に０ですから変化無し、それが２分音符の間続きます。<BR>
+次は始まりが０、終わりが９６、３２分音符の長さで変化、と書いてあるのでほぼ瞬間的に幅が９６になる、という事ですね。<BR>
+<BR>
+２セット目の長さを８分音符みたく長くすれば、<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="vib_04.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+…のように、「じわじわとかかり方が強くなっていく」という風にする事も出来ます。<BR>
+<BR>
+特に指定しない限りこの効果は続きますが、曲の途中でやめたい時は<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#004d00"><FONT color="#000000" size="-1">M.W( 0, 0, !2, 0, 96, !32)　ドーーー　</FONT><FONT color="#ff0000" size="-1">M( 0 )</FONT><FONT color="#000000" size="-1">　ソーーー</FONT><BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">のように、やめたいところへ M(0) と書けばＯＫです。<BR>
+<BR>
+<BR>
+</FONT></B><BR>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

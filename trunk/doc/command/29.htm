@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>Rythm</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">Rhythm</TD>
+      <TD align="left">Rhythm{...}</TD>
+      <TD align="left">{...}の中を、リズムモードにする</TD>
+      <TD align="left">トラック・チャンネル</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>&quot;Rhythm{ mml }&quot;のように書くと、{ ...} で括られた部分を、リズム専用モードとして扱う。<BR>
+この入力モードでは、大文字、小文字に関わらず、１文字１命令として扱われる。<BR>
+<BR>
+リズム専用モードの１命令は、予め、『<FONT color="#0000ff">$文字{ 定義内容}</FONT>』のように定義しておく。<BR>
+<BR>
+リズム専用モードで、一時的にリズム専用モードを解除するには、（）で括る。<BR>
+また、『＃変数名』のような＃で始まる文字列型変数は、内容が展開される。<BR>
+<BR>
+（&quot;Rhythm&quot;は歴史的事情により&quot;Rythm&quot;と書くことも可能）</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//Rhythm のサンプル</FONT></B><BR>
+      $b{n36,}<BR>
+      $s{n38,}<BR>
+      $h{n42,}<BR>
+      $o{n46,}<BR>
+      CH(10)<BR>
+      Rhythm{<BR>
+      　[4　l8<BR>
+      　　　brsr bbsr r-1<BR>
+      　　　hoho hoho<BR>
+      　]<BR>
+      }<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="30.htm">$</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

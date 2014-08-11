@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<body>
+
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='index.html'>MIDI Standard</a>＼
+	<a href='exclusive.html'>Exclusive Message</a>＼
+</td>
+</tr>
+</table>
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>Device Control</h2>
+<!----------------------------------------------------------------------->
+<h3>詳細</h3>
+
+<br>
+<h4>■Master Volume</h4>
+MIDI楽器全体（全チャンネル）のボリューム設定を行います。<br>
+このメッセージは、各MIDIデバイス間の音量を調整する為に用います。<br>
+各チャンネル個別の音量については、<a href='ControlChange.html#07'>Main Volume(Control Change No.7)</a>にて行います。<br>
+コントロールチェンジの7及び11番と同様、値の変化に対する音量の変化カーブは、値の２乗に比例します。<br>
+<ul>
+<li><a href='./function/MasterVolume.html'>MasterVolume</a>
+</ul>
+
+
+<br>
+<h4>■Master Ballance</h4>
+MIDI楽器全体（全チャンネル）のバランス設定を行います。<br>
+このメッセージは、各MIDIデバイス間のバランスを調整する為に用います。<br>
+各チャンネル個別の音量については、<a href='ControlChange.html#08'>Balance(Control Change No.8)</a>にて行います。<br>
+<ul>
+<li><a href='./function/MasterBallance.html'>MasterBallance</a>
+</ul>
+
+<br>
+<h4>■Master Tuning</h4>
+MIDI楽器全体（全チャンネル）のチューニング設定を行います。<br>
+マスター・ファイン・チューニングおよびマスター・コース・チューニングが初期値の時、
+（ピッチ・ベンドやその他ピッチに影響するコントローラーがかかっていなければ）
+ノート番号69 が440Hz となります。<br>
+<br>
+GM System Level.2(GM2)に対応した音源は、
+Master Course Tuningを±12半音以上に設定できることが義務付けられています。
+又、リズム・チャンネルには、マスター・チューニングの効果が掛からない事を推奨されています。<br>
+<ul>
+<li><a href='./function/MasterTuning.html'>MasterTuning</a>
+<li><a href='./function/MasterTuning.html'>MasterFineTuning</a>
+<li><a href='./function/MasterTuning.html'>MasterCoarseTuning</a>
+</ul>
+
+<br>
+<h4>■Global Parameter Control</h4>
+MIDI楽器全体（全チャンネル）の、パラメータの編集を行います。<br>
+MIDI規格では、リバーブとコーラスのパラメータが標準化されています。<br>
+<ul>
+<li><a href='./function/RT_Reverb.html'>RT_Reverb</a>
+<li><a href='./function/RT_Reverb.html'>RT_Reverb_All</a>
+<li><a href='./function/RT_Reverb.html'>RT_Reverb_Type</a>
+<li><a href='./function/RT_Reverb.html'>RT_Reverb_Time</a>
+<li><a href='./function/RT_Chorus.html'>RT_Chorus</a>
+<li><a href='./function/RT_Chorus.html'>RT_Chorus_All</a>
+<li><a href='./function/RT_Chorus.html'>RT_Chorus_Type</a>
+<li><a href='./function/RT_Chorus.html'>RT_Chorus_ModRate</a>
+<li><a href='./function/RT_Chorus.html'>RT_Chorus_ModDepth</a>
+<li><a href='./function/RT_Chorus.html'>RT_Chorus_Feedback</a>
+<li><a href='./function/RT_Chorus.html'>RT_Chorus_SendToReverb</a>
+</ul>
+
+<br><br>
+<!----------------------------------------------------------------------->
+<h3>Reference</h3>
+
+
+<br><br>
+</div>
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>
+

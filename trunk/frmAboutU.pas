@@ -94,9 +94,6 @@ begin
 end;
 
 procedure TfrmAbout.FormShow(Sender: TObject);
-var
-    g: TGraphic;
-    xx,yy:Integer;
 begin
   try
     try
@@ -108,14 +105,6 @@ begin
     end;
     cmd := '';
     Button1.Caption := '—¹‰ð (&O)';
-    g := frmSakuraPad.cbarTop.Picture.Graphic;
-    for yy:=0 to (Self.Height div g.Height) do
-    begin
-        for xx:=0 to (Self.Width div g.Width) do
-        begin
-            imgBack.Canvas.Draw(xx*g.width, yy*g.Height, g);
-        end;
-    end;
   except
   end;
 end;

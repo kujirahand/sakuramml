@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"gs.h" ver.0.70</TITLE>
+<META content="SAKURA Function gs" name=keywords>
+<META content="ＧＳ音源特有の命令を定義した関数 (1999/12/17)" name=description>
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"gs.h" ver.0.70</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#概要">概要</A></LI>
+  <UL>
+    <LI><A HREF="#概要_使い方">使い方</A></LI>
+  </UL>
+  <LI><A HREF="#リバーブに関する命令">リバーブに関する命令</A></LI>
+  <UL>
+    <LI><A HREF="#リバーブに関する命令_GSReverbMacro(val)">GSReverbMacro(val)</A></LI>
+    <LI><A HREF="#リバーブに関する命令_GSReverbCharacter(val)">GSReverbCharacter(val)</A></LI>
+    <LI><A HREF="#リバーブに関する命令_GSReverbPRE_LPE(val)">GSReverbPRE_LPE(val)</A></LI>
+    <LI><A HREF="#リバーブに関する命令_GSReverbLevel(val)">GSReverbLevel(val)</A></LI>
+    <LI><A HREF="#リバーブに関する命令_GSReverbTime(val)">GSReverbTime(val)</A></LI>
+    <LI><A HREF="#リバーブに関する命令_GSReverbFeedback(val)">GSReverbFeedback(val)</A></LI>
+    <LI><A HREF="#リバーブに関する命令_GSReverbSendToChorus(val)">GSReverbSendToChorus(val)</A></LI>
+  </UL>
+  <LI><A HREF="#コーラスに関する命令">コーラスに関する命令</A></LI>
+  <UL>
+    <LI><A HREF="#コーラスに関する命令_GSChorusMacro(val)">GSChorusMacro(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusPRE_LPF(val)">GSChorusPRE_LPF(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusLevel(val)">GSChorusLevel(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusFeedback(val)">GSChorusFeedback(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusDelay(val)">GSChorusDelay(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusRate(val)">GSChorusRate(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusDepth(val)">GSChorusDepth(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusSendToReverb(val)">GSChorusSendToReverb(val)</A></LI>
+    <LI><A HREF="#コーラスに関する命令_GSChorusSendToDelay(val)">GSChorusSendToDelay(val)</A></LI>
+  </UL>
+</UL>
+<!--end of index-->
+<P>
+<P>
+<P>
+<P><A NAME="概要"><BR></A><HR><H1>概要</H1>
+◇Roland GS 音源に特有の命令を定義した関数です。<P>
+<P><A NAME="概要_使い方"><BR></A><H2>使い方</H2>
+<BLOCKQUOTE><CODE>Include(gs.h);<BR>の一文を、曲頭に書いてください。<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="リバーブに関する命令"><BR></A><HR><H1>リバーブに関する命令</H1>
+<P><A NAME="リバーブに関する命令_GSReverbMacro(val)"><BR></A><H2>GSReverbMacro(val)</H2>
+◇リバーブ（残響音）マクロの変更をします。<BLOCKQUOTE><CODE>val =<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00：Room 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;01：Room 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;02：Room 3<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;03：Hall 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;04：Hall 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;05：Plate<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;06：Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;07：Panning Delay<BR><P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="リバーブに関する命令_GSReverbCharacter(val)"><BR></A><H2>GSReverbCharacter(val)</H2>
+◇リバーブ（残響音）の個性を変更をします。<BLOCKQUOTE><CODE>val =<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00：Room 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;01：Room 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;02：Room 3<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;03：Hall 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;04：Hall 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;05：Plate<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;06：Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;07：Panning Delay<BR><P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="リバーブに関する命令_GSReverbPRE_LPE(val)"><BR></A><H2>GSReverbPRE_LPE(val)</H2>
+<P><A NAME="リバーブに関する命令_GSReverbLevel(val)"><BR></A><H2>GSReverbLevel(val)</H2>
+<P><A NAME="リバーブに関する命令_GSReverbTime(val)"><BR></A><H2>GSReverbTime(val)</H2>
+<P><A NAME="リバーブに関する命令_GSReverbFeedback(val)"><BR></A><H2>GSReverbFeedback(val)</H2>
+<P><A NAME="リバーブに関する命令_GSReverbSendToChorus(val)"><BR></A><H2>GSReverbSendToChorus(val)</H2>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="コーラスに関する命令"><BR></A><HR><H1>コーラスに関する命令</H1>
+<P><A NAME="コーラスに関する命令_GSChorusMacro(val)"><BR></A><H2>GSChorusMacro(val)</H2>
+◇コーラスマクロの変更をします。<BLOCKQUOTE><CODE>val =<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;00：Chorus 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;01：Chorus 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;02：Chorus 3<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;03：Chorus 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;04：Feedback Chorus&nbsp;&nbsp;&nbsp;&nbsp; 05：Flanger<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;06：Short Delay&nbsp;&nbsp; 07：Short Delay（FB<BR><P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="コーラスに関する命令_GSChorusPRE_LPF(val)"><BR></A><H2>GSChorusPRE_LPF(val)</H2>
+<P><A NAME="コーラスに関する命令_GSChorusLevel(val)"><BR></A><H2>GSChorusLevel(val)</H2>
+<P><A NAME="コーラスに関する命令_GSChorusFeedback(val)"><BR></A><H2>GSChorusFeedback(val)</H2>
+<P><A NAME="コーラスに関する命令_GSChorusDelay(val)"><BR></A><H2>GSChorusDelay(val)</H2>
+<P><A NAME="コーラスに関する命令_GSChorusRate(val)"><BR></A><H2>GSChorusRate(val)</H2>
+<P><A NAME="コーラスに関する命令_GSChorusDepth(val)"><BR></A><H2>GSChorusDepth(val)</H2>
+<P><A NAME="コーラスに関する命令_GSChorusSendToReverb(val)"><BR></A><H2>GSChorusSendToReverb(val)</H2>
+<P><A NAME="コーラスに関する命令_GSChorusSendToDelay(val)"><BR></A><H2>GSChorusSendToDelay(val)</H2>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</BODY></HTML>

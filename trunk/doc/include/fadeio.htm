@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"fadeio.h" ver.1.00</TITLE>
+<META content="SAKURA Function fadein fadeout" name=keywords>
+<META content="フェードイン・フェードアウトを定義した関数(1999/12/17)" name=description>
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"fadeio.h" ver.1.00</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#概要">概要</A></LI>
+  <LI><A HREF="#使い方">使い方</A></LI>
+  <LI><A HREF="#Fadein(Mes)">Fadein(Mes)</A></LI>
+  <LI><A HREF="#Fadeout(Mes)">Fadeout(Mes)</A></LI>
+  <LI><A HREF="#FadeoutSlowly">FadeoutSlowly</A></LI>
+  <LI><A HREF="#AllTrack(Str CMD)">AllTrack(Str CMD)</A></LI>
+  <LI><A HREF="#FadeinAll(Mes)">FadeinAll(Mes)</A></LI>
+  <LI><A HREF="#FadeoutAll(Mes)">FadeoutAll(Mes)</A></LI>
+  <LI><A HREF="#FadeoutSlowlyAll(Mes)">FadeoutSlowlyAll(Mes)</A></LI>
+</UL>
+<!--end of index-->
+<P>
+<P>
+<P>
+<P><A NAME="概要"><BR></A><HR><H1>概要</H1>
+フェードイン・フェードアウトを定義したファイルです。フェードインは、音量が次第に大きくなる効果のことです。フェードアウトは、音量が次第に小さくなる効果のことです。<P>
+<P><A NAME="使い方"><BR></A><HR><H1>使い方</H1>
+<BLOCKQUOTE><CODE>Include(fadeio.h);<BR>の一文を、曲頭に書き加えてください。<BR><P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="Fadein(Mes)"><BR></A><HR><H1>Fadein(Mes)</H1>
+◇フェードイン：音量が次第に大きくなる効果<BLOCKQUOTE><CODE>Mes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小節数を指定。<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="Fadeout(Mes)"><BR></A><HR><H1>Fadeout(Mes)</H1>
+◇フェードアウト：音量が次第に小さくなる効果<BLOCKQUOTE><CODE>Mes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小節数を指定。<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="FadeoutSlowly"><BR></A><HR><H1>FadeoutSlowly</H1>
+◇フェードアウトスローリー：音量とテンポが次第に小さくなる効果<BLOCKQUOTE><CODE>Mes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小節数を指定。<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="AllTrack(Str CMD)"><BR></A><HR><H1>AllTrack(Str CMD)</H1>
+オールトラック：全てのチャンネルに同じＭＭＬを書き込みます。これをかますと全てのトラックにフェードイン・アウトがかかります<BLOCKQUOTE><CODE>例）AllTrack(Fadein(4))<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="FadeinAll(Mes)"><BR></A><HR><H1>FadeinAll(Mes)</H1>
+◇フェードインオール：全てのトラックをフェードインさせます。<BLOCKQUOTE><CODE>Mes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小節数を指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="FadeoutAll(Mes)"><BR></A><HR><H1>FadeoutAll(Mes)</H1>
+◇フェードアウトオール：全てのトラックをフェードアウトさせます。<BLOCKQUOTE><CODE>Mes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小節数を指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="FadeoutSlowlyAll(Mes)"><BR></A><HR><H1>FadeoutSlowlyAll(Mes)</H1>
+◇フェードアウトスローリーオール：全てのトラックをフェードアウトオールさせます。<BLOCKQUOTE><CODE>Mes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小節数を指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</BODY></HTML>

@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM HomePage Builder 2000 V4.0.2  for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>こんなことがしたいんだけど</TITLE>
+</HEAD>
+<BODY>
+<CENTER>
+<TABLE border="0" width="380" style='font-family : "ＭＳ Ｐゴシック";font-size : 16px;line-height : 18px;'>
+  <TBODY>
+    <TR>
+      <TD align="left">
+      <P><BR>
+      <FONT size="+3"><FONT size="+3" color="#0000ff">特殊効果を使う</FONT></FONT></P>
+      <HR>
+      　曲を打ちこんでいると、もっと細かいことや、いろいろやりたいことが出てくると思います。
+      <BR>
+      <BR>
+      　日本語を使ったストトン表記だけでは、もの足りなくなったら、スクリプトが使える<A href="index.htm">ＭＭＬ</A>に進むことをオススメしますが、ＭＭＬを覚えるのが面倒でしたら、定義ファイルを使いましょう！音源操作やちょっとしたことが簡単に出来ます。<BR>
+      <HR>
+      <B><FONT size="+1">●曲をフェードアウトさせて終わらせたい</FONT></B><BR>
+      <BR>
+      　フェードイン・フェードアウトさせるには、fadeio.hという定義ファイルを使います。定義ファイルを使うには、曲の一番初めに、以下のような文を書きます。<BR>
+      <TABLE border="1" width="100%" bgcolor="#ffffcc">
+        <TBODY>
+          <TR>
+            <TD>読む(<FONT color="#cc6699">ファイル名</FONT>)</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      それでは、フェードアウトとフェードインを使った例をあげてみます。<BR>
+      <TABLE border="1" width="100%" bgcolor="#ffffcc">
+        <TBODY>
+          <TR>
+            <TD>読む(<FONT color="#cc6699">fadeio.h</FONT>)<BR>
+            <BR>
+            <FONT color="#6600ff"><B>Fadeout(２)</B></FONT>//２小節でフェードアウト<BR>
+            音符４【４　ドレミソ　】<BR>
+            <BR>
+            <FONT color="#6600ff"><B>Fadeout(４)</B></FONT>//４小節でフェードアウト<BR>
+            音符４【４　ドレソミ　】<BR>
+            <BR>
+            <FONT color="#6600ff"><B>Fadein(２)</B></FONT>//２小節でフェードイン<BR>
+            音符４【４　ドレソミ　】</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      それから、全てのトラックを同時にフェードアウトさせるには、<FONT color="#6600ff"><B>FadeoutAll(小節数)</B></FONT>を使います。<BR>
+      <TABLE border="1" width="100%" bgcolor="#ffffcc">
+        <TBODY>
+          <TR>
+            <TD>読む(<FONT color="#cc00ff">fadeio.h</FONT>)<BR>
+            <BR>
+            <FONT color="#6600ff"><B>FadeoutAll(２)</B></FONT>//２小節でフェードアウト<BR>
+            トラック１<BR>
+            音符４音階４【４ドレミソ　】<BR>
+            トラック２<BR>
+            音符４音階４【４ミファシ＞レ＜　】<BR>
+            トラック３<BR>
+            音符４音階４【４シラ＞レラ＜　】<BR>
+            <BR>
+            <FONT color="#6600ff"><B>FadeinAll(４)</B></FONT>//４小節でフェードイン<BR>
+            トラック１<BR>
+            音符４音階４【４ドレミソ　】<BR>
+            トラック２<BR>
+            音符４音階４【４ミファシ＞レ＜　】<BR>
+            トラック３<BR>
+            音符４音階４【４シラ＞レラ＜　】</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      <HR>
+      <FONT size="+1"><B>●簡単にメロディーをハモらせたい！<BR>
+      </B></FONT><BR>
+      メロディーを部分的にハモらせるには、定義ファイルunison.hを取りこみます。<BR>
+      <BR>
+      ・・・ですが、ここで、定義ファイルの読み方の説明をしたいと思います。これが分かれば、どんな定義ファイルでも使えるようになりますから。<BR>
+      <BR>
+      　まず、この定義ファイルというものが，どこにあるのかですが、サクラのインストールされているフォルダーを\SAKURAとすると、<FONT color="#9900ff">\SAKURA\Include\</FONT>にある、&quot;名前.h&quot;のファイルがそれです。メモ帳などで開いてみると、<BR>
+      <BR>
+      <FONT color="#ff0000">Function</FONT> <FONT color="#9900ff">名前</FONT><FONT color="#ff0000">(</FONT><FONT color="#cc00ff">引数</FONT><FONT color="#ff0000">)</FONT><FONT color="#ff0000">{</FONT><BR>
+      　　ごにょごにょ。<BR>
+      <FONT color="#ff0000">}</FONT><BR>
+      <BR>
+      と、いう形のものがたくさん書いてあると思います。<BR>
+      この一塊が、一つの命令です。何に使えるかは、コメントが書いてありますので、分かると思います。<BR>
+      <BR>
+      それで、これを使うには、<BR>
+      <BR>
+      <FONT color="#6600ff">名前</FONT>（<FONT color="#cc00ff">引数</FONT>）<BR>
+      <BR>
+      と書けば、その命令が実行されます。<BR>
+      引数には、数字か文字を書きます。（普通は数字を書きます。文字は、｛　｝で括ります。詳しくは後述。）<BR>
+      <BR>
+      それではお待たせしました。メロディーのハモらせかたです。<BR>
+      <TABLE border="1" width="100%" bgcolor="#ffffcc">
+        <TBODY>
+          <TR>
+            <TD>読む(<FONT color="#cc00cc">unison.h</FONT>)<BR>
+            <BR>
+            //３度でハモる<BR>
+            <FONT color="#6600ff"><B>Unison3th</B></FONT><FONT color="#ff0000">（</FONT>ドレミファソファミレドミソミドーー<FONT color="#ff0000">）</FONT><BR>
+            //５度でハモる<BR>
+            <B><FONT color="#6600ff">Unison5th</FONT></B><FONT color="#ff0000">（</FONT>ドレミファソファミレドミソミドーー<FONT color="#ff0000">）</FONT><BR>
+            //１オクターブ上でハモる<BR>
+            <B><FONT color="#6600ff">OctaveUnison</FONT></B><FONT color="#ff0000">（</FONT>ドレミファソファミレドミソミドーー<FONT color="#ff0000">）</FONT><BR>
+            <BR>
+            //任意の度数でハモる（指定は半音単位）<BR>
+            <FONT color="#6600ff"><B>Unison</B></FONT><FONT color="#ff0000">（</FONT><FONT color="#6600ff">｛</FONT>ドレミファソファミレドミソミドーー<FONT color="#6600ff">｝</FONT>,7<FONT color="#ff0000">）</FONT></TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      最後の<B><FONT color="#6600ff">Unison</FONT></B>がちょっとクセ者です。（　）で括り、その中でまた｛　｝で括っています。これは、文字列を表す記号で、忘れるとエラーが出るので注意してください。｛　｝でドレミを括った後の　,７　は、７半音上でハモるという意味です。<BR>
+      <BR>
+      実際、定義ファイルを見てみます。<BR>
+      <TABLE border="1" width="100%" bgcolor="#ffffcc">
+        <TBODY>
+          <TR>
+            <TD>/* ユニゾンユーザー指定 */<BR>
+            <FONT color="#6600ff">Function</FONT> <FONT color="#ff0000"><B>Unison</B></FONT>(<FONT color="#6600ff"><B>Str</B></FONT> S, <FONT color="#6600ff"><B>Int</B></FONT> Value){<BR>
+            　　Sub{ Key(Value); S; Key(0); } S;<BR>
+            }</TD>
+          </TR>
+        </TBODY>
+      </TABLE>
+      <BR>
+      引数の１つ目が<FONT color="#6600ff"><B>Str</B></FONT>となっています。これが、文字列を表す識別子で、｛　文字列　｝と書きます。また、<FONT color="#6600ff"><B>Int</B></FONT>には、数字を書きます。<BR>
+      <BR>
+      定義ファイルの使い方がわかって頂けたでしょうか？<BR>
+      <HR>
+      <P align="right"><A href="page8_2.htm">次へ</A>｜<A href="index.htm">表紙へ戻る</A></P>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>ステップ</TITLE>
+</HEAD>
+<BODY background="cta03.gif">
+<TABLE width="100%">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#004d00"><B><FONT size="+2" color="#ffffff">　ステップ</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE><B><FONT color="#004d00"><BR>
+<BR>
+ＳＡＫＵＲＡのマニュアルを読んでいると時々出てくる</FONT><FONT color="#ff0000">ステップ</FONT><FONT color="#004d00">という言葉。<BR>
+これは一体なんでしょう。<BR>
+<BR>
+ステップというとダンスのアレを思い出しますが、同じようで違うものです。<BR>
+<BR>
+<BR>
+<BR>
+ＳＡＫＵＲＡでのステップは</FONT><FONT color="#ff0000">音の長さ</FONT><FONT color="#004d00">を表しています。<BR>
+<BR>
+しかし音楽では音の長さを○分音符と表すのが普通ですよね？<BR>
+なぜ改めて別の表し方が必要なのでしょうか。<BR>
+<BR>
+○分音符、というのはその言葉通り</FONT><FONT color="#ff0000">一小節をいくつに分けた長さか</FONT><FONT color="#004d00">、という表し方です。<BR>
+<BR>
+この長さを図で表すと<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="length.gif" width="384" height="192" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+こんな感じ。<BR>
+<BR>
+要するに何分の１表記になってる訳です。<BR>
+<BR>
+これだけだと長さが飛び飛びなので</FONT><FONT color="#ff0000">付点</FONT><FONT color="#004d00">を使った長さを加えると、<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="len_2.gif" width="384" height="384" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+こんな感じでバリエーションが増やせます。<BR>
+付点は長さを１．５倍にせよ、という表現です。<BR>
+<BR>
+<BR>
+しかしこれらはあくまで人間が勝手に考えた長さ。<BR>
+コンピュータやシンセから見ればなんの事やら解りません。<BR>
+<BR>
+機械は</FONT><FONT color="#ff0000">タイマーで動いている</FONT><FONT color="#004d00">からですね。<BR>
+<BR>
+人間はメトロノームなどでタイミングをとって演奏しますが、機械はタイマーの時間を見ながら命令を実行しています。<BR>
+<BR>
+０．１秒経ったらこれ、０．２秒経ったらこれ、…というように一歩一歩進むようにして命令を実行・演奏するので、そこからステップという言葉が生まれたんじゃないでしょうか。（場合によっては</FONT><FONT color="#ff0000">クロック</FONT><FONT color="#004d00">や</FONT><FONT color="#ff0000">ティック</FONT><FONT color="#004d00">などという呼び方をする事も）<BR>
+<BR>
+<BR>
+<BR>
+ＳＡＫＵＲＡでは<BR>
+<BR>
+</FONT><FONT color="#ff0000">四分音符＝９６ステップ</FONT><FONT color="#004d00"><BR>
+<BR>
+としてカウントしています。<BR>
+（設定を変える事も出来ますが、何も指定しないとこれになっています）<BR>
+<BR>
+一小節は９６×４＝</FONT><FONT color="#ff0000">３８４ステップ</FONT><FONT color="#004d00">という事ですね。<BR>
+<BR>
+曲を作る時は○分音符と指定してしていますが、ＳＡＫＵＲＡ内部ではステップへ変換されて渡されていますし、ＭＩＤＩファイルへ書き出す時もステップが使われます。<BR>
+<BR>
+<BR>
+<BR>
+普段はあまり使う事がないと思いますが、エフェクトのような特殊効果で○分音符では表現できない中途半端な長さを表現したい場合に便利です。<BR>
+<BR>
+例えば４分音符よりちょっとだけ長くしたい…と思った時は<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド４＋３２<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">のように足し算や引き算を使って出来ない事はないですが、<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド％１０８<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">とステップで指定すれば、鳴らしてから「あれ？ちょっと違うな…」と思った時でも<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド％１０７<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">とか<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド％１０９<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">のように微妙な調整が可能です。<BR>
+<BR>
+一小節が３８４ステップですから</FONT><FONT color="#ff0000">１ステップ＝３８４分音符</FONT><FONT color="#004d00">の長さになります。<BR>
+３８４分音符といえば聞き取れるか聞き取れないか微妙なところです。<BR>
+（楽譜で一番短いものでも６４分音符程度）<BR>
+<BR>
+これならどんなに微妙な長さでも表現出来ますよね。<BR>
+<BR>
+<BR>
+またとてつもなく長い長さを指定したい場合にも便利です。<BR>
+例えば「１０小節」などというとてつもない長さのものだと<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド１ー１ー１ー１ー１ー１ー１ー１ー１ー１<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">とまあこんな感じになってしまいますが、ステップだったら３８４×１０なので<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド％３８４０<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">と指定するだけで済みます。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+ピアノのタラララ～ンというのを人間の演奏っぽくしたいなぁ…などという時も<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド１６レ１６ミ１６ファ１６ソ１６ラ１６シ１６↑ド１<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">とカチカチのタイミングを<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド％２４レ％２４ミ％２４ファ％２４ソ％２４ラ％２４シ％２４↑ド１<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">とまずステップへ置き換えて、％２４（１６分音符）を元に考え<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">ド％３６</FONT><FONT color="#ff0000" size="-1">レ％２４</FONT><FONT color="#000000" size="-1">ミ％２０ファ％１６ソ％２０</FONT><FONT color="#ff0000" size="-1">ラ％２４</FONT><FONT color="#000000" size="-1">シ％３６↑ド１<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">などと段々速くなって遅くなって終わる、などという事も出来ます。<BR>
+<BR>
+この後他のパートと演奏がずれてしまうとやだなぁ…などという時は、<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD>加工前</TD>
+      <TD>１６分（２４ステップ）×７＝１６８ステップ</TD>
+    </TR>
+    <TR>
+      <TD>加工後</TD>
+      <TD>全部で２２４ステップ</TD>
+    </TR>
+    <TR>
+      <TD>差</TD>
+      <TD>４ステップオーバー</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+のように計算して<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#004d00"><FONT color="#ff0000" size="-1">ん－％４</FONT><FONT color="#000000" size="-1">　ド％３６レ％２４ミ％２０ファ％１６ソ％２０ラ％２４シ％３６↑ド１</FONT><BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">と</FONT><FONT color="#ff0000">マイナス休符であらかじめはみ出た時間を巻き戻しておけば</FONT><FONT color="#004d00">最後のドを加工前と加工後で同じタイミングに鳴らす事も出来ます。このような事をしている内に、段々ステップという概念に慣れていくでしょう。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></B><BR>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<meta http-equiv="Content-Style-Type" content="text/html; charset=Shift_JIS">
+	<link rel="stylesheet" type="text/css" href="bwb_guitar.css">
+	<link rev="made" href="mailto:bluewhitebear@hotmail.com">
+	<link rel="index"	href="../bwb_guitar.htm">
+	<link rel="next" 	href="7.htm">
+	<link rel="prev" 	href="5.htm">
+	<title>bwb_guitar.h マニュアル 「６．リズムストローク 」</title>
+</head>
+<body>
+<h1>６．リズムストローク</h1>
+<hr>
+<ul>
+	<li><a href="#bwb_guitar_6_01">BGR関数の概要</a></li>
+	<li><a href="#bwb_guitar_6_02">アルペジオとリズムを合わせて使う</a></li>
+	<li><a href="#bwb_guitar_6_03">ギター以外のフレーズにも使ってみる。</a></li>
+</ul>
+<hr>
+<ul>
+	<li><p><a name="bwb_guitar_6_01">BGR関数の概要</a></p>
+
+		<p>bwb_guitar.hの二つめの目玉機能、<strong>リズムストローク</strong>機能について説明したいと思います。<br>
+		この機能を駆使することで、ストロークの強弱や弦の２本弾きなどのの入力が簡略化されます。</p>
+	
+		<table border="1" width="90%" style="background-color:white;" cellpadding="8" summary="BGR">
+		<tr><td>
+			<p><span style="color:black;"><strong>BGR{文字列}</strong></span></p>
+			<p><span style="color:black;">
+			文字列の中にはbwb_guitar.h特有のMML（＝リズムコマンド入力モード）が使われる。<br>
+			以下にその特有のMMLを示す。
+			</span></p>
+			<p><span style="color:black;">
+			コマンド<br>
+			A：全弦ダウンストローク<br>
+			S：全弦アップストローク<br>
+			Z：低音弦二本をダウンストローク<br>
+			X：低音弦二本をアップストローク<br>
+			Q：高音弦二本をダウンストローク<br>
+			W：高音弦二本をアップストローク<br>
+			a：全弦ダウンストローク（弱め）<br>
+			s：全弦アップストローク（弱め）<br>
+			z：低音弦二本をダウンストローク（弱め）<br>
+			x：低音弦二本をアップストローク（弱め）<br>
+			q：高音弦二本をダウンストローク（弱め）<br>
+			w：高音弦二本をアップストローク（弱め）<br>
+			r：休符<br>
+			^：タイ<br>
+			&lt;：アルペジオコマンド入力モードから一時的に抜け出す<br>
+			&gt;：アルペジオコマンド入力モードに戻る
+			</span></p>
+		</td></tr>
+		</table>
+		
+		<p>サンプルで、実際にどのような使われ方するか見ていただきましょう。</p>
+	
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		BG_LAG=!16<br>
+		<br>
+		TR(01) @25 l2 q99<br>
+		<br>
+		GEm7(1) BGR{ASZXQW^^aszxqwrr&nbsp;&lt;&nbsp;Print("bwb_guitar.h rhythm!!")&nbsp;&gt;}
+		</span></p>
+		
+		<p>まず、キーボードの左側を見てください。<br>
+		キーボードの機種によって若干差はあるかもしれませんが、<br>
+		基本的には２段目には<strong>「Q」「W」</strong>が、３段目には<strong>「A」「S」</strong>、４段目には<strong>「Z」「X」</strong>があると思います。<br>
+		リズムモードのコマンドはここの部分と一致しているため、<br>
+		以下の説明を読めば、どの文字がどのコマンドに対応しているかが、<br>
+		簡単にわかると思うので、入力しやすいと思います。</p>
+
+		<p>まず、３段目の<strong>「A」「S」</strong>を説明します。<br>
+		<strong>「A」</strong>と<strong>「S」</strong>は、全部の弦をストロークするコマンドです。<br>
+		左側の<strong>「A」</strong>は全弦ダウンストローク、右側の<strong>「S」</strong>は全弦アップストロークです。<br>
+		引数をとらないところを除けば、<span class="function">BGD,BGU</span>と大差がないかと思われます。</p>
+
+		<p>次に３段目の<strong>下</strong>の段の<strong>「Z」「X」</strong>についてです。<br>
+		これは<strong>低音</strong>弦２本を限定してストロークを行うコマンドです。<br>
+		低音弦２本限定ということ、例えば、Em7のポジション１ですと、<br>
+		押さえているポジションは <strong>６弦,５弦,４弦,３弦,２弦,１弦 = 0,2,0,0,0,0</strong> ですので、<br>
+		最も低音の弦は６弦と５弦だけ弾くことになります。<br>
+		ちょうど、ダウンストロークでいえば、<span class="function">BGD(,,,,,,6,5)</span>にあたります。<br>
+		ちなみにGsus4のポジション１のような、５弦だけミュートしているようなフォームの場合、<br>
+		５弦は演奏されず、６弦と４弦だけ演奏されます。<br>
+		また、このとき、一応ミュート状態で弦は弾いてるので、<br>
+		５弦の分もズレが考慮されますので、<br>
+		６弦と４弦の間には <strong>BG_LAG × 2 </strong> の分のズレがあります。<br>
+		左側の<strong>「Z」</strong>はダウンストローク、右側の<strong>「X」</strong>はアップストロークです。</p>
+		
+		<p>次に３段目の<strong>上</strong>の段の<strong>「Q」「W」</strong>についてです。<br>
+		これは<strong>高音</strong>弦２本を限定してストロークを行うコマンドです。<br>
+		機能的な部分は低音弦２本同じ弾くときと同じで、<br>
+		例えば、１弦だけミュートされていたとしても、<br>
+		２弦と３弦の２本の弦をきっかり弾いてくれます。<br>
+		左側の<strong>「Q」</strong>はダウンストローク、右側の<strong>「W」</strong>はアップストロークです。</p>
+		
+		<p>またこれらを<strong>小文字</strong>にすると演奏する音量やゲートを小さくすることができます。</p>
+		
+		<p>休符、タイは通常通りの扱いです。</p>
+		
+		<p>最後にアルペジオモードと同様、BGA関数の引数内で通常のMML入力に戻りたい場合、<br>
+		<strong>「&lt;」「&gt;」</strong>で実行したい文字列を挟むことで、通常のMML入力ができます。</p>
+
+	</li>
+	<li><p><a name="bwb_guitar_6_02">アルペジオとリズムを合わせて使う</a></p>
+	
+		<p>ではアルペジオのついて触れた５章の内容を絡めて、<br>
+		両方の関数を交互に使うことで、高度なパターンを作ってみましょう。</p>
+		
+		<p>サンプルを示します。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		BG_LAG=!128<br>
+		BG_PEDAL=on<br>
+		<br>
+		TR(01) @25 l16 q99<br>
+		<br>
+		#SAMPLE={<br>
+			BGR{A^xA^xA^ ^^}<br>
+			BGA{D^E^F^}<br>
+		}<br>
+		<br>
+		GCM7(1);#SAMPLE;<br>
+		GAm7;#SAMPLE;<br>
+		GDm;#SAMPLE;<br>
+		GG;#SAMPLE;<br>
+		GC;BGD(!1,,+10,,on,-BG_LAG+!8)<br>
+		y64,0</span></p>
+
+		<p>このようにパターンをマクロ化しておけば、後で応用も利きます。<br>
+		コードフォームによってミュートされている弦があるため、<br>
+		パターンのリズム感が損なわれる可能性もありますから、気をつけて利用してください。</p>
+	</li>
+	<li><p><a name="bwb_guitar_6_03">ギター以外のフレーズにも使ってみる。</a></p>
+	
+		<p>bwb_guitar.hを使ってこんな裏技も可能です。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		BG_LAG=0<br>
+		BG_PEDAL=off<br>
+		<br>
+		TR(01) @49 l16 q99<br>
+		<br>
+		#SAMPLE={<br>
+			BGR{zrQrQrzrQrQr}}<br>
+			}<br>
+		<br>
+		GCM7(1);#SAMPLE;<br>
+		GAm7;#SAMPLE;<br>
+		GDm;#SAMPLE;<br>
+		GG;#SAMPLE;<br>
+		GC;BGD(!1)</span></p>
+
+		<p>シンセパッドの分散和音を手軽に入力してみたり、<br>
+		シンセサイザーにアルペジオのパターンを弾かせてみたり、<br>
+		使用方法はいろいろ思いつきます。試してみてください。</p>
+	</li>
+</ul>
+<hr>
+<p><a href="../bwb_guitar.htm">戻る</a></p>
+</body>
+</html>

@@ -1,0 +1,95 @@
+A:LINK{
+  text-decoration : none;
+}
+A:VISITED{
+  text-decoration : none;
+}
+A:HOVER{
+  color : red;
+  text-decoration : underline;
+}
+BODY, TABLE{
+  line-height : 1.1em;
+  font-size : 1em;
+}
+
+HR{
+  color : navy;
+  width : 100%;
+}
+H1{
+	width: 100%;
+	background-color: #FF6600;
+	color: white;
+	padding: 4px;
+	font-size: 1.2em;
+}
+H2{
+	width: 100%;
+	border-width: 0 0 2px 0;
+	border-style: solid;
+	border-color: #FF6600;
+	padding: 0px 0 2px 0px;
+	font-size: 1em;
+	margin: 8px 0 4px 0;
+	color: navy;
+}
+H3{
+	width: 100%;
+	background-color: navy;
+	margin: 14px 0 8px 0;
+	padding: 2px 0 2px 4px;
+	color: white;
+	font-weght: normal;
+	font-size: 1em;
+}
+
+.title{
+	color: white;
+	background-color: orange;
+	font-weight: bold;
+	font-size: 1.1em;
+	border: 0;
+}
+.head, .foot{
+	font-weight: normal;
+	font-size: 0.8em;
+}
+.foot-link{
+	color: white;
+}
+.mini{
+	font-weight: normal;
+	font-size: 80%;
+	border: 0;
+}
+.news{
+	font-size: 0.8em;
+	background-color: #EEEEEE;
+	border-color: #EEEEEE;
+	border: 2px;
+	padding: 8px;
+	margin: 8px;
+	border-style: dashed;
+	line-height: 1.2em;
+}
+.menu{
+	font-size: 0.8em;
+	line-height: 1.3em;
+	background-color: #FFFFEE;
+	border-color: #EEEEEE;
+	border: 2px;
+	padding: 8px;
+	margin: 8px;
+	border-style: dashed;
+}
+.omake{
+	font-size: 0.8em;
+	background-color: #FFFFEE;
+	border-color: #EEEEEE;
+	border: 2px;
+	padding: 8px;
+	margin: 4px;
+	border-style: dashed;
+	line-height: 1em;
+}

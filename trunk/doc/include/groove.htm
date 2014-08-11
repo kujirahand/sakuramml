@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"groove.h" ver.0.13</TITLE>
+<META content="SAKURA Function Timing" name=keywords>
+<META name="description" content="タイミングをずらしたりグルーブ制御関数(1999/12/27) クジラ飛行机">
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"groove.h" ver.0.13</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#概要">概要</A></LI>
+  <LI><A HREF="#使い方">使い方</A></LI>
+  <LI><A HREF="#TempoChange( T1, T2, Len )">TempoChange( T1, T2, Len )</A></LI>
+  <LI><A HREF="#ResetTiming()">ResetTiming()</A></LI>
+  <LI><A HREF="#RndTiming(Val)">RndTiming(Val)</A></LI>
+  <LI><A HREF="#Swing16(Val)">Swing16(Val)</A></LI>
+  <LI><A HREF="#Swing8(Val)">Swing8(Val)</A></LI>
+  <LI><A HREF="#TimingForward(Val)">TimingForward(Val)</A></LI>
+  <LI><A HREF="#TimingBack(Val)">TimingBack(Val)</A></LI>
+</UL>
+<!--end of index-->
+<P>
+<P>
+<P>
+<P><A NAME="概要"><BR></A><HR><H1>概要</H1>
+フレーズをスィングさせたり、やタイミングをずらしたりします。 <P>
+<P><A NAME="使い方"><BR></A><HR><H1>使い方</H1>
+<BLOCKQUOTE><CODE>Include(groove.h);<BR>の一文を、曲頭に書き加えてください。<BR><P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="TempoChange( T1, T2, Len )"><BR></A><HR><H1>TempoChange( T1, T2, Len )</H1>
+◇テンポチェンジ<BLOCKQUOTE><CODE>テンポを Len の長さの間に、T1 から T2 に向かって、滑らかに変えます。<BR>ex) l8 [2 cdef gfed ] TempoChange(120,30,!1); l8 [2 cdef gfed ]<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="ResetTiming()"><BR></A><HR><H1>ResetTiming()</H1>
+◇タイミングリセット<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="RndTiming(Val)"><BR></A><HR><H1>RndTiming(Val)</H1>
+◇タイミングをランダムにバラす<BLOCKQUOTE><CODE>Val&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;タイミングをばらす値、ステップ値で指定。<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="Swing16(Val)"><BR></A><HR><H1>Swing16(Val)</H1>
+◇16beat Swing<BLOCKQUOTE><CODE>Val&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;スィングする値、ステップ値で指定。<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="Swing8(Val)"><BR></A><HR><H1>Swing8(Val)</H1>
+◇8beat Swing<BLOCKQUOTE><CODE>Val&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;スィングする値、ステップ値で指定。<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="TimingForward(Val)"><BR></A><HR><H1>TimingForward(Val)</H1>
+◇全体的に前ノリなリズム<BLOCKQUOTE><CODE>Val&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;前ノリにする値。<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="TimingBack(Val)"><BR></A><HR><H1>TimingBack(Val)</H1>
+◇全体的に後ノリなリズム<BLOCKQUOTE><CODE>Val&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;後ノリにする値。<BR><P>
+<P>
+<P>
+<P>
+<P>
+</BODY></HTML>

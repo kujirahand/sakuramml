@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>表現力を高めよう</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H1>表現力を高めよう</H1>
+<HR>
+<P>前章で見てきたことは、ストトン表記でも記述ができるMMLの基本でしたが、ここでは、さらに突っ込んで見てみましょう！</P>
+<HR>
+<P>・<B>ノートオン・オプション</B></P>
+<OL>
+  <LI><B>ノート</B>再び<BR>
+  ドレミファソラシ を cdefgab と表現し、ノートの後ろに（
+  c<FONT color="#cc0000">4</FONT> c<FONT color="#cc0000">2</FONT> のように）<FONT color="#cc0000">音長</FONT>が指定できることは、全章で書きましたが、この音長の後ろにコンマで区切り、更に、ゲート、ベロシティ、タイミングを書くことが出来ます。
+  <TABLE border="1" cellpadding="3">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">ノート[音長][,ゲート][,ベロシティ][,タイミング]</FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#3300ff">c4,100,127,2</FONT> // <FONT color="#3333cc">l4q100v127t2c</FONT> と同じ意味<BR>
+        <FONT color="#3300ff">c1,80,90,-2</FONT>　// <FONT color="#3333cc">l1q80v80t-2c</FONT> と同じ意味<BR>
+        <FONT color="#3300ff">c%96,%70,120,0</FONT> // <FONT color="#3333cc">l%96q%70v120t0c</FONT> と同じ意味</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  (＊[ ]内は省略可能を表す)<BR>
+  <BR>
+  
+  <LI><B>ノートオンごとの先行指定</B><BR>
+  細かく打ちこみ作業をしていくと、ベロシティやゲートは、頻繁に値を変えたくなります。そんなとき、いちいち、<FONT color="#6600ff">v50 c v70 c v80 e v100 g</FONT>、と書いていくのは、非常に面倒ですし、あとから修正するのも大変です。<BR>
+  そこで、登場したのが、先行指定という概念です。これは、あらかじめ一度にたくさんの値を指定してしまおうというもので、
+  l,v,q,t,oのノートオン関連のコマンドに使えます。<B>指定方法</B>は、　<FONT color="#3300ff">コマンド</FONT><FONT color="#ff0000"><B>.onNote(</B></FONT> <FONT color="#3300ff">値1,値2,値3...</FONT> <FONT color="#ff0000"><B>)</B></FONT> のように指定します。（先行指定は、指定を解除するまで繰返されます。<B>解除</B>は、<FONT color="#ff0000">コマンド</FONT><FONT color="#9900ff">値</FONT>というように普通の指定をします。）<BR>
+  <TABLE border="1" cellpadding="3">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><FONT color="#ff0000"><B>.onNote(</B></FONT><FONT color="#ffffff"> </FONT><FONT color="#ffffff">値1,値2,値3... </FONT><FONT color="#ff0000"><B>)</B></FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">l4<BR>
+        <FONT color="#6600ff">v</FONT><FONT color="#6600ff">.onNote(50,120,80,120)</FONT>;<BR>
+        cccc gggg<BR>
+        <FONT color="#6600ff">v100</FONT> //先行指定解除<BR>
+        <FONT color="#6600ff">q.onNote(100,30)</FONT>;<BR>
+        cccc gggg<BR>
+        <FONT color="#6600ff">q100</FONT> //先行指定解除<BR>
+        cccc c1</TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ccffcc"><FONT color="#330000">ここで、コマンドとは、</FONT><BR>
+        <FONT color="#6600ff"><B>o l q v t q_ v_ t_</B></FONT><BR>
+        のこと。</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  
+  <LI><B>時間ごとの先行指定</B><BR>
+  ノートオンごとの先行指定は便利なものですが、長いフレーズに対して一気に指定すると、どのノートにどの値が対応しているのか、訳がわからなくなる可能性があります。<BR>
+  時間ごとの先行指定は、指定が少し面倒ですが、値の推移を時間ごとに見られるので、便利です。<BR>
+  <B>指定方法</B>は、<FONT color="#3300ff">コマンド</FONT><FONT color="#ff0000">.onTime(</FONT><FONT color="#3300ff"> (低値, 高値, ステップ時間), </FONT><FONT color="#9933cc">(低値, 高値, ステップ時間)</FONT><FONT color="#3300ff">, (低値, 高値, ステップ時間), ... </FONT><FONT color="#ff0000">)</FONT>です。<BR>
+  <B>解除方法</B>は、<FONT color="#6600ff">コマンド</FONT><FONT color="#cc00ff">値</FONT>で、.onNoteの解除と同じです。<BR>
+  （ここで、問題になるのは、ステップ時間ですが、ｎ分音符時間指定がしたいときは、<FONT color="#ff0000" size="+1"><B>!</B></FONT><FONT color="#9900ff">n</FONT>か、<FONT color="#ff0000">Step(</FONT><FONT color="#9900cc">n</FONT><FONT color="#ff0000">)</FONT>とすれば、ｎ分音符がステップ時間に変換されます。）<BR>
+  またこちらも、機能解除しない限り繰り返されます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><B><FONT color="#ff0000">.onTime(</FONT></B><FONT color="#ffffff"> (低値, 高値, ステップ時間), </FONT><FONT color="#ffffff">(低値, 高値, ステップ時間)</FONT><FONT color="#ffffff">, ... </FONT><B><FONT color="#ff0000">)</FONT></B></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#9900ff">v.onTime(60,127,</FONT><FONT color="#ff0000"><B>!</B></FONT><FONT color="#9900ff">1)</FONT>;<BR>
+        l8 cccc cccc cccc cccc<BR>
+        <FONT color="#9900ff">v100</FONT> <FONT color="#cc0000">//.onTimeの解除</FONT><BR>
+        <BR>
+        <FONT color="#6600ff">q.onTime(10,120,</FONT><FONT color="#ff0000">!</FONT><FONT color="#6600ff">1)</FONT><BR>
+        l8 cccccccc dddddddd<BR>
+        <FONT color="#6600ff">q80</FONT> <FONT color="#cc0000">//.onTimeの解除</FONT> <BR>
+        <BR>
+        <FONT color="#9900ff">q.onTime((100,100,</FONT><FONT color="#ff0000">!</FONT><FONT color="#9900ff">4),(10,10,</FONT><FONT color="#ff0000">!</FONT><FONT color="#9900ff">4))</FONT>;<BR>
+        l4 cccc gggg<BR>
+        l4 cc8c8cc8c8 gg8g8gg8g8<BR>
+        <FONT color="#9900ff">q100</FONT>　<FONT color="#cc0000">//.onTimeの解除</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  この.Timeオプションは、記述が冗長になりやすいため、.Cycleオプションがあります。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><B><FONT color="#ff0000">.onCycle(</FONT></B><FONT color="#ffffff"> </FONT><FONT color="#ffffff">ステップ時間, 値１, 値２, 値３, 値４, 値５
+        ...</FONT><B><FONT color="#ff0000">)</FONT></B></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#9900ff">t.onCycle(!16, 0, 8</FONT><FONT color="#9900ff">)</FONT>;<BR>
+        l16 cccc cccc cccc cccc<BR>
+        <FONT color="#cc0000">//これは、t.onTime(0,0,!16, 8,8,!16)と同じ意味。</FONT><FONT color="#cc0000"><BR>
+        </FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <BR>
+  また<FONT color="#ff0000">相対指定コマンド v_ t_ q_</FONT> などと組み合わせれば、どのフレーズに対しても一定のグルーブ（ノリ）を与えることが出来ます。<BR>
+  v_ はベロシティーの相対指定。 t_ はタイミングの相対指定。q_
+  はゲートの相対指定コマンドで、それぞれ
+  v
+  t q とは独立しています。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#6600ff">v.onNote( 40,100 )</FONT>;　//(1)<BR>
+        l8 cccccccc<BR>
+        <FONT color="#ff0000">v_.onTime(-40,40,!1)</FONT>;//(2)<BR>
+        cccccccc dddddddd eeeeeeee</TD>
+        <TD bgcolor="#ffffff"><IMG src="pic/graph.gif" width="176" height="100" border="0"><BR>
+        (２)自体は、右上がり直線のグラフになるが、（１）と組み合わせることで複雑な波形が再現できます。</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  ver0.999から、この相対指定コマンドが、別々の１０個の値を指定できるようになりました。これにより、今まで以上に複雑なリズムを表現できます。<BR>
+  <TABLE border="1" width="100%">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド__(番号0~9)</FONT><BR>
+        　　<FONT color="#ffffff">v__番号</FONT><BR>
+        <FONT color="#ffffff">　　q__番号</FONT><BR>
+        <FONT color="#ffffff">　　t__番号</FONT><BR>
+        <FONT color="#ffffff">(0番は、コマンド_と同じ意味)</FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">t.onCycle(!16,0,8);<FONT color="#cc0000">//基本はハーフシャッフル</FONT><BR>
+        t__1.onCycle(!4,0,-2);<FONT color="#cc0000">//偶数拍目頭は少し前ノリに</FONT><BR>
+        t__2.onTime(0,8,!1^1);<FONT color="#cc0000">//２小節ごと少しずつもたっていくように</FONT><BR>
+        [16 l16 cccc cccc ]</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  
+  <LI><B>値をランダムで曖昧にする</B><BR>
+  人間の演奏は機械と違って、良い意味で曖昧で、その曖昧さが味になったりします。<FONT color="#cc00ff">コマンド</FONT><FONT color="#6600ff">.Random(</FONT><FONT color="#cc00ff">n</FONT><FONT color="#6600ff">)</FONT>でnを０以上に設定すると、それ以降の値をランダムに上下させます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><B><FONT color="#ff0000">.Random(</FONT><FONT color="#ffffff">n</FONT><FONT color="#ff0000">)</FONT></B></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">v80 <FONT color="#6600ff">v.Random(20)</FONT> l8 cccc cccc cccc cccc<BR>
+        <FONT color="#6600ff">v.Random(0)</FONT>; <FONT color="#cc0000">//.Randomの解除</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  
+  <LI>値の範囲を制限する<BR>
+  <TABLE border="1" bgcolor="#ffffcc">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><B><FONT color="#ff0000">.Range(</FONT><FONT color="#ffffff">低値</FONT><FONT color="#ff0000">, </FONT><FONT color="#ffffff">高値</FONT><FONT color="#ff0000">)</FONT></B></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ccffff">これを設定することにより、値の範囲を制限できます。</TD>
+      </TR>
+      <TR>
+        <TD>v<FONT color="#3300ff">.Range</FONT>(40,80)<BR>
+        v.onTime(0,127,!2);<BR>
+        l8 cccc cccc cccc cccc<BR>
+        v<FONT color="#3300ff">.Range</FONT>(-1,-1);<FONT color="#cc0000">//範囲制限の解除。</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <BR>
+  
+  <LI><B>その他</B><BR>
+  ノートオンオプションには、他にもオプションがありますが、最大値を設定したり、＞＜の意味を逆にしたりと、たいしたことないので、ヘルプのMML・ノートオンオプションの項を参照してください。
+</OL>
+<HR>
+<P align="right"><A href="index.htm">戻る</A>｜<A href="mml2_1.htm">次へ</A></P>
+</BODY>
+</HTML>

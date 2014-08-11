@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM HomePage Builder 2000 V4.0.2  for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>関数を使うと何が出来る？</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H1>関数を使うと何が出来るの？</H1>
+<HR>
+<H2>関数の概要</H2>
+<P>　関数を記述することで、サクラの機能を拡張することが出来ます。</P>
+<P>　ただし、ここで重要なのは、関数が分からなければ、曲作りが出来ないかと言えば、そんなことはありません。</P>
+<P>　曲作りで同じような処理を何度も書くことがあるとか、なんとか、もっと簡単にコマンドを実行したいとか、計算で音楽を作りたいという方は、関数が使えると、ものすごく作曲が面白くなります！！</P>
+<HR>
+<H2>具体的に関数を使ってみる</H2>
+<P>　みじんこ先生が掲示板に書いてくれた、関数の効用を一部引用してみます。</P>
+<P>□投稿者/ <A href="mailto:ryu.u@jcom.home.ne.jp">みじんこ</A>　<SMALL>-(2002/09/26(Thu) 
+02:08:02)</SMALL></P>
+<P>例えば音にエンベロープ（音量がじわじわ上がったり下がったりする効果）をつけたい時は</P>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">EP.W(127,90,!16)</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>などとすると音を鳴らすたびに１６分の長さで少し音量が小さくなってくれたりします。<BR>
+<BR>
+　これは「音符の始まりあたりを加工する方法」ですが、同じ方法では「音符の終わりあたり」つまり余韻を操作する事ができません。<BR>
+<BR>
+笛とかストリングスを音符毎になめらかに小さくしたい…と思っても気合でＥＰ．Ｔしなくてはならなくなってしまい、うーん、それでは面倒くさいなぁ、困ったなぁ、という時関数が使えると、</P>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">//----------------------------------<BR>
+      //---関数定義部分<BR>
+      Function RRS(Len){<BR>Int Now_Vol=MML(y7) // 現在のボリュームを保存<BR>If(Len==0){Len=!32}　　// 
+数値省略なら３２分音符長で<BR>r-%(Len) V.T(MML(y7),40,Len) r%(Len)<BR>V(Now_Vol) // 
+ボリュームをコマンド前の状態に<BR>}<BR>
+      //----------------------------------<BR>
+      //---関数利用例<BR>
+      // カッコにはフェードアウトの長さを入れてね<BR>
+q99 V(100) EP(127)<BR>
+      c4d4e4 RRS(!8) 
+f4g4</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>このようにｅ４に余韻をつける…というような事が可能になります。<BR>
+<BR>
+元々ＳＡＫＵＲＡはかなり便利なのですが、もっと細かい事をやりたい時にはこのように自分でオリジナルのコマンドを作ってしまった方が早かったりするわけです。<BR>
+<BR>
+文字列マクロは単に置き換えるだけなので、ＩＦなどを使えばそれなりには複雑な動きもしてくれますけど、やっぱり限界があります。<BR>
+<BR>
+勿論簡単な機能だったら文字列マクロの方が楽な場合もありますから、そちらを選んでもかまいません。変数や引数を複雑にいじりたい場合は関数で、簡単でいいなら文字列マクロで、という具合に使い分けるといいんじゃないかと思います。</P>
+<HR>
+<H2>関数のサンプルは？</H2>
+<P>　一番お手本となる関数のサンプルは、サクラの、&quot;Include&quot;フォルダに入ってる、拡張子が&quot;.h&quot;のファイルです。これは、作者とサクラの有志により作られたたくさんの関数が分野ごとに定義ファイルとしてまとめられています。参考にどうぞ。</P>
+<HR>
+<P align="right"><A href="index.htm">戻る</A></P>
+</BODY>
+</HTML>

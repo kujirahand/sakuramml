@@ -1,0 +1,140 @@
+/*
+ *	MIDI Standard for Sakura
+ */
+/****************************************/
+/*			背景						*/
+/****************************************/
+/* 桜 春爛漫 (Default) */
+body {
+	background-attachment: fixed;
+	position:absolute;
+	left:16px;
+	scrollbar-base-color : #FFFFFF;
+	scrollbar-face-color : #FFFFFF; 
+	scrollbar-track-color: #FFFFFF;
+	scrollbar-arrow-color : #000000; 
+	scrollbar-3dlight-color: #000000;
+	scrollbar-highlight-color : #FFFFFF; 
+	scrollbar-shadow-color : #FFFFFF;
+	scrollbar-darkshadow-color : #000000;
+}
+
+/****************************************/
+/*			ヘッダー／フッター			*/
+/****************************************/
+/* Header */
+#header {
+	border-collapse: collapse;
+	background-color: cyan;
+	border: 1px solid cyan;
+}
+
+#header th {
+	border: 1px solid cyan; 
+	background-color: cyan;
+	color: black;
+	text-align: left;
+}
+
+#header td {
+	border: 1px solid cyan; 
+	background-color: cyan;
+	color: black;
+	text-align: left;
+}
+
+/* Footer */
+#footer {
+	border-collapse: collapse;
+	background-color: cyan;
+	border: 1px solid cyan;
+}
+
+#footer th {
+	border: 1px solid cyan; 
+	background-color: cyan;
+	color: black;
+	text-align: left;
+}
+
+#footer td {
+	border: 1px solid cyan; 
+	background-color: cyan;
+	color: black;
+	text-align: left;
+}
+
+/****************************************/
+/*			コンテンツ					*/
+/****************************************/
+/* 見出し */
+#contents h1 {
+	border-left: blue 20px solid;
+	border-bottom: blue 2px solid;
+	padding-left: 20px;
+}
+
+#contents h2 {
+	border-left: blue 20px solid;
+	border-bottom: blue 1px solid;
+	padding-left: 10px;
+}
+
+#contents h3 {
+	border-bottom: blue 1px solid;
+}
+
+/* 表 */
+#contents table {
+	border-collapse: collapse;
+	border: 1px solid blue;
+}
+
+#contents caption {
+	border: 1px solid blue; 
+	background-color: yellow;
+	color: black;
+	text-align: left;
+}
+
+#contents th {
+	border: 1px solid blue; 
+	background-color: cyan;
+	color: black;
+	text-align: center;
+}
+
+#contents td {
+	border: 1px solid blue; 
+	color: black;
+	text-align: left;
+}
+
+/* 強調表示 */
+#contents strong {
+	color: red;
+}
+
+
+/* 引数表示 */
+#contents var {
+	color: red;
+}
+
+/* メニューの中 */
+#contents span {
+	color: black;
+	display: inline;		/* 初期状態は	*/
+	visibility: visible;	/* 　表示する。	*/
+}
+
+/****************************************/
+/*			リンク関連					*/
+/****************************************/
+a:link{
+	color: blue;
+}
+
+a:visited{
+	color: green;
+}

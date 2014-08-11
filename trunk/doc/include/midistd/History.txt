@@ -1,0 +1,68 @@
+========================================================================
+		Standard MIDI Define  for Sakura
+                         経歴
+                  Copyright (C)2001 A.Watanabe  ( S.W. )
+========================================================================
+
+
+Version 1.00						2006.11. 1
+	各種ドキュメントの作成。
+	■関数定義
+	以下の関数を作成。
+	音楽表現に直接関連するExclusive Messageを、全てサクラの関数化完了。
+	今後は、コントロールチェンジ関連に着手する。
+	・RT_CD_ChPressure
+	・RT_CD_PolyPressure
+	・RT_CD_CC
+	・RT_KeyBased_Basic
+
+Version 0.04β						2006.10.28
+	各種ドキュメントの作成。
+	■関数定義
+	以下の関数を作成
+	・RT_NoteTuning
+	・NRT_NoteTuning
+	・RT_NoteTuning_Bank
+	・NRT_NoteTuning_Bank
+	以下４つの関数で、チャンネルを正確に指定できなかったバグを修正。
+	・RT_OctaveTuningB
+	・RT_OctaveTuningW
+	・NRT_OctaveTuningB
+	・NRT_OctaveTuningW
+
+Version 0.03β						2006.10.10
+	各種ドキュメントの作成。
+	■定数定義
+	デバッグ用定数を作成した。…MidiStd_Debug
+	■関数定義
+	デバッグ用の処理を追加。
+	以下の関数を作成
+	・MasterTuning
+	・MasterFineTuning
+	・MasterCoarseTuning
+	・RT_OctaveTuningB
+	・RT_OctaveTuningW
+	・NRT_OctaveTuningB
+	・NRT_OctaveTuningW
+
+
+Version 0.02β						2006.10. 7
+	■関数定義
+	以下の関数について、パラメータが2Wordとなっていなかったミスを修正。
+	・MasterVolume
+	・MasterBallance
+
+
+Version 0.01β						2006.10. 6
+	■定数定義
+	以下項目について、定数化
+	・ユニバーサル・エクスクルーシブ・メッセージ
+	■関数定義
+	以下の関数を作成
+	・GM_SystemOff
+	・GM_SystemOn1
+	・GM_SystemOn2
+	・MasterVolume
+	・MasterBallance
+	・RT_Reverb関連
+	・RT_Chorus関連

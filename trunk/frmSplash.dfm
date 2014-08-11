@@ -1,6 +1,6 @@
 object frmSplashWindow: TfrmSplashWindow
-  Left = 192
-  Top = 107
+  Left = 238
+  Top = 179
   BorderStyle = bsNone
   Caption = 'Splash!'
   ClientHeight = 201

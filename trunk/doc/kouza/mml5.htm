@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM HomePage Builder 2000 V4.0.2  for Windows">
+<TITLE>制御構造を使って楽をしよう</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H2>制御構造を使って楽をしよう</H2>
+<HR>
+<P>制御構造とは、同じ部分を繰返し実行したり、条件によって処理の内容を変えたりする場合に使います。</P>
+<P>これによって、コンパイルの度に違う演奏をさせたり、演算による演奏が可能になったり、実験的な試みが出来たりします。</P>
+<HR>
+<OL>
+  <LI><B>コメント</B><BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffff"><FONT color="#3300ff">// </FONT><FONT color="#ffcc00">...</FONT> （行末の改行までコメント）</TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffff"><FONT color="#3300ff">/* </FONT><FONT color="#ffcc00">...</FONT><FONT color="#3300ff"> */</FONT><BR>
+        <FONT color="#cc0000">/*</FONT>から<FONT color="#cc0000">*/</FONT>まで、囲まれた領域をコメントにします。<BR>
+        このコメントは、<FONT color="#6633ff">/* cdefg </FONT><FONT color="#cc0066">/* check nest */</FONT><FONT color="#6633ff"> */</FONT> のように、ネストにもできます。</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  ＊コメントに指定された部分は、コンパイルの始めに、空白文字に置き換えられます。<BR>
+  <BR>
+  
+  <LI><B>制御</B><BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">[</FONT><FONT color="#ffff00">num</FONT><FONT color="#ffff00"> </FONT><FONT color="#ffff00">文</FONT><FONT color="#ffffff"> : </FONT><FONT color="#ffff00">文</FONT><FONT color="#ffffff"> ] </FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ccffff">ＭＭＬでよく使う単純ループです。[ ... ]の間を<FONT color="#cc00ff">num</FONT>回ループします。':'は、省略可能です。ループからの脱出を意味し、<FONT color="#cc00ff">num</FONT>回目にそのループから抜けます。</TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">[4 cdef ] // cdefの４回繰返し<BR>
+        [2 <FONT color="#cc0000">cd</FONT> [2 <FONT color="#666699">bb</FONT>] ] // 展開→<FONT color="#cc0000">cd</FONT> <FONT color="#666699">bbbb</FONT> <FONT color="#cc0000">cd</FONT> <FONT color="#666699">bbbb</FONT><BR>
+        [2 [2<FONT color="#cc00ff">c</FONT>][2<FONT color="#99cc00">d</FONT>] ] // 展開→<FONT color="#cc00ff">cc</FONT><FONT color="#99cc00">dd</FONT> <FONT color="#cc00ff">cc</FONT><FONT color="#99cc00">dd</FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">[4 ccc : d ] e //展開→ ccc d ccc d ccc d
+        ccc e<BR>
+        [2 [2 <FONT color="#ff33ff">ee</FONT>:gg] aa]//展開→<FONT color="#ff33ff">ee</FONT>gg<FONT color="#ff33ff">ee</FONT>aa <FONT color="#ff33ff">ee</FONT>gg<FONT color="#ff33ff">ee</FONT>aa<BR>
+        [2[2 c:d]:e]f//展開→cdce cdcf</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">IF(</FONT><FONT color="#ffff00">条件</FONT><FONT color="#ffffff">){ </FONT><FONT color="#ffff00">true</FONT><FONT color="#ffffff"> }ELSE{ </FONT><FONT color="#ffff00">false</FONT><FONT color="#ffffff"> }</FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ccffff">・条件分岐です。条件が正しければ{ true }を、正しくなければ、{
+        false }を実行します。<BR>
+        ・条件には数値計算式が使えます。（今のところ文字列は条件になれません。）<BR>
+        ・内部では、条件が０ならELSE{ false }部分を実行し、０以外なら{
+        true }部分を実行することになっています。以下、条件に有用な演算子と返却値です。<BR>
+        <TABLE border="1">
+          <TBODY>
+            <TR>
+              <TD align="center">a==b</TD>
+              <TD align="left">aとbが等しければ１を等しくないとき０を返す</TD>
+            </TR>
+            <TR>
+              <TD align="center">a!=0</TD>
+              <TD align="left">aとbが等しく無い時１を、等しいとき０を返す</TD>
+            </TR>
+            <TR>
+              <TD align="center">a&lt;b</TD>
+              <TD align="left">aがbより小さいとき１、それ以外０を返す</TD>
+            </TR>
+            <TR>
+              <TD align="center">a&gt;b</TD>
+              <TD align="left">aがbより大きいとき１、それ以外０を返す</TD>
+            </TR>
+            <TR>
+              <TD align="center">a&lt;=b</TD>
+              <TD align="left">aがb以下のとき１、それ以外０を返す</TD>
+            </TR>
+            <TR>
+              <TD>a&gt;=b</TD>
+              <TD>aがb以上のとき１、それ以外０を返す</TD>
+            </TR>
+          </TBODY>
+        </TABLE>
+        ・ELSE{ false }は、省略することが出来ます。<BR>
+        ・文字列の比較もできますが、#name 形式の文字列マクロを使って、比較せねばなりません。</TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">//変数と定数の比較<BR>
+        Int AAA = 3;<BR>
+        IF(AAA&gt;0){ cccc }ELSE{ cgcg }<BR>
+        IF(AAA&lt;10){ cccc }ELSE{ cgcg }<BR>
+        IF(AAA==3){ cccc }ELSE{ cgcg }<BR>
+        <BR>
+        //変数と変数の比較<BR>
+        Int A = 100;<BR>
+        Int B = 300;<BR>
+        IF(A&gt;=B){ cccc }ELSE{ g1 }<BR>
+        IF(A!=B){ cccc }ELSE{ g1 }<BR>
+        <BR>
+        //直接数値を指定した場合<BR>
+        IF(0){ Print({TRUE}) }ELSE{ Print({FALSE})
+        }<BR>
+        IF(1){ Print({TRUE}) }ELSE{ Print({FALSE})
+        }<BR>
+        IF(5){ Print({TRUE}) }ELSE{ Print({FALSE})
+        }</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">WHILE(</FONT><FONT color="#ffff00">条件</FONT><FONT color="#ffffff">){ </FONT><FONT color="#ffff00">文</FONT><FONT color="#ffffff"> }</FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ccffff">・条件が正しい間（１以上の時）、文を繰返します。（一応安全のため、同じ文を長時間繰返し続けるとエラー表示して止まります。）<BR>
+        ・ループから強制的に脱出するには、EXITを使います。</TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">Int A=40;<BR>
+        WHILE(A&lt;127){<BR>
+        　　A = A+Random(8);<BR>
+        　　Print(A);<BR>
+        　　IF(A==80){ EXIT; }//強制脱出<BR>
+        　　l8n(A);<BR>
+        }</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#3300ff"><FONT color="#ffffff">FOR(</FONT><FONT color="#ffff00">初期化</FONT><FONT color="#ffffff">;</FONT><FONT color="#ffff00">条件</FONT><FONT color="#ffffff">;</FONT><FONT color="#ffff00">増分</FONT><FONT color="#ffffff">){ </FONT><FONT color="#ffff00">文</FONT><FONT color="#ffffff"> }</FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ccffff">まず、変数を<B>初期化</B>し、<B>条件</B>が正しい（１以上）か判断します。もし、条件が正しければ、<B>文</B>を実行し、その後、<B>増分</B>を実行します。それから、再び<B>条件</B>が正しいか判断し、正しければ、<B>文</B>と<B>増分</B>を実行します。これは、条件が正しい間繰返されます。</TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">FOR(Int A=1; A&lt;=10; A=A+1){<BR>
+        　　Print(A);<BR>
+        }<FONT color="#9900ff">//1から10までを表示する</FONT><BR>
+        <BR>
+        FOR(Int B=0; B&lt;16; B++){<FONT color="#99ccff"><FONT color="#ff0000">//B++はB=B+1と同義</FONT></FONT><BR>
+        　　l16c<BR>
+        }<FONT color="#9900ff">//{ l16c }を16回実行する</FONT><BR>
+        <BR>
+        FOR(Int C=0; C==0;){<BR>
+        　　cdef<BR>
+        　　C=Random(3);<FONT color="#ff0000">//Cに0～2の乱数を代入する</FONT><BR>
+        }<FONT color="#9900ff">//Cに0が代入されるまで繰返される</FONT><BR>
+        <BR>
+        FOR(Int I=0; I&lt;32; I++){<BR>
+        　　Int C = 40+Random(20)+I;<BR>
+        　　l8n(C);<FONT color="#ff0000">//C番のノートナンバーを発音する</FONT><BR>
+        　　Print(C);<BR>
+        }<FONT color="#9900ff">//ランダムに32個のノートを発音する</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  ＊追記：<BR>
+  変数++で、変数の値を１増やします。<BR>
+  変数--で、変数の値を１減らします。<BR>
+  <BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ccffff"><FONT color="#3300ff">EXIT</FONT></TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc">ループ内から強制的に脱出します。</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  
+</OL>
+<HR>
+<P align="right"><A href="index.htm">戻る</A>｜<A href="mml6.htm">次へ</A></P>
+</BODY>
+</HTML>

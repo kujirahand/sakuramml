@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<body>
+
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='index.html'>MIDI Standard</a>＼
+	<a href='exclusive.html'>Exclusive Message</a>＼
+</td>
+</tr>
+</table>
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>General MIDI</h2>
+<!----------------------------------------------------------------------->
+<h3>概要</h3>
+この機能は、ＧＭモードと、楽器固有のモードを切り換える為に用います。<br>
+
+<br><br>
+<!----------------------------------------------------------------------->
+<h3>詳細</h3>
+
+<br>
+<h4>■GM System Off</h4>
+MIDIデバイスに固有のモードがある場合、General MIDIモードを解除します。<br>
+General MIDIモードしか無い場合は無効です。<br>
+<ul>
+<li><a href='./function/GM_System.html'>GM_SystemOff</a>
+</ul>
+
+<br>
+<h4>■GM System Level.1 On</h4>
+MIDIデバイスをGeneral MIDI Level.1(GM1)モードに切り換え、各パラメータを初期化します。<br>
+楽器によっては、General MIDI Level.2(GM2)モードとなります。<br>
+<br>
+又、Roland社SCシリーズのMIDIデバイスはGSの音色、YAMAHA社MuシリーズのMIDIデバイスはTG-300Bの音色を使用することが出来ますが、
+これらのMIDIデバイスは、GM_SystemOn2を明示的に送信しないと、General MIDI Level.2(GM2)モードの音色を使用する事はできません。<br>
+<br>
+General MIDIモードと楽器固有のモードを持つMIDIデバイスがこのメッセージを受信すると、General MIDIモードとなります。<br>
+その為、楽器固有の音色や機能は使えなくなる可能性がありますが、GM規格に対応している他の楽器との互換性は保つ事が出来ます。<br>
+<ul>
+<li>GM-Reset　　("stdmsg.h"で定義されています。)
+<li><a href='./function/GM_System.html'>GM_SystemOn</a>
+<li><a href='./function/GM_System.html'>GM_SystemOn1</a>
+</ul>
+
+<br>
+<h4>■GM System Level.2 On</h4>
+MIDIデバイスをGeneral MIDI Level.2(GM2)モードに切り換え、各パラメータを初期化します。<br>
+GS規格とGM2規格が混在する楽器、XG規格とGM2規格が混在する楽器、
+若しくはGS規格とXG規格とGM2規格が混在する楽器がこのメッセージ受信した場合は、
+GS規格やXG規格にて制定されている音色や機能は使用できなくなります。<br>
+これは、GS規格, XG規格はGM Level.1の上位規格ではありますが、GM Level.2とは互換性が無い為です。<br>
+例：<br>
+Roland社　SC8820, SC8850<br>
+YAMAHA社　Mu128, Mu1000, Mu2000<br>
+<ul>
+<li><a href='./function/GM_System.html'>GM_SystemOn2</a>
+</ul>
+
+<br>
+<h3>■GM System Level.1 & 2 On で初期化される内容</h3>
+GM System Level.1 Onメッセージ及び、GM System Level.2 Onメッセージを
+受信する事で初期化されるパラメータは以下の通りです。<br>
+<br>
+
+<table>
+<caption>チャンネルの設定<caption>
+<tr><th>Channel	</th><th>初期化内容							</th><th>GM1</th><th>GM2</th></tr>
+<tr><td>1～16	</td><td>Channel Mode3						</td><td>○	</td><td>○	<br>	
+<tr><td>10以外	</td><td>平均律( A = 440 Hz )にする。		</td><td>─	</td><td>○	<br>	
+<tr><td>10以外	</td><td>メロディーチャンネルに割り当てる。	</td><td>○	</td><td>○	<br>	
+<tr><td>10		</td><td>リズムチャンネルに割り当てる。		</td><td>○	</td><td>○	<br>	
+</table>
+<br><br>
+
+<table>
+<caption>Channel Voice Messageの初期設定値<caption>
+<tr><th>Parameter					</th><th>GM1			</th><th>GM2			</th></tr>
+<tr><td>Chanel Pressure Message		</td><td>─				</td><td>0				</td></tr>
+<tr><td>Control Change Message		</td><td colspan='2'>以下、表参照				</td></tr>
+<tr><td>Program Change Message		</td><td>0 (A.Piano)	</td><td>0 (A.Piano)	</td></tr>
+<tr><td>Pitch Bend Change Message	</td><td>8192			</td><td>8192			</td></tr>
+</table>
+<br><br>
+
+<table>
+<caption>Control Change及び、Channel Mode Messageの初期設定値<caption>
+<tr><th colspan='2'>Control Change</th><th colspan='2'>初期設定値</th></tr>
+<tr><th>No.		</th><th>Parameter						</th><th>GM1	</th><th>GM2	</th></tr>
+<tr><td>0,	32	</td><td>Bank Select					</td><td>─		</td><td>Channel10以外：$78 / $00<br>	
+																				Channel10　　：$79 / $00</td></tr>
+<tr><td>1		</td><td>Modlation						</td><td>0		</td><td>0		</td></tr>
+<tr><td>5		</td><td>Portamento Time				</td><td>─		</td><td>0		</td></tr>
+<tr><td>6	,38	</td><td>Data Entry						</td><td>─		</td><td>$00 / $00</td></tr>
+<tr><td>7		</td><td>Channel Volume					</td><td>100	</td><td>100	</td></tr>
+<tr><td>10		</td><td>Panpot							</td><td>64		</td><td>64		</td></tr>
+<tr><td>11		</td><td>Expression						</td><td>127	</td><td>127	</td></tr>
+<tr><td>64		</td><td>Hold (Dumper pedal,sustaion)	</td><td>0		</td><td>0		</td></tr>
+<tr><td>65		</td><td>Portamento on/off				</td><td>─		</td><td>0		</td></tr>
+<tr><td>66		</td><td>Sostenuto						</td><td>─		</td><td>0		</td></tr>
+<tr><td>67		</td><td>Soft Pedal						</td><td>─		</td><td>0		</td></tr>
+<tr><td>71		</td><td>Timbre / Harmonic Intensity	</td><td>─		</td><td>64		</td></tr>
+<tr><td>72		</td><td>Release time					</td><td>─		</td><td>64		</td></tr>
+<tr><td>73		</td><td>Attack time					</td><td>─		</td><td>64		</td></tr>
+<tr><td>74		</td><td>Brightness						</td><td>─		</td><td>64		</td></tr>
+<tr><td>75		</td><td>Decay Time						</td><td>─		</td><td>64		</td></tr>
+<tr><td>76		</td><td>Vibrato Rate					</td><td>─		</td><td>64		</td></tr>
+<tr><td>77		</td><td>Vibrato Depth					</td><td>─		</td><td>64		</td></tr>
+<tr><td>78		</td><td>Vibrato Decay					</td><td>─		</td><td>64		</td></tr>
+<tr><td>91		</td><td>Reverb							</td><td>─		</td><td>40		</td></tr>
+<tr><td>93		</td><td>Chorus							</td><td>─		</td><td>0		</td></tr>
+<tr><td>100	,101</td><td>Registered Parameter			</td><td>─		</td><td>$7F / $7F (Null)</td></tr>
+<tr><th colspan='2'>Channel Mode</th><th colspan='2'>初期設定値</th></tr>
+<tr><td>126		</td><td>Mono Mode On	</td><td>		</td><td>1		</td></tr>
+</table>
+<br><br>
+
+<table>
+<caption>Registered Parameterの初期設定値<caption>
+<tr><th colspan='2'>Registered Parameter</th><th colspan='2'>初期設定値</th></tr>
+<tr><th>No.		</th><th>Parameter				</th><th>GM1	</th><th>GM2	</th></tr>
+<tr><td>0		</td><td>Pitch Bend Sensitivity	</td><td>2		</td><td>2　　　　　( 200 [cent] )		</td></tr>
+<tr><td>1		</td><td>Fine Tuning			</td><td>		</td><td>$40 / $00 ( ±0 [cent] )			</td></tr>
+<tr><td>2		</td><td>Corse Tuing			</td><td>		</td><td>$40 / $00 ( ±0 [cent] )			</td></tr>
+<tr><td>5		</td><td>Modlation Depth		</td><td>─		</td><td>$40 / $00 ( 50 [cent] )			</td></tr>
+</table>
+<br><br>
+
+<table>
+<caption>Universal Exclusiveの初期設定値<caption>
+<tr><th>Parameter							</th><th>GM1</th><th>GM2						</th></tr>
+<tr><td>MasterVolume						</td><td>─	</td><td>$7F / $7F	(最大値)		</td></tr>
+<tr><td>Master Fine Tuning					</td><td>─	</td><td>$40 / $00	( ±0 [cent] )	</td></tr>
+<tr><td>Master Corse Tuning					</td><td>─	</td><td>$40		( ±0 [cent] )	</td></tr>
+<tr><td>Reverb Type							</td><td>─	</td><td>4			( Large Hall )	</td></tr>
+<tr><td>Chorus Type							</td><td>─	</td><td>2			( Chorus 3 )	</td></tr>
+<tr><td>Scale Octave Tuning 1Byte format	</td><td>─	</td><td>$40		( ±0 [cent] )	</td></tr>
+</table>
+<br><br>
+
+<!----------------------------------------------------------------------->
+<h3>Reference</h3>
+
+
+<br><br>
+</div>
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>
+

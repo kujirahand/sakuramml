@@ -1,0 +1,8 @@
+トップページ, doc\index.htm
+エディタの使い方, doc\edit\index.htm
+簡単ドレミの書き方, doc\reference\sutoton.htm
+サクラ入門講座,doc\kouza\index.htm
+機能一覧,doc\reference\index.htm
+困ったときは…, doc\faq\index.htm
+コントロールチェンジ早見表,doc\reference\cc.htm
+RPN/NRPN早見表,doc\reference\rpn.htm

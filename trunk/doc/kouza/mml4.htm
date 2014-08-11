@@ -1,0 +1,303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS"><META name="GENERATOR" content="IBM HomePage Builder 2000 V4.0.2  for Windows">
+
+<TITLE>変数と関数</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H2>変数と関数</H2>
+<HR>
+<P>　ここでは、サクラ独自のスクリプト機能について説明します。単純な機能しかありませんが、自分なりの関数を作ったりすることで、作業の効率化がはかれます。</P>
+<HR>
+<H2>・<A name="変数">変数</A></H2>
+<BLOCKQUOTE>変数とは、数学にも出てきたxとかyとか、数値を入れることのできる入れ物のことです。<BR>
+<BR>
+例えば、何度も、出てくる数値があったとして、それを後から一気に直したいときなど、その何度も出てくる数値を変数にしておけば、修正が楽になるというものです。<BR>
+<BR>
+変数の種類には、整数型、配列型、文字列型の３種類があります。それらを使うには、まず、変数の宣言が必要になります。</BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT size="+2">整数型</FONT>変数</B>について<BR>
+・整数型は普通の-3とか、77とか、このような数値を言います。
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ff0000">宣言</FONT>　<FONT color="#ffffff">Int 変数名 [=初期値];</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">//変数宣言例<BR>
+      Int A = 0;<BR>
+      Int B = 50;<BR>
+      Int C = 9;<BR>
+      //A,B,Cの３つの整数型変数を作った。<BR>
+      <BR>
+      //内容の表示<BR>
+      Print(A);//Aの内容を表示<BR>
+      Print(B);//Bの内容を表示<BR>
+      Print(C);//Cの内容を表示<BR>
+      <BR>
+      //計算と表示の例<BR>
+      A = 3*(B*C/10)+3;<BR>
+      Print(A);//計算結果を表示</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+（＊Printの表示先は、エディタバージョンなら、表示-コンパイラからのメッセージで見られます。）<BR>
+<BR>
+変数を使えば、計算が出来ます。四則演算<FONT color="#3300ff">＋α</FONT>できますので、サクラを電卓の代わりに使うことも出来ます！（そんな使い方する人いないと思うけど。）<BR>
+<BR>
+使用可能な演算子の説明<BR>
+<TABLE border="1" cellpadding="3">
+  <TBODY>
+    <TR>
+      <TD align="center" bgcolor="#ffffcc">*</TD>
+      <TD bgcolor="#ffccff">掛け算</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#ffffcc">/</TD>
+      <TD bgcolor="#ffccff">割り算</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#ffffcc">%</TD>
+      <TD bgcolor="#ffccff">割り算の余りを求める</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#ffffcc">+</TD>
+      <TD bgcolor="#ffccff">足し算</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#ffffcc">-</TD>
+      <TD bgcolor="#ffccff">引き算</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#ffcc33">|</TD>
+      <TD bgcolor="#ffccff">ビットごとの論理和（ＯＲ）</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#ffcc33">&amp;</TD>
+      <TD bgcolor="#ffccff">ビットごとの論理積（ＡＮＤ）</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#ffcc33">^</TD>
+      <TD bgcolor="#ffccff">ビットごとの排他的論理和（ＸＯＲ）</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#99ffcc">==</TD>
+      <TD bgcolor="#ffccff">等しい時１、等しくない０</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#99ffcc">!=</TD>
+      <TD bgcolor="#ffccff">等しくないとき１、等しいとき０</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#99ffcc">&lt;</TD>
+      <TD bgcolor="#ffccff">より小さいとき１、それ以外０</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#99ffcc">&gt;</TD>
+      <TD bgcolor="#ffccff">より大きいとき１、それ以外０</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#99ffcc">&lt;=</TD>
+      <TD bgcolor="#ffccff">&lt;=　以下のとき１、それ以外０</TD>
+    </TR>
+    <TR>
+      <TD align="center" bgcolor="#99ffcc">&gt;=</TD>
+      <TD bgcolor="#ffccff">&gt;= 以上のとき１、それ以外１</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+四則演算は、解ると思いますが、ビットごとの論理演算とはなんだ～！！という方もいると思いますが、話すと長くなりそうなのでここには書きません。たぶん、あまり使わないと思います。<BR>
+音源をマニアックに操作したい場合に有効な演算です。<BR>
+その下の水色のパネルの演算子は、変数と変数の比較に使います。次の章の制御構造にて詳しく説明します。<BR>
+<BR>
+<BR>
+<B><FONT size="+2">配列型</FONT>変数</B>について<BR>
+<BR>
+配列変数とは、たくさんの値を持つことの出来る変数です。<BR>
+オプションを指定するときなど、変数を使うといくつも値をかかなければなりませんが、配列変数は、その中に多くの値を持つことが出来るので、表記が簡潔になります。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ff0000">宣言</FONT>　<FONT color="#ffffff">Array 変数名 [ =(初期値1,値2,値3...)];</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">//配列変数の宣言<BR>
+      Array A = ( 100,10,80,10 );<BR>
+      Array B = ( 10,100,30,100 );<BR>
+      Array C = ( 20,20,100,20 );<BR>
+      <BR>
+      //内容の表示<BR>
+      Print(A);<BR>
+      Print(B);<BR>
+      <BR>
+      //配列同士をまとめる<BR>
+      A = (A, B, C);<BR>
+      Print(A);</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+これだけ（↑）では、いったい何の役に立つのかと思いますが、以下に役立つ例を紹介します。<BR>
+<TABLE border="1" bgcolor="#ffffcc">
+  <TBODY>
+    <TR>
+      <TD>Array <FONT color="#6600ff">m</FONT> = <FONT color="#6600ff">(10,10,!16)</FONT>;<BR>
+      Array <FONT color="#ff00ff">A</FONT> = <FONT color="#ff00ff">(100,100,!16)</FONT>;<BR>
+      q<FONT color="#cc0000">.onTime</FONT>( <FONT color="#6600ff">m</FONT>,<FONT color="#ff00ff">A</FONT>,<FONT color="#6600ff">m</FONT>,<FONT color="#6600ff">m</FONT>,<FONT color="#ff00ff">A</FONT>,<FONT color="#6600ff">m</FONT>,<FONT color="#ff00ff">A</FONT>,<FONT color="#ff00ff">A</FONT>);<BR>
+      l16 o6[16 'ceg' ];<FONT color="#3366ff">//cegの和音を16個鳴らす</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+と、このように、たくさん書くと面倒に感じられたノートオンオプションの<FONT color="#cc0000">.onTime</FONT>の指定がすっきりとまとまりました。<BR>
+*配列のサイズを得るには、SizeOfという関数を使います。<BR>
+<BR>
+<B><FONT size="+2">文字列型</FONT></B><B>変数</B>について<BR>
+これは、文字列を覚えておく変数です。何度も使うフレーズを登録しておいて、使いまわす場合に有効です。<BR>
+また、文字列型変数は、オプション指定( .s
+)で、文字列置換を行うことができます。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ff0000">宣言</FONT>　<FONT color="#ffffff">Str 変数名 [ = { 初期値 }];</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">//文字列変数の宣言<BR>
+      Str A = {cdefg}<BR>
+      Str B = {efgab}<BR>
+      <BR>
+      //内容の表示<BR>
+      Print(A);<BR>
+      Print(B);<BR>
+      <BR>
+      //文字列同士を足す<BR>
+      A = A + B;<BR>
+      Print(A);<BR>
+      A;//←これだけで A の内容を演奏する意味<BR>
+      <BR>
+      //文字列の内容を置換する例<BR>
+      Str C = { irii rirr irii riri };<BR>
+      C.s({i},{'cega'});<BR>
+      l16 o5 C;</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<H2>・<A name="関数">関数</A></H2>
+<BLOCKQUOTE>MMLを打ちこんでいると、似たようなコマンドの繰返しが何度も出てきて、打ちこむのが面倒になります。<BR>
+全く同じ内容のものなら、上記の文字列変数を使えば、良いのですが、部分的に数値やフレーズを変えたいというとき、関数を使うことで、作業が楽になります。<BR>
+<BR>
+また音源操作など、比較的よく使うと思われる関数は、前回も紹介しましたが、<FONT color="#6633ff">Include</FONT>フォルダーに収録しています。スクリプトがなんとなく解ってきたら眺めてみてください。<BR>
+<BR>
+関数について<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3366ff"><FONT color="#ff0000">定義</FONT><BR>
+      <FONT color="#ffffff">Function 関数名(型 引数1=省略値,<FONT color="#ffffff">型 </FONT>引数2<FONT color="#ffffff">=省略値</FONT>,<FONT color="#ffffff">型 </FONT>引数3<FONT color="#ffffff">=省略値</FONT>...){</FONT><BR>
+      <FONT color="#ffffff">　　定義内容</FONT><BR>
+      <FONT color="#ffffff">}</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffff">・上のように定義した関数は、その関数名(引数)と書くことで呼び出すことができます。<BR>
+      ・引数の型は、Int型、Array型,Str型が使えます。<BR>
+      ・引数の型を省略すると、Int型変数と見なされます。<BR>
+      ・関数の引数は省略できます。引数を省略すると、その引数には省略値（設定がない時は０）が代入されたことになります。<BR>
+      ・また、関数は普通、関数名()という形で使われますが、引数が何も無い時は、()を省略して、関数名だけでも、呼び出すことが出来ます。<BR>
+      ・関数の呼び出し時に、引数を与えるのですが、引数の与え方は、&quot;Func(a1,a2,a3...)&quot;と書くのが普通ですが、&quot;Func=a1,a2,a3&quot;のように書くことが出来ます。もし、文字列が第１引数ならば、&quot;Func{
+      str }&quot;のように () を使わず直接、{} を記述することができます。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">//定義例<BR>
+      Function Nanika(Int A, Int B,Int C){<BR>
+      　　Print(A);<BR>
+      　　Print(B);<BR>
+      　　Print(C);<BR>
+      }//引数A,B,Cの内容を打ち出すだけの関数<BR>
+      <BR>
+      //利用例<BR>
+      Nanika(50,30,100);//50 30 100と表示<BR>
+      Nanika(1,2,3);//1 2 3と表示<BR>
+      Int AAA = 1000;<BR>
+      Nanika(AAA,AAA,AAA);//1000 1000 1000と表示</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">/*<BR>
+      　オプションコマンドなど引数がたくさん必要なコマンドを、簡単な関数にまとめる例<BR>
+      */<BR>
+      //ベンドアップ関数定義<BR>
+      Function <FONT color="#6600ff">BendUp</FONT>(Int Len){<BR>
+      　　PitchBend.onTime(-$2000, 0, Len);<BR>
+      }<BR>
+      //関数使用<BR>
+      l4 cdef <FONT color="#6600ff">BendUp</FONT>(!8)cdef <FONT color="#6600ff">BendUp</FONT>(!4)g1</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">//引数の省略の例<BR>
+      <BR>
+      Function FUNC(A,B=100,C=101){<BR>
+      　　Print(A);<BR>
+      　　Print(B);<BR>
+      　　Print(C);<BR>
+      }<BR>
+      FUNC(1,2,3);//省略しないで関数呼び出し<BR>
+      FUNC(1); //第２,第３引数を省略して関数呼び出し。<BR>
+      FUNC; //すべての引数を省略して関数呼び出し。</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<H2>・文字列マクロ</H2>
+<BLOCKQUOTE>文字列マクロは、必ず#から始まります。主な機能は、文字列型変数と同じようなものですが、文字列に引数を取る事が出来ます。また、文字列マクロには、マクロの使用を宣言しなくても良いのです。（その分、誤って同じ名前のマクロを他で使ってしまってもエラー表示されないという欠点があります。）<BR>
+<BR>
+普通の文字列マクロ
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#6600ff"><FONT color="#ff0000">定義</FONT>　<FONT color="#ffffff">#マクロ名 = { 文字列 };</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">//定義<BR>
+      #test1 = { l8 cdef gfed };<BR>
+      #test2 = { l8 efga bagf };<BR>
+      <BR>
+      //使用<BR>
+      #test1; #test2;<BR>
+      <BR>
+      //連結<BR>
+      #test3 = #test1 + #test2;<BR>
+      Print(#test3);//文字列の表示<BR>
+      #test3;//使用</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+引数付き文字列マクロ<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#6600ff"><FONT color="#ffffff">文字列マクロの任意の場所に引数を与えたい時は、引数を与えた居場所に、#?1
+      #?2 #?3 ...と、引数の番号を書いておきます。</FONT><BR>
+      <FONT color="#ffffff">引数が与えられれば、#?番号が、その引数に置き代わります。引数を省略すると、#?番号は無になります。</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc"><FONT color="#990000">//引数付き文字列マクロ定義</FONT><BR>
+      #Hiki = { <FONT color="#ff0000">#?1</FONT>;cdef <FONT color="#ff0000">#?2</FONT>;gfed <FONT color="#ff0000">#?3</FONT>;c1 }<BR>
+      <BR>
+      <FONT color="#990000">//引数付き文字列マクロ使用</FONT><BR>
+      #Hiki(<FONT color="#6600ff">{</FONT><FONT color="#6600ff">l8o4}</FONT>,<FONT color="#6600ff">{l4o5}</FONT>,<FONT color="#6600ff">{o4}</FONT>);<BR>
+      <FONT color="#990000">//→展開すると</FONT>：<FONT color="#6600ff">l8o4</FONT>;cdef <FONT color="#6600ff">l4o5</FONT>;gfed <FONT color="#6600ff">o4</FONT>;c1<BR>
+      <BR>
+      #Hiki(<FONT color="#6600ff">{l8o5}</FONT>);<BR>
+      <FONT color="#990000">//→展開すると</FONT>：<FONT color="#6600ff">l8o5</FONT>;cdef ;gfed ;c1</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<P align="right"><A href="index.htm">戻る</A>｜<A href="mml5.htm">次へ</A></P>
+</BODY>
+</HTML>

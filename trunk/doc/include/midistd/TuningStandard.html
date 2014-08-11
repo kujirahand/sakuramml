@@ -1,0 +1,286 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<body>
+
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='index.html'>MIDI Standard</a>＼
+	<a href='exclusive.html'>Exclusive Message</a>＼
+</td>
+</tr>
+</table>
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>MIDI Tuning Standard</h2>
+<!----------------------------------------------------------------------->
+<h3>概要</h3>
+
+<h4>■チューニング・プログラム</h4>
+各MIDIデバイス間でマイクロ・チューニングを相互利用する為に用いられます。<br>
+チューニング・プログラムの実装方法は、プログラム・チェンジ(Sakuraの@命令やVoice命令)と同様にMIDI楽器メーカーの任意となります。<br>
+チューニング・プログラムは、各プログラム(音色：Sakuraの@命令やVoice命令で指定する)とセットになっているべきで、
+<a href='ControlChange.html#100'>Registered Parameter</a> No.3 & 4の<a href='ControlChange.html#RPN03'>Tuning Preset & Bank</a>にて、プログラムのチューニングを切り換えます。<br>
+<br>
+チューニング値のフォーマットは3Byte1組で、相対値ではなく絶対値となります。<br>
+MSBで100cent(半音)単位で指定でき、LSB(下位14bit)を0にした場合、
+MSB(上位7bit)にて平均律(A=440Hz)時のノートナンバーの音程となります。<br>
+LSBは、100/16383cent(=0.0061cent)単位で指定可能です。<br>
+"$7F,$7F,$7F"の場合は、チューニングを変更しません。<br>
+発音可能な音程が限られているプログラム(音色)の時に、発音不可能な音程のチューニングは"$7F,$7F,$7F"となります。<br>
+例えば、ヴァイオリンはNote No.59～96しか発音されないべきで、No.0～58及び97～127の音程では"$7F,$7F,$7F"となるべきです。<br>
+<table>
+<caption>Frequency Data Format</caption>
+<tr><th>MSB	</th><th colspan='2'>LSB</th><th>											</th></tr>
+<tr><td>$00	</td><td>$00</td><td>$00</td><td>Note No.0 のデフォルトのチューニング		</td></tr>
+<tr><td>…	</td><td>	</td><td>	</td><td>…											</td></tr>
+<tr><td>$3C	</td><td>$00</td><td>$00</td><td>Note No.60(中央ド) のデフォルトのチューニング		</td></tr>
+<tr><td>…	</td><td>	</td><td>	</td><td>…											</td></tr>
+<tr><td>$7F	</td><td>$00</td><td>$00</td><td>Note No.127 のデフォルトのチューニング		</td></tr>
+<tr><td>…	</td><td>	</td><td>	</td><td>…											</td></tr>
+<tr><td>$7F	</td><td>$7F</td><td>$7F</td><td>変更無し									</td></tr>
+</table>
+<br>
+標準化されているチューニング・プログラムのPreset No.及びBank No.のマップは、以下の通りです。<br>
+<table>
+<tr><th>Bank No.</th><th>Preset No.</th><th></th></tr>
+<tr><td>$00</td><td>$00</td><td>平均律 (A=440Hz)</td></tr>
+</table>
+<br>
+MIDI規格では、この機能を実装しない場合は標準で平均律とする事が推奨されています。<br>
+General MIDI Level.2(GM2)では、この機能を実装しない場合は標準で平均律とする事が義務つけられています。<br>
+<br>
+
+<br>
+<h4>■スケール・オクターブ・チューニング</h4>
+各チャンネルの各オクターブの12個の音階について、チューニングを行います。<br>
+MIDIデバイスに選択可能なチューニング・プログラムがある場合、
+あらかじめ設定されているチューニング・プログラムからのオフセット量を指定します。<br>
+チューニング・プログラムはデフォルトで平均律が設定されており、平均律からのオフセット量となります。<br>
+<br>
+
+<br>
+<h4>■MIDIのチューニングについて</h4>
+最終的な音程は、<a href='ControlChange.html#RPN03'>Tuning Preset No.(RPN No.3)及びTuning Bank No.(RPN No.4)</a>で設定されているチューニング・プログラム
+（デフォルトは平均律、又、MIDIデバイスがこのメッセージに対応していない場合も平均律とする。）
+を基準とし、<br>
+<li><a href='ControlChange.html#RPN01'>Fine Tuning (RPN No.1)</a><br>
+<li><a href='ControlChange.html#RPN02'>Corse Tuning (RPN No.2)</a><br>
+<li><a href='DeviceControl.html'>Master Fine Tuning (Universal Exclusive Message (Real Time) )</a><br>
+<li><a href='DeviceControl.html'>Master Corse Tuning (Universal Exclusive Message (Real Time) )</a><br>
+<li>Scale Octave Tuning (Universal Exclusive Message (Real Time or Non Real Time) )<br>
+<li><a href='voice.html#bend'>Pitch Bend (Channel Voice Message)</a><br>
+で指定されたチューニング量が加減算された音程が出力されます。<br>
+
+<br><br>
+<!----------------------------------------------------------------------->
+<h3>詳細</h3>
+
+<br>
+<h4>■Bulk Tuning Dump Request</h4>
+指定されたPreset No.のチューニング・プログラムの設定について、ダンプ送信をMIDIデバイスに要求します。<br>
+このメッセージを送信すると、MIDIデバイスはBulk Tuning Dumpを送信します。<br>
+<ul>
+</ul>
+
+<br>
+<h4>■Bulk Tuning Dump</h4>
+MIDIデバイスがBulk Tuning Dump Requestを受信した場合に、MIDIデバイスはこのメッセージを送信します。<br>
+<ul>
+F0, 7E, <var>device ID</var>, 08, 01, <var>no</var>, <var>tuning name(16)</var>, <var>tuning data(128×3)</var>, <var>chksum</var>, F7<br>
+<br>
+<table>
+<tr><td><var>device ID			</var></td><td>Target device (7F＝全て)	</td></tr>
+<tr><td><var>no					</var></td><td>Tuning Preset No. (0～127)	</td></tr>
+<tr><td><var>tuning name(16)	</var></td><td>16ByteのASCII code	</td></tr>
+<tr><td><var>tuning data(128×3)</var></td><td>3Byte1組で、各ノートのチューニング</td></tr>
+<tr><td><var>chksum				</var></td><td>先頭のF0と最後のF7を除いたメッセージをXORした値。	</td></tr>
+</table>
+</ul>
+
+<br>
+<h4>■Bulk Tuning Dump Request (Bank)</h4>
+指定されたPreset No.及びBank No.のチューニング・プログラムの設定について、ダンプ送信をMIDIデバイスに要求します。<br>
+このメッセージは、Bankを指定する他はBulk Tuning Dump Requestと同じです。<br>
+MIDIデバイスが、Key-BasedかScale Octaveかのどのテーブルを持っているかで、
+MIDIデバイスから返信されるメッセージが変わります。<br>
+送信されるメッセージは、Key Based Tuning Dumpか、Scale Octave Tuning Dump 1Byte formatか、Scale Octave Tuning Dump 2Byte formatです。<br>
+<ul>
+</ul>
+
+<br>
+<h4>■Key Based Tuning Dump</h4>
+このメッセージは、Bankがある他はBulk Tuning Dumpと同じです。<br>
+Scale Octave Tuningと区別する為に、Key Based Tuningと改名されました。<br>
+MIDIデバイスがBulk Tuning Dump Request (Bank)を受信し、且つ、
+Key Basedのテーブルを持っていた場合に、MIDIデバイスはこのメッセージを送信します。<br>
+このメッセージは、MIDIデバイスのチューニングを設定するものではありません。<br>
+<ul>
+F0, 7E, <var>device ID</var>, 08, 04, <var>bank</var>, <var>no</var>, <var>tuning name(16)</var>, <var>tuning data(128×3)</var>, <var>chksum</var>, F7<br>
+<br>
+<table>
+<tr><td><var>device ID			</var></td><td>Target device (7F＝全て)	</td></tr>
+<tr><td><var>bank				</var></td><td>Tuning Bank No. (0～127)	</td></tr>
+<tr><td><var>no					</var></td><td>Tuning Preset No. (0～127)	</td></tr>
+<tr><td><var>tuning name(16)	</var></td><td>16ByteのASCIIコード	</td></tr>
+<tr><td><var>tuning data(128×3)</var></td><td>3Byte1組で、各ノートのチューニング</td></tr>
+<tr><td><var>chksum				</var></td><td>先頭のF0と最後のF7を除いたメッセージをXORした値。	</td></tr>
+</table>
+</ul>
+
+<br>
+<h4>■Scale Octave Tuning Dump 1Byte format</h4>
+MIDIデバイスがBulk Tuning Dump Request (Bank)を受信し、且つ、
+Scale Octaveの1Byte formatのテーブルを持っていた場合に、MIDIデバイスはこのメッセージを送信します。<br>
+このメッセージは、MIDIデバイスのチューニングを設定するものではありません。<br>
+<ul>
+F0, 7E, <var>device ID</var>, 08, 05, <var>bank</var>, <var>no</var>, <var>tuning name(16)</var>, <var>tuning data(12)</var>, <var>chksum</var>, F7<br>
+<br>
+<table>
+<tr><td><var>device ID			</var></td><td>Target device (7F＝全て)	</td></tr>
+<tr><td><var>bank				</var></td><td>Tuning Bank No. (0～127)	</td></tr>
+<tr><td><var>no					</var></td><td>Tuning Preset No. (0～127)	</td></tr>
+<tr><td><var>tuning name(16)	</var></td><td>16ByteのASCIIコード	</td></tr>
+<tr><td><var>tuning data(12)	</var></td><td>ド～シの12音階のチューニング(64が±0centで、1cent単位で変化)	</td></tr>
+<tr><td><var>chksum				</var></td><td>先頭のF0と最後のF7を除いたメッセージをXORした値。	</td></tr>
+</table>
+</ul>
+
+<br>
+<h4>■Scale Octave Tuning Dump 2Byte format</h4>
+MIDIデバイスがBulk Tuning Dump Request (Bank)を受信し、且つ、
+Scale Octaveの2Byte formatのテーブルを持っていた場合に、MIDIデバイスはこのメッセージを送信します。<br>
+このメッセージは、MIDIデバイスのチューニングを設定するものではありません。<br>
+<ul>
+F0, 7E, <var>device ID</var>, 08, 06, <var>bank</var>, <var>no</var>, <var>tuning name(16)</var>, <var>tuning data(24)</var>, <var>chksum</var>, F7<br>
+<br>
+<table>
+<tr><td><var>device ID			</var></td><td>Target device (7F＝全て)	</td></tr>
+<tr><td><var>bank				</var></td><td>Tuning Bank No. (0～127)	</td></tr>
+<tr><td><var>no					</var></td><td>Tuning Preset No. (0～127)	</td></tr>
+<tr><td><var>tuning name(16)	</var></td><td>16ByteのASCIIコード	</td></tr>
+<tr><td><var>tuning data(24)	</var></td><td>2Byte1組で、ド～シの12音階のチューニング<br>
+												MSB=$40, LSB=$00が、中央(±0cent)。<br>
+												MSBは半音(100cent)単位。<br>
+												LSBは、100/128cent単位。</td></tr>
+<tr><td><var>chksum				</var></td><td>先頭のF0と最後のF7を除いたメッセージをXORした値。	</td></tr>
+</table>
+</ul>
+
+
+<br>
+<h4>■Single Note Tuning Change (Real-Time)</h4>
+指定されたTuning Preset No.及びBank No.の、指定された音程について、チューニング設定を変更します。<br>
+この変更は、Tuning Preset No.(RPN No.3)及びTuning Bank No.(RPN No.4)で指定することで各チャンネルで有効になります。<br>
+また、既に設定されていた場合は、即座に、現在鳴っている音もチューニングを変更します。<br>
+<ul>
+<li><a href='./function/RT_NoteTuning.html'>RT_NoteTuning</a>
+</ul>
+
+<br>
+<h4>■Single Note Tuning Change (Non Real-Time)</h4>
+指定されたTuning Preset No.及びBank No.の、指定された音程について、チューニング設定を変更します。<br>
+Single Note Tuning Change (Real-Time)の、ノン・リアルタイム版です。<br>
+既に同一のTuning Preset No.(RPN No.3)及びTuning Bank No.(RPN No.4)が設定されていた場合、現在鳴っている音はチューニングを変更しません。<br>
+<ul>
+<li><a href='./function/RT_NoteTuning.html'>NRT_NoteTuning</a>
+</ul>
+
+<br>
+<h4>■Single Note Tuning Change (Real-Time) (Bank)</h4>
+このメッセージは、Bankを指定する他はSingle Note Tuning Change (Real-Time)と同じです。<br>
+このメッセージは、即座に、現在鳴っている音もチューニングを変更します。<br>
+<ul>
+<li><a href='./function/RT_NoteTuning.html'>RT_NoteTuning_Bank</a>
+</ul>
+
+<br>
+<h4>■Single Note Tuning Change (Non Real-Time) (Bank)</h4>
+このメッセージは、Bankを指定する事及び、Non Real-Timeで送信される他は
+Single Note Tuning Change (Real-Time)と同じです。<br>
+このメッセージは、現在鳴っている音はチューニングを変更しません。<br>
+<ul>
+<li><a href='./function/RT_NoteTuning.html'>NRT_NoteTuning_Bank</a>
+</ul>
+
+<br>
+<h4>■Scale Octave Tuning 1Byte format (Real-Time)</h4>
+各チャンネルの各オクターブの12個の音階について、チューニングを行います。<br>
+このメッセージは、即座に、現在鳴っている音もチューニングを変更します。<br>
+<ul>
+<li><a href='./function/RT_OctaveTuning.html'>RT_OctaveTuningB</a>
+</ul>
+
+<br>
+<h4>■Scale Octave Tuning 1Byte format (Non Real-Time)</h4>
+各チャンネルの各オクターブの12個の音階について、チューニングを行います。<br>
+Scale Octave Tuning 1Byte format (Real-Time)の、ノン・リアルタイム版です。<br>
+このメッセージは、現在鳴っている音はチューニングを変更しません。<br>
+<ul>
+<li><a href='./function/RT_OctaveTuning.html'>NRT_OctaveTuningB</a>
+</ul>
+
+<br>
+<h4>■Scale Octave Tuning 2Byte format (Real-Time)</h4>
+各チャンネルの各12個の音階について、チューニングを行います。<br>
+Scale Octave Tuning 1Byte format (Real-Time)の、2Byte format版で、指定できる範囲と制度を大きくしたものです。<br>
+このメッセージは、即座に、現在鳴っている音もチューニングを変更します。<br>
+最小／最大のオフセットは、100centです。<br>
+<ul>
+<li><a href='./function/RT_OctaveTuning.html'>RT_OctaveTuningW</a>
+</ul>
+
+<br>
+<h4>■Scale Octave Tuning 2Byte format (Non Real-Time)</h4>
+各チャンネルの各12個の音階について、チューニングを行います。<br>
+Scale Octave Tuning 2Byte format (Real-Time)の、ノン・リアルタイム版です。<br>
+このメッセージは、現在鳴っている音はチューニングを変更しません。<br>
+最小／最大のオフセットは、100centです。<br>
+<ul>
+<li><a href='./function/RT_OctaveTuning.html'>NRT_OctaveTuningW</a>
+</ul>
+
+
+<br><br>
+<!----------------------------------------------------------------------->
+<h3>Reference</h3>
+
+
+<br><br>
+</div>
+<!-----------------------------------------------------------------------------
+	ヘッダー
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>
+

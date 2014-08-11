@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>Slur</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">Slur</TD>
+      <TD align="left" nowrap>Slur(type,value[,range])</TD>
+      <TD align="left">タイ記号&amp;の異音程(スラー)の動作を変更する。type=0:グリッサンド/1:ベンド/2:ゲート/3:アルペジオ</TD>
+      <TD align="left">音符属性</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>&quot;Slur(type, value)&quot;で、タイ記号&quot;&amp;(value)&quot;の異音程(スラー)の動作を変更する。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ccffcc">type</TD>
+      <TD bgcolor="#ccffcc">typeの概略</TD>
+      <TD bgcolor="#CCFFCC">動作</TD>
+      <TD bgcolor="#ccffcc">valueの意味</TD>
+      <TD bgcolor="#ceffce">rangeの意味</TD>
+      <TD bgcolor="#ccffcc">使い方例</TD>
+    </TR>
+    <TR>
+      <TD>0</TD>
+      <TD>グリッサンド</TD>
+      <TD>異音程をベンドで滑らかにつなぐ(※1)(※2)（※3）</TD>
+      <TD>グリッサンドの長さ</TD>
+      <TD>ベンドレンジを指定。省略可。</TD>
+      <TD bgcolor="#FFFF99">@81 l4 Slur(0,!8) c&amp;e&amp;g</TD>
+    </TR>
+    <TR>
+      <TD>1</TD>
+      <TD>ベンド</TD>
+      <TD>異音程をベンドで表現。ギターのハンマリングに近い。(※1)</TD>
+      <TD>無効</TD>
+      <TD>無効</TD>
+      <TD bgcolor="#FFFF99">@25 l8 Slur(1,0) cdc c&amp;d&amp;c g&amp;f&amp;e&amp;d</TD>
+    </TR>
+    <TR>
+      <TD>2</TD>
+      <TD>ゲート</TD>
+      <TD>＆のついた音符のゲートを、valueにする</TD>
+      <TD>ゲートの長さ</TD>
+      <TD>無効</TD>
+      <TD bgcolor="#FFFF99">@81 l8 Slur(2,100) q50 c&amp;d e&amp;f g&amp;f
+      e&amp;d</TD>
+    </TR>
+    <TR>
+      <TD>3</TD>
+      <TD>アルペジオ</TD>
+      <TD>＆でつないだ音符の終わりまでゲートを伸ばす。そのとき、value に、ノートの最大発音音数を指定できる。</TD>
+      <TD>最大発音音数</TD>
+      <TD>無効</TD>
+      <TD bgcolor="#FFFF99">l16 Slur(3,100) c&amp;e&amp;g d&amp;f&amp;a</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+（※１）<BR>
+　typeが0と1のとき、ベンドレンジ(BRコマンド)の初期値は、GMの初期値である２として計算しているが、このレンジを越えたときは、自動的にベンドレンジを再設定する。但し、GMのベンドレンジの最大は、１２であるので、これを超えたときは、type=2のゲートに動作が変更される。<BR>
+<BR>
+（※２）<BR>
+　typeが0のとき、グリッサンドは、その音符の直前にかかるが、もし、その音符以後にグリッサンドしたい場合は、&quot;Slur(0,-20)&quot;のように、valueに、負の数を与える。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF99">Slur(0,20)</TD>
+      <TD bgcolor="#FFFF99">|---<FONT color="#ff0033">**</FONT>|-----|</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#FFFF99">Slur(0,-20)</TD>
+      <TD bgcolor="#FFFF99">|-----|<FONT color="#FF0033">**</FONT>---|</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+（※３）<BR>
+　typeが０の場合で、グリッサンドの長さを変えたい場合は、＆に続けて、&quot;l1
+c&amp;!2 d&amp;32 e&quot;のように、その長さをステップ数で指定することができる。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//Slur のサンプル</FONT></B><BR>
+      @81 l4 Slur(0,!8) c&amp;e&amp;g<BR>
+      @25 l8 Slur(1,0) cdc c&amp;d&amp;c
+      g&amp;f&amp;e&amp;d<BR>
+      @81 l8 Slur(2,100) q50 c&amp;d e&amp;f
+      g&amp;f
+      e&amp;d<BR>
+      l16 Slur(3,100) c&amp;e&amp;g d&amp;f&amp;a<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

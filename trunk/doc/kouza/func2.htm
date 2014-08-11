@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>実際に関数を作ってみる</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H1>実際に関数を作ってみる</H1>
+<HR>
+<H2>関数を作るには？</H2>
+<P>　関数を作るには、Ｃ言語など、プログラムに関する知識が若干必要になります。それは、サクラのスクリプト機能は、Ｃ言語をベースに設計されているからです。</P>
+<P>　しかし、実際には、Ｃ言語すべての知識が必要なわけではありません。四則演算と、簡単な関数の記述方法が分かれば問題ないかと思います。</P>
+<HR>
+<H2>Ｃ言語との違い</H2>
+<P>　Ｃ言語と、サクラスクリプトの違いをあげてみます。</P>
+<H3>変数・関数名</H3>
+<P>　まず、変数や、関数の名前は、大文字からはじめる必要があります。小文字からはじめることも出来ますが、それだと、１文字で１つの命令だとみなされます。</P>
+<H3>記述方法</H3>
+<P>　関数の記述方法ですが、以下のようになります。</P>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#99ffcc">Function 関数名 ( 引数の型 変数名 = 初期値, 引数の型 変数名 = 初期値... ){<BR>
+      　　//関数の内容<BR>
+      }</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>　関数というものの、関数の型を指定することは出来ません。このとき、引数の型と、初期値は省略ができます。引数の型を省略すると、その引数は自動的に&quot;Int&quot;型になります。</P>
+<H3>文字列の扱い</H3>
+<P>　普通、Ｃ言語で文字列を扱うときは、文字列を、&quot;abcdefg&quot;のように扱いますが、サクラでは、{
+abcdefg } のように、ダブルコーテーション&quot;&quot;の代わりに、{ } を使います。</P>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">Str S = { cdefg }</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<HR>
+<H2>詳しい内容</H2>
+
+<P><A href="mml4.htm">→変数と関数</A></P>
+<HR>
+<H2>スクリプトのテスト</H2>
+<P>　まず、関数を作るにあたって、知っておくと便利な知識をまとめてみました。</P>
+<P>●変数の内容をチェック</P>
+<P>&quot;Print&quot;命令を使うと変数の内容をチェックできます。また、&quot;MsgBox&quot;命令を使うとダイアログを表示できます。</P>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">Int A = 50<BR>
+      Print(A)</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>●コマンドの値をチェック</P>
+<P>　&quot;<A href="../command/99.htm">MML(コマンド)&quot;</A>命令を使うと、l や v などのコマンドの値を調べることが出来ます。</P>
+<HR>
+<P align="right"><A href="index.htm">戻る</A></P>
+</BODY>
+</HTML>

@@ -1,0 +1,28 @@
+結果=「<TABLE border=1>\n」
+「*.htm」を、ファイル列挙。
+ソート。
+反復(
+	FNAMEに、入れる。
+	もし、FNAME=「index.htm」ならば、続ける。
+	FNAMEを、開く。
+	T=それ
+	Tから、『TITLE』の、タグ切り出し。
+	タグ削除。
+	結果に、「<TR><TD><A href=\"{FNAME}\">・{それ}</A></TD></TR>\n」を、足す。
+)。
+結果=結果&"</TABLE>\n"
+「<HTML>
+<HEAD>
+<TITLE>定義ファイルのマニュアル</TITLE>
+</HEAD>
+<BODY>
+<H1>定義ファイルのマニュアル</H1>
+<BLOCKQUOTE>
+{結果}
+</BLOCKQUOTE>
+<HR>
+<A href=\"../index.htm\">戻る</A>
+</BODY>
+</HTML>」を、『index.htm』へ、保存。
+『index.htm』を、起動。
+終わり。

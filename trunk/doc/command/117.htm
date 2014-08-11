@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>TempoChange</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">TempoChange</TD>
+      <TD align="left">TempoChange(t1[[,t2],len])</TD>
+      <TD align="left">テンポをt1からt2へlen(ステップ数)の長さで変更する。t2を省略すると、現在のテンポからt1までの推移。lenを省略すると全音符の長さになる。</TD>
+      <TD align="left">メタイベント</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>テンポをt1からt2へlen(ステップ数)の長さで変更する。t2を省略すると、現在のテンポからt1までの推移。lenを省略すると全音符の長さになる。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//TempoChange のサンプル</FONT></B><BR>
+      TempoChange(120, 80, !1);l4 cdef gfed //120から80へ、テンポを滑らかに変更する<BR>
+      TempoChange(160,!2);l4 cdef gfed //現在のテンポから、160へ２分音符の間に変更する<BR>
+      TempoChange=160; l4 cdef gfed // 全音符の間に、テンポを160に滑らかに変更する<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="56.htm">Tempo</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>
