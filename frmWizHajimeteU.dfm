@@ -1,9 +1,10 @@
 object frmWizHajimete: TfrmWizHajimete
   Left = 221
   Top = 157
-  Width = 431
-  Height = 210
+  BorderStyle = bsDialog
   Caption = #31777#21336#12469#12463#12521#12539#12454#12452#12470#12540#12489
+  ClientHeight = 219
+  ClientWidth = 426
   Color = clBtnFace
   Font.Charset = SHIFTJIS_CHARSET
   Font.Color = clWindowText
@@ -19,8 +20,8 @@ object frmWizHajimete: TfrmWizHajimete
   object imgBack: TImage
     Left = 0
     Top = 0
-    Width = 423
-    Height = 176
+    Width = 426
+    Height = 219
     Align = alClient
     Picture.Data = {
       0A544A504547496D6167652F030000FFD8FFE000104A46494600010201004800
@@ -196,7 +197,7 @@ object frmWizHajimete: TfrmWizHajimete
   end
   object btnOK: TButton
     Left = 336
-    Top = 144
+    Top = 184
     Width = 75
     Height = 25
     Caption = #27770#23450'(&O)'

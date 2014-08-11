@@ -1,0 +1,628 @@
+//_
+/*		 	■  J u n c t i o n   o f   e x i s t e n c e  ■
+
+[ 音源フォーマット ]	GM･GS
+[  対  象  音  源  ]	GM互換音源全般 (GS推奨)
+[  制  作  音  源  ]	Roland SC-8850
+				YAMAHA S-YXG50 V3
+				LABWAY X-wave5000 (YAMAHA YMF-724)
+[  演  奏  時  間  ]	4分11秒 (2.5ループ)
+[ 使用チャンネル数 ]	11 (1~11)
+[ファイルバージョン]	3.01
+[ 作 曲 ･ 著 作 権 ]    H.YAMANOI
+                              Mail : h_yamanoi@lycos.jp
+                               MSN : yamanoi@hotmail.com
+                               ICQ : 155593370
+                               Web : http://www.text2music.com/y-kun/
+[  動  作  確  認  ]	TMIDI Player version 3.7.3
+[サクラのバージョン]	SakuraPad   : 1.022
+				dSakura.dll : 1.030
+[  制  作  環  境  ]	富士通 FM-V DESKPOWER S2-167
+					CPU : MMXPentium166MHz
+					RAM : 32MB (SIMM 60ns)
+					O S : Windows95 OSR2.0 (ver4.00950B)
+[  その他注意事項  ]	＜ 転載･掲載･自作ゲーム等での使用について ＞
+				非商用目的 : 基本的に自由ですが、
+						 事前もしくは事後にご一報下さると嬉しいです。
+				商用目的   : 必ず事前に許可を得て下さい。
+
+ ダウンロードしていただきありがとうございました。
+ まず、ご使用のMIDI音源に合わせて以下の"="の後に数値を半角英数で入力して下さい。(初期値:1)
+*/
+//_Synth Type
+			Int	SynthType	=	1	;
+/*
+		＜ 数値と音源の対応 ＞
+	1 : GM互換音源全般 (GS音源推奨)	← BGMで使用する時はコレ
+	2 : GS音源 SC-88ProMap [EFX無し]	← 鑑賞用のオマケ
+	3 : GS音源 SC-88ProMap [EFX有り]	← いいぞ!!
+
+◆ あの｢Joe｣がパワーアップして帰ってきた!!
+ お久し振りです。この度｢Joe｣をリメイクしてみました。
+前作のver2.1もそれなりに頑張ったつもりだったんですが、やはり聴き直してみると物足りないところが
+多々ありまして、リメイクに踏み切った次第です。
+ シューティングのボス戦をイメージして作ったので、
+自作のゲーム等に使いたいという方は、商用目的でない限りご自由にコンパイルしてお使い下さい。
+その際、事後でもよいのでメールでご一報下さると嬉しいなぁ･･･と思います。(←前作からのコピー)
+ ver2.1との具体的な変更点は以下のとおりです。
+  ・楽器編成の見直し
+	 まず、リードギターをディストーションギターからオーバードライブギターに変更しました。
+	こちらの方が良いと思うのですが、どうでしょう？
+	 次にベースですが、前作のフィンガーベースで弾いてたパートをピックベースにし、
+	ピックベースで弾いてたパートは廃止しました。
+	 今回、新たに追加したのがオルガンによるバッキングです。前作のシンセによるバッキングは
+	なんか中途半端でしたので･･･。
+	 各楽器の位置ですが、ギターとシンセ(ギターシンセのつもりです)は完全に左右の端へ、
+	リズム隊とオルガンは中央へそれぞれ振り分けました。
+  ・楽曲構成の見直し
+	 TMIDIでトランスポーズしてみたら結構イイじゃ～ん、という訳で部分的にトランスポーズ
+	しています。
+	 あとはイントロとベースを一部変えたぐらいです。
+  ・奏法の再現
+	 ギターのパートではミュートをエクスプレッションで、ハンマリングオン／プリングオフを
+	ピッチベンドで表現しています。ミュートはちょっとした関数を作るだけでいいのですが、
+	H.O/P.Oは音を出しっぱなしにしてピッチベンドで音程を変化させるのでひたすら面倒でした。
+  ・スクリプト
+	｢ミネスクリプト｣(勝手に命名)を導入、イチから書き直しました。
+  ・テンポ
+	 前作では16ビートになってしまっていたので、８ビートに直しました。
+	そのためテンポが倍の300BPMになっていますが、実質上変化はありません。
+
+◆　更新履歴
+2000/11/04　Ver1.00　完成。あまりにもショボイので未公開(^^;;
+2001/01/10　Ver2.00　全面的に作り直し
+2001/01/14　Ver2.10　ちょっと修正
+2001/01/14　Ver2.11　t2mに投稿後、恐るべきバグ発見！修正（汗
+2001/07/24　Ver3.00　全面的に打ち直し
+2001/??/??　Ver3.01　どこか修正したらしい（汗
+
+ [ご意見･ご感想･ご要望･文句等は、
+                  Mail : h_yamanoi@lycos.jp
+                   MSN : yamanoi@hotmail.com
+                   ICQ : 155593370
+                   Web : http://www.text2music.com/y-kun/
+                                    までどうぞお気軽に･･･。]
+*/
+//---------------------------------------------------------------------------------------------
+//_Meta Ivent 
+If(SynthType==1){
+	TrackName = {"[Junction of existence] for GS ver3.01 by H.YAMANOI"}
+}Else{If(SynthType==2){
+	TrackName = {"[Junction of existence] for SC-88Pro ver3.011 by H.YAMANOI"}
+}Else{TrackName = {"[Junction of existence] for SC-88Pro ver3.012 by H.YAMANOI"}	}}
+	Copyright = {"07/24/2001  H.YAMANOI"}
+	TimeSignature = 4,4;
+//_System Setting
+	Include			(stdmsg.h);
+	System.MeasureShift	(4);
+	System.TimeBase		(96);
+	System.KeyFlag+		(f);
+//_Tempo
+	Time(-3:1: 0) Tempo = 300 ;
+//_Header
+	Function Isu(bm,bl,pc,nv,np,ne,e1,e2,e3){ l%1   y0((bm)); r* y32((bl)); r*   @((pc)); r*
+		y7((nv)); r* y10((np)); r* y11((ne)); r* y91((e1)); r* y93((e2)); r* y94((e3)); r* }
+	Function Dpt(n1,n2)	{ l%1 y99(24); r* y98(n1); r* y6(n2); r* }
+	Function Dlv(n1,n2)	{ l%1 y99(26); r* y98(n1); r* y6(n2); r* }
+	Function Dpn(n1,n2)	{ l%1 y99(28); r* y98(n1); r* y6(n2); r* }
+	Function Mono()		{ l%1 y126(0); r* }
+	Function PL(pt)	{ l%1 y65(127); r* y5(pt); r* }
+//_Track Name
+	TR( 1) CH( 2) Time(-3:1: 0) TrackName = "Lead 1"
+	TR( 2) CH( 3) Time(-3:1: 0) TrackName = "Syn 1"
+	TR( 3) CH( 4) Time(-3:1: 0) TrackName = "Base"
+	TR( 4) CH( 5) Time(-3:1: 0) TrackName = "Rtm 1"
+	TR( 5) CH( 6) Time(-3:1: 0) TrackName = "Cutting"
+	TR( 6) CH( 7) Time(-3:1: 0) TrackName = "Organ"
+	TR( 7) CH( 8) Time(-3:1: 0) TrackName = "Lead 2"
+	TR( 8) CH( 9) Time(-3:1: 0) TrackName = "Syn 2"
+	TR( 9) CH(11) Time(-3:1: 0) TrackName = "Rtm 2"
+	TR(10) CH(10) Time(-3:1: 0) TrackName = "Drum"
+	TR(17) CH( 1) Time(-3:1: 0) TrackName = "Sys-Ex"
+//_Universal Exclusive
+TR(17) Time( -3:1: 0) SysEx$ = F0,7E,7F,09,01,F7;	// GM System On
+//_System Exclusive   [ GS ]
+//					 Es,Mk,Dv,Md,Cm, Address ,Dt,Cs,Ee
+TR(17) Time( -3:2: 0) SysEx$ = F0,41,10,42,12, 40,00,7F,00,41,F7;	// GS Reset
+	 Time( -3:3: 8) SysEx$ = F0,41,10,42,12,{40,01,30,05}  ,F7;	// Reverb Macro
+	 Time( -3:3:16) SysEx$ = F0,41,10,42,12,{40,01,33,30}  ,F7;	// Reverb Level
+	 Time( -3:3:24) SysEx$ = F0,41,10,42,12,{40,01,34,50}  ,F7;	// Reverb Time
+	 Time( -3:3:32) SysEx$ = F0,41,10,42,12,{40,01,38,02}  ,F7;	// Chorus Macro
+	 Time( -3:3:40) SysEx$ = F0,41,10,42,12,{40,01,3A,40}  ,F7;	// Chorus Level
+	 Time( -3:3:48) SysEx$ = F0,41,10,42,12,{40,01,3B,64}  ,F7;	// Chorus Feedback
+	 Time( -3:3:56) SysEx$ = F0,41,10,42,12,{40,01,3C,00}  ,F7;	// Chorus Delay
+	 Time( -3:3:64) SysEx$ = F0,41,10,42,12,{40,01,3D,01}  ,F7;	// Chorus Rate
+	 Time( -3:3:72) SysEx$ = F0,41,10,42,12,{40,01,3E,20}  ,F7;	// Chorus Depth
+If(SynthType==3){
+	 Time( -3:4: 0) SysEx$ = F0,41,10,42,12,{40,42,22,01}  ,F7;	// EFX on [CH2]
+	 Time( -3:4: 2) SysEx$ = F0,41,10,42,12,{40,48,22,01}  ,F7;	// EFX on [CH8]
+	 Time( -3:4: 4) SysEx$ = F0,41,10,42,12,40,03,00,11,03,29,F7;// EFX Type [OD1/OD2]
+	 Time( -3:4: 6) SysEx$ = F0,41,10,42,12,{40,03,03,00}  ,F7;	// OD1 Sel
+	 Time( -3:4: 8) SysEx$ = F0,41,10,42,12,{40,03,04,50}  ,F7;	// OD1 Drive
+	 Time( -3:4:10) SysEx$ = F0,41,10,42,12,{40,03,05,03}  ,F7;	// OD1 Amp
+	 Time( -3:4:12) SysEx$ = F0,41,10,42,12,{40,03,06,01}  ,F7;	// OD1 Amp Sw
+	 Time( -3:4:14) SysEx$ = F0,41,10,42,12,{40,03,12,00}  ,F7;	// OD1 Pan
+	 Time( -3:4:16) SysEx$ = F0,41,10,42,12,{40,03,13,7F}  ,F7;	// OD1 Level
+	 Time( -3:4:18) SysEx$ = F0,41,10,42,12,{40,03,08,00}  ,F7;	// OD2 Sel
+	 Time( -3:4:20) SysEx$ = F0,41,10,42,12,{40,03,09,50}  ,F7;	// OD2 Drive
+	 Time( -3:4:22) SysEx$ = F0,41,10,42,12,{40,03,0A,03}  ,F7;	// OD2 Amp
+	 Time( -3:4:24) SysEx$ = F0,41,10,42,12,{40,03,0B,01}  ,F7;	// OD2 Amp Sw
+	 Time( -3:4:26) SysEx$ = F0,41,10,42,12,{40,03,14,7F}  ,F7;	// OD2 Pan
+	 Time( -3:4:28) SysEx$ = F0,41,10,42,12,{40,03,15,7F}  ,F7;	// OD2 Level
+	 Time( -3:4:30) SysEx$ = F0,41,10,42,12,{40,03,16,7F}  ,F7;	// Level
+	 Time( -3:4:32) SysEx$ = F0,41,10,42,12,{40,03,17,3C}  ,F7;	// EFX To Rev
+	 Time( -3:4:34) SysEx$ = F0,41,10,42,12,{40,03,18,0A}  ,F7;	// EFX To Cho
+}	If(SynthType==1){
+//_Instulment Setup   [ GS/GM ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  0,  0, 30,122,  0,127, 60, 10,  0);BR(12);	// OverdrivenGuitar
+	TR( 2) Time( -2:1:48) Isu(  0,  0, 82,127,  0,127, 60, 10,  0);BR(12);PL(15);	// SawtoothLead
+	TR( 3) Time( -2:2: 0) Isu(  0,  0, 35,120, 64,127, 20, 10,  0);BR(12);	// PickBass
+	TR( 4) Time( -2:2:48) Isu(  0,  0, 31,110,  0,127, 20, 10,  0);BR(12);	// DistortionGuitar
+	TR( 5) Time( -2:3: 0) Isu(  0,  0, 30,100,127,127, 40, 30,  0);BR(12);	// OverdrivenGuitar
+	TR( 6) Time( -2:3:48) Isu(  0,  0, 19, 80, 64,127, 60, 20,  0);BR(12);	// RockOrgan
+	TR( 7) Time( -2:4: 0) Isu(  0,  0, 30,122,127,127, 60, 10,  0);BR(12);	// OverdrivenGuitar
+	TR( 8) Time( -2:4:48) Isu(  0,  0, 82,127,127,127, 60, 10,  0);BR(12);PL(15);	// SawtoothLead
+	TR( 9) Time( -1:1: 0) Isu(  0,  0, 31,100,  0,127, 20, 10,  0);BR(12);	// DistortionGuitar
+	TR(10) Time( -1:1:48) Isu(  0,  1, 17,110, 64,127, 40,  0,  0);BR(12);	// PowerSet
+			Dpt(36,64);	Dpt(38,72);	Dpt(42,64);	Dpt(44,64);	Dpt(46,64);
+			Dpt(41,63);	Dpt(43,63);	Dpt(45,63);	Dpt(47,63);
+	}Else{If(SynthType==2){
+//_Instulment Setup   [ SC-88Pro ]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu(  8,  3, 30,127,  0,127, 60, 10,  0);BR(12);	// LP OverDrvGt
+	TR( 2) Time( -2:1:48) Isu(  6,  3, 82,127,  0,127, 60, 10,  0);BR(12);PL(15);	// GR-300
+	TR( 3) Time( -2:2: 0) Isu(  1,  3, 35,115, 64,127, 20, 10,  0);BR(12);	// Picked Bass2
+	TR( 4) Time( -2:2:48) Isu(  1,  3, 31,100,  0,127, 20, 10,  0);BR(12);	// Dist. Gt2:
+	TR( 5) Time( -2:3: 0) Isu(  3,  3, 30,100,127,127, 40, 30,  0);BR(12);	// More Drive
+	TR( 6) Time( -2:3:48) Isu( 24,  3, 19, 85, 64,127, 50, 10,  0);BR(12);	// Rotary Org.F
+	TR( 7) Time( -2:4: 0) Isu(  8,  3, 30,127,127,127, 60, 10,  0);BR(12);	// LP OverDrvGt
+	TR( 8) Time( -2:4:48) Isu(  6,  3, 82,127,127,127, 60, 10,  0);BR(12);PL(15);	// GR-300
+	TR( 9) Time( -1:1: 0) Isu(  4,  3, 31, 95,  0,127, 20, 10,  0);BR(12);	// Dist.Fast:
+	TR(10) Time( -1:1:48) Isu(  0,  3, 17,127, 64,127, 40,  0,  0);BR(12);	// POWER
+			Dpt(36,63);	Dpt(38,68);	Dpt(42,63);	Dpt(44,63);	Dpt(46,63);
+			Dpt(41,62);	Dpt(43,62);	Dpt(45,62);	Dpt(47,62);
+}Else{
+//_Instulment Setup   [ SC-88Pro (With EFX)]
+//					   BM, BL, PC,Vol,Pan,Exp,Rev,Cho,Dly
+	TR( 1) Time( -2:1: 0) Isu( 17,  3, 28,127,  0,127, 60, 10,  0);BR(12);	// TC Rear Pick
+	TR( 2) Time( -2:1:48) Isu(  6,  3, 82,127,  0,127, 60, 10,  0);BR(12);PL(15);	// GR-300
+	TR( 3) Time( -2:2: 0) Isu(  1,  3, 35,115, 64,127, 20, 10,  0);BR(12);	// Picked Bass2
+	TR( 4) Time( -2:2:48) Isu(  1,  3, 31,100,  0,127, 20, 10,  0);BR(12);	// Dist. Gt2:
+	TR( 5) Time( -2:3: 0) Isu(  3,  3, 30,100,127,127, 40, 30,  0);BR(12);	// More Drive
+	TR( 6) Time( -2:3:48) Isu( 24,  3, 19, 85, 64,127, 50, 10,  0);BR(12);	// Rotary Org.F
+	TR( 7) Time( -2:4: 0) Isu( 17,  3, 28,127,127,127, 60, 10,  0);BR(12);	// TC Rear Pick
+	TR( 8) Time( -2:4:48) Isu(  6,  3, 82,127,127,127, 60, 10,  0);BR(12);PL(15);	// GR-300
+	TR( 9) Time( -1:1: 0) Isu(  4,  3, 31, 95,  0,127, 20, 10,  0);BR(12);	// Dist.Fast:
+	TR(10) Time( -1:1:48) Isu(  0,  3, 17,127, 64,127, 40,  0,  0);BR(12);	// POWER
+			Dpt(36,63);	Dpt(38,68);	Dpt(42,63);	Dpt(44,63);	Dpt(46,63);
+			Dpt(41,62);	Dpt(43,62);	Dpt(45,62);	Dpt(47,62);
+}}
+//_Macro
+$k{n36,} /* B 1 kick drum 2	 */		$s{n38,} /* D 2 snare drum 1	 */
+$f{n41,} /* F 2 low tom 2	 */		$h{n42,} /* F#2 closed hi-hat	 */
+$l{n43,} /* G 2 low tom 1	 */		$P{n44,} /* G#2 pedal hi-hat	 */
+$m{n45,} /* B 2 mid tom 1	 */		$H{n46,} /* A#2 open hi-hat	 */
+$t{n47,} /* D 3 high tom 1	 */		$c{n49,} /* C#3 crash cymbal 1 */
+$p{n55,} /* G 3 Splash Cymbal	 */		$C{n57,} /* A 3 crash cymbal 2 */
+//---------------------------------------------------------------------------------------------
+//_Track 10   [ Drum ]
+#drum0={	l%48	Rythm{(v.onNote=43,55,67,79,91,103,115,127;)[8s]	}}
+#drum1={	l%48	Key(0)
+	Sub{Rythm{	(v120)[3kr^^k[2kr^]kkkrk] kr^^kkr^kr^k[2kr]
+			[3kr^^k[2kr^]kkkrk] [8kr] }}
+	Sub{Rythm{	(v115)[3[4r^sr]] [2r^sr]ssrs[4r]
+			[3[4r^48sr]] [8s][8r] }}
+	Sub{Rythm{	(v125)Cr(v100)Hr [5(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			(v125)Cr(v100)Hr [5(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			(v125)Cr(v100)Hr [5(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			(v125)Cr(v100)Hr [3(v105)Hr(v100)Hr] r384(v127)c	}}
+	Sub{Rythm{	(v125)[7r384] r192 tmlf
+			[7r384]  ttmmllff	}}	}
+#drum2={	l%48	Key(0)
+	Sub{Rythm{	(v120)[3kr^^k[2kr^]kkkrk] kr^^kkr^kr^k[2kr]
+			[2kk[3kr][2kkr]kr] kr^^k[2kr^]kkkrk [8kr] }}
+	Sub{Rythm{	(v115)[3[4r^sr]] [2r^sr]ssrs[4r]
+			[7sr^^][4s] [4r^sr] [2sr][4s][8r] }}
+	Sub{Rythm{	(v125)Cr(v100)Hr [5(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			(v125)Cr(v100)Hr [5(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			[2[4(v105)h][3(v110)Hr(v105)h](v105)hhh]
+			(v125)Cr(v100)Hr [3(v105)Hr(v100)Hr] r384(v127)c }}
+	Sub{Rythm{	(v125)[7r384] r192 tmlf
+			[7r384]  ttmmllff	}}	}
+#drum3={	l%48	Key(0)
+	Sub{Rythm{	(v120)[3kr^^k[2kr^]kkkrk] kr^^kkr^kr^k[2kr]
+			[2kk[3kr][2kkr]kr] kr^^k[2kr^]kkkrk [5kr] }}
+	Sub{Rythm{	(v115)[3[4r^sr]] [2r^sr]ssrs[4r]
+			[7sr^^][4s] [4r^sr] [2sr][4s][4r]s }}
+	Sub{Rythm{	(v125)Cr(v100)Hr [5(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			(v125)Cr(v100)Hr [5(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			[2[4(v105)h][3(v110)Hr(v105)h](v105)hhh]
+			(v125)Cr(v100)Hr [3(v105)Hr(v100)Hr] r384+192(v127)c }}
+	Sub{Rythm{	(v125)[7r384] r192 tmlf
+			[7r384]  tmlf	}}	}
+#drum4={	l%48	Key(0)
+	Sub{Rythm{	(v120)[3[3kr^^][2kr]] [3kr^^][4k]
+			[3[3kr^^][2kr]] [2kr^^][4kr]	}}
+	Sub{Rythm{	[3[3r192](v80)sr(v127)sr] [4r192]
+			[3[3r192](v80)sr(v127)sr] [2r192][4(v115)s]	}}
+	Sub{Rythm{	(v125)Cr^^[14(v110)Pr^^](v115)p(v105)hhh
+			(v125)Cr^^[14(v110)Pr^^](v127)cr144	}}
+	Sub{Rythm{	[2(v125)[7r384] r192 tmlf]	}}	}
+#drum5={	l%48	Key(0)
+	Sub{Rythm{	(v120)[3kr^^k[2kr^]kkkrk] kr^^kkr^kr^k[2kr]
+			[3kr^^k[2kr^]kkkrk] [8kr] }}
+	Sub{Rythm{	(v115)[3[4r^sr]] [2r^sr][2r^ss]
+			[3[4r^48sr]] [8s][8r] }}
+	Sub{Rythm{	(v125)Cr(v100)Hr [13(v105)Hr(v100)Hr] [2(v115)pr^](v127)cr
+			(v125)Cr(v100)Hr [11(v105)Hr(v100)Hr] r384(v127)c	}}
+	Sub{Rythm{	(v125)[15r384]  ttmmllff	}}	}
+#drum6={	l%48	Key(0)
+	Sub{Rythm{	(v120)[3kr^^k[2kr^]kkkrk] kr^^kkr^kr^k[2kr]
+			[3kr^^k[2kr^]kkkrk] kr^^kkr^kr^k[4r] }}
+	Sub{Rythm{	(v115)[3[4r^sr]] [2r^sr][2r^ss]
+			[3[4r^48sr]] [2r^sr]r^ss[4r] }}
+	Sub{Rythm{	(v125)Cr(v100)Hr [14(v105)Hr(v100)Hr] [2(v115)pr]
+			(v125)Cr(v100)Hr [13(v105)Hr(v100)Hr] [2(v115)pr^](v127)c	}}
+	Sub{Rythm{	(v125)[15r384] r192 tmlf	}}	}
+#drum7={	l%48	Key(0)
+	Sub{Rythm{	(v120)[3kr^^k[2kr^]kkkrk] kr^^kkr^kr^k[2kr]
+			[3kr^^k[2kr^]kkkrk] kr^^kkr^[8r] }}
+	Sub{Rythm{	(v115)[3[4r^sr]] [2r^sr][2r^ss]
+			[3[4r^48sr]] [8s][8r] }}
+	Sub{Rythm{	(v125)Cr(v100)Hr [14(v105)Hr(v100)Hr] [2(v115)pr]
+			(v125)Cr(v100)Hr [11(v105)Hr(v100)Hr] 	}}
+	Sub{Rythm{	(v125)[15r384] ttmmllff	}}	}
+//_Track  1   [ Lesd 1 ]
+#led11={	Key(0)	l%48 o5 p%=0;
+	v110q99a> Sub{rp%=-2048;}e^ v115p%=0; Sub{rp%=-1365;}g+^ p%=0;v110c+<v105q95a+^^^
+		q99v100 Sub{p%.onTime=-683,0,48;}g+^>v115
+		Sub{p%.onTime=-683,0,48;r^p%=-683;}d^^^p%=0;
+	v100 Sub{p%.onTime=-683,0,48;}<b^> v115d<v105 Sub{p%.onTime=-683,0,48;}a144
+		M(127); Sub{p%.onTime=-683,0,48;}g+384r^ M(0);
+	v110q99a> Sub{rp%=-2048;}e^p%=0; v115 Sub{rp%=-1365;}g+^ p%=0;v110c+<v105q95a+^^^
+		q100v100 Sub{p%.onTime=-683,0,48;}g+^>v115
+		Sub{p%.onTime=-683,0,48;r^p%=-683;}d^^^p%=0;
+	v100 Sub{p%.onTime=-683,0,48;}<b^ >v105f
+		v110 Sub{p%.onTime=-683,0,48;} M(127); f528r^ M(0);
+	q99v110 Sub{p%.onTime=-683,0,48;}d^ v115 Sub{p%.onTime=-683,0,48;}a^
+		v110 d Sub{rp%=-2048;rp%=0;}f^^
+		Sub{p%.onTime=-683,0,48;}q95 Sub{r^^p%=-1365;r^^p%=-2730;}e384<p%=0;
+	q99v110 Sub{p%.onTime=-683,0,48;}a^ >v115 Sub{p%.onTime=-683,0,48;}e^
+		v110<a+> Sub{rp%=-2048;rp%=0;}d^^
+		Sub{p%.onTime=-683,0,48;} q95 Sub{r^^p%=-1365;r^^p%=-2730;}c384<p%=0;
+	q99v100 Sub{p%.onTime=-683,0,48;} Sub{r^p%=2048;}c^^p%=0;d+^^v105q93g^>
+		q99v100 Sub{p%.onTime=-683,0,48;} Sub{r^p%=2048;}c^^p%=0;d+^^v115q93g^
+	q99v110 Sub{M(14);rM(28);rM(42);rM(56);rM(70);rM(84);rM(98);rM(112);}
+		Sub{rp%=683;rp%=0;rp%=683;rp%=0;rp%=683;rp%=0;rp%=683;}f384p%=0;q99
+		Sub{p%.onTime=-683,0,48;r192p%.onTime=0,-170,96,-171,-341,48,-342,-683,48;}
+		M(127);f384< M(0);p%=0;	}
+#led12={	Key(0)	l%48 o5 p%=0;
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}d^^c^^q95d^
+	q99 Sub{p%.onTime=-683,0,48;}c^^<b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}<b^^a^^q95g^
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}d^^c^^q95d^
+	q99 Sub{p%.onTime=-683,0,48;}c^^<b^^>q95c^
+	q99 Sub{p%.onTime=-683,0,48;r96p%.onTime=0,-170,96,-171,-341,48,-342,-683,48;}
+		M(127);d288r^M(0);<p%=0;
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}d^^c^^q95d^
+	q99 Sub{p%.onTime=-683,0,48;}c^^<b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}<b^^a^^q95g^
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}c^^d^^q95e^
+	q99 Sub{p%.onTime=-683,0,48;}d^^d^^Sub{p%.onTime=-683,0,48;}e^^e^^q80f^g^	}
+#led13={	Key(0)	l%48 o6 p%=0;
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}d^^c^^q95d^
+	q99 Sub{p%.onTime=-683,0,48;}c^^<b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}<b^^a^^q95g^
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}d^^c^^q95d^
+	q99 Sub{p%.onTime=-683,0,48;}c^^<b^^>q95c^
+	q99 Sub{p%.onTime=-683,0,48;r96p%.onTime=0,-170,96,-171,-341,48,-342,-683,48;}
+		M(127);d288r^M(0);<p%=0;
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}d^^c^^q95d^
+	q99 Sub{p%.onTime=-683,0,48;}c^^<b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}<b^^a^^q95g^
+	q99 Sub{p%.onTime=-683,0,48;}a^^b^^>q95c^ q99 Sub{p%.onTime=-683,0,48;}c^^d^^q95e^
+	q99 Sub{p%.onTime=-683,0,48;}d^^d^^Sub{p%.onTime=-683,0,48;}e^^e^^q80f^g^	}
+#end={ v0 r6144+384 a }
+//_Track  2   [ Syn 1 ]
+#syn11={	Key(0)	l%48 o5 p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=-1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120b576 p%=0; Sub{r^p%=-1365;}v115q95e^^^p%=0;
+	Sub{r^^p%=683;r^^p%=2048;}v120q99b384>p%=0; Sub{rp%.onTime=0,-341,96,-342,-683,48;}c192<p%=0;b^^r
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=-1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120b576 p%=0; Sub{r^p%=-1365;}v115q95e^^^p%=0;
+	Sub{r^^p%=683;r^^p%=2048;}v120q99b384>p%=0; Sub{r^^p%=1365;r^^p%=2731;}c336 p%=0;r	}
+#syn12={	Key(0)	l%48 o6 p%=0; q99
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=-1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120b576 p%=0; Sub{r^p%=-1365;}v115q95e^^^p%=0;
+	Sub{r^^p%=683;r^^p%=2048;}v120q99b384>p%=0; Sub{rp%.onTime=0,-341,96,-342,-683,48;}c192<p%=0;b^^r
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=-1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120a576 p%=0; Sub{r^p%=1365;}v115q95d^^^p%=0;
+	Sub{r^^p%=-1365;r^^p%=-2731;r^^p%=-3413;}q99v120b576 p%=0; Sub{r^p%=-1365;}v115q95e^^^p%=0;
+	Sub{r^^p%=683;r^^p%=2048;}v120q99b384>p%=0; Sub{r^^p%=1365;r^^p%=2731;}c336 p%=0;r	}
+//_Track  3   [ Bass ]
+#bass0={	Sub{	p%.onTime=0,-2047,192,-2048,-4095,96,-4096,-8192,96;	}
+	v120 l%384 q95 o3 d	p%=0;	}
+#bass1={	v120 l%48 q70 o2
+	Key(0)	[3q.onNote=60,70,50,80,70,60,80,50;[16a]] [8a]q60gq80g^q60g^q80gq70g^
+	Key(1)	[3q.onNote=60,70,50,80,70,60,80,50;[16a]] [8a]q60gq80g^q60g^q80gq70g^ Key(0)}
+#bass2={	Key(0)	v120 l%48 q70 o2
+	q.onNote=60,70,50,80,70,60,80,50;
+	[12a]aagg	[8f*]f*f*ff ggg+g+
+	[8e] eef*f*ggg+g+	[8a]aaa+a+ bb>cc
+	q.onNote=90,60,80,60,70,60;
+	d^>dc^c<agf^ga^gfe<	a^>ag^gedc^de^dc<b
+	q.onNote=60,70,50,80,70,60,80,50;
+	[8f] [8a]	>[8d] c+c+cc<bbaa	}
+#bass3={	v120 l%48 q70 o2
+	q.onNote=60,70,50,80,70,60,80,50;
+	[12a]aagg	[8f*]f*f*ff ggg+g+
+	[8e] eef*f*ggg+g+	[8a]aaa+a+ bb>cc
+	q.onNote=90,60,80,60,70,60;
+	d^>dc^c<agf^ga^gfe<	a^>ag^gedc^de^dc<b
+	q.onNote=60,70,50,80,70,60,80,50;
+	[8f] [8a]	>[8d] d^^^d	}
+#bass4={	v120 l%48 q70 o2
+	a^^b^^>c^d^^c^^d^ c^^<b^^>c^<b^^a^^g^ a^^b^^>c^d^^c^^d^ c^^<b^^>c^d^^c^^<br
+	a^^b^^>c^d^^c^^d^ c^^<b^^>c^<b^^a^^g^ a^^b^^>c^c^^d^^e^ d^^d^^e^^e^^f^gr<	}
+#bass5={	v120 l%48 q70 o2
+	q.onNote=60,70,50,80,70,60,80,50,80,60,70,50,80;
+	[8a]>d^dc^cd^ [8c]<b^ba^ag^ [8a]>d^dc^cd^ [8c]d^dc^c<br
+	[8a]>d^dc^cd^ [8c]<b^ba^ag^ [8a]>c^cd^de^
+	q.onNote=80,60,80,70,80,60,80,70,80,80;
+	d^dd^de^ee^ef^gr<	}
+#bass6={	v120 l%48 q70 o2
+	q.onNote=60,70,50,80,70,60,80,50,80,60,70,50,80;
+	[16a]>[16d][16c]<[16b][16a]>[16d][16e][16f]<	}
+#bass7={	v120 l%48 q70 o2
+	q.onNote=60,70,50,80,70,60,80,50,80,60,70,50,80;
+	[16a]>[16d][16c]<[16b][16a]>[16d][16f][16a]<	}
+
+//_Track  4   [ Rtm 1 ]
+Function Mt(nt){	Sub{l%48 r6 y11.onTime=127,43,(nt-6); r(nt-6) y11=127; l%48 }}
+#rtm11={	Sub{	Key(0)	l%48 o4 t.onNote=0,4;
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^  d^^ c^^<b^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^ <g^^ a^^ b^
+			Key(1)
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^  d^^ c^^<b^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^ <g^^ a^^ b^	 }
+		Sub{	Key(0)	l%48 o4 t.onNote=2,2;
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			e   e^  d   d^  e   e^^ d^  e^  d^   e   e   e   f^^ g^  a^^ g^^ f^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			e   e^  d   d^  e   e^^ d^  e^  d^   e   e   e   f^^ g^  d^^ e^^ f^
+			Key(1)
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			e   e^  d   d^  e   e^^ d^  e^  d^   e   e   e   f^^ g^  a^^ g^^ f^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			e   e^  d   d^  e   e^^ d^  e^  d^   e   e   e   f^^ g^  d^^ e^^ f^	 }
+		Sub{	Key(0)	l%48 o3 t.onNote=4,0;
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^  d^^ c^^<b^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^ <g^^ a^^ b^
+			Key(1)
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^  d^^ c^^<b^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^ <g^^ a^^ b^	 }
+	[2	l%48
+		Mt(48);r^^Mt(48);r^^Mt(48);r480 Mt(48);rMt(48);rMt(48);r672
+		Mt(48);r^^Mt(48);r^^Mt(48);r480 Mt(48);rMt(48);rMt(48);r672	]	}
+#rtm12={	Sub{	[2	Key(0)	l%48 o4 t.onNote=0,4;
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^  d^^ c^^<b^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^ <g^^ a^^ b^	]}
+		Sub{	[2	Key(0)	l%48 o4 t.onNote=2,2;
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			e   e^  d   d^  e   e^^ d^  e^  d^   e   e   e   f^^ g^  a^^ g^^ f^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			e   e^  d   d^  e   e^^ d^  e^  d^   e   e   e   f^^ g^  d^^ e^^ f^	]}
+		Sub{	[2	Key(0)	l%48 o3 t.onNote=4,0;
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^  d^^ c^^<b^
+	v.onNote= 115,110,115,110,115,110,115,115,110, 115,115,115,115,110,120,120,115;
+	q.onNote=  80, 90, 80, 90, 80, 90, 95, 95, 95,  80, 80, 80, 95, 90, 95, 95, 90 ;
+			a   a^  g   g^  a   a^^ g^  a^  g^   a   a   a   b^^>c^ <g^^ a^^ b^	]}
+	[2	l%48
+		Mt(48);r^^Mt(48);r^^Mt(48);r480 Mt(48);rMt(48);rMt(48);r672
+		Mt(48);r^^Mt(48);r^^Mt(48);r480 Mt(48);rMt(48);rMt(48);r672	]	}
+#rtm13={	Sub{	Key(0)	l%48 o4	t.onNote=0,4;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	a^^a^^a^^a^^a^a^	b^^b^^b^^b^^b^b^	f^^f^^f^^f^^f^f^	g^^g^^g^^g^^g^g^
+	a^^a^^a^^a^^a^a^	b^^b^^b^^b^^b^b^>	c^^c^^c^^c^^c^c^	d^^d^^e^^e^^f^g^<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=2,2;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	e^^e^^e^^e^^e^e^	f*^^f*^^f*^^f*^^f*^f*^	c+^^c+^^c+^^c+^^c+^c+^	d^^d^^d^^d^^d^d^
+	e^^e^^e^^e^^e^e^	f*^^f*^^f*^^f*^^f*^f*^	g^^g^^g^^g^^g^g^	a^^a^^b^^b^^>c^d^<	}
+		Sub{	Key(0)	l%48 o3	t.onNote=4,0;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	a^^a^^a^^a^^a^a^	b^^b^^b^^b^^b^b^	f^^f^^f^^f^^f^f^	g^^g^^g^^g^^g^g^
+	a^^a^^a^^a^^a^a^	b^^b^^b^^b^^b^b^>	c^^c^^c^^c^^c^c^	d^^d^^e^^e^^f^g^<	}	}
+#rtm14={	Sub{	Key(0)	l%48 o4	t.onNote=0,4;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ c^^c^^c^^c^^c^c^< b^^b^^b^^b^^b^b^
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ e^^e^^e^^e^^e^e^ f^^f^^f^^f^^f^f^<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=2,2;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	e^^e^^e^^e^^e^e^ a^^a^^a^^a^^a^a^ g^^g^^g^^g^^g^g^ f^^f^^f^^f^^f^f^
+	e^^e^^e^^e^^e^e^ a^^a^^a^^a^^a^a^ b^^b^^b^^b^^b^b^> c^^c^^c^^c^^c^c^<	}
+		Sub{	Key(0)	l%48 o3	t.onNote=4,0;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ c^^c^^c^^c^^c^c^< b^^b^^b^^b^^b^b^
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ e^^e^^e^^e^^e^e^ f^^f^^f^^f^^f^f^<	}	}
+#rtm15={	Sub{	Key(0)	l%48 o4	t.onNote=0,4;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ c^^c^^c^^c^^c^c^< b^^b^^b^^b^^b^b^
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ f^^f^^f^^f^^f^f^ a^^a^^a^^a^^a^a^<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=2,2;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	e^^e^^e^^e^^e^e^ a^^a^^a^^a^^a^a^ g^^g^^g^^g^^g^g^ f^^f^^f^^f^^f^f^
+	e^^e^^e^^e^^e^e^ a^^a^^a^^a^^a^a^ >c^^c^^c^^c^^c^c^ e^^e^^e^^e^^e^e^<	}
+		Sub{	Key(0)	l%48 o3	t.onNote=4,0;
+	v.onNote=110,105,100,95,105,95;	q.onNote=95,90,85,80,75,70;
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ c^^c^^c^^c^^c^c^< b^^b^^b^^b^^b^b^
+	a^^a^^a^^a^^a^a^> d^^d^^d^^d^^d^d^ f^^f^^f^^f^^f^f^ a^^a^^a^^a^^a^a^<	}	}
+//_Track  5   [ Cut ]
+#cut1={	Sub{	Key(0)	l%48 o3
+	v.onNote=110,105;	t.onNote=0,4;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=0,4,0;	>q95d^^q95c^^q90<b^
+	v.onNote=110,105;	t.onNote=4,0;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=4,0,4;	q95g^^q95a^^q90b^
+			Key(1)
+	v.onNote=110,105;	t.onNote=0,4;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=0,4,0;	>q95d^^q95c^^q90<b^
+	v.onNote=110,105;	t.onNote=4,0;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=4,0,4;	q95g^^q95a^^q90b^		}
+		Sub{	Key(0)	l%48 o4
+	v.onNote=110,105;	t.onNote=2,2;	q60[24e]
+	v.onNote=120,115,110;	t.onNote=2,2,2;	q95a^^q95g^^q90f^
+	v.onNote=110,105;	t.onNote=2,2;	q60[24e]
+	v.onNote=120,115,110;	t.onNote=2,2,2;	q95d^^q95e^^q90f^
+			Key(1)
+	v.onNote=110,105;	t.onNote=2,2;	q60[24e]
+	v.onNote=120,115,110;	t.onNote=2,2,2;	q95a^^q95g^^q90f^
+	v.onNote=110,105;	t.onNote=2,2;	q60[24e]
+	v.onNote=120,115,110;	t.onNote=2,2,2;	q95d^^q95e^^q90f^		}
+		Sub{	Key(0)	l%48 o4
+	v.onNote=110,105;	t.onNote=4,0;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=4,0,4;	>q95d^^q95c^^q90<b^
+	v.onNote=110,105;	t.onNote=0,4;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=0,4,0;	q95g^^q95a^^q90b^
+			Key(1)
+	v.onNote=110,105;	t.onNote=4,0;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=4,0,4;	>q95d^^q95c^^q90<b^
+	v.onNote=110,105;	t.onNote=0,4;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=0,4,0;	q95g^^q95a^^q90b^		}
+	[2	[2	[24 Mt(48);r48] r384	]	]	}
+#cut2={	Sub{	[2	Key(0)	l%48 o3
+	v.onNote=110,105;	t.onNote=0,4;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=0,4,0;	>q95d^^q95c^^q90<b^
+	v.onNote=110,105;	t.onNote=4,0;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=4,0,4;	q95g^^q95a^^q90b^	]}
+		Sub{	[2	Key(0)	l%48 o4
+	v.onNote=110,105;	t.onNote=2,2;	q60[24e]
+	v.onNote=120,115,110;	t.onNote=2,2,2;	q95a^^q95g^^q90f^
+	v.onNote=110,105;	t.onNote=2,2;	q60[24e]
+	v.onNote=120,115,110;	t.onNote=2,2,2;	q95d^^q95e^^q90f^	]}
+		Sub{	[2	Key(0)	l%48 o4
+	v.onNote=110,105;	t.onNote=0,4;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=0,4,0;	>q95d^^q95c^^q90<b^
+	v.onNote=110,105;	t.onNote=4,0;	q60[24a]
+	v.onNote=120,115,110;	t.onNote=4,0,4;	q95g^^q95a^^q90b^	]}
+		[2[2[24 Mt(48);r48] r384	]	]	}
+#cut3={	Sub{	Key(0)	l%48 o3	t.onNote=0,4;
+	q60v.onNote=110,105;[16a][16b][16f][16g][16a][16b]>[16c][6d][6e][2f][2g]	}
+		Sub{	Key(0)	l%48 o4	t.onNote=2,2;
+	q60v.onNote=110,105;[16e][16f*][16c+][16d][16e][16f*][16g][6a][6b]>[2c][2d]<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=4,0;
+	q60v.onNote=110,105;[16a][16b][16f][16g][16a][16b]>[16c][6d][6e][2f][2g]	}
+		[8[16 Mt(48);r48]]	}
+#cut4={	Sub{	Key(0)	l%48 o3	t.onNote=0,4;
+	q60v.onNote=110,105;[16a]>[16d][16c]<[16b][16a]>[16d][16e][16f]<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=2,2;
+	q60v.onNote=110,105;[16e][16a][16g][16f][16e][16a][16b]>[16c]<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=4,0;
+	q60v.onNote=110,105;[16a]>[16d][16c]<[16b][16a]>[16d][16e][16f]<	}
+		[8[16 Mt(48);r48]]	}
+#cut5={	Sub{	Key(0)	l%48 o3	t.onNote=0,4;
+	q60v.onNote=110,105;[16a]>[16d][16c]<[16b][16a]>[16d][16f][16a]<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=2,2;
+	q60v.onNote=110,105;[16e][16a][16g][16f][16e][16a]>[16c][16e]<	}
+		Sub{	Key(0)	l%48 o4	t.onNote=4,0;
+	q60v.onNote=110,105;[16a]>[16d][16c]<[16b][16a]>[16d][16f][16a]<	}
+		[8[16 Mt(48);r48]]	}
+//_Track  6   [ Organ ]
+#ogan0={	v100 o5 q99 l%12 M(16)	r*288 fgab>c<bag	}
+#ogan1={	Key(0)	v120 o5 l%12 M(16)
+	q95 'a>e<'1152-48 q99 >fedc< q80'a>df<'144q80'a>ce<'144q80'gb>d<'48 q99 ab>cd<
+	q95 'a>e<'1152-48 q99 >fedc< q80'gb>d<'144q80'a>ce<'144q80'b>ef<'48 q99 ab>cd<
+		Key(1)
+	q95 'a>e<'1152-48 q99 >fedc< q80'a>df<'144q80'a>ce<'144q80'gb>d<'48 q99 ab>cd<
+	q95 'a>e<'1152-48 q99 >fedc< q80'gb>d<'144q80'a>ce<'144q80'b>ef<'48 q99 ab>cd<	}
+#ogan2={	Key(0)	v120 o5 l%12 M(16);
+	'a>e<'576'g>d<'192 'f*>c<'768
+	'eb'576'f>c<'96'g>d<'96 'a>e<'672 b>cdedc<ba
+	'g>d<'96'>da<'48'>da<'48r48'a>e<'96'b>f<'48 '>ceg<'144'b>df<'144'a>ce<'96
+	'eb'96'b>f<'48'b>f<'48r48'f>c<'96'g>d<'48 'a>ce<'144'gb>d<'144'fa>c<'96
+	'f>c<'384'a>e<'384 M(32);'>da<'672 >gfedc<bag	}
+#ogan3={	Key(0)	v120 o5 l%12 M(16);
+	'a>e<'144'b>f<'144'>cg<'96 '>da<'144'>cg<'144'>da<'96
+	'>cg<'144'b>f<'144'>cg<'96 'b>f<'144'a>e<'144'g>d<'96
+	'a>e<'144'b>f<'144'>cg<'96 '>da<'144'>cg<'144'>da<'96
+	'>cg<'144'b>f<'144'>cg<'96 '>da<'288 >gfedcb<ag
+	'a>e<'144'b>f<'144'>cg<'96 '>da<'144'>cg<'144'>da<'96
+	'>cg<'144'b>f<'144'>cg<'96 'b>f<'144'a>e<'144'g>d<'96
+	'a>e<'144'b>f<'144'>cg<'96 '>da<'144'>cg<'144'>da<'96
+	'>da<'144'>da<'144'>eb<'144'>eb<'144'>f>c<<'96'>g>d<<'48r48	}
+#ogan4={	Key(0)	v120 o5 l%12 M(16);
+	'a>e<'384 '>da<'384 '>cg<'384 'b>f<'384
+	'a>e<'384 '>da<'384 '>cg<'384 '>da<'288 >gfedcb<ag
+	'a>e<'384 '>da<'384 '>cg<'384 'b>f<'384
+	'a>e<'384 '>da<'384 '>da<'144'>da<'144'>eb<'144'>eb<'144 >fgab>c<bagfedcdefg	}
+#ogan5={	Key(0)	v120 o5 l%12 M(16);
+	'a>e<'768 '>da<'768 '>cg<'768 'b>f<'768
+	'a>e<'768 '>da<'768 '>eb<'768 '>f>c<<'768-96 >gfedcb<ag	}
+#ogan6={	Key(0)	v120 o5 l%12 M(16);
+	'a>e<'768 '>da<'768 '>cg<'768 'b>f<'768
+	'a>e<'768 '>da<'768 '>f>c<<'768 '>a>e<<'768-96 >gfedc<bag	}
+//_Track  7   [ Lead 2 ]
+#led21={	r24	#led11	}
+#led22={	r24	#led12	}
+#led23={	r24	#led13	}
+//_Track  8   [ Syn 2 ]
+#syn21={	r24	#syn11	}
+#syn22={	r24	#syn12	}
+//_Track  9   [ Rtm 2 ]
+#rtm21={	p%=-32; M(16); #rtm11	}
+#rtm22={	p%=-32; M(16); #rtm12	}
+#rtm23={	p%=-32; M(16); #rtm13	}
+#rtm24={	p%=-32; M(16); #rtm14	}
+#rtm25={	p%=-32; M(16); #rtm15	}
+//------------------------------------------------------------------------------
+//_Track
+//		Tr 1   Tr 2   Tr 3   Tr 4   Tr 5   Tr 6   Tr 7   Tr 8   Tr 9   Tr10
+//		Ch 2   Ch 3   Ch 4   Ch 5   Ch 6   Ch 7   Ch 8   Ch 9   Ch11   Ch10
+/*		Lead1  Syn1   Bass   Rtm1   Cut    Organ  Lead2  Syn2   Rtm2   Drum*/	Time(  0:1:0)
+	Play(,      ,      ,#bass0,      ,      ,#ogan0,      ,      ,      ,#drum0);	Time(  1:1:0)
+	Play(,      ,      ,#bass1,#rtm11,#cut1 ,#ogan1,      ,      ,#rtm21,#drum1);
+r6144	Play(,#led11,      ,#bass2,#rtm12,#cut2 ,#ogan2,#led21,      ,#rtm22,#drum2);
+r6144	Play(,      ,      ,#bass1,#rtm11,#cut1 ,#ogan1,      ,      ,#rtm21,#drum1);
+r6144	Play(,      ,#led11,#bass3,#rtm12,#cut2 ,#ogan2,      ,#led21,#rtm22,#drum3);
+r6144	Play(,#led12,      ,#bass4,#rtm13,#rtm13,#ogan3,#led22,      ,#rtm23,#drum4);
+r6144	Play(,#led13,      ,#bass5,#rtm13,#cut3 ,#ogan4,#led23,      ,#rtm23,#drum5);
+r6144	Play(,      ,#syn11,#bass6,#rtm14,#cut4 ,#ogan5,      ,#syn21,#rtm24,#drum6);
+r6144	Play(,      ,#syn12,#bass7,#rtm15,#cut5 ,#ogan6,      ,#syn22,#rtm25,#drum7);
+r6144	Play(,      ,      ,#bass1,#rtm11,#cut1 ,#ogan1,      ,      ,#rtm21,#drum1);
+r6144	Play(,#led11,      ,#bass2,#rtm12,#cut2 ,#ogan2,#led21,      ,#rtm22,#drum2);
+r6144	Play(,      ,      ,#bass1,#rtm11,#cut1 ,#ogan1,      ,      ,#rtm21,#drum1);
+r6144	Play(,      ,#led11,#bass3,#rtm12,#cut2 ,#ogan2,      ,#led21,#rtm22,#drum3);
+r6144	Play(,#led12,      ,#bass4,#rtm13,#rtm13,#ogan3,#led22,      ,#rtm23,#drum4);
+r6144	Play(,#led13,      ,#bass5,#rtm13,#cut3 ,#ogan4,#led23,      ,#rtm23,#drum5);
+r6144	Play(,      ,#syn11,#bass6,#rtm14,#cut4 ,#ogan5,      ,#syn21,#rtm24,#drum6);
+r6144	Play(,      ,#syn12,#bass7,#rtm15,#cut5 ,#ogan6,      ,#syn22,#rtm25,#drum7);
+r6144	Play(,      ,      ,#bass1,#rtm11,#cut1 ,#ogan1,      ,      ,#rtm21,#drum1);
+r6144	Play(,#led11,      ,#bass2,#rtm12,#cut2 ,#ogan2,#led21,      ,#rtm22,#drum2);
+r6144	Play(,      ,      ,#bass1,#rtm11,#cut1 ,#ogan1,      ,      ,#rtm21,#drum1);
+r6144	Play(,#end  ,#led11,#bass3,#rtm12,#cut2 ,#ogan2,      ,#led21,#rtm22,#drum3);

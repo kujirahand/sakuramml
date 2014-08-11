@@ -1,0 +1,149 @@
+//--------------------------------------------------------
+/*
+■サイコロ転がし１
+
+この曲は、再生ボタンを押すたびに、違う曲を演奏します。
+こんなことができるのも、テキスト音楽ならでは、でしょうか。
+*/
+
+TrackName     = {"サイコロ転がし１"}    //曲名
+Copyright     = {"クジラ飛行机"}        //著作権表示
+MetaText      = {"実行のたびに曲が変わります。"}
+Tempo         = Random(90,130);         //テンポ設定
+TimeSignature = 4,4;
+//--------------------------------------------------------
+ResetGM();
+
+//_Variable
+Int BassNote = NoteNo(o4c);
+/*Array Scale = (0,2,4,5,7,9,11, 12,14,16,17,19,21,23,
+	24,26,28,29,31,33,35);//Major */
+Array Scale = (0,2,3,5,7,9,10, 12,14,15,17,19,21,22,
+	24,26,27,29,31,33,34);//Minor
+//Array Scale = (0,4,5,7,11,  12,16,17,19,23);//Okinawa
+
+Int ScaleSize = SizeOf(Scale);
+Int OldNote = Scale(Random(ScaleSize));
+#OldBassPhrase = {}
+Int RestRate = 30;
+
+//_Function
+Function MakeNote(){
+	#RET = {};// 関数の結果を、#RETに返す。
+	// リズムの決定 (発音、タイ、休符）
+	IF(Random(100) < RestRate){ //休符かタイ
+		IF(Random(100) > 25){       //休符
+			#RET = {r};
+		}ELSE{                      //タイ
+			#RET = {^};
+		}
+		EXIT;
+	}
+	// ノートの決定
+	IF(Random(100) > 80){
+		// 前回の結果を無視してランダムな音を使う
+		OldNote = Random(ScaleSize);
+		Int N = Scale(OldNote) + BassNote;
+		#RET = {n}+#STR(N)+{,};
+	}ELSE{ //前回の結果を踏まえて
+		OldNote = OldNote + RandomSelect(-1,1);
+		IF(OldNote < 0){ OldNote = ScaleSize-1; }ELSE{
+		IF(OldNote >= ScaleSize){ OldNote = 0; }}
+		Int N = Scale(OldNote) + BassNote;
+		#RET = {n}+#STR(N)+{,};
+	}
+}
+
+Function MakePhrase(){
+	#RET_PH = {}
+	//基本フレーズを初期化するか？
+	IF(Random(3)==0){ #OldBassPhrase = {}; }
+	//基本フレーズの作成
+	IF(#OldBassPhrase == {}){
+		#OldBassPhrase = {};
+		[4 MakeNote(); 
+		#OldBassPhrase = #OldBassPhrase + #RET; ]
+	}
+	#BassPh = #OldBassPhrase;
+	Int Pat = Random(3); //パターン分け
+	IF(Pat == 0){ //基本フレーズのリフレイン
+		Str Tmp = {};[4 MakeNote(); Tmp = Tmp + #RET; ]
+		#RET_PH = #BassPh + #BassPh + Tmp + #BassPh;
+	}
+	IF(Pat == 1){ //基本フレーズ＋おかずＸ２times
+		Str Tmp = {};[4 MakeNote(); Tmp = Tmp + #RET; ]
+		Str Tmp2 = {};[4 MakeNote(); Tmp2 = Tmp2 + #RET; ]
+		#RET_PH = #BassPh + Tmp + #BassPh + Tmp2;
+	}
+	IF(Pat == 2){ //基本フレーズ１回のみ
+		Str Tmp1 = {};[4 MakeNote(); Tmp1 = Tmp1 + #RET; ]
+		Str Tmp2 = {};[4 MakeNote(); Tmp2 = Tmp2 + #RET; ]
+		Str Tmp3 = {};[4 MakeNote(); Tmp3 = Tmp3 + #RET; ]
+		#RET_PH = Tmp1 + Tmp2 + #BassPh + Tmp3;
+	}
+}
+
+Function MakeChord(){
+	#RET = {}
+	Int CD_Root = Random(ScaleSize);
+	Int CD_3 = CD_Root + 2;
+	IF(CD_3 >= ScaleSize){ CD_3 = CD_3 - ScaleSize; }
+	Int CD_5 = CD_Root + 4;
+	IF(CD_5 >= ScaleSize){ CD_5 = CD_5 - ScaleSize; }
+	CD_Root = Scale(CD_Root) + BassNote;
+	CD_3 = Scale(CD_3) + BassNote;
+	CD_5 = Scale(CD_5) + BassNote;
+	#RET ={'n} + #STR(CD_Root)+{,0 n};
+	#RET = #RET + #STR(CD_3)+{,0 n}+#STR(CD_5)+{'};
+}
+
+//_1 Track
+Track(1)
+r1 Voice(RandomSelect(31,57,60,49));
+l8v120 q85
+RestRate = 35;
+Str Intro1 = {Lyric{"間奏"}r1r1r1r1}
+Str A1 = {Lyric{A-melo};l8};
+ [2 MakePhrase(); A1 = A1 + #RET_PH ]
+RestRate = 28;
+Str B1 = {Lyric{B-melo};l8};
+ [2 MakePhrase(); B1 = B1 + #RET_PH ]
+
+[2
+	Intro1; A1;A1;B1;B1
+	Intro1; A1;B1;B1; Intro1;
+]
+
+//_2 Track
+Track(2) 
+r1 Voice(RandomSelect(1,12,25,26));
+RestRate = 60;
+MakePhrase(); Str Rif1_1 = #RET_PH;
+MakePhrase(); Str Rif1_2 = #RET_PH;
+RestRate = 55;
+MakePhrase(); Str Rif2_1 = #RET_PH;
+MakePhrase(); Str Rif2_2 = #RET_PH;
+l8v90 q98
+Str Intro2 = {[2 Sub{ Rif1_1 } Rif1_2 ]};
+Str A2 = Intro2;
+Str B2 = {[2 Sub{ Rif2_1 } Rif2_2 ]};
+
+[2
+	Intro2; A2;A2;B2;B2
+	Intro2; A2;B2;B2; Intro2
+]
+
+
+//_3 Track
+Track(3)
+r1 Voice(RandomSelect(5,6,17,55));
+q100 v60
+Str Intro3 = {r1r1r1r1}
+Str A3 ={l1} [4 MakeChord();A3 = A3 + #RET]
+Str B3 ={l2} [8 MakeChord();B3 = B3 + #RET]
+
+[2
+	Intro3; Intro3;A3;B3;B3
+	Intro3; A3;B3;B3; Intro3
+]
+//<--- ここまで

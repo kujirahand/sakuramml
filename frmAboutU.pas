@@ -9,6 +9,7 @@ uses
 const
   HISTORY = 'history.txt';
   TITLE_JPG = 'doc\title.jpg';
+  WEB_URL = 'http://oto.chu.jp/';
 
 type
   TfrmAbout = class(TForm)
@@ -90,7 +91,7 @@ end;
 
 procedure TfrmAbout.Label2Click(Sender: TObject);
 begin
-    OpenApp('http://oto.chu.jp/');
+    OpenApp(WEB_URL);
 end;
 
 procedure TfrmAbout.FormShow(Sender: TObject);
@@ -130,14 +131,16 @@ end;
 
 procedure TfrmAbout.Image1Click(Sender: TObject);
 var
-    s: array [0..2] of string;
+    s: array [0..4] of string;
 begin
     Image1.Visible := False;
     frmSakuraPad.PlayWave(WAV_B);
-    s[0] := 'ちょっとだけよ～ん'#13#10'ぽっ・・・';
-    s[1] := 'MMLに栄光あれ！'#13#10'楽しく素敵に MML!!!';
-    s[2] := 'がしゅっ。';
-    lblHide.Caption := s[Random(3)];
+    s[0] := '音楽は神が与えた最高の癒やし';
+    s[1] := 'MMLで楽しく'#13#10'楽しく素敵に MML!!!';
+    s[2] := 'サクラで楽しく音楽しよう！';
+    s[3] := 'サウンドプログラミングはサクラで';
+    s[4] := 'サクラでいつでもどこでも'#13#10'楽しく音楽しよう！';
+    lblHide.Caption := s[Random(5)];
     Application.ProcessMessages ;
     sleep(600);
     Image1.Visible := True;
@@ -145,7 +148,7 @@ end;
 
 procedure TfrmAbout.lblInfoAuthorClick(Sender: TObject);
 begin
-    OpenApp('http://oto.chu.jp/');
+    OpenApp(WEB_URL);
 end;
 
 end.

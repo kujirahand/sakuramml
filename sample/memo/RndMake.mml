@@ -1,0 +1,72 @@
+/*	"RndMake.txt"
+ *
+ *	ランダムにフレーズを作成する関数
+ *	作成1999/11/30
+ */
+
+/*	使い方：
+ 	１．スケールの選択
+ 		メジャースケールを使うとき、Scale = MajorScale
+ 		マイナースケールを使うとき、Scale = MinoeScale
+ 		スケール以外の半音を混ぜたいとき、NoiseRate = ?
+ 	２．MakePattern(Count,N1,N2,NRate)　関数を呼ぶ
+ 		引数の意味：	Count		フレーズの長さ
+ 					N1 ~ N2 	使用オクターブ
+ 					NRate		フレーズ中スラーにする率
+ 	３．結果。文字列マクロ #RET にフレーズが作られる。
+ */
+ 
+/* ランダムにノートを選んで#RETに代入する関数 N1<= Octave <= N2 */
+Int		NoiseRate = 8;
+Array		MajorScale = (0,2,4,5,7,9,11);
+Array		MinorScale = (0,2,3,5,7,9,10);
+Array		Scale = MajorScale;
+
+Int NumToNoteOctave = -1;
+Function NumToNote(N){
+	Int Oct = N / 12;
+	IF(Oct != NumToNoteOctave){
+		#RET = #RET + {o} + #STR(Oct);
+		NumToNoteOctave = Oct;
+	}
+	N = N % 12;
+	IF(N==0) { #RET = #RET + {c} }
+	IF(N==1) { #RET = #RET + {c+} }
+	IF(N==2) { #RET = #RET + {d} }
+	IF(N==3) { #RET = #RET + {d+} }
+	IF(N==4) { #RET = #RET + {e} }
+	IF(N==5) { #RET = #RET + {f} }
+	IF(N==6) { #RET = #RET + {f+} }
+	IF(N==7) { #RET = #RET + {g} }
+	IF(N==8) { #RET = #RET + {g+} }
+	IF(N==9) { #RET = #RET + {a} }
+	IF(N==10){ #RET = #RET + {a+} }
+	IF(N==11){ #RET = #RET + {b} }
+}
+
+Function MakeNote(N1,N2){
+	Int NN = Random(N1,N2)*12+Scale(Random(7));
+	IF(NoiseRate > Random(100)){ NN++ }
+	NumToNote(NN);
+}
+
+/* パターンを作って、#RETに代入する関数 */
+Function MakePattern(Count,N1,N2,NRate){
+	#RET = {};
+	Int R;
+	FOR(Int I=0; I<Count; I++){
+		R = Random(100);
+		IF(R<NRate){
+			MakeNote(N1,N2);
+		}ELSE{
+			IF(I==0){ MakeNote(N1,N2) }ELSE{ #RET = #RET + {^} }
+		}		
+	}	
+}
+
+//	使用例
+	@33
+	MakePattern(16,2,3,50);
+	l16q80 [4 #RET; ]
+	Print(#RET);
+

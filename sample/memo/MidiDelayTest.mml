@@ -1,0 +1,134 @@
+/*
+	MIDI Delay
+	エフェクターなど使わないで、ディレイを再現する
+*/
+
+Function MidiDelayS(Str S){	// シンプルなディレイ
+	Int Temp_v = MML(v);
+	Int Dly = !8
+	Int Dec_v = Temp_v / 8;
+	Int J = Temp_v;
+	J = J - (Dec_v * 2);
+	v(J);
+	For(Int I=1;I<=2;I++){
+		Sub{ r%(Dly) v(J) S  }
+		Dly=Dly*2;
+		J=J-Dec_v;
+	}
+	v(Temp_v) S 
+}
+@27o5l4cdef
+MidiDelayS({ cdefgfedcegec2})
+
+
+/*　リピート回数(Repeat)とディレイタイム(Delay)を指定できる
+　　汎用的なディレイ　*/
+Function MidiDelay(Str S,Int Repeat, Int Delay){
+	Int Temp_v = MML(v);
+	Int Dly = Delay;
+	Int Dec_v = Temp_v / (Repeat+2);
+	Int J = Temp_v;
+	J = J - (Dec_v * 2);
+	v(J);
+	For(Int I=1;I<=Repeat;I++){
+		Sub{ r%(Dly) v(J) S }
+		Dly=Dly+Delay;
+		J=J - Dec_v;
+	}
+	v(Temp_v) S 
+}
+@31o5
+MidiDelay({l8 cdefgfedcegec2},4,!8)
+
+/*  ディレイの音程をKeyPlus分ずつずらしていく変なディレイ  */
+Function MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus){
+	Int Temp_v = MML(v);
+	Int Dly = Delay;
+	Int Dec_v = Temp_v / (Repeat+2);
+	Int J = Temp_v;
+	Int K = 0;
+	J = J - (Dec_v * 2);
+	v(J);
+	For(Int I=1;I<=Repeat;I++){
+		K=K + KeyPlus;
+		Sub{
+			Key(K)	
+			r%(Dly) v(J) S 
+		}
+		Dly=Dly+Delay;
+		J=J - Dec_v;
+	}
+	v(Temp_v) Key(0) S 
+}
+@31o5
+MidiDelayKey({l8 [2 cegeae>c<e ] },2,!4,5)
+r2
+
+/*　ディレイがフレーズより前から始まる。テープの逆回転を
+　　再現したかのようなディレイ。ＭＩＤＩならでは。　*/
+Function MidiDelayRev(Str S, Int Repeat, Int Delay){
+	Int Temp_v = MML(v);
+	Int Dly = Delay;
+	Int Dec_v = Temp_v / (Repeat+2);
+	Int J = Temp_v;
+	J = J - (Dec_v * 2);
+	v(J);
+	For(Int I=1;I<=Repeat;I++){
+		Dly=Dly-Delay;
+		Sub{
+			r%(Dly) v(J) S 
+		}
+		J=J - Dec_v;
+	}
+	v(Temp_v) Key(0) S 
+}
+@31o5r4
+MidiDelayRev({l8 [4 cegeae>c<e ] },4,!16)
+
+
+/*  ディレイタイムが短くなっていくディレイ  */
+Function MidiDelayTap(Str S, Int Repeat, Int Delay){
+	Int Temp_v = MML(v);
+	Int Dly = Delay;
+	Int Dec_v = Temp_v / (Repeat+2);
+	Int J = Temp_v;
+	J = J - (Dec_v * 2);
+	v(J);
+	For(Int I=1;I<=Repeat;I++){
+		Dly=Dly+Delay;
+		Delay = Delay /2;
+		Sub{
+			r%(Dly) v(J) S 
+		}
+		J=J - Dec_v;
+	}
+	v(Temp_v) Key(0) S 
+}
+@31o5r4
+MidiDelayTap({l4 [2 crergrercr ] },4,!8)
+
+
+/*  ディレイタイムが短くなっていくディレイその２ 
+　　ゲートを短くしたもの　　　　　　　　　　　　　*/
+Function MidiDelayTap2(Str S, Int Repeat, Int Delay){
+	Int Temp_v = MML(v);
+	Int Temp_q = MML(q);
+	Int Dly = Delay;
+	Int Dec_v = Temp_v / (Repeat+2);
+	Int J = Temp_v;
+	J = J - (Dec_v * 2);
+	v(J); q%1;
+	For(Int I=1;I<=Repeat;I++){
+		
+		Dly=Dly+Delay;
+		Delay = Delay /2;
+		Sub{
+			r%(Dly) v(J) S 
+		}
+		J=J - Dec_v;
+	}
+	v(Temp_v) q(Temp_q) Key(0) S 
+}
+@31o5r4
+MidiDelayTap2({l4 [2 q100 crrgerrr ] },8,!4)
+

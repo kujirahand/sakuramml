@@ -1,0 +1,36 @@
+/*
+ *     Rythm Mode Sample
+ *     MML for SAKURA
+ */
+
+//	ＭＭＬのリズムモードを使ったサンプルです。
+
+System.Include(stdmsg.h);
+Tempo=120;
+ResetGM();
+
+//ＧＭ、ＧＳ音源では、チャンネル１０がリズム楽器専用
+Track(10); Channel(10);Time(1:3:0);
+Track(11); Channel(10);Time(1:3:0); 
+
+//リズム用マクロ
+$b{n36,} //-- bass drum
+$s{n38,} //-- snare
+$h{n42,} //-- hihat-close
+$m{n46,} //-- hihat-open
+$c{n49,} //-- cymbal
+$d{n62,} //-- conga
+$e{n63,} //-- conga
+
+//タイミングなど文字列変数定義
+#Tim1 	={ t.onNote(0,2); }
+#Vel1		={ v100; }
+#Vel2		={ v.onNote(80,70,120,95); }
+#VelFill 	={ v.onTime(70,127,!4); }
+
+Rythm{
+	(  Track(10); )
+	l16[2 [2 (#Tim1;#Vel1;) brrb,,70 s,,120rrr rbb,,50b :s,,127rrr  ] :srss ](#VelFill) s32s32sss 
+	(  Track(11); )
+	l16[2 [2 (#Tim1;#Vel2;) hrhh mrhh rhrh hhhh32h32 ] ]
+}
