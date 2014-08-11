@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='../midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='../index.html'>MIDI Standard</a>＼
+	<a href='../exclusive.html'>Exclusive Message</a>＼
+	<a href='../DeviceControl.html'>Device Control</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>Master Tuning</h2>				<!--（コマンドの名前。）-->
+<!------------------------------------------------------------->
+<h3>■概要</h3>
+　この機能は、各MIDIデバイス全体のチューニングを設定します。<br>
+<br>
+
+
+<br>
+<h3>■書式</h3>
+<code>
+MasterTuning(<var>INT iTuning</var>);<br>
+MasterFineTuning(<var>INT iTuningLSBMSB</var>);<br>
+MasterFineTuning_Ex(<var>INT idDevice</var>, <var>INT iTuningLSBMSB</var>);<br>
+MasterCoarseTuning(<var>INT iTuningHSB</var>);<br>
+MasterCoarseTuning_Ex(<var>INT idDevice</var>, <var>INT iTuningHSB</var>);<br>
+</code>
+
+<br>
+[備考]<br>
+※この命令は、以下のMMLと同等です。<br>
+<code>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, RT_DeviceCont, RT_DeviceCont_MasterFineTuning, <var>iTuningLSB</var>, <var>iTuningMSB</var>, $F7<br>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, RT_DeviceCont, RT_DeviceCont_MasterCoarseTuning, $00, <var>iTuningHSB</var>, $F7<br>
+
+<br>
+<h3>■引数</h3>
+<table>
+<tr><th width='64pt'>引数名	</th>
+	<th width='64pt'>初期値	</th>
+	<th width='64pt'>範囲	</th>
+	<th width='448pt'>機能	</th></tr>
+<tr><td><var>INT iTuning</var>	</td>
+	<td>0</td>
+	<td>-532480～524287</td>
+	<td>MIDIデバイス全体のチューニングを指定します。<br>
+		<var>iTuning</var> × 100 ÷ 8192 [cent]<br>
+		-532480：-6500.0 [cent]<br>
+		0 　　　：　　0.0 [cent] (中央)<br>
+		524287	：+6399.9 [cent]</td></tr>
+<tr><td><var>INT iTuningLSBMSB</var>	</td>
+	<td>8192</td>
+	<td>0～16383</td>
+	<td>MIDIデバイス全体のチューニングを指定します。<br>
+		（ <var>iTuning</var> － 8192 ） × 100 ÷ 8192 [cent]<br>
+		0　　　：-100.0 [cent]<br>
+		8192 　：　　0.0 [cent] (中央)<br>
+		16383　：　+99.9 [cent]</td></tr>
+<tr><td><var>INT iTuningHSB</var>	</td>
+	<td>64</td>
+	<td>0～127</td>
+	<td>MIDIデバイス全体のチューニングを指定します。<br>
+		（ <var>iTuning</var> － 64 ） × 100 [cent]<br>
+		0　　：-6400 [cent]<br>
+		64 　：　　0 [cent] (中央)	<br>
+		127　：+6300 [cent]</td></tr>
+<tr><td><var>INT idDevice</var>	</td>
+	<td>$7F</td>
+	<td>$00 ～ $7F</td>
+	<td>MIDIデバイスのDeviceIDを指定します。<br>
+		MIDI規格では、Bloadcastである$7Fを推奨しています。</td></tr>
+</table><br>
+※100 [cent] ＝ 1 [半音]
+
+<br>
+<h3>■返り値</h3>
+無し<br>
+<br>
+
+<br>
+<h3>■説明</h3>
+これらの関数は、MIDIデバイス全体のチューニングを設定します。<br>
+MasterTuning()関数は、<var>iTuningLSBMSB</var>と<var>iTuningHSB</var>を計算し、
+MasterFineTuning()関数及び、MasterCoarseTuning()関数をコールします。<br>
+MasterFineTuning()関数及び、MasterCoarseTuning()関数は、<var>idDevice</var>を$7F(Bloadcast)にして、
+MasterFineTuning_EX()関数及び、MasterCorseTuning_EX()関数をコールしている為、
+全てのMIDIデバイスがメッセージを受信します。<br>
+
+<br>
+<h3>■使用例</h3>
+<table>
+<caption>List.1 </caption>
+<tr><td><pre><code>
+MasterTuning(1602);			//A=445[Hz]にチューニング
+TR(1)	o4 l4 cdefgabc
+</code></pre></td></tr>
+</table><br>
+
+
+<br>
+<!------------------------------------------------------------->
+<h3>■関連項目</h3>
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

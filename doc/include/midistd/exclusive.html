@@ -1,0 +1,390 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='index.html'>MIDI Standard</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+	<h2 align='center'>System Exclusive Message</h2>
+
+チャンネルに関係なく、MIDIデバイスのシステム全体に共通するメッセージです。<br>
+各楽器メーカーにID番号(1 or 3Byte)が割り振られており、MIDIデバイス固有の機能を設定する事が可能です。<br>
+その為、ID番号によって様々なフォーマットがあります。<br>
+又、$7D～$7Fの３つのメーカーID番号は、全てのMIDIデバイスに共通するメッセージとして割り振られいます。<br>
+$7Dは、教育機関、研究機関等のテスト用で商用のMIDIデバイスでの使用は禁止されています。<br>
+$7E～$7FはUniversal Exclusive Messageで、MIDI規格の拡張として使用されます。<br>
+SysEx命令により、直接記述が可能です。<br>
+
+<h3><a name='NRT'>Universal Non-Real Time Exclusive Message</a></h3>
+
+全てのMIDI楽器に共通するエクスクルーシブ・メッセージです。<br>
+以下は、演奏中にリアルタイムに送信する必要が無いメッセージです。<br>
+<br>
+■SysEx命令では、以下の通りに記述します。<br>
+<br>
+SysEx = $F0, $7E, <var>Device-ID</var>, <var>Sub-ID#1</var>, (<var>Sub-ID#2</var>), (<var>Data[]</var>), $F0<br>
+<br>
+<table>
+<tr><td>	$F0				</td><td>Exclusive Messageの開始を示します。</td></tr>
+<tr><td>	$7E				</td><td>Universal Non-Real Time Exclusive Messageを示します。</td></tr>
+<tr><td><var>Device-ID</var></td><td>MIDI DeviceのIDです。（0x7F(Broadcast)の場合、全てのMIDIが受信します。）</td></tr>
+<tr><td><var>Sub-ID#1</var>	</td><td>コマンドの種類を示します。(以下、表参照)</td></tr>
+<tr><td><var>Sub-ID#2</var>	</td><td>コマンドの種類を示します。(以下、表参照)　（※使用しない場合も有ります。）</td></tr>
+<tr><td><var>Data[]</var>	</td><td>データです。コマンドにより長さは異なります。　（※使用しない場合も有ります。）</td></tr>
+<tr><td>	$F7				</td><td>Exclusive Messageの終了を示します。</td></tr>
+</table>
+<br>
+
+<table>
+<tr><th>Name</th><th>Sub ID#1</th><th>Sub ID#2</th><th>GM1</th><th>GM2</th><th>Command</th><th>Define file</th></tr>
+<tr><td colspan='7'><strong>File/Sample Damp</strong></td></tr>
+<tr><td>Dump Header		</td><td>0x01</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Data Packet		</td><td>0x02</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Dump Request	</td><td>0x03</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>End of File		</td><td>0x7B</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Wait			</td><td>0x7C</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Cancel			</td><td>0x7D</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>NAK				</td><td>0x7E</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>ACK				</td><td>0x7F</td><td><font color='red'>No Used</font></td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>MIDI Time Code</strong></td></tr>
+<tr><td>Special					</td><td>0x04</td><td>0x00</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Punch In Points			</td><td>0x04</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Punch Out Points		</td><td>0x04</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Delete Punch In Point	</td><td>0x04</td><td>0x03</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Delete Punch Out Point	</td><td>0x04</td><td>0x04</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Start Point		</td><td>0x04</td><td>0x05</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Stop Point		</td><td>0x04</td><td>0x06</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Start Points with Additional Infomation</td><td>0x04</td><td>0x07</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Stop Points with Additional Infomation</td><td>0x04</td><td>0x08</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Delete Event Start Point	</td><td>0x04</td><td>0x09</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Delete Event Stop Point		</td><td>0x04</td><td>0x0A</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Cue Points					</td><td>0x04</td><td>0x0B</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Cue Points with Additional Infomation	</td><td>0x04</td><td>0x0C</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Delete Cue Point						</td><td>0x04</td><td>0x0D</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Name In Additional Infomation		</td><td>0x04</td><td>0x0E</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>Sample Damp Standard</strong></td></tr>
+<tr><td>Multiple Loop Points		</td><td>0x05</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Loop Points Request			</td><td>0x05</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Sample Name Trance Mission	</td><td>0x05</td><td>0x03</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Sample Name Request			</td><td>0x05</td><td>0x04</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Extended Dump Header		</td><td>0x05</td><td>0x05</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Extended Loop Point Trance Mission	</td><td>0x05</td><td>0x06</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Extended Loop Point Request			</td><td>0x05</td><td>0x07</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>General Infomation	</strong></td></tr>
+<tr><td>Identity Request	</td><td>0x06</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Identity Reply		</td><td>0x06</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>File Damp Standard</strong></td></tr>
+<tr><td>Header		</td><td>0x07</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Data Packet	</td><td>0x07</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Request		</td><td>0x07</td><td>0x03</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong><a href='TuningStandard.html'>MIDI Tuning Standard</a></strong></td></tr>
+<tr><td>Bulk Tuning Dump Request				</td><td>0x08</td><td>0x00</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Bulk Tuning Dump Reply					</td><td>0x08</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Single Note Tuning Change				</td><td>0x08</td><td>0x02</td><td>×</td><td>×</td>
+	<td><a href='./function/RT_NoteTuning.html'>NRT_NoteTuning</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Bulk Tuning Dump Request (Bank)			</td><td>0x08</td><td>0x03</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Key Based Tuning Dump					</td><td>0x08</td><td>0x04</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Scale Octave Tuning Dump 1Byte format	</td><td>0x08</td><td>0x05</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Scale Octave Tuning Dump 2Byte format	</td><td>0x08</td><td>0x06</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Single Note Tuning Change (Bank)		</td><td>0x08</td><td>0x07</td><td>×</td><td>×</td>
+	<td><a href='./function/RT_NoteTuning.html'>NRT_NoteTuning_Bank</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Scale Octave Tuning 1Byte format		</td><td>0x08</td><td>0x08</td><td>×</td><td>○</td>
+	<td><a href='./function/RT_OctaveTuning.html'>NRT_OctaveTuningB</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Scale Octave Tuning 2Byte format		</td><td>0x08</td><td>0x09</td><td>×</td><td>×</td>
+	<td><a href='./function/RT_OctaveTuning.html'>NRT_OctaveTuningW</a></td><td>midistd.h</td>
+</tr>
+<tr><td colspan='7'><strong><a href='GeneralMIDI_EX.html'>General MIDI	</a></strong></td></tr>
+<tr><td>GM System Level.1 On<br>（旧GM Reset, GM System On）</td><td>0x09</td><td>0x01</td><td>○</td><td>○</td>
+	<td>GM-Reset<br>
+		<a href='./Function/GM_System.html'>GM_SystemOn<br>GM_SystemOn1</a></td><td>stdmsg.h<br>midistd.h<br>midistd.h</td>
+</tr>
+<tr><td>GM System Off										</td><td>0x09</td><td>0x02</td><td>○</td><td>○</td>
+	<td><a href='./Function/GM_System.html'>GM_SystemOff</a></td><td>midistd.h</td>
+</tr>
+<tr><td>GM System Level.2 On								</td><td>0x09</td><td>0x03</td><td>×</td><td>○</td>
+	<td><a href='./Function/GM_System.html'>GM_SystemOn2</a></td><td>midistd.h</td>
+</tr>
+<tr><td colspan='7'><strong>File Reference System	</strong></td></tr>
+<tr><td>Open File				</td><td>0x0B</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Select or Reselect		</td><td>0x0B</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Open File and Select	</td><td>0x0B</td><td>0x03</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Close File				</td><td>0x0B</td><td>0x04</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+</table>
+<br><br>
+
+<h3><a name='RT'>Universal Real Time Exclusive Message</a></h3>
+
+全てのMIDI楽器に共通するエクスクルーシブ・メッセージです。<br>
+以下は、演奏中にリアルタイムに送信する必要が有るメッセージです。<br>
+受信デバイス(MIDI楽器等)が対応しれいれば、これらのメッセージを受信すると即座に設定を適用させます。<br>
+<br>
+■SysEx命令では、以下の通りに記述します。<br>
+<br>
+SysEx = $F0, $7F, <var>Device-ID</var>, <var>Sub-ID#1</var>, (<var>Sub-ID#2</var>), (<var>Data[]</var>), $F0<br>
+<br>
+<table>
+<tr><td>	$F0				</td><td>Exclusive Messageの開始を示します。</td></tr>
+<tr><td>	$7F				</td><td>Universal Real Time Exclusive Messageを示します。</td></tr>
+<tr><td><var>Device-ID</var></td><td>MIDI DeviceのIDです。（0x7F(Broadcast)の場合、全てのMIDIが受信します。）</td></tr>
+<tr><td><var>Sub-ID#1</var>	</td><td>コマンドの種類を示します。(以下、表参照)</td></tr>
+<tr><td><var>Sub-ID#2</var>	</td><td>コマンドの種類を示します。(以下、表参照)　（※使用しない場合も有ります。）</td></tr>
+<tr><td><var>Data[]</var>	</td><td>データです。コマンドにより長さは異なります。　（※使用しない場合も有ります。）</td></tr>
+<tr><td>	$F7				</td><td>Exclusive Messageの終了を示します。</td></tr>
+</table>
+<br>
+
+<table>
+<tr><th>Name</th><th>Sub ID#1</th><th>Sub ID#2</th><th>GM1</th><th>GM2</th><th>Command</th><th>Define file</th></tr>
+<tr><td colspan='7'><strong>MIDI Time Code</strong></td></tr>
+<tr><td>Full Message	</td><td>0x01</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>User Bits		</td><td>0x01</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>MIDI Show Control</strong></td></tr>
+<tr><td>Extensions		</td><td>0x02</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>Notation Information</strong></td></tr>
+<tr><td>Bar Number					</td><td>0x03</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Time Signature Immediate	</td><td>0x03</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Time Signature Delayed		</td><td>0x03</td><td>0x42</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong><a href='DeviceControl.html'>Device Control</a></strong></td></tr>
+<tr><td>Master Volume				</td><td>0x04</td><td>0x01</td><td>×</td><td>○</td>
+	<td><a href='./function/MasterVolume.html'>MasterVolume</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Master Ballance				</td><td>0x04</td><td>0x02</td><td>×</td><td>×</td>
+	<td><a href='./function/MasterBallance.html'>MasterBallance</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Master Fine Tuning			</td><td>0x04</td><td>0x03</td><td>×</td><td>○</td>
+	<td rowspan='2'><a href='./function/MasterTuning.html'>MasterTuning<br>
+					MasterFineTuning<br>MasterCoarseTuning</a></td>
+	<td rowspan='2'>midistd.h</td>
+</tr>
+<tr><td>Master Coarse Tuning		</td><td>0x04</td><td>0x04</td><td>×</td><td>○</td>
+</tr>
+<tr><td>Global Parameter Control	</td><td>0x04</td><td>0x05</td><td>×</td><td>○</td>
+	<td><a href='./function/RT_Reverb.html'>RT_Reverb<br>RT_Reverb_All<br>RT_Reverb_Type<br>RT_Reverb_Time</a><br>
+		<a href='./function/RT_Chorus.html'>RT_Chorus<br>RT_Chorus_All<br>RT_Chorus_Type<br>RT_Chorus_ModRate<br>RT_Chorus_ModDepth<br>RT_Chorus_Feedback<br>RT_Chorus_SendToReverb</a></td>
+	<td>midistd.h</td>
+</tr>
+<tr><td colspan='7'><strong>Real Time MIDI Time Code Cueing</strong></td></tr>
+<tr><td>Special										</td><td>0x05</td><td>0x00</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Punch In Points								</td><td>0x05</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Punch Out Points							</td><td>0x05</td><td>0x02</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Start Point							</td><td>0x05</td><td>0x05</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Stop Point							</td><td>0x05</td><td>0x06</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Start Points with Additional Infomation</td><td>0x05</td><td>0x07</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Stop Points with Additional Infomation</td><td>0x05</td><td>0x08</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Cue Points									</td><td>0x05</td><td>0x0B</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Cue Points with Additional Infomation		</td><td>0x05</td><td>0x0C</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Event Name In Additional Infomation			</td><td>0x05</td><td>0x0E</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>MIDI Machine Control Commands</strong></td></tr>
+<tr><td>MMC Message		</td><td>0x06</td><td>0x00～0x7F</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong>MIDI Machine Control Responses</strong></td></tr>
+<tr><td>MMC Message		</td><td>0x07</td><td>0x00～0x7F</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td colspan='7'><strong><a href='TuningStandard.html'>MIDI Tuning Standard</a></strong></td></tr>
+<tr><td>Single Note Tuning Change				</td><td>0x08</td><td>0x02</td><td>×</td><td>×</td>
+	<td><a href='./function/RT_NoteTuning.html'>RT_NoteTuning</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Single Note Tuning Change (Bank)		</td><td>0x08</td><td>0x07</td><td>×</td><td>×</td>
+	<td><a href='./function/RT_NoteTuning.html'>RT_NoteTuning_Bank</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Scale Octave Tuning 1Byte format		</td><td>0x08</td><td>0x08</td><td>×</td><td>△</td>
+	<td><a href='./function/RT_OctaveTuning.html'>RT_OctaveTuningB</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Scale Octave Tuning 2Byte format		</td><td>0x08</td><td>0x09</td><td>×</td><td>×</td>
+	<td><a href='./function/RT_OctaveTuning.html'>RT_OctaveTuningW</a></td><td>midistd.h</td>
+</tr>
+<tr><td colspan='7'><strong><a href='ControllerDestination.html'>Controller Destination Setting</a></strong></td></tr>
+<tr><td>Channel Pressure			</td><td>0x09</td><td>0x01</td><td>×</td><td>○</td>
+	<td><a href='./function/RT_CD_ChPressure.html'>RT_CD_ChPressure</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Polyhonic Key Pressure		</td><td>0x09</td><td>0x02</td><td>×</td><td>×</td>
+	<td><a href='./function/RT_CD_PolyPressure.html'>RT_CD_PolyPressure</a></td><td>midistd.h</td>
+</tr>
+<tr><td>Control Change Message		</td><td>0x09</td><td>0x03</td><td>×</td><td>○</td>
+	<td><a href='./function/RT_CD_CC.html'>RT_CD_CC</a></td><td>midistd.h</td>
+</tr>
+<tr><td colspan='7'><strong><a href='KeyBasedInstrument.html'>Key-Based Instrument Controllers</a></strong></td></tr>
+<tr><td>Basic						</td><td>0x0A</td><td>0x01</td><td>×</td><td>○</td>
+	<td><a href='./function/RT_KeyBased_Basic.html'>RT_KeyBased_Basic</a></td><td>midistd.h</td>
+</tr>
+<tr><td colspan='7'><strong>Scalable Polyphony MIDI</strong></td></tr>
+<tr><td>MIP Message					</td><td>0x0B</td><td>0x01</td><td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+</table>
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

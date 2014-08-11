@@ -1,0 +1,369 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"stdmsg.h" ver.1.32</TITLE>
+<META content="標準的な音源操作命令を定義した (2000/3/22)" name=description>
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"stdmsg.h" ver.1.32</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#概要">概要</A></LI>
+  <LI><A HREF="#グローバル定数">グローバル定数</A></LI>
+  <UL>
+    <LI><A HREF="#グローバル定数_DeviceNumber">DeviceNumber</A></LI>
+  </UL>
+  <LI><A HREF="#音源初期化命令">音源初期化命令</A></LI>
+  <UL>
+    <LI><A HREF="#音源初期化命令_ResetGM">ResetGM</A></LI>
+    <LI><A HREF="#音源初期化命令_ResetGS">ResetGS</A></LI>
+    <LI><A HREF="#音源初期化命令_ResetXG">ResetXG</A></LI>
+  </UL>
+  <LI><A HREF="#NRPN 関連の命令">NRPN 関連の命令</A></LI>
+  <UL>
+    <LI><A HREF="#NRPN 関連の命令_VibratoRate(mm)">VibratoRate(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_VibratoDepth(mm)">VibratoDepth(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_VibratoDelay(mm)">VibratoDelay(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_FilterCutoff(mm)">FilterCutoff(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_FilterResonance(mm)">FilterResonance(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EGAttack(mm)">EGAttack(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EGDecay(mm)">EGDecay(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EGRelease(mm)">EGRelease(mm)</A></LI>
+  </UL>
+  <LI><A HREF="#ドラムノートエディット">ドラムノートエディット</A></LI>
+  <UL>
+    <LI><A HREF="#ドラムノートエディット_DrumFilterCutoff(rr,mm)">DrumFilterCutoff(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumFilterResonance(rr,mm)">DrumFilterResonance(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumEGAttackRate(rr,mm)">DrumEGAttackRate(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumEGDecayRate(rr,mm)">DrumEGDecayRate(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumPitchCoarse(rr,mm)">DrumPitchCoarse(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumPitch(rr,mm) = DrumPitchCoarse　に同じ">DrumPitch(rr,mm) = DrumPitchCoarse　に同じ</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumPitchFine(rr,mm)">DrumPitchFine(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumLevel(rr,mm)">DrumLevel(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumPan(rr,mm)">DrumPan(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumReverbSendLevel(rr,mm)">DrumReverbSendLevel(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumChorusSendLevel(rr,mm)">DrumChorusSendLevel(rr,mm)</A></LI>
+    <LI><A HREF="#ドラムノートエディット_DrumVariationSendLevel(rr,mm)">DrumVariationSendLevel(rr,mm)</A></LI>
+  </UL>
+  <LI><A HREF="#ＲＰＮ命令：ピッチベンドに関する命令です。">ＲＰＮ命令：ピッチベンドに関する命令です。</A></LI>
+  <UL>
+    <LI><A HREF="#ＲＰＮ命令：ピッチベンドに関する命令です。_PitchBendSensitivity(mm)">PitchBendSensitivity(mm)</A></LI>
+    <LI><A HREF="#ＲＰＮ命令：ピッチベンドに関する命令です。_BR(mm)">BR(mm)</A></LI>
+    <LI><A HREF="#ＲＰＮ命令：ピッチベンドに関する命令です。_FineTune(mm)">FineTune(mm)</A></LI>
+    <LI><A HREF="#ＲＰＮ命令：ピッチベンドに関する命令です。_CoarseTune(mm)">CoarseTune(mm)</A></LI>
+  </UL>
+  <LI><A HREF="#GM レベルの楽器名">GM レベルの楽器名</A></LI>
+</UL>
+<!--end of index-->
+<P>
+ <P>
+<P><A NAME="概要"><BR></A><HR><H1>概要</H1>
+◇標準的な命令を定義したファイルです。指定しなくても自動的に読み込む仕組みになっています。<P>
+<P>
+<P>
+<P><A NAME="グローバル定数"><BR></A><HR><H1>グローバル定数</H1>
+<P>
+<P><A NAME="グローバル定数_DeviceNumber"><BR></A><H2>DeviceNumber</H2>
+エクスクルーシブで、DeviceNumberを変えたいときは、この数値を変える<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="音源初期化命令"><BR></A><HR><H1>音源初期化命令</H1>
+◇音源リセット命令：音源を初期化します。<P><A NAME="音源初期化命令_ResetGM"><BR></A><H2>ResetGM</H2>
+ＧＭリセット：ＧＭシステムＯＮを送信します。<P>
+<P><A NAME="音源初期化命令_ResetGS"><BR></A><H2>ResetGS</H2>
+ＧＳリセット：ＧＳシステムＯＮを送信します。<P>
+<P><A NAME="音源初期化命令_ResetXG"><BR></A><H2>ResetXG</H2>
+ＸＧリセット：ＸＧシステムＯＮを送信します。<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="NRPN 関連の命令"><BR></A><HR><H1>NRPN 関連の命令</H1>
+◇ＮＲＰＮ命令：音源をエディットする関数群です。<BLOCKQUOTE><CODE>mm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;値(0-127)<BR><P>
+</CODE></BLOCKQUOTE><P><A NAME="NRPN 関連の命令_VibratoRate(mm)"><BR></A><H2>VibratoRate(mm)</H2>
+<P><A NAME="NRPN 関連の命令_VibratoDepth(mm)"><BR></A><H2>VibratoDepth(mm)</H2>
+<P><A NAME="NRPN 関連の命令_VibratoDelay(mm)"><BR></A><H2>VibratoDelay(mm)</H2>
+<P><A NAME="NRPN 関連の命令_FilterCutoff(mm)"><BR></A><H2>FilterCutoff(mm)</H2>
+<P><A NAME="NRPN 関連の命令_FilterResonance(mm)"><BR></A><H2>FilterResonance(mm)</H2>
+<P><A NAME="NRPN 関連の命令_EGAttack(mm)"><BR></A><H2>EGAttack(mm)</H2>
+<P><A NAME="NRPN 関連の命令_EGDecay(mm)"><BR></A><H2>EGDecay(mm)</H2>
+<P><A NAME="NRPN 関連の命令_EGRelease(mm)"><BR></A><H2>EGRelease(mm)</H2>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="ドラムノートエディット"><BR></A><HR><H1>ドラムノートエディット</H1>
+◇ドラムのノートの音色をエディットする命令です。<BLOCKQUOTE><CODE>rr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;楽器番号(0-127)<BR>mm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;値(0-127)<BR></CODE></BLOCKQUOTE><P><A NAME="ドラムノートエディット_DrumFilterCutoff(rr,mm)"><BR></A><H2>DrumFilterCutoff(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumFilterResonance(rr,mm)"><BR></A><H2>DrumFilterResonance(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumEGAttackRate(rr,mm)"><BR></A><H2>DrumEGAttackRate(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumEGDecayRate(rr,mm)"><BR></A><H2>DrumEGDecayRate(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumPitchCoarse(rr,mm)"><BR></A><H2>DrumPitchCoarse(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumPitch(rr,mm) = DrumPitchCoarse　に同じ"><BR></A><H2>DrumPitch(rr,mm) = DrumPitchCoarse　に同じ</H2>
+<P><A NAME="ドラムノートエディット_DrumPitchFine(rr,mm)"><BR></A><H2>DrumPitchFine(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumLevel(rr,mm)"><BR></A><H2>DrumLevel(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumPan(rr,mm)"><BR></A><H2>DrumPan(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumReverbSendLevel(rr,mm)"><BR></A><H2>DrumReverbSendLevel(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumChorusSendLevel(rr,mm)"><BR></A><H2>DrumChorusSendLevel(rr,mm)</H2>
+<P><A NAME="ドラムノートエディット_DrumVariationSendLevel(rr,mm)"><BR></A><H2>DrumVariationSendLevel(rr,mm)</H2>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="ＲＰＮ命令：ピッチベンドに関する命令です。"><BR></A><HR><H1>ＲＰＮ命令：ピッチベンドに関する命令です。</H1>
+<BLOCKQUOTE><CODE>mm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;値<BR></CODE></BLOCKQUOTE><P><A NAME="ＲＰＮ命令：ピッチベンドに関する命令です。_PitchBendSensitivity(mm)"><BR></A><H2>PitchBendSensitivity(mm)</H2>
+<P><A NAME="ＲＰＮ命令：ピッチベンドに関する命令です。_BR(mm)"><BR></A><H2>BR(mm)</H2>
+<BLOCKQUOTE><CODE>PitchBendSensitivityの省略形<BR></CODE></BLOCKQUOTE><P><A NAME="ＲＰＮ命令：ピッチベンドに関する命令です。_FineTune(mm)"><BR></A><H2>FineTune(mm)</H2>
+<P><A NAME="ＲＰＮ命令：ピッチベンドに関する命令です。_CoarseTune(mm)"><BR></A><H2>CoarseTune(mm)</H2>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="GM レベルの楽器名"><BR></A><HR><H1>GM レベルの楽器名</H1>
+■｜－楽器名の宣言も、stdmsg.h でなされています。<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</BODY></HTML>

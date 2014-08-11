@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='../midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='../index.html'>MIDI Standard</a>＼
+	<a href='../exclusive.html'>Exclusive Message</a>＼
+	<a href='../DeviceControl.html'>Device Control</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>RT_Reverb</h2>				<!--（コマンドの名前。）-->
+<!------------------------------------------------------------->
+<h3>■概要</h3>
+この機能は、リバーブを設定する事が可能です。<br>
+リバーブの量は、MIDI各チャンネルに対して<a href='../ControlChange.html'>Control Change</a> No.91の<a href='../ControlChange.html#91'>Effect Depth 1 (Reverb)</a>で設定します。<br>
+<br>
+
+
+<br>
+<h3>■書式</h3>
+<code>
+RT_Reverb_All(<var>INT iType</var>, <var>INT iTime</var>)<br>
+RT_Reverb_Type(<var>INT iType</var>)<br>
+RT_Reverb_Time(<var>INT iTime</var>)<br>
+RT_Reverb(<var>INT pp</var>, <var>INT vv</var>)<br>
+RT_Reverb_Ex(<var>INT idDevice</var>, <var>INT pp</var>, <var>INT vv</var>)<br>
+</code>
+
+<br>
+[備考]<br>
+※この命令は、コンパイラ内部で以下のMMLに変換されます。<br>
+<code>
+SysEx =	$F0,
+		MakerID_RealTime,
+		<var>idDevice</var>,
+		RT_DeviceCont,
+		RT_DeviceCont_GlobalParameter,
+		RT_Slot_Reverb[],
+		<var>INT pp</var>,
+		<var>INT vv</var>,
+		$F7
+</code>
+
+<br>
+<h3>■引数</h3>
+<table>
+<tr><th width='64pt'>引数名	</th>
+	<th width='64pt'>初期値	</th>
+	<th width='64pt'>範囲	</th>
+	<th width='448pt'>機能	</th></tr>
+<tr><td><var>INT iType</var>	</td>
+	<td>4</td>
+	<td>0～4,8</td>
+	<td>リバーブのタイプを設定します。<br>
+		0 :	Small Room (一辺5m程度)<br>
+		1 :	Medium Room (一辺10m程度)<br>
+		2 :	Large Room (ライブ可能な程度)<br>
+		3 :	Medium Hall (中規模コンサートホール)<br>
+		4 :	Large Hall (大規模コンサートホール)<br>
+		8 :	Plate (プレート・シミュレート)<br>
+	</td></tr>
+<tr><td><var>INT iTime</var>	</td>
+	<td>各<var>iType</var>での初期値は以下<br>
+		0 :	44	(1.1sec)<br>
+		1 :	50	(1.3sec)<br>
+		2 :	56	(1.5sec)<br>
+		3 :	64	(1.8sec)<br>
+		4 :	64	(1.8sec)<br>
+		8 :	50	(1.3sec)<br></td>
+	<td>0～127</td>
+	<td>低域の残響音が原音の-60dBまで減衰する時間(0.36～9.0sec)を設定します。<br>
+		設定値の計算式は以下の通りです。<br>
+		<var>INT iTime</var> ＝ ln(Time[sec])÷0.025 ＋ 40<br>
+		※ln()は、eが底のLog()関数です。</td></tr>
+<tr><td><var>INT idDevice</var>	</td>
+	<td>$7F</td>
+	<td>$00 ～ $7F</td>
+	<td>MIDIデバイスのDeviceIDを指定します。<br>
+		MIDI規格では、Bloadcastである$7Fを推奨しています。</td></tr>
+<tr><td><var>INT pp</var>	</td>
+	<td> - </td>
+	<td>1～2</td>
+	<td>パラメータ番号を指定します。<br>
+		1 :	Reverb Type<br>
+		2 :	Reverb Time</td></tr>
+<tr><td><var>INT vv</var>	</td>
+	<td> - </td>
+	<td> - </td>
+	<td>各パラメータの数値を指定します。</td></tr>
+</table><br>
+
+
+<br>
+<h3>■返り値</h3>
+無し<br>
+<br>
+
+<br>
+<h3>■説明</h3>
+リバーブの設定を行います。<br>
+これらの命令は、MIDIデバイス初期化時等の、演奏していない状態で使用する事が望ましいです。<br>
+RT_Reverb_Type()命令にて、リバーブのタイプ、<br>
+RT_Reverb_Time()命令にて、リバーブのタイム、<br>
+RT_Reverb_All()命令では、上記２つのパラメータを同時に設定する事ができます。<br>
+上記３つの命令は、関数内部で<var>INT pp</var>と<var>INT vv</var>を設定し、RT_Reverb()命令を呼んでいます。<br>
+RT_Reverb()命令は、<var>idDevice</var>を$7F(Bloadcast)にしてRT_Reverb_Ex()関数をコールしています。
+その為、デフォルトでは全てのMIDIデバイスがメッセージを受信します。<br>
+<br>
+
+<br>
+<h3>■使用例</h3>
+<table>
+<caption>List.1 </caption>
+<tr><td><pre><code>
+RT_Reverb_All(4,80);
+TR(1)	o4 l4 cdefgabc
+</code></pre></td></tr>
+</table><br>
+
+
+<br>
+<!------------------------------------------------------------->
+<h3>■関連項目</h3>
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

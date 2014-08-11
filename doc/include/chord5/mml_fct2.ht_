@@ -1,0 +1,1286 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder Version 6.0.4.0 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE></TITLE>
+<STYLE type="text/css">
+<!--
+BODY{
+  line-height : 25px;
+  letter-spacing : 1px;
+}
+-->
+</STYLE>
+</HEAD>
+<BODY background="cta03.gif">
+<TABLE width="100%" bgcolor="#004f27">
+  <TBODY>
+    <TR>
+      <TD><B><FONT color="#ffffff">　リファレンス</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+元々ある程度のコードの知識を持った方でもコード５の動作は中々面白いものなのではないかと思いますが、「ランダム要素が強すぎる」「もうちょっと思い通りにコントロール出来ないかな…」と感じる事もあるでしょう。<BR>
+<BR>
+<BR>
+そこでコード５では実際にどんな事をやっているのかを紹介します。まずは主役、脇役、悪役にどんなものがアサインされているかのリファレンスです。<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<CENTER><A name="top"></A>
+<TABLE>
+  <TBODY>
+    <TR>
+      <TD align="center"><A href="#first">１．主要コードの動作</A></TD>
+    </TR>
+    <TR>
+      <TD align="center"><A href="#tonic">２．主役</A></TD>
+    </TR>
+    <TR>
+      <TD align="center"><A href="#sub_d">３．脇役</A></TD>
+    </TR>
+    <TR>
+      <TD align="center"><A href="#domi">４．悪役</A></TD>
+    </TR>
+    <TR>
+      <TD align="center"><A href="#tonic_m">５．暗い主役</A></TD>
+    </TR>
+    <TR>
+      <TD align="center"><A href="#sub_d_m">６．暗い脇役</A></TD>
+    </TR>
+    <TR>
+      <TD align="center"><A href="#domi_m">７．暗い悪役</A></TD>
+    </TR>
+    <TR>
+      <TD align="center"><A href="chord5_index.htm">目次へ戻る</A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><A name="first"><IMG src="logo21.jpg" width="400" height="140" border="0" alt="主要コードの動作"></A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+各コードは</FONT><FONT color="#ff0000"><FONT color="#ff0000"><B>スケール</B></FONT></FONT><FONT size="-1" color="#004824">と</FONT><FONT color="#ff0000"><FONT color="#ff0000"><B>ディグリー</B></FONT></FONT><FONT size="-1" color="#004824">を設定しています。<BR>
+<BR>
+<BR>
+スケールとは「ドレミファソラシの形」を表し、どの音程に＃や♭が付くのか、という情報で、もっとも有名なのはメジャースケールとマイナースケールです。コード５では２１種類のスケールが使えるようになっています。<BR>
+<BR>
+<BR>
+ディグリーとは相対音程での和音表記の事で、相対音程とは、Ｃメジャーの音階『ド，レ，ミ，ファ，ソ，ラ，シ』でも『１，２，３，４，５，６，７』、Ｆメジャーの音階『ファ，ソ，ラ，シ♭，ド，レ，ミ』でも『１，２，３，４，５，６，７』、と調の頭の音程から１番目の音程，２番目の音程，３番目の音程・・・と相対音程で呼ぶシステムの事です。つまり相対音程で『１，３，５の和音＝１の和音』『２，４，６の和音＝２の和音』と和音を組み立てていくのがディグリーってわけです。<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="degree.gif" width="384" height="256" border="0"></TD>
+    </TR>
+    <TR>
+      <TD align="center">こんな感じ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">ディグリー和音は殆どの場合、２の和音と言ったら２，４，６，８・・・、３の和音と言ったら３，５，７，９（２）・・・、というように音階を一個飛ばしで重ねていくだけですので、非常にコンピュータで扱いやすい表現ですね。（コード５では計算でコードを鳴らしているのでディグリーの方が都合良かったのです。笑）<BR>
+<BR>
+<BR>
+上の例の場合では、Ⅱの和音というとⅡ，Ⅳ，Ⅵ，Ⅷ（Ⅰ）の和音になるので、実際にはソ，シ♭，レ，ファ＝ソのマイナー７、つまりＧｍ７が鳴る、という事になります。<BR>
+<BR>
+<BR>
+・・・とまあそんな方式でコードをたたき出し、その後高さを変えたり、コンボコードの計算をしたりしています。<BR>
+<BR>
+<BR>
+<A href="#top">メニューへ戻る</A><BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><A name="tonic"><IMG src="logo1.jpg" width="400" height="140" border="0" alt="主役（トニック）"></A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+主役（Ｔ）は主に、メジャー系のスケールでのⅠ、Ⅲ、Ⅵの和音が入ってます。<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1" bgcolor="#eeeeee">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffff">ストトン</TD>
+      <TD bgcolor="#ffffff">ＭＭＬ</TD>
+      <TD bgcolor="#ffffff">定義内容</TD>
+      <TD bgcolor="#ffffff">スケール</TD>
+    </TR>
+    <TR>
+      <TD>主役１</TD>
+      <TD>T1</TD>
+      <TD>Ⅰ</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役２</TD>
+      <TD>T2</TD>
+      <TD>Ⅵm</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役３</TD>
+      <TD>T3</TD>
+      <TD>Ⅲm</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役４</TD>
+      <TD>T4</TD>
+      <TD>Ⅰsus4</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役５</TD>
+      <TD>T5</TD>
+      <TD>Ⅳsus4</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役６</TD>
+      <TD>T6</TD>
+      <TD>Ⅲsus4</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役７</TD>
+      <TD>T7</TD>
+      <TD>Ⅰmaj7</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役８</TD>
+      <TD>T8</TD>
+      <TD>Ⅵm7</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役９</TD>
+      <TD>T9</TD>
+      <TD>Ⅲm7</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役１０</TD>
+      <TD>T10</TD>
+      <TD>Ⅰmaj7+9</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役１１</TD>
+      <TD>T11</TD>
+      <TD>Ⅵm7+9</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役１２</TD>
+      <TD>T12</TD>
+      <TD>Ⅲm7+9</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役１３</TD>
+      <TD>T13</TD>
+      <TD>Ⅰ</TD>
+      <TD><FONT size="-1" color="#ff0000">ミクソリディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役１４</TD>
+      <TD>T14</TD>
+      <TD>Ⅰ7</TD>
+      <TD><FONT size="-1" color="#ff0000">ミクソリディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役１５</TD>
+      <TD>T15</TD>
+      <TD>Ⅲ7</TD>
+      <TD><FONT size="-1" color="#ff0000">アイオニアン＃５にチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>主役１６</TD>
+      <TD>T16</TD>
+      <TD>Ⅰaug</TD>
+      <TD><FONT size="-1" color="#ff0000">アイオニアン＃５にチェンジ</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">ミクソリディアンやアイオニアン＃５はメジャースケールと比べると１音しか違わないので、それほど意識することなく使えるんじゃないかと思います。<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><FONT size="-1">Ｃ調のメジャー</FONT></TD>
+      <TD><FONT size="-1">ド</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">レ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ミ</FONT></TD>
+      <TD><FONT size="-1">ファ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ソ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ラ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">シ</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">ミクソリディアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#ff0000">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00ff00"><FONT size="-1">メジャー</FONT></TD>
+      <TD bgcolor="#00ff00">Ⅰ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅱ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅲ</TD>
+      <TD bgcolor="#00ff00">Ⅳ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅴ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅵ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅶ</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">アイオニアン＃５</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅴ</TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">赤い部分は基本となるメジャースケールと違う音程になる部分です。<BR>
+<BR>
+<BR>
+<A href="#top">メニューへ戻る</A><BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><A name="sub_d"><IMG src="logo22.jpg" width="400" height="140" border="0" alt="わき役（サブドミナント）"></A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+わき役は主にメジャー系スケールでのⅡ、Ⅳの和音が入ってます。<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1" bgcolor="#eeeeee">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffff">ストトン</TD>
+      <TD bgcolor="#ffffff">ＭＭＬ</TD>
+      <TD bgcolor="#ffffff">定義内容</TD>
+      <TD bgcolor="#ffffff">スケール</TD>
+    </TR>
+    <TR>
+      <TD>脇役１</TD>
+      <TD>S1</TD>
+      <TD>Ⅳ</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役２</TD>
+      <TD>S2</TD>
+      <TD>Ⅱm</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役３</TD>
+      <TD>S3</TD>
+      <TD>Ⅱ</TD>
+      <TD><FONT size="-1" color="#ff0000">リディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役４</TD>
+      <TD>S4</TD>
+      <TD>Ⅳsus4</TD>
+      <TD><FONT size="-1" color="#ff0000">ミクソリディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役５</TD>
+      <TD>S5</TD>
+      <TD>Ⅱsus4</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役６</TD>
+      <TD>S6</TD>
+      <TD>Ⅳmaj7</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役７</TD>
+      <TD>S7</TD>
+      <TD>Ⅱm7</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役８</TD>
+      <TD>S8</TD>
+      <TD>Ⅳ#m7♭5</TD>
+      <TD><FONT size="-1" color="#ff0000">リディアン７ｔｈにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役９</TD>
+      <TD>S9</TD>
+      <TD>Ⅳmaj7+9</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役１０</TD>
+      <TD>S10</TD>
+      <TD>Ⅱm7+9</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役１１</TD>
+      <TD>S11</TD>
+      <TD>Ⅱ7+9</TD>
+      <TD><FONT size="-1" color="#ff0000">リディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役１２</TD>
+      <TD>S12</TD>
+      <TD>Ⅳ7</TD>
+      <TD><FONT size="-1" color="#ff0000">メロディックマイナーにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>脇役１３</TD>
+      <TD>S13</TD>
+      <TD>Ⅱ7</TD>
+      <TD><FONT size="-1" color="#ff0000">リディアンにチェンジ</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">脇役は結構色々なスケールがあります。<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><FONT size="-1">Ｃ調のメジャー</FONT></TD>
+      <TD><FONT size="-1">ド</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">レ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ミ</FONT></TD>
+      <TD><FONT size="-1">ファ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ソ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ラ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">シ</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">ミクソリディアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#ff0000">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00ff00"><FONT size="-1">メジャー</FONT></TD>
+      <TD bgcolor="#00ff00">Ⅰ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅱ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅲ</TD>
+      <TD bgcolor="#00ff00">Ⅳ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅴ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅵ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅶ</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">リディアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅳ</TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">リディアン７ｔｈ</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅳ</TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#ff0000">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">メロディックマイナー</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#ff0000">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+<A href="#top">メニューに戻る</A><BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><A name="domi"><IMG src="logo11.jpg" width="400" height="140" border="0" alt="悪役（ドミナント）"></A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+悪役は主にメジャー系スケールでのⅤ、Ⅶの和音が入ってます。<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1" bgcolor="#eaeaea">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffff">ストトン</TD>
+      <TD bgcolor="#ffffff">ＭＭＬ</TD>
+      <TD bgcolor="#ffffff">定義内容</TD>
+      <TD bgcolor="#ffffff">スケール</TD>
+    </TR>
+    <TR>
+      <TD>悪役１</TD>
+      <TD>D1</TD>
+      <TD>Ⅴ</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役２</TD>
+      <TD>D2</TD>
+      <TD>Ⅶm♭5</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役３</TD>
+      <TD>D3</TD>
+      <TD>Ⅶ♭</TD>
+      <TD><FONT size="-1" color="#ff0000">ミクソリディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役４</TD>
+      <TD>D4</TD>
+      <TD>Ⅴsus4</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役５</TD>
+      <TD>D5</TD>
+      <TD>Ⅴ7</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役６</TD>
+      <TD>D6</TD>
+      <TD>Ⅶm7♭5</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役７</TD>
+      <TD>D7</TD>
+      <TD>Ⅶmaj7</TD>
+      <TD><FONT size="-1" color="#ff0000">ミクソリディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役８</TD>
+      <TD>D8</TD>
+      <TD>Ⅴ7+9</TD>
+      <TD><FONT size="-1">メジャースケール（アイオニアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役９</TD>
+      <TD>D9</TD>
+      <TD>Ⅶm7♭5+9</TD>
+      <TD><FONT size="-1" color="#ff0000">ミクソリディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役１０</TD>
+      <TD>D10</TD>
+      <TD>Ⅴmaj7</TD>
+      <TD><FONT size="-1" color="#ff0000">リディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役１１</TD>
+      <TD>D11</TD>
+      <TD>Ⅶm</TD>
+      <TD><FONT size="-1" color="#ff0000">リディアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>悪役１２</TD>
+      <TD>D12</TD>
+      <TD>Ⅶm7</TD>
+      <TD><FONT size="-1" color="#ff0000">リディアンにチェンジ</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">悪役は比較的スタンダードなスケールが多いです。<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><FONT size="-1">Ｃ調のメジャー</FONT></TD>
+      <TD><FONT size="-1">ド</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">レ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ミ</FONT></TD>
+      <TD><FONT size="-1">ファ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ソ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ラ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">シ</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">ミクソリディアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#ff0000">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00ff00"><FONT size="-1">メジャー</FONT></TD>
+      <TD bgcolor="#00ff00">Ⅰ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅱ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅲ</TD>
+      <TD bgcolor="#00ff00">Ⅳ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅴ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅵ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅶ</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">リディアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅳ</TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+<A href="#top">メニューへ戻る</A><BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><A name="tonic_m"><IMG src="logo23.jpg" width="400" height="140" border="0" alt="暗い主役（トニックマイナー）"></A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+暗い主役は主にマイナー系スケールでのⅠ、Ⅲが入ってます。<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1" bgcolor="#eaeaea">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffff">ストトン</TD>
+      <TD bgcolor="#ffffff">ＭＭＬ</TD>
+      <TD bgcolor="#ffffff">定義内容</TD>
+      <TD bgcolor="#ffffff">スケール</TD>
+    </TR>
+    <TR>
+      <TD>暗い主役１</TD>
+      <TD>Tm1</TD>
+      <TD>Ⅰm</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役２</TD>
+      <TD>Tm2</TD>
+      <TD>Ⅲ♭</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役３</TD>
+      <TD>Tm3</TD>
+      <TD>Ⅰsus4</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役４</TD>
+      <TD>Tm4</TD>
+      <TD>Ⅲ♭sus4</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役５</TD>
+      <TD>Tm5</TD>
+      <TD>Ⅰm7</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役６</TD>
+      <TD>Tm6</TD>
+      <TD>Ⅲ♭maj7</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役７</TD>
+      <TD>Tm7</TD>
+      <TD>Ⅰm7+9</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役８</TD>
+      <TD>Tm8</TD>
+      <TD>Ⅲ♭maj7+9</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役９</TD>
+      <TD>Tm9</TD>
+      <TD>ⅠmM7</TD>
+      <TD><FONT size="-1" color="#ff0000">メロディックマイナーにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役１０</TD>
+      <TD>Tm10</TD>
+      <TD>Ⅲ♭7</TD>
+      <TD><FONT size="-1" color="#ff0000">フリジアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役１１</TD>
+      <TD>Tm11</TD>
+      <TD>Ⅰdim</TD>
+      <TD><FONT size="-1" color="#ff0000">オルタード♭７にチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い主役１２</TD>
+      <TD>Tm12</TD>
+      <TD>Ⅲ♭augM7</TD>
+      <TD><FONT size="-1" color="#ff0000">メロディックマイナーにチェンジ</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">マイナー系はかなり難しいスケールもあるので注意です。<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><FONT size="-1">Ｃ調のマイナー</FONT></TD>
+      <TD><FONT size="-1">ド</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">レ</FONT></TD>
+      <TD><FONT size="-1">ミ♭</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ファ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ソ</FONT></TD>
+      <TD><FONT size="-1">ラ♭</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">シ♭</FONT></TD>
+      <TD>＿</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">メロディックマイナー</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅶ</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00ff00"><FONT size="-1">マイナー</FONT></TD>
+      <TD bgcolor="#00ff00">Ⅰ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅱ</TD>
+      <TD bgcolor="#00ff00">Ⅲ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅳ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅴ</TD>
+      <TD bgcolor="#00ff00">Ⅵ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅶ</TD>
+      <TD bgcolor="#00ff00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">フリジアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#ff0000">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">オルタード♭７</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#ff0000">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#ff0000">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#ff0000">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+<A href="#top">メニューへ戻る</A><BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><A name="sub_d_m"><IMG src="logo31.jpg" width="400" height="140" border="0" alt="暗いわき役（サブドミナントマイナー）"></A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+暗い脇役は主にマイナー系スケールでのⅣ、Ⅱ、Ⅵが入ってます。<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1" bgcolor="#eaeaea">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffff">ストトン</TD>
+      <TD bgcolor="#ffffff">ＭＭＬ</TD>
+      <TD bgcolor="#ffffff">定義内容</TD>
+      <TD bgcolor="#ffffff">スケール</TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役１</TD>
+      <TD>Sm1</TD>
+      <TD>Ⅳm</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役２</TD>
+      <TD>Sm2</TD>
+      <TD>Ⅵ♭</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役３</TD>
+      <TD>Sm3</TD>
+      <TD>Ⅱm♭5</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役４</TD>
+      <TD>Sm4</TD>
+      <TD>Ⅳsus4</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役５</TD>
+      <TD>Sm5</TD>
+      <TD>Ⅵ♭sus4</TD>
+      <TD><FONT size="-1" color="#ff0000">フリジアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役６</TD>
+      <TD>Sm6</TD>
+      <TD>Ⅳm7</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役７</TD>
+      <TD>Sm7</TD>
+      <TD>Ⅵ♭maj7</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役８</TD>
+      <TD>Sm8</TD>
+      <TD>Ⅱm7♭5</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役９</TD>
+      <TD>Sm9</TD>
+      <TD>Ⅳm7+9</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役１０</TD>
+      <TD>Sm10</TD>
+      <TD>Ⅵ♭maj7+9</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役１１</TD>
+      <TD>Sm11</TD>
+      <TD>Ⅳ7</TD>
+      <TD><FONT size="-1" color="#ff0000">ドリアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役１２</TD>
+      <TD>Sm12</TD>
+      <TD>Ⅵm7♭5</TD>
+      <TD><FONT size="-1" color="#ff0000">ドリアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い脇役１３</TD>
+      <TD>Sm13</TD>
+      <TD>Ⅱm7</TD>
+      <TD><FONT size="-1" color="#ff0000">ドリアンにチェンジ</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">暗い脇役はスタンダードなスケールが多いです。<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><FONT size="-1">Ｃ調のマイナー</FONT></TD>
+      <TD><FONT size="-1">ド</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">レ</FONT></TD>
+      <TD><FONT size="-1">ミ♭</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ファ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ソ</FONT></TD>
+      <TD><FONT size="-1">ラ♭</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">シ♭</FONT></TD>
+      <TD>＿</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">ドリアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅵ</TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00ff00"><FONT size="-1">マイナー</FONT></TD>
+      <TD bgcolor="#00ff00">Ⅰ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅱ</TD>
+      <TD bgcolor="#00ff00">Ⅲ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅳ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅴ</TD>
+      <TD bgcolor="#00ff00">Ⅵ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅶ</TD>
+      <TD bgcolor="#00ff00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">フリジアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#ff0000">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+<A href="#top">メニューへ戻る</A><BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><A name="domi_m"><IMG src="logo41.jpg" width="400" height="140" border="0" alt="暗い悪役（ドミナントマイナー）"></A></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+暗い悪役は主にマイナースケール系でのⅤ、Ⅶ、Ⅱ♭の和音が入ってます。<BR>
+<BR>
+<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1" bgcolor="#eaeaea">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffff">ストトン</TD>
+      <TD bgcolor="#ffffff">ＭＭＬ</TD>
+      <TD bgcolor="#ffffff">定義内容</TD>
+      <TD bgcolor="#ffffff">スケール</TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役１</TD>
+      <TD>Dm1</TD>
+      <TD>Ⅴm</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役２</TD>
+      <TD>Dm2</TD>
+      <TD>Ⅴ</TD>
+      <TD><FONT size="-1" color="#ff0000">ハーモニックマイナーにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役３</TD>
+      <TD>Dm3</TD>
+      <TD>Ⅶ♭</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役４</TD>
+      <TD>Dm4</TD>
+      <TD>Ⅱ♭</TD>
+      <TD><FONT size="-1" color="#ff0000">フリジアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役５</TD>
+      <TD>Dm5</TD>
+      <TD>Ⅴsus4</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役６</TD>
+      <TD>Dm6</TD>
+      <TD>Ⅶ♭sus4</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役７</TD>
+      <TD>Dm7</TD>
+      <TD>Ⅴm7</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役８</TD>
+      <TD>Dm8</TD>
+      <TD>Ⅴ7</TD>
+      <TD><FONT size="-1" color="#ff0000">ハーモニックマイナーにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役９</TD>
+      <TD>Dm9</TD>
+      <TD>Ⅶ♭7</TD>
+      <TD><FONT size="-1">マイナースケール（エオリアン）</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役１０</TD>
+      <TD>Dm10</TD>
+      <TD>Ⅱ♭maj7</TD>
+      <TD><FONT size="-1" color="#ff0000">フリジアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役１１</TD>
+      <TD>Dm11</TD>
+      <TD>Ⅶ♭maj7</TD>
+      <TD><FONT size="-1" color="#ff0000">ドリアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役１２</TD>
+      <TD>Dm12</TD>
+      <TD>Ⅴm7+9</TD>
+      <TD><FONT size="-1" color="#ff0000">ドリアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役１３</TD>
+      <TD>Dm13</TD>
+      <TD>Ⅱ♭maj7+9</TD>
+      <TD><FONT size="-1" color="#ff0000">フリジアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役１４</TD>
+      <TD>Dm14</TD>
+      <TD>Ⅶ♭m7</TD>
+      <TD><FONT size="-1" color="#ff0000">フリジアンにチェンジ</FONT></TD>
+    </TR>
+    <TR>
+      <TD>暗い悪役１５</TD>
+      <TD>Dm15</TD>
+      <TD>Ⅶdim</TD>
+      <TD><FONT size="-1" color="#ff0000">ハーモニックマイナーにチェンジ</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824">暗い悪役は特別な役割を持っているので、かなり色々なスケールに変形します。<BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><FONT size="-1">Ｃ調のマイナー</FONT></TD>
+      <TD><FONT size="-1">ド</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">レ</FONT></TD>
+      <TD><FONT size="-1">ミ♭</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ファ</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">ソ</FONT></TD>
+      <TD><FONT size="-1">ラ♭</FONT></TD>
+      <TD>＿</TD>
+      <TD><FONT size="-1">シ♭</FONT></TD>
+      <TD>＿</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">ドリアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅵ</TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00ff00"><FONT size="-1">マイナー</FONT></TD>
+      <TD bgcolor="#00ff00">Ⅰ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅱ</TD>
+      <TD bgcolor="#00ff00">Ⅲ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅳ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅴ</TD>
+      <TD bgcolor="#00ff00">Ⅵ</TD>
+      <TD bgcolor="#00ff00"></TD>
+      <TD bgcolor="#00ff00">Ⅶ</TD>
+      <TD bgcolor="#00ff00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">フリジアン</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#ff0000">Ⅱ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅶ</TD>
+      <TD bgcolor="#00cc00"></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#00cc00"><FONT size="-1">ハーモニックマイナー</FONT></TD>
+      <TD bgcolor="#00cc00">Ⅰ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅱ</TD>
+      <TD bgcolor="#00cc00">Ⅲ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅳ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00">Ⅴ</TD>
+      <TD bgcolor="#00cc00">Ⅵ</TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#00cc00"></TD>
+      <TD bgcolor="#ff0000">Ⅶ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<FONT size="-1" color="#004824"><BR>
+</FONT></BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="-1" color="#004824"><BR>
+<BR>
+<A href="#top">メニューへ戻る</A><BR>
+<BR>
+<BR>
+<BR>
+</FONT><BR>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

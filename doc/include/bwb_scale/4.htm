@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<meta http-equiv="Content-Style-Type" content="text/html; charset=Shift_JIS">
+	<link rel="stylesheet" type="text/css" href="bwb_scale.css">
+	<link rev="made" href="mailto:bluewhitebear@hotmail.com">
+	<link rel="index"	href="../bwb_scale.htm">
+	<link rel="next" 	href="5.htm">
+	<link rel="prev" 	href="3.htm">
+	<title>bwb_scale.h マニュアル 「４．簡易マニュアル」</title>
+</head>
+<body>
+<h1>４．簡易マニュアル</h1>
+<p>簡易マニュアルでは本ヘッダーの基本的に使う部分だけを簡単に紹介します。</p>
+<hr>
+<ul>
+	<li><a href="#bwb_scale_4_01">調を決める</a></li>
+	<li><a href="#bwb_scale_4_02">Key(x)のように転調する</a></li>
+	<li><a href="#bwb_scale_4_03">もう1度転調する</a></li>
+	<li><a href="#bwb_scale_4_04">同主調転調</a></li>
+	<li><a href="#bwb_scale_4_05">5度圏転調</a></li>
+	<li><a href="#bwb_scale_4_06">オクターブの調整</a></li>
+	<li><a href="#bwb_scale_4_07">メジャースケール（長調）とマイナースケール（短調）</a></li>
+	<li><a href="#bwb_scale_4_08">現在の調についての情報の表示</a></li>
+</ul>
+<hr>
+<ul>
+	<li>
+		<p><a name="bwb_scale_4_01">調を決める</a></p>
+		<p>恐らくほとんどのユーザーはいままで調を決めるのに<br>
+		例えば、キーがＥなら、「KeyFlag+(cdfg)」と打ち込んでいたでしょうが、<br>
+		本ヘッダーを使えば、簡単に入力できます。<br>
+		例えば、キーがＥなら、「BS_E」と打ち込むだけです。<br>
+		他も同じ、キーがＣなら、「BS_C」です。<br>
+		キーがC♯の場合は「BS_Cp」です。（「♯」は「p」に置き換えて入力してください。）<br>
+		また、同じキーC#でも、「BS_Db」と入力することもできます。（「♭」は「b」に置き換えて入力してください。）</p>
+	</li>
+	<li>
+		<p><a name="bwb_scale_4_02">Key(x)のように転調する</a></p>
+		<p>今まで転調してきた人はおそらくKey(1)やTimeKey(1)を入力し、手軽に済ませていたことでしょう。<br>
+		ただし、これらはリズムトラックにも影響してしまい、<br>
+		ドラムの音がひっちゃかめっちゃかになるという経験はしませんでしたか？<br>
+		本ヘッダーではリズムトラックに影響なく入力することが可能です。<br>
+		TimeKeyの代わりに「BS_K(x)」もしくは「BS_KEY(x)」で入力することで、<br>
+		「x」に転調したい値をいれてください。「BS_K(2)」だと2半音上に転調します。<br>
+		また、「BS_K(-4)」だと4半音下に転調します。<br>
+		「BS_K(x)」はTimeKeyやKeyと併用することが可能です。</p>
+		<p>また、１半音だけ上に転調したい場合は「BS_KUP」か「BS_UP」。<br>
+		１半音だけ下に転調したい場合は「BS_KDOWN」か「BS_DOWN」が使用できます。</p>
+	</li>
+	<li>
+		<p><a name="bwb_scale_4_03">もう1度転調する</a></p>
+		<p>例えば、曲中に「まず1半音上に転調。次のフレーズで3半音下に転調する。」という<br>
+		2回転調させる箇所があるとしましょう。<br>
+		最初にTimeKey(1)を打ち込んで、音符を入力していった後、<br>
+		また、転調するときに「あれ、現在のTimeKeyはなんだっけ？」と不安になり、<br>
+		確認するために元の値を文章だらけのMMLの中から探しださなければなりません。<br>
+		本ヘッダーではそんなわずらわしさすらも解消の対象です。<br>
+		本ヘッダー使用時には「TimeKey」の代わりに「BS_K」を使いますが、<br>
+		それとまったく同じ命令があります。それが「BS_K2(x)」と「BS_K3(x)」です。<br>
+		（「BS_KEY2(x)」と「BS_KEY3(x)」でも可能。）<br>
+		本ヘッダーは「BS_K(x)」、「BS_K2(x)」、「BS_K3(x)」によって転調される具合を<br>
+		別々に管理しているので、先ほどのような場合には、<br>
+		まず、「BS_K(1)」を打ち込んだ後、次に「BS_K2(-3)」を打ち込んでやれば、大丈夫です。<br>
+		変数の管理が苦手な人は助かる機能ではないでしょうか？</p>
+		<p>また、こちらも同じように「BS_K2UP」、もしくは「BS_K3UP」で１半音上に転調。<br>
+		「BS_K2DOWN」、もしくは「BS_K3DOWN」で１半音下に転調できます。</p>
+	</li>
+	<li>
+		<p><a name="bwb_scale_4_04">同主調転調</a></p>
+		<p>転調でよく使われるパターンの一つに同主調転調というものがあります。<br>
+		これは短3度の移調のことです。（＝3半音の移調）<br>
+		これは「BS_TK(x)」で行えます。（「BS_TKEY(x)」でも可能。）<br>
+		例えば、BS_TK(2)で6半音上に転調したりするのですが、<br>
+		BS_TK(5)とかで軽く15半音上に転調してしまうので、<br>
+		後述の「オクターブの調整」の「BS_O(x)」でオクターブ単位でキーを修正してください。</p>
+		<p>同主調転調は4回行うと、最終的には元のキーに戻ってこれることから、<br>
+		非常に便利な転調であり、（4*3=12=１オクターブ）<br>
+		多くのコンポーザーがときたま使う転調テクニックでもあります。</p>
+	</li>
+	<li>
+		<p><a name="bwb_scale_4_05">5度圏転調</a></p>
+		<p>同じく転調の一つのパターン。<br>
+		機能的にはchord5.hにおける「Trans(x)」と変わりません。（=5半音の転調）<br>
+		これは「BS_FK(x)」で行えます。（「BS_FKEY(x)」でも可能。）<br>
+		実際には「x*５」の値だけ転調しますが、<br>
+		xの値が大きくなって、全体的な音程が上がりすぎるのを防ぐために、<br>
+		本ヘッダーが自動でオクターブを調整します。<br>
+		本ヘッダーの修正が自分にとって逆効果だった場合、<br>
+		後述の「オクターブの調整」の「BS_O(x)」でオクターブ単位でキーを修正してください。</p>
+		<p>５度圏転調は♯、♭の数が一つしか変わらないため、<br>
+		メロディやコードの組み方次第によっては、<br>
+		転調したことをわかりづらくすることができるため、<br>
+		非常におもしろい効果を生み出すことができます。</p>
+		<p>また、「BS_FK(1)」にすると、キーがＣからＦになります。<br>
+		「この進行は４度進行でないの？」と思うかもしれませんが、<br>
+		ＦからしてみればＣは５度の関係なのです。<br>
+		この理屈については<br>
+		「５度圏左巻き進行（＝サイクル・オブ・フィフス、Cycle Of 5th）」<br>
+		を知ると分かりますので、興味のあるかたは調べてみてください。</p>
+	</li>
+	<li>
+		<p><a name="bwb_scale_4_06">オクターブの調整</a></p>
+		<p>全体を１オクターブ上げたいなどの操作を行うこともできます。<br>
+		「BS_O(x)」でxの値だけオクターブの上げ下げを行うことができます。<br>
+		（「BS_OCTAVE(x)」でも可能。）<br>
+		また、単純に１オクターブ上げたいだけなら、「BS_OUP」。<br>
+		１オクターブ下げたいだけなら、「BS_ODOWN」でも可能です。</p>
+		<p>５度圏転調（=「BS_FK(x)」）では<br>
+		ヘッダーが自動的にオクターブの補正を行うため、<br>
+		その自動補正が気にいらない場合はこれらのコマンドで手動補正が可能です。</p>
+	</li>
+	<li>
+		<p><a name="bwb_scale_4_07">メジャースケール（長調）とマイナースケール（短調）</a></p>
+		<p><span class="scale">メジャースケール</span>は「BS_SCALE_MAJOR」。<br>
+		<span class="scale">マイナースケール</span>は「BS_SCALE_MINOR」で設定できます。<br>
+		もちろん曲中に<span class="scale">長調</span>と<span class="scale">短調</span>の変更も可能です。<br>
+		ちなみにキーがＣにおいて、<span class="scale">メジャースケール</span>は「ドレミファソラシ」。<br>
+		<span class="scale">マイナースケール</span>は「ドレミ♭ファソラ♭シ♭」です。</p>
+		<p>また、この後は見易さを重視するため、<br>
+		スケール名は原則英語表記にしていきますので、<br>
+		メジャースケール<span class="scale">Major Scale</span>。<br>
+		マイナスケールは<span class="scale">Minor Scale</span>と書きます。</p>
+	</li>
+	<li>
+		<p><a name="bwb_scale_4_08">現在の調についての情報の表示</a></p>
+		<p>ここまで機能があると、今何の調なのかとかさっぱりわかんなくなってしまいますよね。<br>
+		そこで、本ヘッダーには現在の情報を表示する機能があります。<br>
+		それは「BS_PRINT」です。では実際に使ってみましょう。</p>
+		<p><img style="border:3px;" alt="BS_PRINTの図１" src="bwb_scale_bsprint_01.JPG" width="320" height="240"></p>
+		<p>を再生してみると、</p>
+		<p><img style="border:3px;" alt="BS_PRINTの図２" src="bwb_scale_bsprint_02.JPG" width="640" height="160"></p>
+		<p>と表示されます。画面を見れば、簡単に分かりますが、一応解説します。</p>
+
+		<p><strong>１行目：[現在のパラメータ(Time:1920)]</strong></p>
+		<p>数値的なパラメータという題名です。<br>
+		Time:1920は今のTimeの値を表示しています。<br>
+		TimeBase=480なので、４分音符=480。<br>
+		l8 cdefgabrで１小節分なので、４分音符×４＝1920です。</p>
+
+		<p><strong>２行目：キー：(Ｄ )　　オクターブシフト(BS_O)：-1</strong></p>
+		<p>「BS_D」が「キー:（Ｄ　）」に反映されるわけですね。<br>
+		BS_O(-1)も後ろのオクターブシフトに反映されてます。</p>
+
+		<p><strong>３行目：短３度転調(BS_TK)：1×3→3　　５度転調(BS_FK)：2×5%12→-2</strong></p>
+		<p>BS_TK(1)が「1×3」の「1」に来ています。<br>
+		「→3」は実際に転調している値です。（1×3=3）<br>
+		BS_FK(2)が「2×5%12」の「2」に来ています。<br>
+		「→-2」は実際に転調している値です。(2×5=10。自動補正で１オクターブ下で10-12=-2。)</p>
+
+		<p><strong>４行目：半音転調(BS_K,BS_K2,BS_K3)：(1,2,3)　　スケール修正値：(0,0,0,0,0,0,0)</strong></p>
+		<p>「半音転調(BS_K,BS_K2,BS_K3)：(1,2,3)」では、図の通り、<br>
+		「(1,2,3)」の「1」は「BS_K(x)」の値に対応し、<br>
+		「(1,2,3)」の「2」は「BS_K2(x)」の値に対応。<br>
+		「(1,2,3)」の「3」は「BS_K3(x)」の値に対応しているわけです。<br>
+		スケール修正値に関してはここでは解説しません。</p>
+
+		<p><strong>５行目：スケール：Aeolian(Minor)(-1,-1,0,0,-1,0,0)(7音)</strong></p>
+		<p>「BS_SCALE_MINOR」は「Scale：<span class="scale">Aeolian</span>(<span class="scale">Minor</span>)(-1,-1,0,0,-1,0,0)(7音)」に反映されます。<br>
+		「<span class="scale">Aeolian</span>」というのは<span class="scale">Minor Scale</span>の別名。<br>
+		「(-1,-1,0,0,-1,0,0)」は実際に行われているKeyFlagの修正。<br>
+		「(7音)」というのはスケールが７音で構成されているということです。<br>
+		（世の中には５音や８音で構成されているスケールもあります。</p>
+
+		<p><strong>６行目：スケールの構成音：(cde-fga-b-):()</strong></p>
+		<p>また、「Scale：[Aeolian(Minor)(cde-fga-b-):()]」ですが、<br>
+		「<span class="scale">Aeolian(Minor)</span>」はスケール名。<br>
+		「(cde-fga-b-)」はそのスケールの構成音を表しています、<br>
+		（<span class="scale">Minor Scale</span>は「ミラシ」が♭になる。）<br> 
+		「:()」は、８半音以上のスケールの際に使いますので、<br>
+		これも解説せず、後の章で解説したいと思います。</p>
+
+		<p><strong>７行目：現在の結果：Key：[Ａ　]	転調値：[-5]</strong></p>
+		<p>実際数えてみるとわかりますが、</p>
+　　
+
+<table border="1" width="90%" style="background-color:white;" cellpadding="8" summary="BS_PRINTのための計算式">
+	<tr>
+		<td>
+			<p><span style="color:black;">
+			半音転調：BS_K+BS_K2+BS_K3=1+2+3=６半音転調<br>
+			短３度転調：「1×3→3」より、３半音転調<br>
+			５度圏転調：「2×5%12→-2」より、-2半音転調<br>
+			オクターブシフト：BS_O*12=-1*12=-12半音転調<br>
+			もともとのキー：BS_DはキーをＤにする→Cより２半音上→２半音転調</span></p>
+			<p><span style="color:black;">Key：[Ａ　]<br>
+			AはＣの9半音上<br>
+			半音転調＋短３度転調＋５度圏転調＋オクターブシフト＋キーのずれ<br>
+			＝6+3-2-12+2<br>
+			＝-3<br>
+			＝12×0 - 3<br>
+			＝Key：[Ａ　]</span></p>
+			<p><span style="color:black;">転調値<br>
+			半音転調＋短３度転調＋５度圏転調＋オクターブシフト<br>
+			＝6+3-2-12<br>
+			＝-5<br>
+			＝転調値</span></p>
+		</td>
+	</tr>
+</table>
+
+		<p>つまり、現在のキーは「Ａ」。<br>
+		値の上での転調は「-5」なので、「c　ド」の５半音下の「g　ソ」に対応する。<br>
+		つまり、「cdefgab」は「ド」からスタートではなく、５半音下の「ソ」から始まります。</p>
+		<p>BS_PRINTを使うと現在のbwb_scale.hの使用状況が簡単に把握できるので、活用してください。</p>
+	</li>
+</ul>
+
+<hr>
+<p><a href="../bwb_scale.htm">戻る</a></p>
+</body>
+</html>

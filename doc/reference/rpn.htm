@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>RPN/NRPN 一覧表</TITLE>
+</HEAD>
+<BODY>
+<H1>一般的なRPN/NRPN</H1>
+<HR>
+<H1>ＲＰＮ一覧</H1>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff66">コマンド名</TD>
+      <TD bgcolor="#ffff66">定義</TD>
+      <TD bgcolor="#ffff66">範囲</TD>
+      <TD bgcolor="#ffff66">意味</TD>
+    </TR>
+    <TR>
+      <TD>PitchBendSensitivity(mm)</TD>
+      <TD>RPN=0,0,(mm)</TD>
+      <TD>GM:0-12<BR>
+      GS/XG:0-24</TD>
+      <TD>ピッチベンドのレンジ幅を、半音で指定する</TD>
+    </TR>
+    <TR>
+      <TD>BR(mm)</TD>
+      <TD>RPN=0,0,(mm)</TD>
+      <TD>GM:0-12<BR>
+      GS/XG:0-24</TD>
+      <TD>=PitchBendSensitivity</TD>
+    </TR>
+    <TR>
+      <TD>FineTune(mm)</TD>
+      <TD>RPN=0,1,(mm)</TD>
+      <TD>0-64-127</TD>
+      <TD>チューニング微調整</TD>
+    </TR>
+    <TR>
+      <TD>CoarseTune(mm) </TD>
+      <TD>RPN=0,2,(mm)</TD>
+      <TD>40-64-88<BR>
+      </TD>
+      <TD>チューニング（半音単位で調整）</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<H1>NRPN一覧</H1>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF66">コマンド名</TD>
+      <TD bgcolor="#FFFF66">定義</TD>
+      <TD bgcolor="#FFFF66">範囲</TD>
+      <TD bgcolor="#FFFF66">意味</TD>
+    </TR>
+    <TR>
+      <TD>VibratoRate(mm)</TD>
+      <TD>NRPN=1,8,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>ビブラートの周期の早さ</TD>
+    </TR>
+    <TR>
+      <TD>VibratoDepth(mm)</TD>
+      <TD>NRPN=1,9,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>ビブラートの深さ </TD>
+    </TR>
+    <TR>
+      <TD>VibratoDelay(mm) </TD>
+      <TD>NRPN=1,$A,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>ビブラートがかかりはじめるまでの遅れ</TD>
+    </TR>
+    <TR>
+      <TD>FilterCutoff(mm)</TD>
+      <TD>NRPN=1,$20,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>カットオフ。値を大きくすると、高い周波数を通過させるので、明るい音色になる</TD>
+    </TR>
+    <TR>
+      <TD>FilterResonance(mm) </TD>
+      <TD>NRPN=1,$21,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>カットオフ周波数付近の倍音成分を強調、クセのある（アクの強い）音色になる<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD>EGAttack(mm) </TD>
+      <TD>NRPN=1,$63,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>音の立ち上がるスピード</TD>
+    </TR>
+    <TR>
+      <TD>EGDecay(mm)</TD>
+      <TD>NRPN=1,$64,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>音が立ち上がってから安定するまでの時間<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD>EGRelease(mm)</TD>
+      <TD>NRPN=1,$66,(mm)</TD>
+      <TD>0-127</TD>
+      <TD>ノート・オフしてから、音が消えるまでの時間<BR>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY>
+</HTML>

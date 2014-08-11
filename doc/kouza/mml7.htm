@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM HomePage Builder 2000 V4.0.2  for Windows">
+<TITLE>見やすいMMLへの提案</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H2>見やすいMMLへの提案</H2>
+<HR>
+<P>ＭＭＬは、テキストベースのため、混み入った記述をすると、後から何を書いたのか分からなくなってしまいます。<BR>
+ＭＭＬを各フレーズごとに作って、それを時間順に横一列に並べるよう記述したらどうでしょう。</P>
+<P>そんなアイデアを元に思いついたコマンドがＰＬＡＹです。これは、トラックを横一列に並べて、時間順に書くことができます。<BR>
+文字列変数に、フレーズを入れておき、それをＰＬＡＹで鳴らすのです。<BR>
+これで、フレーズの部品化が進み、時系列にＭＭＬを見ていくことが出来ます。</P>
+<HR>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ffffff">PLAY(文字列,文字列,文字列, ...)</FONT><BR>
+      <FONT color="#ffffff">PLAY(track0, track1, track2, ...)</FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffff">文字列をトラックに分けて演奏します。<BR>
+      文字列は、文字列変数か文字列マクロ(#name)か
+      {...} か 文字列変数で指定します。<BR>
+      動作としては、一番左の文字列から、トラック０に、２番目の文字列を、トラック１に、３番目をトラック２へ順に書きこんで行きます。<BR>
+      これによって、フレーズの部品化が進み、読みやすいＭＭＬになると思います。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">#PH1 = { o5l4 cdefgb } //MMLを文字列変数に代入<BR>
+      #PH2 = { o4l2 c e b }<BR>
+      #PH3 = { o3l1 c c2 }<BR>
+      PLAY( #PH1, #PH2, #PH3, ) //各トラックに文字列を書きこむ<BR>
+      //Track(1)#PH1; Track(2);#PH2; Track(3);#PH3;
+      と同じ意味。</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+追記：<BR>
+PLAYコマンドは、PLAYが指定されたトラックのタイムに、すべてのトラックのタイムを合わせてから書きこみます。</BLOCKQUOTE>
+<HR>
+<P>また、<A href="mml2.htm">ノートオンオプション</A>や、Sub{}などを積極的に利用して、純粋な演奏表記部分と、それに味付けするエフェクト部分を切り離すことでも、少し可視性が高まります。</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc">l8 v100 o5<BR>
+      //ノートオンオプション<BR>
+      <FONT color="#cc0000">v_.onTime(-10,10,!4,-20,20,!4);//ベロシティの調節</FONT><BR>
+      //Subコマンド<BR>
+      <FONT color="#cc0000">Sub{ [2 y10,0 rrr y10,100 rrr y10,64 rr]
+      }//コントロールチェンジの書き込み</FONT><BR>
+      <FONT color="#3300ff">g^^e^^d^ edegega^</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<P>次のようなフレーズを打ち込むにはどうしたら良いでしょう？</P>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc">ドーーーーーーーー<BR>
+      　　　ミーーーーーーーーーー<BR>
+      　　　　　　　　ソーーー<BR>
+      <FONT color="#ff0000">
+      （音と音がダブっている時）</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE>これを綺麗なＭＭＬで表現するのが今後の課題の一つなんですが、サクラでは、以下のように表記できます。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc"><FONT color="#0000ff">//その１（l0 を使う）</FONT><BR>
+      <FONT color="#ff0000">l0</FONT> c,%!1 r2 e,%!1^1 r2 g,%!1<BR>
+      <BR>
+      <FONT color="#0000ff">
+      //その２（文字列変数を使う）</FONT><BR>
+      Int MemoTime;<BR>
+      Str <FONT color="#ff0000">InsTrk</FONT> = { MemoTime = Time; }<BR>
+      Str <FONT color="#ff0000">SetTrk</FONT> = { Time = MemoTime; }<BR>
+      l4 cded <FONT color="#ff0000">InsTrk</FONT> c^^^ ^^^^ ^^^^<BR>
+      　　　　<FONT color="#ff0000">SetTrk</FONT> r^^^ e^^^ ^^^^ ^^^^ ^^^^<BR>
+      　　　　<FONT color="#ff0000">SetTrk</FONT> r^^^ ^^^^ g^^^<BR>
+      <BR>
+      <FONT color="#0033ff">//その３（オーソドックスにSub{}を使う）</FONT><BR>
+      l4 cded<BR>
+      <FONT color="#ff0000">Sub</FONT>{ c^^^ ^^^^ ^^^^ }<BR>
+      <FONT color="#ff0000">Sub</FONT>{ r^^^ e^^^ ^^^^ ^^^^ ^^^^ ^^^^ }<BR>
+      　　 r^^^ ^^^^ g^^^<BR><BR>
+      <FONT color="#0033ff">//その４（休符で戻る）</FONT><BR>
+      l4 cded c^^^ ^^^^ ^^^^<BR>
+      r-4 e^^^ ^^^^ ^^^^ ^^^^ ^^^^<BR>
+      r-2 g^^^</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<P><B>最後に</B></P>
+<BLOCKQUOTE><FONT size="+2" color="#9900ff"><B>今</B></FONT>のMMLの欠点は、テキストが主体なので、俯瞰性が悪く、どこになにが書いてあるのか、いったいどういう音が鳴るのかが見えにくい事です。</BLOCKQUOTE>
+<BLOCKQUOTE>それに反して、GUIベースの現代の一般的なシーケンサーは、見た目がカッコよく、元来目に見えない音の様子を図形として表示することが出来ます。</BLOCKQUOTE>
+<BLOCKQUOTE>それを思うと、MMLは、覚えるのも面倒くさく、全くメリットが無いかのように思われます。</BLOCKQUOTE>
+<BLOCKQUOTE>ところが、<B>MMLでの音楽製作には、たくさんのメリットがあります。</B></BLOCKQUOTE>
+<BLOCKQUOTE>最たるものを１つ挙げるなら、とにもかくにも、加工が楽だということでしょう。フォーマットが文字なので、わざわざ音楽作成専用のシーケンサーを使わなくても、どんなワープロやエディタからも、曲の製作が可能だからです。</BLOCKQUOTE>
+<BLOCKQUOTE>しかも、巷には、文章やプログラムを書くためのツールやスクリプトがごろごろしており、文章を簡単に整形加工するための素晴らしい環境が整っています。そう言うわけで、こんなに良い環境を音楽製作に活かさない手はないだろうと思います。</BLOCKQUOTE>
+<BLOCKQUOTE>さらに、サクラのスクリプトを使ってアルゴリズム作曲が出来たり、関数を利用した、フレーズの味付けが楽に出来たり、コードなど関数電卓に出来たり・・・、音楽がプログラムできることも大きなメリットです。</BLOCKQUOTE>
+<BLOCKQUOTE><FONT size="+2" color="#9900ff"><B>そ</B></FONT>して、MMLという音楽記述方法には、まだまだ進化の余地がたくさんあります。去年kfmというMMLコンパイラを作ったのですが、公開して改良を重ねる過程で、多くの助言を頂き、そのフィードバックをいっぱい受けて、サクラを作り上げました。サクラは、kfmに比べたらかなり良い線に近づいたな、という実感があります。</BLOCKQUOTE>
+<BLOCKQUOTE>コツコツと不思議な音楽を作りつづける音楽家の皆さん、そしてテキスト派ミュージシャンの皆さん、MMLで盛り上がって行きましょう！</BLOCKQUOTE>
+<HR>
+<P align="right">作者：クジラ飛行机</P>
+<HR>
+<P align="right"><A href="index.htm">戻る</A></P>
+</BODY>
+</HTML>

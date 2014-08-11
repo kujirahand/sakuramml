@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>コントロールチェンジオプション</TITLE>
+</HEAD><BODY>
+<H1>コントロールチェンジオプション</H1>
+<HR>
+<P>コントロールチェンジに、さまざまなオプションを指定できます。<BR>
+参照：（ノート属性のオプションは、<A href="note-option.htm">こちら</A>）（コントロールチェンジ早見表は、<A href="cc.htm">こちら</A>）</P>
+<TABLE border=1>
+<TR><TD><A href="#.onNote">onNote</A></TD><TD>(命令).onNote(v1,v2,v3...)</TD><TD>ノートオン毎の値の先行指定</TD></TR>
+<TR><TD><A href="#.onNote">N</A></TD><TD></TD><TD>=.onNote</TD></TR>
+<TR><TD><A href="#.onTime">onTime</A></TD><TD>(命令).onTime(low,high,len...)</TD><TD>一度にlowからhighへ値をFrequency間隔で書き込む</TD></TR>
+<TR><TD><A href="#.onTime">T</A></TD><TD></TD><TD>=.onTime</TD></TR>
+<TR><TD><A href="#.onNote">onCycle</A></TD><TD>(命令).onCycle(len,v1,v2,v3...)</TD><TD>指定時間毎の値の先行指定</TD></TR>
+<TR><TD><A href="#.onNote">C</A></TD><TD></TD><TD>=.onCycle</TD></TR>
+<TR><TD>onNoteWave</TD><TD>(命令).onNoteWave(low,high,len...)</TD><TD>ノートオン毎に直線的な値の推移を書き込む(コントロールチェンジ,ベンド)</TD></TR>
+<TR><TD>W</TD><TD>(命令).W(low,high,len...)</TD><TD>ノートオン毎に直線的な値の推移を書き込む(コントロールチェンジ,ベンド)</TD></TR>
+<TR><TD>onNoteWaveEx</TD><TD>(命令).W(low,high,len...)</TD><TD>ノートオン毎に、ノートの長さに応じた波形を書き込む(コントロールチェンジ,ベンド)</TD></TR>
+<TR><TD>WE</TD><TD>(命令).W(low,high,len...)</TD><TD>ノートオン毎に、ノートの長さに応じた波形を書き込む(コントロールチェンジ,ベンド)</TD></TR>
+<TR><TD>onNoteWaveR</TD><TD>(命令).onNoteWaveR(low,high,len...)</TD><TD>ノートオンしている間、low,higi,len...を繰り返す</TD></TR>
+<TR><TD>WR</TD><TD>(命令).WR(low,high,len...)</TD><TD>ノートオンしている間、low,higi,len...を繰り返す</TD></TR>
+    <TR>
+      <TD>onNoteSine</TD>
+      <TD>(命令).onNoteSine(type,low,high,len,times)</TD>
+      <TD>ノートオン毎にコントロールチェンジの連続値書き込み命令
+      type=0:sine/1:up sine/2:down sine</TD>
+    </TR>
+    <TR>
+      <TD>Sine</TD>
+      <TD>(命令).onNoteSine(type,low,high,len,times)</TD>
+      <TD>一度だけ、コントロールチェンジを連続値書き込み命令
+      type=0:sine/1:up sine/2:down sine</TD>
+    </TR>
+    <TR><TD>Delay</TD><TD>(命令).Delay=v</TD><TD>先行指定の効果の遅延時間</TD></TR>
+<TR><TD>Repeat</TD><TD>(命令).Repeat(on/off)</TD><TD>予約指定で.onNoteなどで繰り返すかどうか</TD></TR>
+<TR><TD>Random</TD><TD>(命令).Random=v</TD><TD>書き込まれる値に、vのランダムな値を足す</TD></TR>
+<TR><TD>Range</TD><TD>(命令).Range(low,high)</TD><TD>書き込まれる値に、上限と下限を設定する</TD></TR>
+<TR><TD>Frequency</TD><TD>(命令).WR(low,high,len...)</TD><TD>コントロールチェンジの書き込み頻度を指定する</TD></TR>
+  </TABLE><HR>
+<H2><A name=".onNote">ノートオンごとの先行指定（.onNote）(.onCycle)</A></H2>
+<BLOCKQUOTE>　細かく打ちこみ作業をしていくと、コントロールチェンジやピッチベンドの値を、頻繁に値を変えたくなります。<BR>
+そんなとき、いちいち、<FONT color="#6600ff">P=50 c P=70 c P=100 e P=10 g</FONT>、と書いていくのは、非常に面倒ですし、あとから修正するのも大変です。</BLOCKQUOTE>
+<BLOCKQUOTE>　そこで、登場したのが、先行指定という概念です。これは、あらかじめ一度にたくさんの値を指定してしまおうというものです。</BLOCKQUOTE>
+<BLOCKQUOTE><B>　指定方法</B>は、　<FONT color="#3300ff">コマンド</FONT><FONT color="#ff0000"><B>.onNote(</B></FONT> <FONT color="#3300ff">値1,値2,値3...</FONT> <FONT color="#ff0000"><B>)</B></FONT> のように指定します。（先行指定は、指定を解除するまで繰返されます。<B>解除</B>は、<FONT color="#ff0000">コマンド</FONT><FONT color="#9900ff">値</FONT>というように普通の指定をします。）<BR>
+<TABLE border="1" cellpadding="3">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><FONT color="#ff0000"><B>.onNote(</B></FONT><FONT color="#ffffff"> </FONT><FONT color="#ffffff">値1,値2,値3... </FONT><FONT color="#ff0000"><B>)</B></FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">Panpot.onNote(0,127)<BR>
+      l4 cdef gfed</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<BLOCKQUOTE>　また、一定間隔ごとに指定した値を書き込みたい場合は、&quot;.onCycle&quot;を使います。<BR>
+<TABLE border="1" cellpadding="3">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><FONT color="#ff0000"><B>.onCycle(</B></FONT><FONT color="#ffffff"> </FONT><FONT color="#ffffff">周期, 値1,値2,値3... </FONT><FONT color="#ff0000"><B>)</B></FONT></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">p.onCycle(!4,0,127)<BR>
+      l8[16c]</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<H2><A name=".onTime">時間ごとの先行指定(.onTime)</A></H2>
+<BLOCKQUOTE>一度にlowからhighへ値をFrequency間隔で書き込みます。</BLOCKQUOTE>
+<BLOCKQUOTE><B>指定方法</B>は、<FONT color="#3300ff">コマンド</FONT><FONT color="#ff0000">.onTime(</FONT><FONT color="#3300ff"> (低値, 高値, ステップ値), </FONT><FONT color="#9933cc">(低値, 高値, ステップ値)</FONT><FONT color="#3300ff">, (低値, 高値, ステップ値), ... </FONT><FONT color="#ff0000">)</FONT>です。（ここで、問題になるのは、ステップ時間ですが、ｎ分音符時間指定がしたいときは、<FONT color="#ff0000" size="+1"><B>!</B></FONT><FONT color="#9900ff">n</FONT>と書くことで、ｎ分音符がステップ時間に変換されます。）これは、一度書き込んでしまったら、解除はできません。<BR>
+<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#3300ff"><FONT color="#ffffff">コマンド</FONT><B><FONT color="#ff0000">.onTime(</FONT></B><FONT color="#ffffff"> (低値, 高値, ステップ値), </FONT><FONT color="#ffffff">(低値, 高値, ステップ値)</FONT><FONT color="#ffffff">, ... </FONT><B><FONT color="#ff0000">)</FONT></B></TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffffcc">Expression.onTime(0,127,!1);<BR>
+      [64 c32]</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

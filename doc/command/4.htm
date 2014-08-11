@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>t</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">t</TD>
+      <TD align="left">t(n)</TD>
+      <TD align="left">発音のタイミングをステップ単位で指定(初期値0)</TD>
+      <TD align="left">音符属性</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>発音のタイミング（遅れなど）をステップ単位で指定する(初期値0)<BR>
+これは、単体で使用するよりも、&quot;.onCycle&quot;などの音符属性オプションを用いて、特定のグルーブを表現する場合に指定することが多い。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//t のサンプル</FONT></B><BR>
+      //TimeBase(96)のとき<BR>
+      t.onCycle(!16, 0,8)<BR>
+      [4 l16 ccec gcec ecgc ec`cc]<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="../reference/note-option.htm">音符属性オプション</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

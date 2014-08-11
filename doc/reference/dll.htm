@@ -1,0 +1,226 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>dSakura.dll について</TITLE>
+</HEAD>
+<BODY bgcolor="white" text="black" link="blue" alink="red" vlink="purple">
+<H1>dSakura.dll について</H1>
+<HR>
+<!--index-->
+<H2>目次</H2>
+<UL>
+  <LI><A href="#概要">概要</A>
+  <UL>
+    <LI><A href="#概要_どこにあるの？">どこにあるの？</A>
+    <LI><A href="#概要_連絡先：">連絡先：</A>
+    <LI><A href="#概要_作成環境：">作成環境：</A>
+    <LI><A href="#概要_動作テスト済み環境：">動作テスト済み環境：</A>
+    <LI><A href="#概要_著作権＆配布制限">著作権＆配布制限</A>
+  </UL>
+  <LI><A href="#説明">説明</A>
+  <UL>
+    <LI><A href="#説明_DLLの関数">DLLの関数</A>
+    <LI><A href="#説明_注意">注意</A>
+  </UL>
+  <LI><A href="#使用方法">使用方法</A>
+  <LI><A href="#Visual Basic から使う">Visual Basic から使う</A>
+  <LI><A href="#Delphi から使う">Delphi から使う</A>
+  <LI><A href="#C++Builder から使う">C++Builder から使う</A>
+</UL>
+<!--end of index-->
+<P><A name="概要"><BR>
+</A></P>
+<HR>
+<H1>概要</H1>
+サクラの心臓部分です。これを利用すれば自作のプログラムで、簡単にMIDIファイルを生成することができます。
+<P><A name="概要_どこにあるの？"><BR>
+</A></P>
+<H2>どこにあるの？</H2>
+dSakura.dllは、サクラをインストールしたフォルダに入っています。(Windowsデフォルトでは、DLLは隠しファイルになっていますので、見えなくなっているかもしれませんが。)
+<P><A name="概要_連絡先："><BR>
+</A></P>
+<H2>連絡先：</H2>
+<BLOCKQUOTE><CODE><A href="http://oto.chu.jp/">http://oto.chu.jp/</A><BR>
+クジラ飛行机<BR>
+</CODE></BLOCKQUOTE>
+<P><A name="概要_作成環境："><BR>
+</A></P>
+<H2>作成環境：</H2>
+<BLOCKQUOTE><CODE>Borland C++Builder 4<BR>
+</CODE></BLOCKQUOTE>
+<P><A name="概要_動作テスト済み環境："><BR>
+</A></P>
+<H2>動作テスト済み環境：</H2>
+<BLOCKQUOTE><CODE>Microsoft Visual Basic 5 と 6<BR>
+Borland C++Builder 4<BR>
+Borland Delphi 4<BR>
+</CODE></BLOCKQUOTE>
+<P><A name="概要_著作権＆配布制限"><BR>
+</A></P>
+<H2>著作権＆配布制限</H2>
+<P>dSakura.dllの著作権は、クジラ飛行机にあります。dSakura.dllの使用、配布は自由です。その際は、一言声をかけていただけると嬉しいです。特に、自作アプリから使用し、公開する場合には、ぜひ一報お願いします。私のホームページで、宣伝しますので！！</P>
+<P><A name="説明"><BR>
+</A></P>
+<HR>
+<H1>説明</H1>
+<P><A name="説明_DLLの関数"><BR>
+</A></P>
+<H2>DLLの関数</H2>
+<P><FONT color="blue">BOOL MMLtoMIDI(char *MMLText, char *FileName,
+char *ErrMsg);</FONT></P>
+<BLOCKQUOTE><CODE>MMLText&nbsp;&nbsp;&nbsp;&nbsp; : MMLかストトンを入れて下さい。MMLの文法は、別途ヘルプファイルをご覧ください。<BR>
+FileName&nbsp;&nbsp;&nbsp;&nbsp;: 完成したMIDIファイルを保存する名前を入れて下さい。<BR>
+ErrMsg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+最大256文字の固定長文字列に、エラーメッセージを返します。<BR>
+　　　　　　　SetErrMsgLenにて、エラー文字列長が変えられます。<BR>
+</CODE></BLOCKQUOTE>
+<FONT color="blue">void GetVerInfo(char *s);</FONT>
+<BLOCKQUOTE><CODE>s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+: 領域を確保した文字列を指定すると、詳細バージョン情報文字列を返す<BR>
+</CODE></BLOCKQUOTE>
+<FONT color="blue">void SetErrMsgLen(int mLen);</FONT>
+<BLOCKQUOTE><CODE>mLen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+エラーメッセージのバッファ長を設定。<BR>
+</CODE></BLOCKQUOTE>
+<H2>注意</H2>
+サクラは、コンパイル前に、定義ファイルstdmsg.hを読み込む事になっていますので、dSakura.dllを置くディレクトリか、そのディレクトリの中に、必ず、stdmsg.hを置いてください。
+<P><A name="使用方法"><BR>
+</A></P>
+<HR>
+<H1>使用方法</H1>
+<P>以下、各開発環境で、実際に使う例をのせておきました。静的にリンクする方法です。<A name="Visual Basic から使う"></A></P>
+<HR>
+<H1>Visual Basic から使う</H1>
+サンプルコードの提供は、北神陽太さん&lt;<A href="mailto:y-kitagami@nifty.ne.jp">mailto:y-kitagami@nifty.ne.jp</A>&gt;です。
+<BLOCKQUOTE><CODE>dSakuraを使いたいモジュールの先頭で、以下のように宣言します。<BR>
+</CODE>
+<P><CODE>'for dSakura<BR>
+Private Declare Function MMLtoMIDI Lib &quot;dSakura.dll&quot;
+(ByVal Value As String, ByVal FName As String,
+ByVal ErrMsg As String) As Boolean<BR>
+</CODE></P>
+<P><CODE>以下使用例です。<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<BR>
+Private Function Compile() As Boolean<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Dim MMLstr As String&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'コンパイルするMMLテキスト<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Dim kekka As Boolean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'コンパイル結果(Falseでエラー)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Dim ErrMsg As String
+* 512 'エラーメッセージ固定長文字列<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Dim FName As String&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'作業用midファイル名<BR>
+On Error GoTo ERRSUB<BR>
+<BR>
+ChDir App.Path 'DLLを実行アプリと同じディレクトリに置いてある場合<BR>
+'ここではSakuraのリッチテキスト部分がアクティブか確認し、<BR>
+'リッチテキストのMMLを定義しています。<BR>
+'自作プログラムでは使用しているコントロールに変更するか、<BR>
+'直接MMLテキストを定義してください。<BR>
+If ActiveForm Is Nothing Then Exit Function<BR>
+MMLstr = ActiveForm.rtfText.Text<BR>
+<BR>
+'書き出すmidファイル名。<BR>
+'ここでは、プログラムと同じパスに&quot;Temp.mid&quot;を作成します。<BR>
+FName = App.Path &amp; &quot;\Temp.mid&quot;<BR>
+<BR>
+'コンパイルします。<BR>
+kekka = MMLtoMIDI(MMLstr, FName, ErrMsg)<BR>
+<BR>
+'コンパイル結果がエラーならメッセージを表示します。<BR>
+If kekka = False Then<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ErrMsg
+= Left(ErrMsg, InStr(ErrMsg, vbNullChar)
+- 1) 'Null文字除去<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MsgBox&quot;コンパイルに失敗しました。&quot;
+&amp; vbCr &amp; _<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;dSakura.DLLからのメッセージ：&quot;
+&amp; vbCr &amp; _<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ErrMsg,
+vbExclamation, &quot;dSakura.DLL MMLエラー&quot;<BR>
+End If<BR>
+<BR>
+'コンパイル結果は、エラーのときFalseを返します。<BR>
+'結果により処理を分岐させる場合、If Compile
+&lt;&gt; False Then で<BR>
+'分岐させてください（VBではTrueの値が違うため注意）<BR>
+Compile = kekka<BR>
+<BR>
+Exit Function<BR>
+<BR>
+'エラー処理<BR>
+ERRSUB:<BR>
+<BR>
+If Err = 48 Then<BR>
+&nbsp;&nbsp;MsgBox &quot;dSakura.DLLがありません。&quot;&nbsp;&nbsp;,
+vbCritical, &quot;確認&quot;<BR>
+&nbsp;&nbsp;Resume Next<BR>
+End If<BR>
+<BR>
+End Function<BR>
+</CODE></P>
+</BLOCKQUOTE>
+<P><A name="Delphi から使う"><BR>
+</A></P>
+<HR>
+<H1>Delphi から使う</H1>
+<P>interface部で、以下のように宣言します。</P>
+<P>function MMLtoMIDI(mml:PChar; fname:PChar;
+err:PChar):BOOL; stdcall external 'dSakura.dll';</P>
+<P>実際の使用例です。</P>
+<P>Button1を押したとき、RichEdit1にあるテキストをコンパイルします。演奏用にTMediaPlayerも貼り付けておいてください。</P>
+<BLOCKQUOTE><CODE>procedure TForm1.Button1Click(Sender: TObject);<BR>
+var<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;txt,fname,d:String;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;c:Array [0..256]
+of Char;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;f:Boolean;<BR>
+begin<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;RichEdit1.PlainText
+:= True;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;txt:=RichEdit1.Text
+;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;fname:='test.mid';<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;f:=MMLtoMIDI(PChar(txt),PChar(fname),@c);<BR>
+</CODE>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;if not f then<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;begin<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ShowMessage('コンパイル失敗');<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetLength(d,300);<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StrLCopy(PChar(d),@c,512);<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ShowMessage(d+':');<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;end else begin<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MediaPlayer1.FileName
+:= 'test.mid';<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MediaPlayer1.Open
+;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MediaPlayer1.Play
+;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;end;<BR>
+end;<BR>
+</CODE></P>
+</BLOCKQUOTE>
+<P><A name="C++Builder から使う"><BR>
+</A></P>
+<HR>
+<H1>C++Builder から使う</H1>
+<P>宣言</P>
+<P>extern &quot;C&quot; __declspec(dllimport)
+BOOL __stdcall MMLtoMIDI(char *text, char
+*fname, char *errmsg);</P>
+<P>使用例</P>
+<BLOCKQUOTE><CODE>BOOL compile(){<BR>
+　&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char
+t[BUFSIZ] = &quot;cdefgfedcdefgfedc\n&quot;;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char
+err1[256];<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return
+MMLtoMIDI(t,&quot;test.mid&quot;,err1);<BR>
+}<BR>
+</CODE></BLOCKQUOTE>
+静的に使う場合、あらかじめ、implibツールで、.libファイルを作成して、メイクファイルにlibファイルを追加してください。
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY>
+</HTML>

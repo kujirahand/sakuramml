@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>スラー</TITLE>
+</HEAD>
+<BODY background="cta03.gif">
+<TABLE width="100%">
+  <TBODY>
+    <TR>
+      <TD width="604" bgcolor="#003700"><B><FONT color="#ffffff" size="+2">スラー　(レガート奏法)</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE><B><FONT color="#004d00"><BR>
+楽譜などを見ながら打ち込んでいる人は時々お目にするかもしれませんが、<BR>
+<BR>
+<BR>
+</FONT></B>
+<CENTER>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur01.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+<B><FONT color="#004d00"><BR>
+<BR>
+違う音程ってどうやってつなぐんだ？？となると思います。<BR>
+<BR>
+この記号は「なめらかに演奏せよ」という意味ですが、なめらかってどないやねん…といえば</FONT><FONT color="#ff0000" size="+1">次の音符の始まりがあまり目立たないようにする</FONT><FONT color="#004d00">という事です。<BR>
+<BR>
+SAKURAでは「＆」という記号を使います。<BR>
+<BR>
+</FONT></B>
+<HR>
+<B><FONT color="#004d00"><BR>
+例）<BR>
+</FONT></B><FONT color="#000000" size="-1">ドレミ＆ファソ<FONT color="#000000"><BR>
+</FONT><BR>
+</FONT>
+<HR>
+<B><FONT color="#004d00"><BR>
+こうすると、ミとファが滑らかに繋がります。<BR>
+<BR>
+<BR>
+<BR>
+…とまあこの音で納得してもらえればそれでＯＫなのですが、実はそんなに簡単にはいかないのが世の常。<BR>
+<BR>
+楽器の種類によって「どうすれば滑らかになるか」が違うからですね。<BR>
+因みに今の「滑らか」は、<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_01.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+こんな感じ。<BR>
+<BR>
+実は「スラー（レガート）」というのは本当に色々あって、一種類では様々な楽器のスラーを表現しきれません。中にはギターのように一つの楽器で様々な繋げ方をするものまであります。<BR>
+<BR>
+そこでＳＡＫＵＲＡ（version2.00以降）では</FONT><FONT color="#ff0000" size="+1">４種類</FONT><FONT color="#004d00">のスラーが選べるようになっています。これはその一種類目ですね。<BR>
+<BR>
+種類を選ぶには、<BR>
+<BR>
+Slur( ? )<BR>
+<BR>
+という命令を使います。（半角）<BR>
+<BR>
+<BR>
+多くの場合、トラックの頭へ書いておくだけで済むと思いますが、時には演奏中に色々切り替えて使いたくなる事もあるでしょう。<BR>
+<BR>
+以下にその４種類を紹介します。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_01.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+スラーモード０です。<BR>
+<BR>
+スラーというよりグリッサンドやポルタメントといった奏法に近いかもしれません。<BR>
+何も指定しないとこれになりますが、別のやつからこれへ戻す時は<BR>
+<BR>
+</FONT></B><FONT color="#000000" size="-1">Slur( 0 )<FONT color="#000000" size="-1"><BR>
+</FONT><BR>
+</FONT><FONT color="#005500"><B>と書きます。このモードでは更に<BR>
+<BR>
+</B></FONT><FONT color="#000000" size="-1">Slur( 0 , 24 )</FONT><FONT color="#005500"><B><BR>
+<BR>
+…とカンマで区切って２つ目の数字を書くと、斜めになっている部分の長さを自由に変える事が出来ます。<BR>
+<BR>
+元々は１２になっていて、３２分音符と同じ長さです。<BR>
+（２４で１６分音符、４８で８分音符、９６で４分音符ですね）<BR>
+<BR>
+例ではプラス値なのでファの頭でピッチ変化が始まりますが、マイナスを指定するとミの終わりからピッチ変化が始まります。<BR>
+<BR>
+</B></FONT>
+<CENTER>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_06.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+<FONT color="#005500"><B><BR>
+<BR>
+またこのモードに限り</B></FONT><FONT color="#ff0000"><FONT color="#ff0000"><B>＆＆</B></FONT></FONT><FONT color="#005500"><B>と２つ「＆」を書くと少し特殊な動き方をさせる事が出来ます。<BR>
+ドレミ＆＆ファソ、などと書くと<BR>
+<BR>
+</B></FONT>
+<CENTER>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_07.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+<FONT color="#005500"><B><BR>
+このようにミ全体の長さを使ってピッチシフトします。<BR>
+<BR>
+<BR>
+モード０では開始音程から高さ±１２半音（１オクターブ）まで、という制限がありますので気をつけてください。それを超えてしまうと自動的にスラーモード２になります。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</B><BR>
+</FONT>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_02.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+スラーモード１。<BR>
+<BR>
+徐々に上がり下がりするのではなく、瞬間的に音程が変わります。<BR>
+音的には一番自然で聴きやすい＆使いやすいものかもしれません。<BR>
+<BR>
+このモードにするには半角で、<BR>
+<BR>
+</FONT></B><FONT color="#000000" size="-1">Slur( 1 )</FONT><B><FONT color="#004d00"><BR>
+<BR>
+と書きます。<BR>
+このモードも０と同様、±１２半音までという制限があります。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_03.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+スラーモード２。<BR>
+<BR>
+これがスラーの本家本元で、後ろの音へちょっとかぶさるタイプのものです。<BR>
+<FONT color="#004d00">このモードにするには半角で、<BR>
+<BR>
+</FONT></FONT></B><FONT color="#004d00"><FONT color="#000000" size="-1">Slur( 2 )</FONT></FONT><B><FONT color="#004d00"><BR>
+<BR>
+と書きます。このモードでは更に<BR>
+<BR>
+</FONT></B><FONT color="#000000" size="-1">Slur( 2 , 120 )</FONT><B><FONT color="#004d00"><BR>
+<BR>
+…とカンマで区切って２つ目の数字を書くと、かぶさり具合（長さ）を自由に調整できます。<BR>
+<BR>
+数字はパーセンテージで、１００だと何もかぶらず、２００だと倍の長さになります。<BR>
+１００％より短くする事も出来ますが、かぶるどころか短くなってしまうのであまり意味はありません。<BR>
+<BR>
+<A href="help07.htm">ゲート</A>と同じ扱いなので、原理はそちらの方で。<BR>
+<BR>
+このモードには音程制限がありません。<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_04.gif" width="256" height="128" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+スラーモード３。<BR>
+<BR>
+別名アルペジオモードと呼ばれています。<BR>
+<BR>
+アルペジオというのは「分散和音」の事で、「和音」というと普通は鍵盤２，３個をいっせーのせでバーンと鳴らすやつの事を言うのですが、ずらして（分散して）鳴らす場合はアルペジオと呼んで区別されます。<BR>
+<BR>
+このモードにするには半角で<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">Slur( 3 )<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">と書きます。<BR>
+<BR>
+このモードはミ＆ファ＆ソ・・・と「＆」で繋いでいくと、どんどん音が重なっていくので「アルペジオモード」な訳ですが、はっきり言ってスラーとは全然違うものです。（笑）<BR>
+<BR>
+しかしピアノやギターなどのアルペジオを打ち込むようになると、このモードがとても便利である事がきっとお分かりになると思います。<BR>
+<BR>
+このモードも音程制限はありませんが、調子に乗って音を重ねすぎると同時発音数というシンセの限界を超えて、他のパートの音が消えてしまうような事もあるのでくれぐれも重ねすぎにはご注意を。（シンセの限界は全てのパートの合計で大体３２音くらいです）<BR>
+<BR>
+５～６音くらいで一回切るか、<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">Slur( 3, 4 )<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">とカンマで区切って「何音まで重ねてよいか」というのを指定してあげるとよいでしょう。<BR>
+<BR>
+</FONT></B>
+<CENTER>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="slur_05.gif" width="256" height="128" border="0"></TD>
+    </TR>
+    <TR>
+      <TD align="center">本来は５音重なるところですが…</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</CENTER>
+<B><FONT color="#004d00"><BR>
+<BR>
+<BR>
+<BR>
+</FONT></B><B><FONT color="#004d00"><BR>
+</FONT></B></BLOCKQUOTE>
+</BODY>
+</HTML>

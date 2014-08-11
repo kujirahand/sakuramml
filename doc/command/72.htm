@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>KeyFlag</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">KeyFlag</TD>
+      <TD align="left">KeyFlag[+|-](note)|KeyFlag=(a,b,c,d,e,f,g)</TD>
+      <TD align="left">臨時記号を設定する</TD>
+      <TD align="left">システム</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>臨時記号を設定する。<BR>
+設定の方法は、直接ノートを指定する方法と、全てのノートについて指定する方法と、２種類ある。<BR>
+<BR>
+・直接ノートを指定する方法<BR>
+<BR>
+KeyFlag+(ドファ) // ドファに＃記号をつける<BR>
+KeyFlag-(ミシ) // ミシに♭記号をつける<BR>
+<BR>
+・全てのノートについて指定する方法<BR>
+KeyFlag=(-2,0,0,-2,0,0,0) // 沖縄音階を再現<BR>
+</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//KeyFlag のサンプル</FONT></B><BR>
+      <BR>
+      KeyFlag+(ドファ)<BR>
+      ドレミファソラシ<BR>
+      <BR>
+      KeyFlag=(-2,0,0,-2,0,0,0);<BR>
+      ドレミファソラシ＞ド<BR>
+      <BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="../reference/keyflag.htm">有名なスケール定義集</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

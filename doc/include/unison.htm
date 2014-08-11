@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"unison.h" ver.0.70</TITLE>
+<META content="SAKURA Function unison" name=keywords>
+<META content="フレーズをユニゾンで鳴らす関数(1999/12/17)" name=description>
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"unison.h" ver.0.70</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#概要">概要</A></LI>
+  <LI><A HREF="#OctaveUnison(Str S)">OctaveUnison(Str S)</A></LI>
+  <LI><A HREF="#Unison5th(Str S)">Unison5th(Str S)</A></LI>
+  <LI><A HREF="#Unison3th(Str S)">Unison3th(Str S)</A></LI>
+  <LI><A HREF="#Unison(Str S, Int Value)">Unison(Str S, Int Value)</A></LI>
+</UL>
+<!--end of index-->
+<P>
+<P>
+<P>
+<P><A NAME="概要"><BR></A><HR><H1>概要</H1>
+■＋フレーズをユニゾンで鳴らす関数（概要）<P>
+フレーズを部分的に３度上でハモらせたり、１オクターブ下の音を足して、音に厚みを出させたりします。<P>
+<P>
+<P><A NAME="OctaveUnison(Str S)"><BR></A><HR><H1>OctaveUnison(Str S)</H1>
+■｜－オクターブユニゾン：１オクターブ上の音を足します。<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;元になるフレーズを指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="Unison5th(Str S)"><BR></A><HR><H1>Unison5th(Str S)</H1>
+■｜－５ｔｈユニゾン：５度上の音を足します。<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;元になるフレーズを指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="Unison3th(Str S)"><BR></A><HR><H1>Unison3th(Str S)</H1>
+■｜－３ｔｈユニゾン：３度上の音を足します。<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;元になるフレーズを指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="Unison(Str S, Int Value)"><BR></A><HR><H1>Unison(Str S, Int Value)</H1>
+■｜－汎用ユニゾン：フレーズに任意の音を足します。<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;元になるフレーズを指定<BR>Value&nbsp;&nbsp;&nbsp;足したい音を半音単位で指定<BR><P>
+例）// ５度上の音(=7半音上)をユニゾンします。<BR>Unison({cdefg}, 7);<BR><P>
+<P>
+<P>
+<P>
+</BODY></HTML>

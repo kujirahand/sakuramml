@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>FAQ:音符表記関連</TITLE>
+</HEAD><BODY>
+<H1>音符表記関連</H1>
+<HR>
+<P><FONT color="#cc0000" size="+1">■３連符が使いたい場合は、どうやったらいいの？</FONT></P>
+<BLOCKQUOTE>連符の表記には、連符｛ストトン表記｝(MMLなら、Div{
+MML }音長) コマンドを使います。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><FONT color="#330000">音符４　ドド　<B>連符</B>｛ドミソ｝　ド</FONT></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BR>
+また、ｎ分音符という表し方は、とても単純に、音符の長さを表せるような仕組みになっています。<BR>
+例えば、四分音符という言い方。これは、全音符を４等分した長さだから、四分音符なのです。二分音符は、全音符を２等分した長さです。<BR>
+<BR>
+計算式で書けば、<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ccffcc"><B><FONT color="#6600ff">（基本音符）×（分割したい個数）＝（求めたい音符の長さ）</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+が、出てくるわけです。<BR>
+<BR>
+全音符を８つに分けた音符は、１Ｘ８＝８分音符。<BR>
+８分音符を３つに分けた音符は、８Ｘ３＝２４分音符<BR>
+１６分音符を２つに分けた音符は、１６Ｘ２＝３２分音符。<BR>
+<BR>
+だから、<BR>
+<BR>
+４分音符の３連符なら、４Ｘ３＝１２分音符となり、<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF99">l12 ccc ddd eee ggg l4 fedc</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+となります。<BR>
+<BR>
+また、音の長さに関して、付点４分音符と付点８分音符を足した長さを使いたいときは、タイ記号の
+^ を使って、 &quot; l4.^8. &quot;と表します。</BLOCKQUOTE>
+<HR>
+</BODY></HTML>

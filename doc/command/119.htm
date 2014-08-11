@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>Decresc</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">Decresc</TD>
+      <TD align="left">Decresc([[[len],v1],v2])</TD>
+      <TD align="left">だんだん小さく。エクスプレッションをlen(ｎ分音符指定で)の間に、v1からv2へ変更する。lenを省略すると全音符の長さになる。</TD>
+      <TD align="left">音色・コントロールチェンジ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>デクレッシェンドを表現する。内部的には、エクスプレッションを用いて実現している。引数を全部省略することができる。その場合は、全音符の長さで、127から、40へと、減少します。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//Decresc のサンプル</FONT></B><BR>
+      Decresc; l4 cdefgfed //全部省略した場合<BR>
+      Decresc=2; l8 [2cdefgfed] //二分音符でデクレッシェンド<BR>
+      Decresc=4^8,10; l8 cdefgfed //付点四分音符で 10までデクレッシェンド<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="118.htm">Cresc</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

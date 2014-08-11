@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>SoundType</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">SoundType</TD>
+      <TD align="left">SoundType=v</TD>
+      <TD align="left">ユーザーが使用している音源のタイプを得る。v=0:GM/1:GS/2:XG/3:i-mode</TD>
+      <TD align="left">システム</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>ユーザーがエディタで設定した音源の種類を得る。<BR>
+音源ごとに違う処理を実装したい場合などに有効。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//SoundType のサンプル</FONT></B><BR>
+      <BR>
+      Int TYPE_GM = 0;<BR>
+      Int TYPE_GS = 1;<BR>
+      Int TYPE_XG = 2;<BR>
+      <BR>
+      If(SoundType = TYPE_GM){ @1 cdef }<BR>
+      If(SoundType = TYPE_GS){ @1,8 gfed }<BR>
+      If(SoundType = TYPE_XG){ @1,0,16 cgcg }<BR>
+      <BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

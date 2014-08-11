@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"delay.h" ver.1.00</TITLE>
+<META content="SAKURA Function" name=keywords>
+<META content="エフェクターなどを使わないで、ディレイを再現する関数群(2000/07/08)" name=description>
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"delay.h" ver.1.00</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#概要">概要</A></LI>
+  <LI><A HREF="#使い方">使い方</A></LI>
+  <LI><A HREF="#MidiDelayS(Str S)">MidiDelayS(Str S)</A></LI>
+  <LI><A HREF="#MidiDelay(Str S, Int Repeat, Int Delay)">MidiDelay(Str S, Int Repeat, Int Delay)</A></LI>
+  <LI><A HREF="#MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus)">MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus)</A></LI>
+  <LI><A HREF="#MidiDelayRev(Str S, Int Repeat, Int Delay)">MidiDelayRev(Str S, Int Repeat, Int Delay)</A></LI>
+  <LI><A HREF="#MidiDelayTap(Str S, Int Repeat, Int Delay)">MidiDelayTap(Str S, Int Repeat, Int Delay)</A></LI>
+  <LI><A HREF="#MidiDelayTap2(Str S, Int Repeat, Int Delay)">MidiDelayTap2(Str S, Int Repeat, Int Delay)</A></LI>
+</UL>
+<!--end of index-->
+<P>
+<P>
+<P>
+<P><A NAME="概要"><BR></A><HR><H1>概要</H1>
+ディレイとは、音が少し遅れて聞こえてくる、やまびこのような効果のことです。普通、ディレイを使うには、「エフェクター」を使います。しかし、音源によっては、エフェクターのないものもあるので、ここでは、エフェクターを使わないで、ＭＩＤＩ情報を駆使して、ディレイを再現します。<P>
+<P><A NAME="使い方"><BR></A><HR><H1>使い方</H1>
+<P>
+Include(delay.h);<P>
+の一文を、曲頭に書き加えてください。<P>
+<P>
+<P><A NAME="MidiDelayS(Str S)"><BR></A><HR><H1>MidiDelayS(Str S)</H1>
+◇シンプルディレイ<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ディレイ効果をかけたいフレーズを書きます。<BR><P>
+例）<BR>MidiDelayS( ドレミファソ );<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="MidiDelay(Str S, Int Repeat, Int Delay)"><BR></A><HR><H1>MidiDelay(Str S, Int Repeat, Int Delay)</H1>
+◇汎用的なディレイ：リピート回数とタイムを指定できる汎用的なディレイ<P>
+<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ディレイ効果をかけたいフレーズ<BR>Repeat&nbsp;&nbsp;繰り返し回数を指定<BR>Delay&nbsp;&nbsp;&nbsp;遅らせる時間を指定<BR><BR>例）<BR>MidiDelay({v100o5l4cegedfaf},2,!8);<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus)"><BR></A><HR><H1>MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus)</H1>
+◇キーディレイ：ディレイの遅れて出るノートの音程が変わる不思議なディレイ<P>
+<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ディレイ効果をかけたいフレーズ<BR>Repeat&nbsp;&nbsp;繰り返し回数を指定<BR>Delay&nbsp;&nbsp;&nbsp;遅らせる時間を指定<BR>KeyPlus 音程の変化量を指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="MidiDelayRev(Str S, Int Repeat, Int Delay)"><BR></A><HR><H1>MidiDelayRev(Str S, Int Repeat, Int Delay)</H1>
+◇逆回転ディレイ：ディレイがフレーズより前から始まるテープ逆回転のようなディレイ<P>
+<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ディレイ効果をかけたいフレーズ<BR>Repeat&nbsp;&nbsp;繰り返し回数を指定<BR>Delay&nbsp;&nbsp;&nbsp;遅らせる時間を指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="MidiDelayTap(Str S, Int Repeat, Int Delay)"><BR></A><HR><H1>MidiDelayTap(Str S, Int Repeat, Int Delay)</H1>
+◇タップディレイ：ディレイタイムが短くなっていくディレイ<P>
+<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ディレイ効果をかけたいフレーズ<BR>Repeat&nbsp;&nbsp;繰り返し回数を指定<BR>Delay&nbsp;&nbsp;&nbsp;遅らせる時間を指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="MidiDelayTap2(Str S, Int Repeat, Int Delay)"><BR></A><HR><H1>MidiDelayTap2(Str S, Int Repeat, Int Delay)</H1>
+◇タップディレイ２：ディレイタイムが短くなっていくディレイ、ゲートが短くなる<P>
+<BLOCKQUOTE><CODE>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ディレイ効果をかけたいフレーズ<BR>Repeat&nbsp;&nbsp;繰り返し回数を指定<BR>Delay&nbsp;&nbsp;&nbsp;遅らせる時間を指定<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</BODY></HTML>

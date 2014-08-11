@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>DeleteCC</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">DeleteCC</TD>
+      <TD align="left">DeleteCC(n)</TD>
+      <TD align="left">この命令以降のタイムに書かれたコントロールチェンジ・ピッチベンドを完全に削除する。</TD>
+      <TD align="left">音色・コントロールチェンジ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>この命令以降のタイムに書かれたコントロールチェンジ・ピッチベンドを完全に削除する。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//DeleteCC のサンプル</FONT></B><BR>
+      EP.onTime(0, 127, !1)<BR>
+      ドドドド<BR>
+      DeleteCC(11);<FONT color="#cc3333">//このコマンド以降に存在するエクスプレッションを完全に削除する</FONT><BR>
+      ソミレミ<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

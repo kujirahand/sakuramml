@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>Array</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">Array</TD>
+      <TD align="left">Array name[=(value,value,value...)];</TD>
+      <TD align="left">配列変数(name)を作成し、(value,value,value...)で初期化する</TD>
+      <TD align="left">スクリプト</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>配列変数(name)を作成し、(value,value,value...)で初期化する。<BR>
+配列変数同士の足し算は、&quot;A = (A, B);
+&quot;のように、( )の中に配列変数を記述することによる行う。<BR>
+配列の１要素を取り出すには、&quot;A(要素番号)&quot;のように参照する。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//Array のサンプル</FONT></B><BR>
+      Array A = (0,1,2,3)<BR>
+      Array B = ();//空の配列<BR>
+      B = (A,4,5,6);//配列の足し算<BR>
+      Print(B);//要素の内容を表示=(0,1,2,3,4,5,6)<BR>
+      Int C = B(3);//要素１つを取り出す<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

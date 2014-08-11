@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>TimeKey</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">TimeKey</TD>
+      <TD align="left">TimeKey((fromTime),(toTime),value)</TD>
+      <TD align="left">時間を指定してキーをvalur半音上げる。(fromTime)を省略すると現在のタイム、(toTime)を省略すると次に指定があるまでが補完される</TD>
+      <TD align="left">システム</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>適用時間を指定して、全てのトラックのキーをvalur半音上げる。<BR>
+(fromTime)を省略すると現在のタイム、(toTime)を省略すると次に指定があるまでが補完される。<BR>
+<BR>
+尚、リズムトラックにまで、TimeKeyは適用されてしまうので、リズムトラックでは、TimeKeyを無効にする、&quot;<A href="110.htm">UseKeyShift</A>&quot;を、(off)に設定すること。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//TimeKey のサンプル</FONT></B><BR>
+      <FONT color="#009900">//(2:1:0)-(3:1:0)の間、全てのトラックのキーを２半音上げる<BR>
+      </FONT><B>TimeKey</B>((2:1:0),(3:1:0),2);<BR>
+      <FONT color="#ff0000"><B>Track</B></FONT>(1) @1<BR>
+      Time(1:1:0) l8 cdef gab`c<BR>
+      Time(2:1:0) l8 cdef gab`c<BR>
+      Time(3:1:0) l8 cdef gab`c <FONT color="#009900">//(3:1:0)には適用されないので注意</FONT><BR>
+      <FONT color="#FF0000"><B>Track</B></FONT>(2) @81<BR>
+      Time(2:1:0) l8 cdef gab`c<BR>
+      Time(3:1:0) l8 cdef gab`c<BR>
+      <BR>
+      <B><FONT color="#FF0000">Track</FONT></B>(10) Channel(10) Time(2:1:0)<BR>
+      <B>UseKeyShift</B>(off) <FONT color="#009900">//リズムトラックでは、タイムキーの効果をオフにする</FONT><BR>
+      $b{n36,} $s{n38,} $h{n42,} Rhythm{ [2 l8 bhsh bhss ]}<BR>
+      <B>UseKeyShift</B>(on)<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="110.htm">UseKeyShift</A> / <A href="73.htm">TimeKeyFlag</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

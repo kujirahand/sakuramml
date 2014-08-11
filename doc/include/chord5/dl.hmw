@@ -1,0 +1,46 @@
+「 Tab.gif                 16-Dec-2002 00:07    11k  
+ chord.gif               16-Dec-2002 00:07     7k  
+ chord5_index.bak        18-Dec-2002 20:24     2k  
+ chord5_index.ht_        18-Dec-2002 20:22     2k  
+ chord5_index.htm        18-Dec-2002 20:24     2k  
+ cta03.gif               16-Dec-2002 00:07     1k  
+ degree.gif              18-Dec-2002 03:16    11k  
+ first.bak               16-Dec-2002 00:07     1k  
+ first.htm               16-Dec-2002 00:07     1k  
+ foundry.gif             18-Dec-2002 20:22     1k  
+ include.gif             16-Dec-2002 00:07    14k  
+ j_fct1.bak              16-Dec-2002 00:07     2k  
+ j_fct1.htm              16-Dec-2002 00:07     2k  
+ j_fct2.bak              16-Dec-2002 00:07     7k  
+ j_fct2.htm              16-Dec-2002 00:07     7k  
+ j_fct3.bak              16-Dec-2002 00:07    33k  
+ j_fct3.htm              16-Dec-2002 00:07    32k  
+ logo1.jpg               18-Dec-2002 03:16    11k  
+ logo11.jpg              18-Dec-2002 03:16    11k  
+ logo2.jpg               16-Dec-2002 00:07    11k  
+ logo21.jpg              18-Dec-2002 03:16    12k  
+ logo22.jpg              18-Dec-2002 03:16    12k  
+ logo23.jpg              18-Dec-2002 03:16    12k  
+ logo3.jpg               16-Dec-2002 00:07    12k  
+ logo31.jpg              18-Dec-2002 03:16    11k  
+ logo4.jpg               16-Dec-2002 00:07    11k  
+ logo41.jpg              18-Dec-2002 05:04    12k  
+ logo5.jpg               16-Dec-2002 00:07    11k  
+ logo6.jpg               16-Dec-2002 00:07    11k  
+ logo7.jpg               16-Dec-2002 00:07    11k  
+ mml_fct1.bak            18-Dec-2002 05:04     5k  
+ mml_fct1.htm            18-Dec-2002 05:04     5k  
+ mml_fct2.bak            18-Dec-2002 05:04    37k  
+ mml_fct2.ht_            18-Dec-2002 03:16    37k  
+ mml_fct2.htm            18-Dec-2002 05:04    36k  
+ oops.bak                18-Dec-2002 20:22     3k  
+ oops.htm                18-Dec-2002 20:22     3k  
+ sample01.gif            16-Dec-2002 00:07     9k  
+ trans.gif」を、反復（
+ 	トリム
+	A=それ
+	Aの、「 」までを、切り取る。
+	トリム; B=それ
+	「http://www.mizinco.jp/chord5/{B}」を、「{B}」へ、HTTPダウンロード
+ )
+     

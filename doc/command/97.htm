@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>NoteNo</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">NoteNo</TD>
+      <TD align="left">NoteNo(mml)</TD>
+      <TD align="left">mml に書かれたノートのノート番号を返す</TD>
+      <TD align="left">変数</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>NoteNo(mml)で、mmlに書かれた、ＭＭＬのノート番号を取得します。<BR>
+<BR>
+このNoteNoで得られる値には、カレントトラックの、オクターブ指定及び、&quot;System.KeyFlag&quot;、&quot;TimeKeyFlag&quot;の、影響を受けます。<BR>
+（但し、&quot;System.KeyShift(=Key)&quot;、&quot;TimeKey&quot;の、キーシフトの値は、適用されません。）</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//NoteNo のサンプル</FONT></B><BR>
+      Int N = NoteNo(o5e)<BR>
+      Print(N);<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

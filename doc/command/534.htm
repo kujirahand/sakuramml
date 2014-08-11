@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>大きく</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">大きく</TD>
+      <TD align="left">大きく(音長),(最終値)</TD>
+      <TD align="left">音量(EP)をだんだん大きくする[=Cresc=]</TD>
+      <TD align="left">ストトン表記</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>クレッシェンドを表現する。内部的には、エクスプレッションを用いて実現している。引数を全部省略することができる。その場合は、全音符の長さで、40から、127へと、増加する。<BR>
+クレッシェンドは、「大きく」と、デクレッシェンドは、「小さく」と同じ命令である。</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//大きく のサンプル</FONT></B><BR>
+      <B>大きく</B><FONT color="#336633"><B></B>//引数を省略</FONT><BR>
+音符４　ドレミファソファミレ<BR>
+<BR>
+      <B>大きく</B>2<FONT color="#336633">//二分音符で大きく</FONT><BR>
+音符８　ドレミファソファミレ<BR>
+      <B>小さく</B>2/<FONT color="#336633">/二分音符で小さく</FONT><BR>
+音符８　ミファソラソファミレ<BR>
+<BR>
+      <B>大きく</B>4,110<FONT color="#336633">//四分音符のうちに、110までの大きさにする</FONT><BR>
+音符８　【ドミソミ】<BR>
+      <B>小さく</B>2,110,30<FONT color="#336633">//ニ分音符のうちに、110から30まで変化させる</FONT><BR>
+音符８　【レファラファ】<BR>
+<BR>
+      <B>音量戻す</B><FONT color="#336633">//音量(EP)を最大値に戻す</FONT><BR>
+      音符８　ドレミファソファミレ　ドーーー<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE><A href="118.htm">Cresc</A>/<A href="119.htm">Decresc</A>/<A href="534.htm">クレッシェンド</A>/<A href="535.htm">デクレッシェンド</A>/<A href="534.htm">大きく</A>/<A href="535.htm">小さく</A>/<A href="536.htm">音量戻す</A></BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

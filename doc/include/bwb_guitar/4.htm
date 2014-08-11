@@ -1,0 +1,337 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<meta http-equiv="Content-Style-Type" content="text/html; charset=Shift_JIS">
+	<link rel="stylesheet" type="text/css" href="bwb_guitar.css">
+	<link rev="made" href="mailto:bluewhitebear@hotmail.com">
+	<link rel="index"	href="../bwb_guitar.htm">
+	<link rel="next" 	href="5.htm">
+	<link rel="prev" 	href="3.htm">
+	<title>bwb_guitar.h マニュアル 「４．握る、ダウンアップストローク」</title>
+</head>
+<body>
+<h1>４．握る、ダウンアップストローク</h1>
+<hr>
+<ul>
+	<li><a href="#bwb_guitar_4_01">コードを鳴らす流れ</a></li>
+	<li><a href="#bwb_guitar_4_02">コードフォームを握る</a></li>
+	<li><a href="#bwb_guitar_4_03">ダウン・アップストローク</a></li>
+	<li><a href="#bwb_guitar_4_04">コードの種類・テンションコードの扱い方</a></li>
+</ul>
+<hr>
+<ul>
+	<li>
+		<p><a name="bwb_guitar_4_01">コードを鳴らす流れ</a></p>
+		<p>まず、bwb_guitar.hを使って、コードを鳴らす手順を説明をしたいと思います。<br>
+			bwb_guitar.hのコードを鳴らす手順は基本的に以下のようになっています。</p>
+		<p><img style="border:3px;" alt="bwb_guitar.hの手順" src="bwb_guitar_process_01.gif" width="640" height="240"></p>
+		<p>またサンプルと同時にbwb_guitar.hの注意点も挙げたいと思います。</p>
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25<br>
+		GCm(1);BGD(!1);</span></p>
+		<p>まず、注意すべき点は、<br>
+		<strong>コードフォームを押さえる動作とコードをかき鳴らす動作を別々に行う</strong>ということです。<br>
+		上のサンプルで言えば、<span class="function">GCm</span>が押さえる動作、<span class="function">BGD(!1)</span>が鳴らす動作になっています。<br>
+		ちょうど左手の作業と右手の作業を別々に行わせる感じですね。<br>
+		こうすることで、同じコードフォームで複数回鳴らす作業を行う場合、</p>
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25<br>
+		GCm(1);BGD(!4);BGD(!4);BGD(!4);BGD(!4);</span></p>
+		<p>となります。</p>
+		<p>こうすることで、コードを変えるとき、修正点が一個で済むことになります。<br>
+		ここはchord2.h等と違う部分なので、気をつけてください。</p>
+		
+		<p>さて、これを踏まえて、bwb_guitar.hに含まれる関数（命令のこと）を説明したいと思います。<br>
+		二つの関数を同時に行うことから、説明も二つ平行する形になってしまいますが、<br>
+		じっくり読んで理解してくださいね。</p>
+	</li>
+	<li><p><a name="bwb_guitar_4_02">コードフォームを握る</a></p>
+		<p>まず、押さえる関数を説明したいと思います。これは、</p>
+		<p><strong>G{ コードネーム }( コードポジション(1～5) )</strong></p>
+		<p>という関数になります。<br>
+		ですから、上記の<span class="function">GCm(1)</span>を改めて解析しなおしてみますと、</p>
+		<p><strong>G{ コードネーム＝Cm }( コードポジション＝１ )</strong></p>
+		<p>ということになります。</p>
+		<p>ですから、例えば、C（シーメジャー）の場合は<span class="function">GC</span>。<br>
+		C△7、もといCM7（シーメジャーセブンス）の場合は<span class="function">GCM7</span>となります。</p>
+		<p>次に、コードポジションとはなんでしょうか？<br>
+		２章でも述べましたが、bwb_guitar.hでは一つのコードにつき、<br>
+		５つのコードフォームを用意してあると述べました。<br>
+		このコードポジションとはそのコードフォームを選ぶための引数（ひきすう）なのです。<br>
+		数字が小さければ小さいけど、全体的に音程の低いコードフォームになり、<br>
+		数字が大きければ大きいほど、全体的に音程の高いコードフォームになります。<br>
+		また、数字が省略すると、前回のコードポジション番号を受け継ぎます。<br>
+		例を示しますと、</p>
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25<br>
+		GCM7(4);BGD(!1);GC;BGD(!1);GCm(1);BGD(!1)</span></p>
+		<p>の場合、間の<span class="function">GC</span>は前の<span class="function">GCM7(4)</span>の4を受け継ぎ、<span class="function">GC(4)</span>となります。</p>
+		<p>ではルート（根音）がＣ（ド）以外のコードを選ぶ場合はどうすればよいのでしょうか？<br>
+		これは、ＣＤＥＦＧＡＢ（ドレミファソラシド）に従って、書き換えればいいだけです。<br>
+		D（ディメジャー）だったら<span class="function">GD</span>という要領です。<br>
+		ただし、D#m（ディーシャープマイナー）は<span class="function">GDpm</span>、A♭m7（エーフラットマイナーセブンス）は<span class="function">GAbm7</span>です。<br>
+		<strong>♯はp,♭はbに</strong>置き換えてください。</p>
+	</li>
+	<li>
+		<p><a name="bwb_guitar_4_03">ダウン・アップストローク</a></p>
+		<p>次に一番上で紹介されたサンプルにあった<span class="function">BGD(!1)</span>の解説です。</p>
+		
+		<table border="1" width="90%" style="background-color:white;" cellpadding="8" summary="BGD">
+		<tr><td>
+		<p><span style="color:black;"><strong>Function BGD(Int l , Int q , Int v , Int t , Int h , Int Z , Int F , Int E)</strong></span></p>
+		<p><span style="color:black;">
+		l：長さ<br>
+		q：加算ゲート値<br>
+		v：加算ベロシティ値<br>
+		t：加算タイミング値<br>
+		h：onだと、ゲート減算処理で同時に音を止める<br>
+		Z：ストローク時のズレの加算値<br>
+		F：何番目の弦から（初期値６）<br>
+		E：何番目までの弦を（初期値１）
+		</span></p>
+		</td></tr>
+		</table>
+		
+		<p>機能がむちゃくちゃありますが、段階を踏んで解説していきます。</p>
+		
+		<ul>
+		<li><p><strong>l,q,v,t</strong></p>
+			<p>まず、<strong>l,q,v,t</strong>について。これは普通の音を鳴らす作業と変わりません。例えば、<br>
+			<span class="mmlsample">l1 q+20 v+20 t+3 c</span> と <span class="mmlsample">c1,+20,+20,+3</span> は同じ音を鳴らせます。<br>
+			それと同じように<span class="function">BGD</span>で表現する場合、<span class="mmlsample">BGD(!1,20,20,3)</span>です。</p>
+			<p>注意すべきことは加算することが前提なので、<strong>+マークがいらない</strong>こと。<br>
+			それと、<strong>長さ</strong>の扱いだけ微妙に違うことでしょうか。<br>
+			例えば<strong>1分音符でドを鳴らす時はc1</strong>ですが、<br>
+			<span class="function">BGD</span>の場合、<span class="function">BGD(!1)</span>と、<strong>!（ビックリマーク）</strong>がつくことです。<br>
+			ここで、<strong>!</strong>がつかないと、<strong>長さをティック(tick)単位で指定する</strong>ことになります。<br>
+			もし、あなたが<strong>TimeBase</strong>等を含め、MIDIの仕様にある程度知識があるのなら、<br>
+			どのような指定方法をとっても構いませんが、<br>
+			見易さの点からも、<strong>!マークをつけ、X分音符という形で指定</strong>したほうがよいでしょう。<br>
+			上記のMIDIの仕様に詳しくない人ならなおさらです。<br>
+			ここではMIDIの仕様について解説しないので、興味を持った方は各自調べてみてください。</p>
+		</li>
+		
+		<li><p><strong>h：onだと、ゲート減算処理で同時に音を止める</strong></p>
+			<p>次に<strong>h</strong>。これは<strong>on/off</strong>で指定します。<br>
+			サンプルを見ると差がわかりやすいかと思われます。</p>
+		
+			<p>hを<strong>on</strong>にしたもの↓<br>
+			<img style="border:3px;" alt="hがon" src="bwb_guitar_h_on.gif" width="480" height="320"></p>
+			<p>hを<strong>off</strong>にしたもの↓<br>
+			<img style="border:3px;" alt="hがoff" src="bwb_guitar_h_off.gif" width="480" height="320"></p>
+		
+			<p>上の図はMIDIシーケンサのCherryでMIDIファイルのデータを見たものです。<br>
+			ゲージの縦方向は音程を表し、<strong>ゲージの横方向は時間軸</strong>を表します。<br>
+			つまり、ゲージが横に長ければ長いほど、音が長く鳴っている状態になるわけです。</p>
+			<p>それを踏まえて、改めて、二つの図を見比べて見ましょう。<br>
+			<strong>hをonにした方（上の図）</strong>は、発音するタイミングはズレているものの、<br>
+			<strong>音が鳴り止むタイミングは同時</strong>です。<br>
+			それに対して、<strong>hをoffにした方（下の図）は音が鳴り止むタイミングもずれています。</strong></p>
+			<p>この機能はどういう時に使えばいいのでしょうか？<br>
+			例えば、左手を離し、新しいコードを押さえる時です。<br>
+			例を示しますと、</p>
+			<p><span class="mmlsample">
+			Include(bwb_guitar.h);<br>
+			<br>
+			TR(01) @25 q99<br>
+			GCM7(3);BGD(!4);BGD(!2);BGD(!4,,,,on);<br>
+			GFM7;BGD(!1);</span></p>
+			<p>これをCherryで確認してみよう。</p>
+			<p><img style="border:3px;" alt="hがon" src="bwb_guitar_h_sample_on.gif" width="480" height="320"></p>
+			<p>F△7を押さえる時にはC△7は押さえていないのだから、<br>
+			C△7の音をいったん全部止めなければならない。<br>
+			そういうときに、hの機能をonにすることで音が鳴り止むタイミングが<br>
+			発音が最も速いものに合わせ、止めることができます。</p>
+			<p>これが仮にhがデフォルトのまま、つまり機能をoffにした場合、<br>
+			F△7が鳴り出す際に、C△7の構成音が一部鳴っていることになるので、おかしいことになります。<br>
+			ですので、ぜひhの機能を活用しましょう。</p>
+		</li>
+			
+		<li><p><strong>Z：ストローク時のズレの加算値</strong></p>
+			<p>まず、ギターの構造からお話しますが、<br>
+			ギターというのは弦が6本張ってあり、<br>
+			それを上から、ないしは下から、ピックや指をあて、弾くことで、<br>
+			音を鳴らす楽器です。<br>
+			ですから、その構造上、音が同時になるということは基本的にあり得ず、<br>
+			先ほどの上の画像のように発音タイミングがずれるわけです。</p>
+			<p>それを踏まえてZの機能について話していきます。</p>
+			<p>まず、サンプルと実行結果を見ていただきましょう。</p>
+			<p><span class="mmlsample">
+			Include(bwb_guitar.h);<br>
+			<br>
+			BG_LAG=!128;<br>
+			<br>
+			TR(01) @25 q99<br>
+			GEm7(1);<br>
+			BGD(!1,,,,,0)<br>
+			BGD(!1,,,,,!128)<br>
+			BGD(!1,,,,,!64^128)</span></p>
+			<p>実行結果をCherryで表示<br>
+			<img style="border:3px;" alt="zの機能" src="bwb_guitar_z.gif" width="640" height="280"></p>
+			<p>左部分をCherryで拡大<br>
+			<img style="border:3px;" alt="zの機能を拡大" src="bwb_guitar_z_zoom.gif" width="300" height="420"></p>
+			
+			<p>上の画像を見ると、ズレがだんだん大きくなってくるのがわかったでしょうか？<br>
+			それが確認できたら、ソースコードを説明していきたいと思います。</p>
+			
+			<p>2行目の<span class="function">BG_LAG</span>というのは、ズレの初期値です。<br>
+			<span class="function">BGD</span>で鳴らすとき、ズレの加算値が0（ないしは値入力が省略された）時はこの値だけズレます。<br>
+			ソースコード上では!128、つまり128分音符分だけズレることになります。</p>
+			
+			<p>5行目の<span class="function">BGD(!1,,,,,0)</span>は<span class="function">BGD(!1)</span>と同じです。<br>
+			ズレの加算値が0ですから、<span class="function">BG_LAG</span>の値の分だけズレます。<br>
+			それを下の画像でMIDIデータを数値で確認できます。<br>
+			ここで鳴り出すタイミングを示す、tickの所を見てみると、3ずつズレているのがわかります。<br>
+			128分音符のとき、TimeBaseが初期値である96だと3tickに相当します。（理解しなくても構いません。）</p>
+			
+			<p>6行目の<span class="function">BGD(!1,,,,,!128)</span>ではズレの加算値が128分音符分です。<br>
+			ですから、<span class="function">BG_LAG=!128</span>もあわせて、!128 × 2の値だけズレがおきます。つまり、64分音符分です。<br>
+			128分音符が3tickですから、64分音符は128分音符の2倍、つまり6tickに相当します。<br>
+			下の画像を見ると、確かに6tickずつズレていることがわかりますね。</p>
+			
+			<p>7行目の<span class="function">BGD(!1,,,,,!64^128)</span>はズレの加算値が!64^128ですが、!64^128とはなんでしょう。<br>
+			これは<strong>64分音符＋128分音符の長さ</strong>を示すことになります。<strong>^</strong>は長さを足す記号だからです。<br>
+			ここでさらに<span class="function">BG_LAG</span>の値を考慮すると、<br>
+			<strong>64分音符＋128分音符の長さ＋128分音符の長さ＝32分音符</strong>の長さになります。<br>
+			つまり128分音符が3tickなことを考えると、32分音符は4倍の12tickズレることになります。</p>
+			
+			<p>ちなみに、全くズレをなくしたいというときは、<br>
+			単純に<span class="function">BG_LAG</span>のマイナスの値を加算してやればいいので、<br>
+			<span class="function">BGD(!1,,,,,-BG_LAG)</span>とすればＯＫです。</p>
+			
+			<p>究極的には足し算引き算の世界です。<br>
+			途中で出てきたTimeBaseは<strong>MIDI 分解能</strong>というワードで検索をかければ、<br>
+			いろいろネット上で資料が出てくるので、興味を持ったかたは調べてみてください。</p>
+		</li>
+		<li><p><strong>F：何番目の弦から（初期値６）、E：何番目までの弦を（初期値１）</strong></p>
+			<p>これはギターの押さえている弦を何弦から何弦目までを弾くかという要素を入力できます。</p>
+			<p>またサンプルを見てみましょう。</p>
+			<p><span class="mmlsample">
+			Include(bwb_guitar.h);<br>
+			<br>
+			TR(01) @25 q99<br>
+			GEm7(1);<br>
+			BGD(!1,,,,,,6,1)<br>
+			BGD(!1,,,,,,5,1)</span></p>
+			<p><span class="function">BGD(!1,,,,,,6,1)</span>を鳴らすと、「ミシレソシミ」が鳴りますが、<br>
+			<span class="function">BGD(!1,,,,,,5,1)</span>では「シレソシミ」が鳴り、最も低い音であるミが鳴りません。<br>
+			これは低音の弦である6弦を弾かなかったので、ミが鳴らなかったのです。</p>
+			<p>では、今度は鳴らさない弦があるときを考えてみましょう。</p>
+			<p><span class="mmlsample">
+			Include(bwb_guitar.h);<br>
+			TR(01) @25 q99<br>
+			GAm7(1);<br>
+			BGD(!1,,,,,,6,1)<br>
+			BGD(!1,,,,,,5,1)</span></p>
+			<p>Am7のコードポジション１では6弦は押さえず、5弦から1弦までしか押さえません。<br>
+			このとき、<span class="function">BGD</span>で6弦からと、指定しても押さえないコードフォームなので、<br>
+			6弦の音は鳴りません。</p>
+		</li>
+		</ul>
+		<p>以上、これがBGD関数の機能です。<br>
+		これで、ダウンストロークの様々な表現ができるようになるでしょう。</p>
+		<p>アップストロークはBGU関数で表現できます。</p>
+		
+		<table border="1" width="90%" style="background-color:white;" cellpadding="8" summary="BGU">
+		<tr><td>
+		<p><span style="color:black;"><strong>Function BGU(Int l , Int q , Int v , Int t , Int h , Int Z , Int F , Int E)</strong></span></p>
+		<p><span style="color:black;">
+		l：長さ<br>
+		q：加算ゲート値<br>
+		v：加算ベロシティ値<br>
+		t：加算タイミング値<br>
+		h：onだと、ゲート減算処理で同時に音を止める<br>
+		Z：ストローク時のズレの加算値<br>
+		F：何番目の弦から（初期値１）<br>
+		E：何番目までの弦を（初期値６）
+		</span></p>
+		</td></tr>
+		</table>
+		
+		<p>最後のFとEだけ初期値が入れ替わるので、そこは注意してください。</p>
+	</li>
+	<li><p><a name="bwb_guitar_4_04">コードの種類・テンションコードの扱い方</a></p>
+		<p>ここで、bwb_guitar.hに用意されているコード一覧を載せたいと思います。<br>
+		下の表はルートにＣをとった時のコードの表です。</p>
+
+		<table border="1" summary="コード表" cellpadding="3">
+			<tr><td>コードネーム</td>
+				<td>関数名</td>
+				<td>構成音（MML）</td>
+				<td>構成音（ストトン）</td></tr>
+			<tr><td>C</td>				<td>GC</td>			<td><span class="es">c e g</span></td>
+															<td><span class="es">ド ミ ソ</span></td></tr>
+			<tr><td>CM7</td>			<td>GCM7</td>		<td><span class="es">c e g b</span></td>
+															<td><span class="es">ド ミ ソ シ</span></td></tr>
+			<tr><td>C7</td>				<td>GC7</td>		<td><span class="es">c e g b-</span></td>
+															<td><span class="es">ド ミ ソ シ♭</span></td></tr>
+			<tr><td>C6</td>				<td>GC6</td>		<td><span class="es">c e g a</span></td>
+															<td><span class="es">ド ミ ソ ラ</span></td></tr>
+			<tr><td>Cm</td>				<td>GCm</td>		<td><span class="es">c e- g</span></td>
+															<td><span class="es">ド ミ♭ ソ</span></td></tr>
+			<tr><td>Cm7</td>			<td>GCm7</td>		<td><span class="es">c e- g b-</span></td>
+															<td><span class="es">ド ミ♭ ソ シ♭</span></td></tr>
+			<tr><td>CmM7</td>			<td>GCmM7</td>		<td><span class="es">c e- g b</span></td>
+															<td><span class="es">ド ミ♭ ソ シ</span></td></tr>
+			<tr><td>Cm7(♭5)</td>		<td>GCm7b5</td>		<td><span class="es">c e- f- b-</span></td>
+															<td><span class="es">ド ミ♭ ファ♭ シ♭</span></td></tr>
+			<tr><td>Csus4</td>			<td>GCsus4</td>		<td><span class="es">c f g</span></td>
+															<td><span class="es">ド ファ ソ</span></td></tr>
+			<tr><td>C7sus4</td>			<td>GC7sus4</td>	<td><span class="es">c f g b-</span></td>
+															<td><span class="es">ド ファ ソ シ♭</span></td></tr>
+			<tr><td>Caug</td>			<td>GCaug</td>		<td><span class="es">c e g+</span></td>
+															<td><span class="es">ド ミ ソ♯</span></td></tr>
+			<tr><td>Cdim</td>			<td>GCdim</td>		<td><span class="es">c e- f+ a</span></td>
+															<td><span class="es">ド ミ♭ ファ♯ ラ</span></td></tr>
+			<tr><td>CM7(9)</td>			<td>GCM7_9</td>		<td>c e g b <span class="es">`d</span></td>
+															<td>ド ミ ソ シ <span class="es">`レ</span></td></tr>
+			<tr><td>C7(9)</td>			<td>GC7_9</td>		<td>c e g b- <span class="es">`d</span></td>
+															<td>ド ミ ソ シ♭ <span class="es">`レ</span></td></tr>
+			<tr><td>Cadd9</td>			<td>GCadd9</td>		<td>c <span class="es">d</span> e g</td>
+															<td>ド <span class="es">レ</span> ミ ソ</td></tr>
+			<tr><td>Cm7(9)</td>			<td>GCm7_9</td>		<td>c e- g b- <span class="es">`d</span></td>
+															<td>ド ミ♭ ソ シ♭ <span class="es">`レ</span></td></tr>
+			<tr><td>C7(♭9)</td>		<td>GC7_b9</td>		<td>c e g b- <span class="es">`d-</span></td>
+															<td>ド ミ ソ シ♭ <span class="es">`レ♭</span></td></tr>
+			<tr><td>C7(♯9)</td>		<td>GC7_p9</td>		<td>c e g b- <span class="es">`e-</span></td>
+															<td>ド ミ ソ シ♭ <span class="es">`ミ♭</span></td></tr>
+			<tr><td>CM7(9,♯11)</td>	<td>GCM7_9_p11</td>	<td>c e g b `d <span class="es">`f+</span></td>
+															<td>ド ミ ソ シ `レ <span class="es">`ファ♯</span></td></tr>
+			<tr><td>Cm7(9,11)</td>		<td>GCm7_9_11</td>	<td>c e- g b- `d <span class="es">`f</span></td>
+															<td>ド ミ♭ ソ シ♭ `レ <span class="es">`ファ</span></td></tr>
+			<tr><td>C69</td>			<td>GC6_9</td>		<td>c e g <span class="es">a `d</span></td>
+															<td>ド ミ ソ <span class="es">ラ `レ</span></td></tr>
+			<tr><td>C7(9,13)</td>		<td>GC7_9_13</td>	<td>c e g b- `d <span class="es">`a</span></td>
+															<td>ド ミ ソ シ♭ `レ <span class="es">`ラ</span></td></tr>
+			<tr><td>C7(9,♭13)</td>		<td>GC7_9_b13</td>	<td>c e g b- `d <span class="es">`a-</span></td>
+															<td>ド ミ ソ シ♭ `レ <span class="es">`ラ♭</span></td></tr>
+		</table>
+		
+		<p>ここでオレンジがかった音についての注意事項を述べたいと思います。</p>
+		<p>ギターというのは最大6音しか同時に鳴らせず、また楽器の特性から、<br>
+		同時に鳴らせる和音というのも限られます。<br>
+		ここでテンションコードのような5音以上含まれる音を鳴らそうとすると、<br>
+		一部の音を省略しなければなりません。<br>
+		例えば、9thがテンションとして付加されたとき、<br>
+		多くの場合ではルートか、5thの音が省略されます。<br>
+		ここで、オレンジがかった色というのは、<br>
+		コードを特徴付ける音として、絶対省略されない音です。<br>
+		ただし、<strong>C7(9,13)</strong>のように、<strong>9th=レ</strong>がテンションとして付加されていても、<br>
+		実際に<strong>9th=レ</strong>が鳴らないフォームであることもあります。<br>
+		あくまでも、コードを最も特徴付ける<strong>13th=ラ</strong>の音だけは絶対省略されないことだけを理解しておいてください。</p>
+		<p>強引に規則づけるならば、<br>
+		<strong>最も大きな数字のテンションは省略されない</strong><br>
+		と覚えておいてください。</p>
+	</li>
+</ul>
+<hr>
+<p><a href="../bwb_guitar.htm">戻る</a></p>
+</body>
+</html>

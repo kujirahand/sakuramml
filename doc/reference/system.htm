@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>システムオプション</TITLE>
+</HEAD><BODY>
+<H1>システムオプション</H1>
+<HR>
+<TABLE border="1" cellpadding="4">
+
+    <TR>
+      <TD bgcolor="#ffff99">命令名</TD>
+      <TD bgcolor="#ffff99">書式</TD>
+      <TD bgcolor="#ffff99">意味</TD>
+    </TR>
+    <TR><TD>Include</TD><TD>Include(fname)</TD><TD>定義ファイルを取り込んで実行する</TD></TR>
+<TR><TD>LoadSMF</TD><TD>System.LoadSMF(fname)</TD><TD>未定義</TD></TR>
+<TR><TD>X68mode</TD><TD>System.X68mode(on/off)</TD><TD>オクターブの上下記号<>を入れ替える。初期値は、off</TD></TR>
+<TR><TD>Stepmode</TD><TD>System.Stepmode(on/off)</TD><TD>ステップ指定を基本とする。初期値は、off</TD></TR>
+<TR><TD>qMax</TD><TD>System.qMax=value</TD><TD>qの100%時の値を指定する。初期値は、100。旧いMMLなどの再現用。（例）System.qMax=8</TD></TR>
+<TR><TD>vMax</TD><TD>Sysytem.vMax=value</TD><TD>vの最大値を指定する。初期値は、127。旧いMMLなどの再現用。（例）System.vMax=15</TD></TR>
+<TR><TD>vAdd</TD><TD></TD><TD>v++で加算する値を指定する</TD></TR>
+<TR><TD>qAdd</TD><TD></TD><TD>q++で加算する値を指定する</TD></TR>
+<TR><TD>q2Add</TD><TD></TD><TD>q%++で、加算する値を指定する</TD></TR>
+<TR><TD>TimeBase</TD><TD>TimeBase=value</TD><TD>四分音符分解能。タイムベースを指定する。初期値は、96。48,96,120,196,240,480などが一般的。</TD></TR>
+<TR><TD>TimeSignature</TD><TD>TimeSignature=分子,分母</TD><TD>拍子記号の設定を行う</TD></TR>
+<TR><TD>RandomSeed</TD><TD>RandomSeed=v</TD><TD>乱数の種を指定して、毎回同じ乱数が得られるようにする。</TD></TR>
+<TR><TD>Keyshift</TD><TD>System.Keyshift=v</TD><TD>キーをv半音上げる</TD></TR>
+<TR><TD>MeasureShift</TD><TD>System.MeasureShift=v</TD><TD>小節数をずらしてTime(1:1:0)以前に初期設定が出来るようにする。</TD></TR>
+<TR><TD>VoiceNoShift</TD><TD>System.VoiceNoShift=v</TD><TD>音色番号が、0から始まる音源の場合に、-1を指定する、初期値は、0</TD></TR>
+<TR><TD>OctaveRangeShift</TD><TD>System.OctaveRangeShift=v</TD><TD>オクターブレンジのシフト値。初期値は、0。</TD></TR>
+<TR><TD>KeyFlag</TD><TD>KeyFlag[+|-](mml)|KeyFlag=(a,b,c,d,e,f,g)</TD><TD>臨時記号を適用する。</TD></TR>
+<TR><TD>GetKeyFlag</TD><TD>Array (name) = System.GetKeyFlag</TD><TD>キーフラグの値を配列に読み込む</TD></TR>
+<TR><TD>ControllerShift</TD><TD>System.ControllerShift=v</TD><TD>各種エフェクトの書き込みタイミングの制御。初期値は、3。</TD></TR>
+</TABLE>
+
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

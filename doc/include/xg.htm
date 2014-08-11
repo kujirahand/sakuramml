@@ -1,0 +1,516 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"xg.h" ver.0.902</TITLE>
+<META content="SAKURA Function" name=keywords>
+<META content="ＸＧ音源特有の命令を定義した (2000/03/28)" name=description>
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"xg.h" ver.0.902</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#概要">概要</A></LI>
+  <UL>
+    <LI><A HREF="#概要_使い方">使い方</A></LI>
+  </UL>
+  <LI><A HREF="#NRPN 関連の命令">NRPN 関連の命令</A></LI>
+  <UL>
+    <LI><A HREF="#NRPN 関連の命令_HPFCutoff(mm)		">HPFCutoff(mm)		</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_HPFResonance(mm)	">HPFResonance(mm)	</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQBass(mm)		">EQBass(mm)		</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQTreble(mm)		">EQTreble(mm)		</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidBass(mm)		">EQMidBass(mm)		</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidTreble(mm)	">EQMidTreble(mm)	</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQBassFrequency(mm)	">EQBassFrequency(mm)	</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQTrebleFrequency(mm)	">EQTrebleFrequency(mm)	</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidBassFrequency(mm)	">EQMidBassFrequency(mm)	</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidTrebleFrequency(mm)">EQMidTrebleFrequency(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidTrebleFrequency(mm)">EQMidTrebleFrequency(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidTrebleFrequency(mm)">EQMidTrebleFrequency(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidTrebleFrequency(mm)">EQMidTrebleFrequency(mm)</A></LI>
+    <LI><A HREF="#NRPN 関連の命令_EQMidTrebleFrequency(mm)">EQMidTrebleFrequency(mm)</A></LI>
+  </UL>
+  <LI><A HREF="#XG エフェクトに関する関数">XG エフェクトに関する関数</A></LI>
+  <UL>
+    <LI><A HREF="#XG エフェクトに関する関数_XGEffectType(ad,dd,DD)">XGEffectType(ad,dd,DD)</A></LI>
+    <LI><A HREF="#XG エフェクトに関する関数_XGReverbType(dd,DD)">XGReverbType(dd,DD)</A></LI>
+    <LI><A HREF="#XG エフェクトに関する関数_XGChorusType(dd,DD)		">XGChorusType(dd,DD)		</A></LI>
+    <LI><A HREF="#XG エフェクトに関する関数_XGVariationType(dd,DD)">XGVariationType(dd,DD)</A></LI>
+    <LI><A HREF="#XG エフェクトに関する関数_XGEffectConnection(VAL,INS)">XGEffectConnection(VAL,INS)</A></LI>
+  </UL>
+  <LI><A HREF="#エフェクタの設定">エフェクタの設定</A></LI>
+  <UL>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_HALL1()		">XGReverbType_HALL1()		</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_HALL2()		">XGReverbType_HALL2()		</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_ROOM1()		">XGReverbType_ROOM1()		</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_ROOM2()		">XGReverbType_ROOM2()		</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_ROOM3()		">XGReverbType_ROOM3()		</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_STAGE1()	">XGReverbType_STAGE1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_STAGE2()	">XGReverbType_STAGE2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_PLATE()		">XGReverbType_PLATE()		</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_WHITE_ROOM()	">XGReverbType_WHITE_ROOM()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_TUNNEL()	">XGReverbType_TUNNEL()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_CANYON()	">XGReverbType_CANYON()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_BASEMENT()	">XGReverbType_BASEMENT()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_BASEMENT()	">XGReverbType_BASEMENT()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGReverbType_BASEMENT()	">XGReverbType_BASEMENT()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CHORUS1()	">XGChorusType_CHORUS1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CHORUS2()	">XGChorusType_CHORUS2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CHORUS3()	">XGChorusType_CHORUS3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CHORUS4()	">XGChorusType_CHORUS4()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CELESTA1()	">XGChorusType_CELESTA1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CELESTA2()	">XGChorusType_CELESTA2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CELESTA3()	">XGChorusType_CELESTA3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_CELESTA4()	">XGChorusType_CELESTA4()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_FLANGER1()	">XGChorusType_FLANGER1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_FLANGER2()	">XGChorusType_FLANGER2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_FLANGER3()	">XGChorusType_FLANGER3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_SYMPHONIC()	">XGChorusType_SYMPHONIC()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_ENSEMBLE_DETUNE()	">XGChorusType_ENSEMBLE_DETUNE()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_PHASER1()	">XGChorusType_PHASER1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_PHASER1()	">XGChorusType_PHASER1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGChorusType_PHASER1()	">XGChorusType_PHASER1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CHORUS1()	">XGEffectType_CHORUS1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CHORUS2()	">XGEffectType_CHORUS2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CHORUS3()	">XGEffectType_CHORUS3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CHORUS4()	">XGEffectType_CHORUS4()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CELESTE1()	">XGEffectType_CELESTE1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CELESTE2()	">XGEffectType_CELESTE2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CELESTE3()	">XGEffectType_CELESTE3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CELESTE4()	">XGEffectType_CELESTE4()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_FLANGER1()	">XGEffectType_FLANGER1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_FLANGER2()	">XGEffectType_FLANGER2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_FLANGER3()	">XGEffectType_FLANGER3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_SYMPHONIC()	">XGEffectType_SYMPHONIC()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_ROTARY_SPEAKER()	">XGEffectType_ROTARY_SPEAKER()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_TREMOLO()	">XGEffectType_TREMOLO()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_AUTO_PAN()	">XGEffectType_AUTO_PAN()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_PHASER1()	">XGEffectType_PHASER1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_PHASER2()	">XGEffectType_PHASER2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_DISTORTION()	">XGEffectType_DISTORTION()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_COMP_DISTORTION()	">XGEffectType_COMP_DISTORTION()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_PITCH_CHANGE1()	">XGEffectType_PITCH_CHANGE1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_PITCH_CHANGE2()	">XGEffectType_PITCH_CHANGE2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_AURAL_EXCITER()	">XGEffectType_AURAL_EXCITER()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_TOUCH_WAH()	">XGEffectType_TOUCH_WAH()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_TOUCH_WAH_DIST()	">XGEffectType_TOUCH_WAH_DIST()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_TOUCH_WAH_ODRV()	">XGEffectType_TOUCH_WAH_ODRV()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_TOUCH_WAH2()	">XGEffectType_TOUCH_WAH2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_COMPRESSOR()	">XGEffectType_COMPRESSOR()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_NOISE_GATE()	">XGEffectType_NOISE_GATE()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_VOICE_CANCEL()	">XGEffectType_VOICE_CANCEL()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_2WAY_ROTARY_SPEAKER()	">XGEffectType_2WAY_ROTARY_SPEAKER()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_ENSEMBLE_DETUNE()	">XGEffectType_ENSEMBLE_DETUNE()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_AMBIENCE()	">XGEffectType_AMBIENCE()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_COMP_DIST_DELAY()	">XGEffectType_COMP_DIST_DELAY()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_COMP_OVERDRIVE_DELAY()	">XGEffectType_COMP_OVERDRIVE_DELAY()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_WAH_DIST_DELAY()	">XGEffectType_WAH_DIST_DELAY()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_WAH_OVERDRIVE_DELAY()	">XGEffectType_WAH_OVERDRIVE_DELAY()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_HALL1()	">XGEffectType_HALL1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_HALL2()	">XGEffectType_HALL2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_ROOM1()	">XGEffectType_ROOM1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_ROOM2()	">XGEffectType_ROOM2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_ROOM3()	">XGEffectType_ROOM3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_STAGE1()	">XGEffectType_STAGE1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_STAGE2()	">XGEffectType_STAGE2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_PLATE()	">XGEffectType_PLATE()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_DELAY_LCR()	">XGEffectType_DELAY_LCR()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_DELAY_LR()	">XGEffectType_DELAY_LR()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_ECHO()	">XGEffectType_ECHO()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_CROSS_DELAY()	">XGEffectType_CROSS_DELAY()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_KARAOKE1()	">XGEffectType_KARAOKE1()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_KARAOKE2()	">XGEffectType_KARAOKE2()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_KARAOKE3()	">XGEffectType_KARAOKE3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_KARAOKE3()	">XGEffectType_KARAOKE3()	</A></LI>
+    <LI><A HREF="#エフェクタの設定_XGEffectType_KARAOKE3()">XGEffectType_KARAOKE3()</A></LI>
+  </UL>
+  <LI><A HREF="#XGRcvChannelMute(Ch)">XGRcvChannelMute(Ch)</A></LI>
+  <UL>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_ＡＤインプット・コントロール">ＡＤインプット・コントロール</A></LI>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_AD_InputGain(Chl, MIC_LINE)">AD_InputGain(Chl, MIC_LINE)</A></LI>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_AD_Volume(Chl, Val)">AD_Volume(Chl, Val)</A></LI>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_AD_MONO_STEREO(Val)">AD_MONO_STEREO(Val)</A></LI>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_AD_Chorus(Chl,Val)">AD_Chorus(Chl,Val)</A></LI>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_AD_Reverb(Chl,Val)">AD_Reverb(Chl,Val)</A></LI>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_AD_Variation(Chl,Val)">AD_Variation(Chl,Val)</A></LI>
+    <LI><A HREF="#XGRcvChannelMute(Ch)_AD_Expression(Chl,Val)">AD_Expression(Chl,Val)</A></LI>
+  </UL>
+</UL>
+<!--end of index-->
+<P>
+<P>
+<P>
+<P><A NAME="概要"><BR></A><HR><H1>概要</H1>
+◇YAMAHA XG 音源特有の命令をまとめた定義ファイルです。<P>
+<P><A NAME="概要_使い方"><BR></A><H2>使い方</H2>
+<BLOCKQUOTE><CODE>Include(xg.h)<BR>の一文を、曲頭に書き加えてください。<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="NRPN 関連の命令"><BR></A><HR><H1>NRPN 関連の命令</H1>
+◇XG 特有のＮＲＰＮパラメータの操作<P>
+<P><A NAME="NRPN 関連の命令_HPFCutoff(mm)		"><BR></A><H2>HPFCutoff(mm)		</H2>
+<P><A NAME="NRPN 関連の命令_HPFResonance(mm)	"><BR></A><H2>HPFResonance(mm)	</H2>
+<P><A NAME="NRPN 関連の命令_EQBass(mm)		"><BR></A><H2>EQBass(mm)		</H2>
+<P><A NAME="NRPN 関連の命令_EQTreble(mm)		"><BR></A><H2>EQTreble(mm)		</H2>
+<P><A NAME="NRPN 関連の命令_EQMidBass(mm)		"><BR></A><H2>EQMidBass(mm)		</H2>
+<P><A NAME="NRPN 関連の命令_EQMidTreble(mm)	"><BR></A><H2>EQMidTreble(mm)	</H2>
+<P><A NAME="NRPN 関連の命令_EQBassFrequency(mm)	"><BR></A><H2>EQBassFrequency(mm)	</H2>
+<P><A NAME="NRPN 関連の命令_EQTrebleFrequency(mm)	"><BR></A><H2>EQTrebleFrequency(mm)	</H2>
+<P><A NAME="NRPN 関連の命令_EQMidBassFrequency(mm)	"><BR></A><H2>EQMidBassFrequency(mm)	</H2>
+<P><A NAME="NRPN 関連の命令_EQMidTrebleFrequency(mm)"><BR></A><H2>EQMidTrebleFrequency(mm)</H2>
+<P><A NAME="NRPN 関連の命令_EQMidTrebleFrequency(mm)"><BR></A><H2>EQMidTrebleFrequency(mm)</H2>
+<P><A NAME="NRPN 関連の命令_EQMidTrebleFrequency(mm)"><BR></A><H2>EQMidTrebleFrequency(mm)</H2>
+<P><A NAME="NRPN 関連の命令_EQMidTrebleFrequency(mm)"><BR></A><H2>EQMidTrebleFrequency(mm)</H2>
+<P><A NAME="NRPN 関連の命令_EQMidTrebleFrequency(mm)"><BR></A><H2>EQMidTrebleFrequency(mm)</H2>
+<BLOCKQUOTE><CODE>mm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;値（0~127）<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="XG エフェクトに関する関数"><BR></A><HR><H1>XG エフェクトに関する関数</H1>
+<P><A NAME="XG エフェクトに関する関数_XGEffectType(ad,dd,DD)"><BR></A><H2>XGEffectType(ad,dd,DD)</H2>
+◇ エフェクトタイプの設定<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="XG エフェクトに関する関数_XGReverbType(dd,DD)"><BR></A><H2>XGReverbType(dd,DD)</H2>
+リバーブの種類を選びます。<BLOCKQUOTE><CODE>dd = MSB / DD = LSB<BR></CODE></BLOCKQUOTE><P><A NAME="XG エフェクトに関する関数_XGChorusType(dd,DD)		"><BR></A><H2>XGChorusType(dd,DD)		</H2>
+コーラスの種類を選びます。<BLOCKQUOTE><CODE>dd = MSB / DD = LSB<BR></CODE></BLOCKQUOTE><P><A NAME="XG エフェクトに関する関数_XGVariationType(dd,DD)"><BR></A><H2>XGVariationType(dd,DD)</H2>
+バリエーションのエフェクト種類を選びます。<BLOCKQUOTE><CODE>dd = MSB / DD = LSB<BR></CODE></BLOCKQUOTE><P><A NAME="XG エフェクトに関する関数_XGEffectConnection(VAL,INS)"><BR></A><H2>XGEffectConnection(VAL,INS)</H2>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="エフェクタの設定"><BR></A><HR><H1>エフェクタの設定</H1>
+<P><A NAME="エフェクタの設定_XGReverbType_HALL1()		"><BR></A><H2>XGReverbType_HALL1()		</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_HALL2()		"><BR></A><H2>XGReverbType_HALL2()		</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_ROOM1()		"><BR></A><H2>XGReverbType_ROOM1()		</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_ROOM2()		"><BR></A><H2>XGReverbType_ROOM2()		</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_ROOM3()		"><BR></A><H2>XGReverbType_ROOM3()		</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_STAGE1()	"><BR></A><H2>XGReverbType_STAGE1()	</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_STAGE2()	"><BR></A><H2>XGReverbType_STAGE2()	</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_PLATE()		"><BR></A><H2>XGReverbType_PLATE()		</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_WHITE_ROOM()	"><BR></A><H2>XGReverbType_WHITE_ROOM()	</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_TUNNEL()	"><BR></A><H2>XGReverbType_TUNNEL()	</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_CANYON()	"><BR></A><H2>XGReverbType_CANYON()	</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_BASEMENT()	"><BR></A><H2>XGReverbType_BASEMENT()	</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_BASEMENT()	"><BR></A><H2>XGReverbType_BASEMENT()	</H2>
+<P><A NAME="エフェクタの設定_XGReverbType_BASEMENT()	"><BR></A><H2>XGReverbType_BASEMENT()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CHORUS1()	"><BR></A><H2>XGChorusType_CHORUS1()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CHORUS2()	"><BR></A><H2>XGChorusType_CHORUS2()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CHORUS3()	"><BR></A><H2>XGChorusType_CHORUS3()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CHORUS4()	"><BR></A><H2>XGChorusType_CHORUS4()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CELESTA1()	"><BR></A><H2>XGChorusType_CELESTA1()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CELESTA2()	"><BR></A><H2>XGChorusType_CELESTA2()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CELESTA3()	"><BR></A><H2>XGChorusType_CELESTA3()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_CELESTA4()	"><BR></A><H2>XGChorusType_CELESTA4()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_FLANGER1()	"><BR></A><H2>XGChorusType_FLANGER1()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_FLANGER2()	"><BR></A><H2>XGChorusType_FLANGER2()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_FLANGER3()	"><BR></A><H2>XGChorusType_FLANGER3()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_SYMPHONIC()	"><BR></A><H2>XGChorusType_SYMPHONIC()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_ENSEMBLE_DETUNE()	"><BR></A><H2>XGChorusType_ENSEMBLE_DETUNE()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_PHASER1()	"><BR></A><H2>XGChorusType_PHASER1()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_PHASER1()	"><BR></A><H2>XGChorusType_PHASER1()	</H2>
+<P><A NAME="エフェクタの設定_XGChorusType_PHASER1()	"><BR></A><H2>XGChorusType_PHASER1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CHORUS1()	"><BR></A><H2>XGEffectType_CHORUS1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CHORUS2()	"><BR></A><H2>XGEffectType_CHORUS2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CHORUS3()	"><BR></A><H2>XGEffectType_CHORUS3()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CHORUS4()	"><BR></A><H2>XGEffectType_CHORUS4()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CELESTE1()	"><BR></A><H2>XGEffectType_CELESTE1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CELESTE2()	"><BR></A><H2>XGEffectType_CELESTE2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CELESTE3()	"><BR></A><H2>XGEffectType_CELESTE3()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CELESTE4()	"><BR></A><H2>XGEffectType_CELESTE4()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_FLANGER1()	"><BR></A><H2>XGEffectType_FLANGER1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_FLANGER2()	"><BR></A><H2>XGEffectType_FLANGER2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_FLANGER3()	"><BR></A><H2>XGEffectType_FLANGER3()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_SYMPHONIC()	"><BR></A><H2>XGEffectType_SYMPHONIC()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_ROTARY_SPEAKER()	"><BR></A><H2>XGEffectType_ROTARY_SPEAKER()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_TREMOLO()	"><BR></A><H2>XGEffectType_TREMOLO()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_AUTO_PAN()	"><BR></A><H2>XGEffectType_AUTO_PAN()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_PHASER1()	"><BR></A><H2>XGEffectType_PHASER1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_PHASER2()	"><BR></A><H2>XGEffectType_PHASER2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_DISTORTION()	"><BR></A><H2>XGEffectType_DISTORTION()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_COMP_DISTORTION()	"><BR></A><H2>XGEffectType_COMP_DISTORTION()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_PITCH_CHANGE1()	"><BR></A><H2>XGEffectType_PITCH_CHANGE1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_PITCH_CHANGE2()	"><BR></A><H2>XGEffectType_PITCH_CHANGE2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_AURAL_EXCITER()	"><BR></A><H2>XGEffectType_AURAL_EXCITER()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_TOUCH_WAH()	"><BR></A><H2>XGEffectType_TOUCH_WAH()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_TOUCH_WAH_DIST()	"><BR></A><H2>XGEffectType_TOUCH_WAH_DIST()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_TOUCH_WAH_ODRV()	"><BR></A><H2>XGEffectType_TOUCH_WAH_ODRV()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_TOUCH_WAH2()	"><BR></A><H2>XGEffectType_TOUCH_WAH2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_COMPRESSOR()	"><BR></A><H2>XGEffectType_COMPRESSOR()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_NOISE_GATE()	"><BR></A><H2>XGEffectType_NOISE_GATE()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_VOICE_CANCEL()	"><BR></A><H2>XGEffectType_VOICE_CANCEL()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_2WAY_ROTARY_SPEAKER()	"><BR></A><H2>XGEffectType_2WAY_ROTARY_SPEAKER()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_ENSEMBLE_DETUNE()	"><BR></A><H2>XGEffectType_ENSEMBLE_DETUNE()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_AMBIENCE()	"><BR></A><H2>XGEffectType_AMBIENCE()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_COMP_DIST_DELAY()	"><BR></A><H2>XGEffectType_COMP_DIST_DELAY()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_COMP_OVERDRIVE_DELAY()	"><BR></A><H2>XGEffectType_COMP_OVERDRIVE_DELAY()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_WAH_DIST_DELAY()	"><BR></A><H2>XGEffectType_WAH_DIST_DELAY()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_WAH_OVERDRIVE_DELAY()	"><BR></A><H2>XGEffectType_WAH_OVERDRIVE_DELAY()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_HALL1()	"><BR></A><H2>XGEffectType_HALL1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_HALL2()	"><BR></A><H2>XGEffectType_HALL2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_ROOM1()	"><BR></A><H2>XGEffectType_ROOM1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_ROOM2()	"><BR></A><H2>XGEffectType_ROOM2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_ROOM3()	"><BR></A><H2>XGEffectType_ROOM3()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_STAGE1()	"><BR></A><H2>XGEffectType_STAGE1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_STAGE2()	"><BR></A><H2>XGEffectType_STAGE2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_PLATE()	"><BR></A><H2>XGEffectType_PLATE()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_DELAY_LCR()	"><BR></A><H2>XGEffectType_DELAY_LCR()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_DELAY_LR()	"><BR></A><H2>XGEffectType_DELAY_LR()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_ECHO()	"><BR></A><H2>XGEffectType_ECHO()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_CROSS_DELAY()	"><BR></A><H2>XGEffectType_CROSS_DELAY()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_KARAOKE1()	"><BR></A><H2>XGEffectType_KARAOKE1()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_KARAOKE2()	"><BR></A><H2>XGEffectType_KARAOKE2()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_KARAOKE3()	"><BR></A><H2>XGEffectType_KARAOKE3()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_KARAOKE3()	"><BR></A><H2>XGEffectType_KARAOKE3()	</H2>
+<P><A NAME="エフェクタの設定_XGEffectType_KARAOKE3()"><BR></A><H2>XGEffectType_KARAOKE3()</H2>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="XGRcvChannelMute(Ch)"><BR></A><HR><H1>XGRcvChannelMute(Ch)</H1>
+◇チャンネルミュート<BLOCKQUOTE><CODE>Ch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;チャンネルの番号<BR><P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="XGRcvChannelMute(Ch)_ＡＤインプット・コントロール"><BR></A><H2>ＡＤインプット・コントロール</H2>
+◇AD インプットの操作<P>
+<P><A NAME="XGRcvChannelMute(Ch)_AD_InputGain(Chl, MIC_LINE)"><BR></A><H2>AD_InputGain(Chl, MIC_LINE)</H2>
+■｜－ゲイン切り替え<BLOCKQUOTE><CODE>Chl / チャンネル(0,1)<BR>MIC_LINE / MIC = 0, LINE = 1<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="XGRcvChannelMute(Ch)_AD_Volume(Chl, Val)"><BR></A><H2>AD_Volume(Chl, Val)</H2>
+■｜－ボリュームコントロール<BLOCKQUOTE><CODE>Chl / Channel<BR>Val / Value<BR><P>
+<P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="XGRcvChannelMute(Ch)_AD_MONO_STEREO(Val)"><BR></A><H2>AD_MONO_STEREO(Val)</H2>
+■｜－モード（ステレオ・モノ）<BLOCKQUOTE><CODE>０＝ＭＯＮＯ　１＝ＳＴＥＲＥＯ<BR><P>
+<P>
+<P>
+<P>
+</CODE></BLOCKQUOTE><P><A NAME="XGRcvChannelMute(Ch)_AD_Chorus(Chl,Val)"><BR></A><H2>AD_Chorus(Chl,Val)</H2>
+■｜－コーラス<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="XGRcvChannelMute(Ch)_AD_Reverb(Chl,Val)"><BR></A><H2>AD_Reverb(Chl,Val)</H2>
+■｜－リバーブ<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="XGRcvChannelMute(Ch)_AD_Variation(Chl,Val)"><BR></A><H2>AD_Variation(Chl,Val)</H2>
+■｜－バリエーション<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P><A NAME="XGRcvChannelMute(Ch)_AD_Expression(Chl,Val)"><BR></A><H2>AD_Expression(Chl,Val)</H2>
+■｜－エクスプレッション<P>
+<P>
+<P>
+<P>
+<P>
+</BODY></HTML>

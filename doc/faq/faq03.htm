@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>よくある質問とその回答～音色エフェクト編</TITLE>
+</HEAD><BODY>
+<H1>よくある質問とその回答～音色・エフェクト編</H1>
+<HR>
+<A name="1"><P><FONT color="#cc0000" size="+1">[Q] シンセの音色を変えたいのですが・・・</FONT></P></A>
+<BLOCKQUOTE>音色か Voice コマンドを使います。普通、DTM音源の場合は、各チャンネル毎に(１から１６まで)１つの音色を割り当てることができます。エディタ左側の音色タブの音色をダブルクリックすると、コマンドが挿入されます。</BLOCKQUOTE>
+<HR>
+<A name="2"><P><FONT size="+1"><FONT color="#cc0000"><FONT color="#cc0000" size="+1">[Q] </FONT>バリエーション音色はどうやって使うの？</FONT></FONT></P></A>
+<BLOCKQUOTE>ローランドＧＳ音源や、ヤマハＸＧ音源をご利用の方は、バリエーション音色が使えます。</BLOCKQUOTE>
+<BLOCKQUOTE>プログラムチェンジ命令は、　Voice( プログラム
+, msb , lsb ) で、指定できます。<BR>
+（GS音源の場合は、MSBがバンク選択で、XG音源の場合は、LSBがバンク選択です。（Voice
+= 音色））<BR>
+<TABLE cellpadding="3" border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc"><FONT color="#cc0000">//ＸＧ音源の場合 (LSBでバンク選択）</FONT><BR>
+      Voice( 81, 0, 0 ) l4 cdef //SquareLd<BR>
+      Voice( 81, 0, 18) l4 cdef //Hollow<BR>
+      <FONT color="#cc0000">//ＧＳ音源の場合（MSBでバンク選択）</FONT><BR>
+      Voice( 56, 0 ) l4 cdef //OrchestraHit<BR>
+      Voice( 56, 8 ) l4 cdef //Impact Hit</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<A name="3"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>特殊効果を手軽に使いたい</FONT></P></A>
+<BLOCKQUOTE>本来、コントロールチェンジなどの音源操作命令を使わなければなりませんが、簡単に使えるように、サクラでは、関数として提供されています。<BR>
+<A href="../kouza/page9.htm">→定義ファイルの使い方</A></BLOCKQUOTE>
+<HR>
+<A name="4"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>ドラムの音はどうやって鳴らすの？</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help04.htm">ＦＡＱ詳細版</A>、もしくは、<A href="../kouza/page8_2.htm">こちら（ストトン）</A>か<A href="../kouza/mml6.htm">こちら（MML）</A>をご覧ください。</BLOCKQUOTE>
+<HR>
+<A name="5"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>フェードアウト（少しずつに音を小さくする）の方法</FONT></P></A>
+<BLOCKQUOTE>詳しくは→<A href="help02.htm">クレッシェンド、デクレッシェンド、フェードイン・アウト</A></BLOCKQUOTE>
+<HR>
+<A name="6"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>ビブラートをかけたい</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help15.htm">モジュレーション</A>を。</BLOCKQUOTE>
+<HR>
+<A name="7"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>エコーをかける方法</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help18.htm">リバーブディレイ</A>を。</BLOCKQUOTE>
+<HR>
+<A name="8"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>ピッチをちょっとだけかえる方法</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help16.htm">ピッチ</A>を。</BLOCKQUOTE>
+<HR>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

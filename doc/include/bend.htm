@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>"bend.h" ver.0.62</TITLE>
+<META content="SAKURA Function" name=keywords>
+<META name=description content="ピッチベンドに関する関数 (2000/07/08)">
+<META http-equiv="Content-Style-Type" content="text/css">
+</HEAD>
+<BODY bgcolor=white text=black link=blue alink=red vlink=purple>
+<H1>"bend.h" ver.0.62</H1><P><HR>
+<!--index--><H2>目次</H2>
+<UL>
+  <LI><A HREF="#g1">概要</A></LI>
+  <LI><A HREF="#g2">使い方</A></LI>
+  <LI><A HREF="#BendUp">BendUp(Len, Delay)</A></LI>
+  <LI><A HREF="#BendDown">BendDown(Len, Delay)</A></LI>
+  <LI><A HREF="#BendEx">BendEx(Len, Delay, Str Note1, Str Note2)</A></LI>
+  <LI><A HREF="#RandomBend">RandomBend(ON_OR_OFF,Value)</A></LI>
+</UL>
+<!--end of index-->
+<HR>
+<H1><A NAME="g1">概要</A></H1>
+<P>ピッチベンドは、音程を一時的に変えたり、連続的に変化させることで、ギターのチョーキングなどの演奏を再現することができます。<BR>
+例えば、&quot;A&quot;の音程を発音するとき、ピッチベンドを使って&quot;G&quot;から&quot;A&quot;にスムーズに音程を変化させることができます。
+<HR>
+<H1><A NAME="g1">使い方</A></H1>
+<P>
+Include(bend.h);
+<P>を、曲頭に書き加えてください。
+<HR>
+<H1><A NAME="BendUp">BendUp(Len, Delay)</A></H1>
+<P>
+◇ベンドアップ：音程を下からなめらかに上げて、指定の音程にする。<P>
+<BLOCKQUOTE><CODE>Len&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;指定した音程になるまでの長さをステップを指定します。<BR>Delay&nbsp;&nbsp;&nbsp;ベンドアップが開始されるまでの長さをステップ指定します。<BR>
+</CODE>
+<P><CODE>例）BendUp（48,96) c1<BR>
+</CODE></P>
+<P><CODE>パラメータの先頭に"!"を記述するとn分音符指定することができます。<BR>
+例）BendUp(!8,!4) c1<BR>
+</CODE></P>
+</BLOCKQUOTE>
+<HR>
+<H1><A NAME="BendDown">BendDown(Len, Delay)</A></H1>
+<P>
+◇ベンドダウン：音程を上からなめらかに下げて、指定の音程にする。
+<BLOCKQUOTE><CODE>Len&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;指定した音程になるまでの長さをステップを指定します。<BR>Delay&nbsp;&nbsp;&nbsp;ベンドアップが開始されるまでの長さをステップ指定します。<BR>
+</CODE>
+<P><CODE>例）BendUp（48,96) c1<BR>
+</CODE></P>
+<P><CODE>パラメータの先頭に"!"を記述するとn分音符指定することができます。<BR>
+例）BendUp(!8,!4) c1<BR>
+</CODE></P>
+</BLOCKQUOTE>
+<HR>
+<H1><A NAME="BendEx">BendEx(Len, Delay, Str Note1, Str Note2)</A></H1>
+<P>
+◇ベンド拡張１：Note1 から Note2 を滑らかにつなぐ。
+<BLOCKQUOTE><CODE>Len&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;指定した音程になるまでの長さをステップを指定します。<BR>Delay&nbsp;&nbsp;&nbsp;ベンドアップが開始されるまでの長さをステップ指定します。<BR>Str Note1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;開始する音程<BR>Str Note2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;終了する音程<BR>
+</CODE>
+<P><CODE>パラメータの先頭に"!"を記述するとn分音符指定することができます。<BR>
+</CODE></P>
+</BLOCKQUOTE>　　　　ベンドのみを書き込むので、 Note2 は、この関数の後に書いてください。<BLOCKQUOTE><CODE>例）BendEx(!4,!4,{o4c},{o5c}) o5c1<BR>
+</CODE></BLOCKQUOTE><P>
+<HR>
+<H1><A NAME="RandomBend">RandomBend(ON_OR_OFF,Value)</A></H1>
+<A NAME="RandomBend"></A>
+<P>
+◇ランダムベンド：発音ごとにランダムなベンド値を書き込む。<P>
+
+<BLOCKQUOTE><CODE>ON_OR_OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;onでランダムを開始、offで停止します。<BR>Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ベンドの最大値を指定します。省略可<BR>
+</CODE>
+<P><CODE>例）RandomBend(on,2000) cege ceg`c<BR>
+</CODE></P>
+</BLOCKQUOTE>
+</BODY></HTML>

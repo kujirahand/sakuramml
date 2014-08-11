@@ -187,13 +187,6 @@ type
     dlgOpenMidi: TOpenDialog;
     N40: TMenuItem;
     mnuPlayerRepeat: TMenuItem;
-    cbarTop: TControlBar;
-    ToolBar4: TToolBar;
-    ToolButton3: TToolButton;
-    ToolButton8: TToolButton;
-    ToolBar5: TToolBar;
-    toolPlay: TToolButton;
-    toolStop: TToolButton;
     N47: TMenuItem;
     browser: TWebBrowser;
     btnErrTabClose: TSpeedButton;
@@ -202,23 +195,8 @@ type
     edtError: TEditor;
     tabErrTabClose2: TSpeedButton;
     cbarBottom: TControlBar;
-    panelPlayer: TPanel;
-    chkPlayFrom: TCheckBox;
-    edtTime1: TSpinEdit;
-    edtTime3: TSpinEdit;
-    edtTime2: TSpinEdit;
     N37: TMenuItem;
     N42: TMenuItem;
-    ToolBar2: TToolBar;
-    ToolButton1: TToolButton;
-    ToolButton2: TToolButton;
-    ToolButton4: TToolButton;
-    ToolButton6: TToolButton;
-    ToolBar1: TToolBar;
-    toolNew: TToolButton;
-    toolOpen: TToolButton;
-    toolSave: TToolButton;
-    panelTrack: TPanel;
     lblInfo: TLabel;
     lblBar: TLabel;
     actList: TActionList;
@@ -238,8 +216,6 @@ type
     actGosenfu: TAction;
     actRun: TAction;
     actStop: TAction;
-    Label2: TLabel;
-    Label3: TLabel;
     panelLeft: TPanel;
     panelLeftTop: TPanel;
     pageLeft: TPageControl;
@@ -268,10 +244,6 @@ type
     btnLeftPanelClose: TSpeedButton;
     imgLeftTop: TImage;
     dlgOpenSkin: TOpenDialog;
-    ToolBar3: TToolBar;
-    toolFontSmall: TToolButton;
-    toolFontMiddle: TToolButton;
-    toolFontBig: TToolButton;
     N49: TMenuItem;
     mnuLineBreak: TMenuItem;
     actLineBreak: TAction;
@@ -326,9 +298,7 @@ type
     mnuHokan: TMenuItem;
     N43: TMenuItem;
     actHokan: TAction;
-    toolPlayReset: TToolButton;
     MPlay: TMediaPlayer;
-    track: TTrackBar;
     actPlayPrev: TAction;
     N55: TMenuItem;
     mnuRythmBox: TMenuItem;
@@ -362,7 +332,6 @@ type
     N18: TMenuItem;
     N44: TMenuItem;
     mnuPlayMonitorTop: TMenuItem;
-    toolMon: TToolButton;
     mnuEffectPlay: TMenuItem;
     N48: TMenuItem;
     mnuEffectClipboard: TMenuItem;
@@ -375,7 +344,6 @@ type
     mnuUseCloseEx: TMenuItem;
     img32file: TImageList;
     mnuMML2MIDIAll: TMenuItem;
-    toolPlayFirst: TToolButton;
     mnuRunFirst: TMenuItem;
     actRunFirst: TAction;
     panelHelpTop: TPanel;
@@ -394,8 +362,6 @@ type
     timerAutoSave: TTimer;
     N67: TMenuItem;
     N70: TMenuItem;
-    toolbarPlaySub: TToolBar;
-    cmbPlaySpeed: TComboBox;
     N71: TMenuItem;
     mnuSpeedCompile: TMenuItem;
     S2: TMenuItem;
@@ -437,6 +403,37 @@ type
     N79: TMenuItem;
     popAddDecNum: TMenuItem;
     popupShowManWeb: TMenuItem;
+    toolMain: TToolBar;
+    btnNew: TToolButton;
+    btnOpen: TToolButton;
+    btnSave: TToolButton;
+    ToolButton9: TToolButton;
+    btnUndo: TToolButton;
+    btnCut: TToolButton;
+    btnPaste: TToolButton;
+    ToolButton13: TToolButton;
+    btnKeyInput: TToolButton;
+    btnGosenInput: TToolButton;
+    btnMon: TToolButton;
+    ToolButton17: TToolButton;
+    btnPlayFirst: TToolButton;
+    btnPlay: TToolButton;
+    btnStop: TToolButton;
+    btnPrev: TToolButton;
+    ToolButton22: TToolButton;
+    track: TTrackBar;
+    ToolButton23: TToolButton;
+    cmbPlaySpeed: TComboBox;
+    ToolButton24: TToolButton;
+    Panel3: TPanel;
+    chkPlayFrom: TCheckBox;
+    edtTime1: TEdit;
+    edtTime2: TEdit;
+    edtTime3: TEdit;
+    Label4: TLabel;
+    Label5: TLabel;
+    ToolButton7: TToolButton;
+    cbarTop: TControlBar;
     procedure WMMousewheel(var Msg: TMessage); message WM_MOUSEWHEEL;
     procedure MMDone(var Msg: TMessage); message MM_MOM_DONE; 
     procedure mnuAboutClick(Sender: TObject);
@@ -665,6 +662,7 @@ type
     IsKakikakeClose: Boolean;
     RejectKey: Boolean;
     FDefPlayChannel: Integer;
+    skinPic: TPicture;
     procedure ChangeFileName(fname:string);
     procedure ChangeTitle(cap: string);
     function  Compile: Boolean;
@@ -763,6 +761,7 @@ procedure TfrmSakuraPad.FormCreate(Sender: TObject);
         //todo:変数の初期化
         FileModify := False;
         ManualOnline := True;
+        skinPic := TPicture.Create;
         //テンポラリファイルにMIDIファイルを作成
         {
         TempMidiFile := 'skr'+FormatDateTime('hh:nn:ss',Now);
@@ -1064,7 +1063,7 @@ begin
     //track.Position := 0;
 
     mnuRun.Enabled := False;
-    toolPlay.Enabled := False;
+    btnPlay.Enabled := False;
     try
         begin //全てのタブ
           txt := edtMain.Lines.Text ;
@@ -1115,7 +1114,7 @@ begin
         edtError.Lines.Text := mmlErrorMessage;
     finally
         mnuRun.Enabled := True;
-        toolPlay.Enabled := True;
+        btnPlay.Enabled := True;
         midiLen := -1;
         PlayModify := False;
         progBar.Visible := False; lblMsg.Visible := False;
@@ -1259,26 +1258,7 @@ begin
 end;
 
 procedure TfrmSakuraPad.WriteBar(Bar: TControl);
-var
-  B: Boolean;
-  S: string;
 begin
-  with Ini do
-  begin
-    B := cbarTop.ContainsControl(Bar);
-    S := 'ToolBar\'+Bar.Name;
-    WriteBool(S, 'Docking', B);
-    WriteBool(S, 'Visible', Bar.Visible);
-    if B then
-    begin
-      WriteInteger(S, 'Top', Bar.Top);
-      WriteInteger(S, 'Left', Bar.Left);
-    end
-    else begin
-      WriteInteger(S, 'Top', Bar.Parent.Top);
-      WriteInteger(S, 'Left', Bar.Parent.Left);
-    end;
-  end;
 end;
 
 procedure TfrmSakuraPad.SaveIniFile;
@@ -1319,16 +1299,6 @@ begin
     s := Trim(ini.Recent.Text);
     s := JReplace(s,#13#10,'|',True);
     ini.WriteString('main','recent_files',s);
-
-    //バー
-    WriteBar(ToolBar1);
-    WriteBar(ToolBar2);
-    WriteBar(ToolBar3);
-    WriteBar(ToolBar4);
-    WriteBar(ToolBar5);
-    //WriteBar(MenuBar);
-    WriteBar(panelTrack);
-    WriteBar(panelPlayer);
 
     //演奏モニター
     for i:=0 to High(ini.MonColor) do
@@ -1464,16 +1434,6 @@ begin
   ini.Recent.Text := ini.ReadString('main','recent_files','');
   ini.Recent.Text := Trim(JReplace(ini.Recent.Text, '|', #13#10,True));
   MakeRecentMenu;
-
-  //バー
-  ReadBar(ToolBar1);
-  ReadBar(ToolBar2);
-  ReadBar(ToolBar3);
-  ReadBar(ToolBar4);
-  ReadBar(ToolBar5);
-  //ReadBar(MenuBar);
-  ReadBar(panelTrack);
-  ReadBar(panelPlayer);
 
   //プラグインの列挙
   mnuPluginEnumClick(nil);
@@ -2214,9 +2174,9 @@ end;
 
 procedure TfrmSakuraPad.FormDestroy(Sender: TObject);
 begin
-    midiOut.Free ;
-    voiceList.Free ;
-
+    FreeAndNil(midiOut);
+    FreeAndNil(voiceList);
+    FreeAndNil(skinPic);
     //======================
     // Backup File を削除
     if FileExists(BackupFile) then
@@ -3536,45 +3496,45 @@ var
 begin
     //スキンの設定
     try
+      if FileExists(fname)=False then
+      begin
+          ini.UseSkin := False;
+      end;
+      if ini.UseSkin = False then
+      begin
+          skinPic.CleanupInstance;
+          imgLeftTop.Picture := nil;
+          imgMan.Picture := nil;
+          ini.SkinPath := '';
+          Exit;
+      end else
+      begin
+        skinPic.LoadFromFile(fname);
+      end;
 
-    if FileExists(fname)=False then
-    begin
-        ini.UseSkin := False;
-    end;
-    if ini.UseSkin = False then
-    begin
-        cbarTop.Picture := nil;
-        cbarBottom.Picture := nil;
-        imgLeftTop.Picture := nil;
-        imgMan.Picture := nil;
-        ini.SkinPath := '';
-        Exit;
-    end;
-
-    cbarTop.Picture.LoadFromFile(fname);
-
-    bmp := TBitmap.Create ;
-    try
-        bmp.width := cbarTop.Picture.Width ;
-        bmp.Height := cbarTop.Picture.Height ;
-        bmp.Assign(cbarTop.Picture.Graphic);
-        bmp.PixelFormat := pf24bit ;
-        i := bmp.Canvas.Pixels[0,0];
-        if i=0 then begin end else begin
-            panelPlayer.Color := i;
-            panelTrack.Color := i;
-            panelLeftTop.Color := i;
-            panelManual.Color := i;
-            panelPicture.Color := i;
-        end;
-        cbarBottom.Picture.Assign(bmp);
-        //imgLeftTop.Picture.Assign(bmp);
-        //imgMan.Picture.Assign(bmp);
-        panelHelpTopResize(nil); // ビットマップの更新
-    finally
-        bmp.Free;
-    end;
-    ini.SkinPath := fname;
+      bmp := TBitmap.Create ;
+      try
+          bmp.width  := skinPic.Width ;
+          bmp.Height := skinPic.Height ;
+          bmp.Assign(skinPic.Graphic);
+          bmp.PixelFormat := pf24bit ;
+          i := bmp.Canvas.Pixels[0,0];
+          if i=0 then begin end else begin
+              //panelPlayer.Color := i;
+              //panelTrack.Color := i;
+              //panelLeftTop.Color := i;
+              //panelManual.Color := i;
+              //panelPicture.Color := i;
+          end;
+          cbarTop.Picture.Assign(bmp);
+          cbarBottom.Picture.Assign(bmp);
+          imgLeftTop.Picture.Assign(bmp);
+          imgMan.Picture.Assign(bmp);
+          panelHelpTopResize(nil); // ビットマップの更新
+      finally
+          bmp.Free;
+      end;
+      ini.SkinPath := fname;
     finally
         //menuBar.Invalidate ;
     end;
@@ -4758,11 +4718,10 @@ begin
 end;
 
 procedure TfrmSakuraPad.panelHelpTopResize(Sender: TObject);
-var
-  x, y, w, h, cw, ch: Integer;
+// var x, y, w, h, cw, ch: Integer;
 begin
   ProgBar.Width := panelHelpTop.Width - ProgBar.Left * 2;
-
+  {
   // PICTURE
   if cbarTop.Picture.Graphic <> nil then
   begin
@@ -4775,7 +4734,7 @@ begin
     begin
       for x := 0 to cw-1 do
       begin
-        imgMan.Canvas.Draw(w * x, h * y, cbarTop.Picture.Graphic); 
+        imgMan.Canvas.Draw(w * x, h * y, cbarTop.Picture.Graphic);
       end;
     end;
     //
@@ -4790,6 +4749,7 @@ begin
       end;
     end;
   end;
+  }
 end;
 
 procedure TfrmSakuraPad.mnuAutoSaveClick(Sender: TObject);

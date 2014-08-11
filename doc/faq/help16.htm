@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>ピッチ</TITLE>
+</HEAD>
+<BODY background="cta03.gif">
+<TABLE width="100%">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#004d00"><B><FONT size="+2" color="#ffffff">　ピッチ</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE><B><FONT color="#004d00"><BR>
+<BR>
+音程はドレミファソと書けばＯＫですが、時には音程で表せないような中途半端なピッチを使いたい事もあるでしょう。<BR>
+<BR>
+シンセサイザには音程とは別に「ピッチシフター」という機能がついてて、音程を少しだけ上げ下げしたい場合はそれを使います。<BR>
+<BR>
+<BR>
+ストトンにはそういうコマンドがないので、ＭＭＬから借りてきましょう。<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">p%?<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">半角で</FONT><FONT color="#ff0000">ｐ％</FONT><FONT color="#004d00">と書くとピッチが変えられます。<BR>
+<BR>
+？には－８１９２～８１９１の数字を書いてください。<BR>
+<BR>
+０で変化無し。(真ん中)<BR>
+４０９６や－４０９６で半音なので、上下２半音まで指定出来ます。<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">p%4096　ドーーー<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">と書くと、一見ドですが実際出る音はド＃になる、という事ですね。<BR>
+<BR>
+じわじわ変える事も出来ます。<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">p%.T( 0, 8191, !2 )　ドーーー<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">０から８１９１まで２分音符の長さで変化させよ、と書いてあります。<BR>
+</FONT><FONT color="#ff0000">ｐ％</FONT><FONT color="#004d00">に</FONT><FONT color="#ff0000">．Ｔ</FONT><FONT color="#004d00">を足して、カッコへ</FONT><FONT color="#ff0000">（始めのピッチ，終わりのピッチ，！長さ）</FONT><FONT color="#004d00">を</FONT><FONT color="#ff0000">半角で</FONT><FONT color="#004d00">書けばＯＫ。<BR>
+<BR>
+カッコの中の数字は３つでワンセットなので、それさえ守れば６個でも９個でも１２個でも大丈夫です。<BR>
+<BR>
+<BR>
+<BR>
+しかしこのｐ％。<BR>
+半音で４０９６も要らないような気がしますが、それにはちゃんと理由があります。<BR>
+<BR>
+ちょっとした装飾音符などは上下２半音でも充分かもしれませんが、１オクターブに渡ってストリングスでグリッサンド…とか、ギターでハンマリング…ともなるとどうにもなりませんよね。音楽を作っていると、そういう表現をしたくなる事は決して少なくないので上下２半音ではやはり不充分。<BR>
+<BR>
+そこで<A href="help11.htm">ＧＭ</A>シンセでは</FONT><FONT color="#ff0000">上下１２半音</FONT><FONT color="#004d00">まで扱える範囲を変える事が出来るようになっています。それには次のようなコマンドを使います。<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">BR( ? )<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">元々は２になっていますが、？に数字を書くと扱える範囲を広げる事が可能。<BR>
+<BR>
+ただしｐ％で指定する－８１９２～８１９１という範囲は変わらないので、ＢＲ（８）などと指定すると<BR>
+<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD><IMG src="pitch01.gif" width="256" height="256" border="0"></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+<BR>
+このような分かれ方に変わります。扱える幅を増やせば増やすほど半音の精度が下がっていくので８１９２段階くらいはないと…という事ですね。（ヤマハやローランドのシンセサイザでは上下２４半音のコントロールが可能です）<BR>
+<BR>
+真ん中に並んでいるのがｐ％の値。<BR>
+<BR>
+半音の幅を求めるには</FONT><FONT color="#ff0000">８１９２　÷　ＢＲ</FONT><FONT color="#004d00">、ＢＲが８だったらｐ％１０２４で＋１半音ピッチがずれるわけです。<BR>
+<BR>
+<BR>
+<BR>
+<A href="help01.htm">スラーのモード０やモード１</A>も内部でこれを使ってピッチシフトしているので「＆」を使うとｐ％は０に戻ってしまいます。「＆」と併用する時は注意しましょう。<BR>
+<BR>
+<BR>
+</FONT></B><BR>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

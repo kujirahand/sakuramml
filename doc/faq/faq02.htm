@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>よくある質問とその回答～演奏上の表現</TITLE>
+</HEAD><BODY>
+<H1>よくある質問とその回答～演奏上の表現編</H1>
+<HR>
+<A name="1"><P><FONT color="#cc0000" size="+1">[Q] 和音は、どうやって鳴らしたらいいのですか？</FONT></P></A>
+<BLOCKQUOTE>以下のように、いろいろな方法があります。用途に合った方法を選んでください！<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ccffcc">和音を鳴らす例</TD>
+      <TD bgcolor="#ccffcc">詳しい説明</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffff99">「ドミソ」</TD>
+      <TD>和音コマンド「」を使った（MMLでは、'ceg'）。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffff99">ド０ミ０ソ</TD>
+      <TD>音長０を指定すると、これも和音として処理される。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffff99">Sub{ ドレミ }<BR>
+      Sub{ ミファソ }<BR>
+      ソシ‘レ</TD>
+      <TD>タイムポインタを強制的に戻す、Subコマンドを使った。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ffff99">トラック１　ドレミ<BR>
+      トラック２　ミファソ<BR>
+      トラック３　ソラシ</TD>
+      <TD>トラックを切り替えて和音を鳴らした。</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<P><FONT color="#cc0000" size="+1">「４分音符のド」と「８分音符のド」をタイでつなげる場合、どう記述するの？</FONT></P>
+<BLOCKQUOTE><FONT color="#9900ff">ド４^８</FONT><BR>
+と、やってください。または、<BR>
+<FONT color="#9900FF">ド４ー８</FONT>　や、　<FONT color="#9900FF">ド４＋８</FONT><BR>
+でも、OKです。</BLOCKQUOTE>
+<BLOCKQUOTE>また、＆で繋げて、<BR>
+<FONT color="#9900FF">ド４＆ド８</FONT><BR>
+と、書くのもＯＫです。</BLOCKQUOTE>
+<HR>
+<A name="2"><P><FONT color="#cc0000" size="+1"><FONT size="+1">[Q] &quot;</FONT>ー&quot;は音をのばすというコマンドですが、１つのーの長さは何音符に相当するのでしょうか</FONT>？</P></A>
+<BLOCKQUOTE>これは、音符で指定した長さになります。<BR>
+<FONT color="#ff00ff">音符４　ドードー</FONT><BR>
+<FONT color="#ff00ff">音符８　ドーーードーーー</FONT><BR>
+この上の２つは、同じ意味です</BLOCKQUOTE>
+<HR>
+<A name="3"><P><FONT color="#cc0000" size="+1"><FONT size="+1"><FONT color="#cc0000">[Q] </FONT></FONT>付点四分音符などの、付点音符は、どうやって表現するの？</FONT></P></A>
+<BLOCKQUOTE>付点音符は、音符の長さのあとに、４． のように、．をつけます。<BR>
+<FONT color="#ff6633">例）　音符４．ミソシ４　ラソミ４<BR>
+例）　音符４　ミ．ソ．シ　ラ．ソ．ミ</FONT></BLOCKQUOTE>
+<HR>
+<A name="4"><P><FONT color="#cc0000" size="+1"><FONT size="+1"><FONT color="#cc0000">[Q] </FONT></FONT>３連符が使いたい場合は、どうやったらいいの？</FONT></P></A>
+<BLOCKQUOTE>連符の表記には、連符｛ストトン表記｝(MMLなら、Div{
+MML }音長) コマンドを使います。<BR>
+<FONT color="#ff6600">例）　音符４　【４　連符｛ドミソ｝ミソミ　】</FONT><BR>
+また、ｎ分音符という表し方は、とても単純に、音符の長さを表せるような仕組みになっています。<BR>
+例えば、四分音符という言い方。これは、全音符を４等分した長さだから、四分音符なのです。二分音符は、全音符を２等分した長さです。計算式で書けば、<BR>
+<B><FONT color="#6600ff">（基本音符）×（分割したい個数）＝（求めたい音符の長さ）</FONT><BR>
+</B>が、出てくるわけです。（<A href="onpu.htm">詳しくは、こちら</A>で。）</BLOCKQUOTE>
+<HR>
+<A name="5"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>音の余韻を変える方法</FONT></P></A>
+<BLOCKQUOTE>ゲート命令を使います。詳しくは、<A href="help07.htm">ゲート</A>の項を。</BLOCKQUOTE>
+<HR>
+<A name="6"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>音量を変える方法</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help13.htm">ベロシティフェーダ</A>を。</BLOCKQUOTE>
+<HR>
+<A name="7"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>転調・移調、シャープのある楽譜の入力の方法</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help05.htm">転調・移調</A>を。</BLOCKQUOTE>
+<HR>
+<A name="8"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>フレーズを少しシャッフルさせたい。</FONT></P></A>
+<BLOCKQUOTE>フレーズをシャッフルさせるには、tコマンドを使います。<BR>
+<BR>
+16分音符をシャッフルさせるには、<FONT color="#cc00ff">t.onCycle(!16, 0, 8)</FONT> と、設定します。この場合8ステップだけ、シャッフルします。<BR>
+v_, q_, t_コマンドを組み合わせれば、グルーブクオンタインズもどきも再現できます。</BLOCKQUOTE>
+<HR>
+<A name="9"><P><FONT size="+1"><FONT color="#cc0000">[Q] どうやってベンドさせるの？ギターのチョーキングの方法は？</FONT></FONT></P></A>
+<BLOCKQUOTE><FONT size="+1"><FONT color="#cc0000">たとえば1音チョーキング、半音チョーキングはどのようにすれば良いのですか？</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE>ベンド範囲を決めるのには、<BR>
+BR(n)<BR>
+というコマンドを使います。n は、半音単位で指定します。<BR>
+そこで、１音チョーキングは、BR(2)と指定します。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffffcc">Include(bend.h); //BendUpなどのベンド関連のコマンドを使うのに必要<BR>
+      音符４<BR>
+      BR(2) BendUp(!8)ソミレミ //!8 で音符８の間ベンドする意味</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+HTMLヘルプのストトン入門講座９「<A href="../kouza/page9.htm">特殊効果を使う</A>」を<BR>
+参考にして、bend.hのソースや、コマンド一覧「<A href="../include/bend.htm">bend.h</A>」をご覧ください！<BR>
+<BR>
+また、もっとベンドの値を自由自在に操りたい場合は、<A href="../kouza/mml3.htm">.onTimeなどのコントロールチェンジオプション</A>を利用します。</BLOCKQUOTE>
+<HR>
+<A name="10"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>２つの音を滑らかにつなぎたい。スラー（レガート）させたい。</FONT></P></A>
+<BLOCKQUOTE>２つの方法があります。詳しくは、<A href="help01.htm">スラー（レガート）</A>の項を。<BR>
+<BR>
+以下、簡単に説明します。<BR>
+<BR>
+１）コントロールチェンジのポルタメントを使う方法（但し、音源によってサポートされない場合があります。）<BR>
+　　PS(127)で、ポルタメントを有効にします。PS(0)で、ポルタメント・オフです。<BR>
+　　PT(30)で、ポルタメントの効きを制御します。<BR>
+　　<FONT color="#cc00ff">例）PS(127) PT(60) c&gt;c&lt;c&gt;c&lt; PS(0)</FONT><BR>
+<BR>
+２）ピッチベンドを使う方法<BR>
+　　サクラ２より対応した「＆」を使うと楽です。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">ド＆ソ</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+で、ドからソへ、滑らかに演奏します。</BLOCKQUOTE>
+<HR>
+<A name="11"><P><FONT color="#cc0000" size="+1">[Q] トリルはどうやって表現するの？</FONT></P></A>
+<BLOCKQUOTE>トリルは、<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">音色(NylonGuitar)　Slur(1)<BR>
+      音符８【４ ド＆レ＆ド＆レ　ドーーー　】</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+と、Ｓｌｕｒ(1)と、スラーモードを１のベンドに設定して、音符を＆で連続して繋げるとそれっぽくなります。</BLOCKQUOTE>
+<HR>
+<A name="12"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>装飾音符をつけたい</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help03.htm">フィーリング</A>を。</BLOCKQUOTE>
+<HR>
+<A name="13"><P><FONT color="#cc0000" size="+1"><FONT color="#cc0000" size="+1">[Q] </FONT>アルペジオ（分散和音）の入力方法は？</FONT></P></A>
+<BLOCKQUOTE>詳しくは、<A href="help06.htm">アルペジオ</A>を。</BLOCKQUOTE>
+<HR>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

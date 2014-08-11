@@ -1,0 +1,220 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<meta http-equiv="Content-Style-Type" content="text/html; charset=Shift_JIS">
+	<link rel="stylesheet" type="text/css" href="bwb_guitar.css">
+	<link rev="made" href="mailto:bluewhitebear@hotmail.com">
+	<link rel="index"	href="../bwb_guitar.htm">
+	<link rel="next" 	href="8.htm">
+	<link rel="prev" 	href="6.htm">
+	<title>bwb_guitar.h マニュアル 「７．bwb_guitar.hの機能 」</title>
+</head>
+<body>
+<h1>７．bwb_guitar.hの機能</h1>
+<hr>
+<ul>
+	<li><a href="#bwb_guitar_7_01">BG_LAG:ストロークの際に生じるズレ具合の調節</a></li>
+	<li><a href="#bwb_guitar_7_02">BG_PEDAL:音を持続させる</a></li>
+	<li><a href="#bwb_guitar_7_03">BG_CHORDFORM:握っているコードの押さえ方の表示</a></li>
+	<li><a href="#bwb_guitar_7_04">BG_PRINT:表示機能</a></li>
+	<li><a href="#bwb_guitar_7_05">BG_KEY:カポやドロップの再現</a></li>
+	<li><a href="#bwb_guitar_7_06">BG_STRINGS:弦ごとのベロシティ調節</a></li>
+	<li><a href="#bwb_guitar_7_07">BG_VELOCITY_XXX:ストロークの際に生じるベロシティ差の調整</a></li>
+	<li><a href="#bwb_guitar_7_08">BG_ARPEGGIO_MUTE_XXX:アルペジオモードで弱く弾くときのベロシティ、ゲートの調整</a></li>
+	<li><a href="#bwb_guitar_7_09">BG_RHYTHM_MUTE_XXX:リズムモードで弱く弾くときのベロシティ、ゲートの調整</a></li>
+</ul>
+<hr>
+<ul>
+	<li><p><a name="bwb_guitar_7_01">BG_LAG:ストロークの際に生じるズレ具合の調節</a></p>
+		<p><span class="function">BG_LAG</span>はストロークの際に生じるタイミングのズレ具合を調節できる変数です。<br>
+		使用方法は<span class="function">BG_LAG</span>に１弦と１弦の間に生じるタイミングのズレを代入すればよい</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l1<br>
+		<br>
+		BG_LAG=0;GEm7(1) BGD(!1)<br>
+		BG_LAG=2;GEm7(1) BGD(!1)<br>
+		BG_LAG=!128;GEm7(1) BGD(!1)<br>
+		BG_LAG=!8;GEm7(1) BGD(!1)
+		</span></p>
+		
+		<p>初期値は <strong>!128</strong> です。</p>
+		
+	</li>
+	<li><p><a name="bwb_guitar_7_02">BG_PEDAL:音を持続させる</a></p>
+		<p><span class="function">BG_PEDAL</span>にonを代入することで、コントロールチェンジ６４番のサステインの機能が働き、<br>
+		音が持続します。アルペジオのような単音を鳴らすときには非常に効果的です。<br>
+		踏みかえのタイミングはコードチェンジを行ったときです。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l8<br>
+		<br>
+		BG_PEDAL=on;<br>
+		GEm7(1);BGA{ABCDEF^^ ^^^^^^^^}
+		</span></p>
+		
+		<p>初期値は <strong>off</strong> です。</p>
+		
+	</li>
+	<li><p><a name="bwb_guitar_7_03">BG_CHORDFORM:握っているコードの押さえ方の表示</a></p>
+		<p><span class="function">BG_CHORDFORM関数</span>を実行することで、現在握っているコードのフォームを表示します。<br>
+		数字はフレット単位です。 <strong>M</strong> はミュートや抑えない弦だということを示します。
+		<strong>0</strong> は開放弦であることを示します。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		GAm(2);<br>
+		BG_CHORDFORM;<br>
+		<br>
+		↓実行結果↓<br>
+		[表示] bwb_guitar.h(121): ６弦,５弦,４弦,３弦,２弦,１弦 = M,0,2,2,1,0<br>
+		[終了] 0.15 秒</span></p>
+
+	</li>
+	<li><p><a name="bwb_guitar_7_04">BG_PRINT:表示機能</a></p>
+		<p><span class="function">BG_PRINT=on</span>にすることで、関数の処理内容を表示することができます。<br>
+		bwb_guitar.hの関数は非常に複雑なため、<br>
+		MIDIを生成する（＝コンパイルする）のに時間がかかりますが、<br>
+		BG_PRINTで表示されたものを、代わりにコピーすることで、<br>
+		コンパイル速度が速くなります。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l16<br>
+		<br>
+		BG_PEDAL=on;<br>
+		BG_PRINT=on;<br>
+		<br>
+		GEm7(1);BGA{ABCDEF^^ ^^^^^^^^}<br>
+		GAm7();BGD(!1);<br>
+		GC();BGR{zxzxzxzx A^^^ ^^^^}<br>
+		<br>
+		↓実行結果↓<br>
+		[表示] bwb_guitar.h(69): y64,0;r*(%1);y64,127;r*(-%1);<br>
+		[表示] bwb_guitar.h(333): v(100)q(99)n(40),v(100)q(99)n(47),v(100)q(99)n(50),<br>
+		v(100)q(99)n(55),v(100)q(99)n(59),v(100)q(99)n(64),^^ ^^^^^^^^;v(100);q(99);<br>
+		[表示] bwb_guitar.h(69): y64,0;r*(%1);y64,127;r*(-%1);<br>
+		[表示] bwb_guitar.h(181): 'v(120);t(0);q(99);n(45);v(108);t(3);q(99);n(52);<br>
+		v(96);t(6);q(99);n(55);v(99);t(9);q(99);n(60);v(102);t(12);q(99);n(64);v(100);<br>
+		t(0);q(99);'%(384)<br>
+		[表示] bwb_guitar.h(69): y64,0;r*(%1);y64,127;r*(-%1);<br>
+		[表示] bwb_guitar.h(448): 'v(90);t(0);q(69);n(40);v(78);t(3);q(69);n(48);'<br>
+		'v(90);t(0);q(69);n(48);r;v(78);t(3);q(69);n(40);'<br>
+		'v(90);t(0);q(69);n(40);v(78);t(3);q(69);n(48);'<br>
+		'v(90);t(0);q(69);n(48);r;v(78);t(3);q(69);n(40);'<br>
+		'v(90);t(0);q(69);n(40);v(78);t(3);q(69);n(48);'<br>
+		'v(90);t(0);q(69);n(48);r;v(78);t(3);q(69);n(40);'<br>
+		'v(90);t(0);q(69);n(40);v(78);t(3);q(69);n(48);'<br>
+		'v(90);t(0);q(69);n(48);r;v(78);t(3);q(69);n(40);'<br>
+		'v(120);t(0);q(99);n(40);v(108);t(3);q(99);n(48);v(96);t(6);q(99);n(52);<br>
+		v(94);t(9);q(99);n(55);v(97);t(12);q(99);n(60);<br>
+		v(100);t(15);q(99);n(64);'^^^ ^^^^;v(100);q(99);t(0);<br>
+		[終了] 0.20 秒</span></p>
+		
+		<p>この実行結果の <strong>[表示] bwb_guitar.h(XXX):</strong>を消去すれば、
+		正常にコンパイルできるようになります。</p>
+		
+		<p>初期値は <strong>off</strong>です。</p>
+	</li>
+	<li><p><a name="bwb_guitar_7_05">BG_KEY:カポやドロップの再現</a></p>
+		<p><span class="function">BG_KEY</span>は開放弦の音程を調整する変数です。<br>
+		<span class="function">BG_KEY</span>に代入された値だけ、全体の音程があがります。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l16<br>
+		<br>
+		BG_KEY=0;<br>
+		GCm();BGD(!1);<br>
+		BG_KEY=5;<br>
+		GCm();BGD(!1);</span></p>
+
+		<p>初期値は <strong>0</strong> です。</p>
+	</li>
+	<li><p><a name="bwb_guitar_7_06">BG_STRINGS:弦ごとのベロシティ調節</a></p>
+		<p>配列変数である<span class="function">BG_STRINGS</span>により弦ごとのベロシティ調節ができるようになります。<br>
+		使い方は６弦から加算するベロシティの値を配列として代入することで、<br>
+		それぞれの弦ごとにベロシティを加算できます。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l16 v100<br>
+		<br>
+		BG_STRINGS=20,-80,-80,-80,-80,20<br>
+		<br>
+		GEm7(1) BGD(!1)</span></p>
+		
+		<p>初期値は全て <strong>0</strong> です。</p>
+	</li>
+	<li><p><a name="bwb_guitar_7_07">BG_VELOCITY_XXX:ストロークの際に生じるベロシティ差の調整</a></p>
+		<p>変数である<span class="function">BG_VELOCITY_FIRST,BG_VELOCITY_LAST,BG_VELOCITY_MOMENTUM</span>に<br>
+		値を代入することでストロークの際に生じるベロシティ差を調節できます。<br>
+		<span class="function">BG_VELOCITY_FIRST</span>で最初の方に弾く弦が強めになる性質を表現し、<br>
+		<span class="function">BG_VELOCITY_LAST</span>で最後の方に弾く弦が強めになる性質を表現し、<br>
+		<span class="function">BG_VELOCITY_MOMENTUM</span>で弦があたるごとに<br>
+		だんだん勢いが失われていく性質を表現します。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l16 v80<br>
+		<br>
+		BG_VELOCITY_FIRST=30;<br>
+		BG_VELOCITY_LAST=10;<br>
+		BG_VELOCITY_MOMENTUM=-3;<br>
+		<br>
+		GEm7(1) BGD(!1)</span></p>
+		
+		<p>初期値は <strong>BG_VELOCITY_FIRSTは20、BG_VELOCITY_LASTは10、BG_VELOCITY_MOMENTUMは-2</strong> です。</p>
+
+	</li>
+	<li><p><a name="bwb_guitar_7_08">BG_ARPEGGIO_MUTE_XXX:アルペジオモードで弱く弾くときのベロシティ、ゲートの調整</a></p>
+		<p>変数である<span class="function">BG_ARPEGGIO_MUTE_VELOCITY,BG_ARPEGGIO_MUTE_GATE</span>に値を代入することで、<br>
+		アルペジオモードのときの小文字で演奏する音の加算するベロシティとゲートを指定します。<br>
+		基本的には小文字は弱く弾くことを表現するので、指定される値はマイナスです。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l16 v80<br>
+		<br>
+		BG_ARPEGGIO_MUTE_VELOCITY=-20<br>
+		BG_ARPEGGIO_MUTE_GATE=-50<br>
+		<br>
+		GEm7(1) BGA{AaBbCcDdCcDdEeFf}</span></p>
+		
+		<p>初期値は <strong>BG_ARPEGGIO_MUTE_VELOCITYは-50、BG_ARPEGGIO_MUTE_GATEは-20</strong> です。</p>
+		
+	</li>
+	<li><p><a name="bwb_guitar_7_09">BG_RHYTHM_MUTE_XXX:リズムモードで弱く弾くときのベロシティ、ゲートの調整</a></p>
+		<p>変数である<span class="function">BG_RHYTHM_MUTE_VELOCITY,BG_RHYTHM_MUTE_GATE</span>に値を代入することで、<br>
+		リズムモードのときの小文字で演奏する音の加算するベロシティとゲートを指定します。<br>
+		基本的には小文字は弱く弾くことを表現するので、指定される値はマイナスです。</p>
+
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 q99 l16 v80<br>
+		<br>
+		BG_RHYTHM_MUTE_VELOCITY=-20<br>
+		BG_RHYTHM_MUTE_GATE=-50<br>
+		<br>
+		GEm7(1) BGR{Z^xZ^xA^ ^^A^ ^^q^}</span></p>
+		
+		<p>初期値は <strong>BG_RHYTHM_MUTE_VELOCITYは-30、BG_RHYTHM_MUTE_GATEは-40</strong> です。</p>
+	</li>
+</ul>
+
+<hr>
+<p><a href="../bwb_guitar.htm">戻る</a></p>
+</body>
+</html>

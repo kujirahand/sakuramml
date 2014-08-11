@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='../midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='../index.html'>MIDI Standard</a>＼
+	<a href='../exclusive.html'>Exclusive Message</a>＼
+	<a href='../TuningStandard.html'>MIDI Tuning Standard</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>Octave Tuning</h2>				<!--（コマンドの名前。）-->
+<!------------------------------------------------------------->
+<h3>■概要</h3>
+　この機能は、各12音階のMIDIデバイスのチューニングを設定します。。<br>
+<br>
+
+
+<br>
+<h3>■書式</h3>
+<h4>リアルタイム・メッセージ (Rail Time Message)</h4>
+<code>
+RT_OctaveTuningB(<var>INT iChannel</var>, <var>ARRAY iOffsetB(12)</var>);<br>
+RT_OctaveTuningW(<var>INT iChannel</var>, <var>ARRAY iOffsetW(12)</var>);<br>
+</code>
+<br>
+[備考]<br>
+※この命令は、コンパイラ内部で以下のMMLに変換されます。<br>
+<code>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, RT_Tuning, RT_Tuning_ScaleOctaveTuning1Byte, <var>Int iChannel[3Byte]</var>, <var>ARRAY iOffsetB(12)[12Byte]</var>, $F7<br>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, RT_Tuning, RT_Tuning_ScaleOctaveTuning2Byte, <var>Int iChannel[3Byte]</var>, <var>ARRAY iOffsetW(12)[24Byte]</var>, $F7<br>
+</code>
+<br>
+
+<br>
+<h4>ノン・リアルタイム・メッセージ (Non Rail Time Message)</h4>
+<code>
+NRT_OctaveTuningB(<var>INT iChannel</var>, <var>ARRAY iOffsetB(12)</var>);<br>
+NRT_OctaveTuningW(<var>INT iChannel</var>, <var>ARRAY iOffsetW(12)</var>);<br>
+</code>
+<br>
+[備考]<br>
+※この命令は、コンパイラ内部で以下のMMLに変換されます。<br>
+<code>
+SysEx = $F0, MakerID_NonRealTime,<var>idDevice</var>, NRT_Tuning, NRT_Tuning_ScaleOctaveTuning1Byte, <var>Int iChannel[3Byte]</var>, <var>ARRAY iOffsetB(12)[12Byte]</var>, $F7<br>
+SysEx = $F0, MakerID_NonRealTime,<var>idDevice</var>, NRT_Tuning, NRT_Tuning_ScaleOctaveTuning2Byte, <var>Int iChannel[3Byte]</var>, <var>ARRAY iOffsetW(12)[24Byte]</var>, $F7<br>
+</code>
+<br>
+
+<br><br>
+<h3>■引数</h3>
+<table>
+<tr><th width='64pt'>引数名	</th>
+	<th width='64pt'>初期値	</th>
+	<th width='64pt'>範囲	</th>
+	<th width='448pt'>機能	</th></tr>
+<tr><td><var>INT iChannel</var>	</td>
+	<td> - </td>
+	<td>$0000～$FFFF</td>
+	<td>適用するMIDI Channelを指定します。<br>
+		Bit0 … MIDI Channel 1<br>
+		Bit1 … MIDI Channel 2<br>
+		～<br>
+		Bit15 … MIDI Channel 16</td></tr>
+<tr><td><var>ARRAY iOffsetB(12)</var>	</td>
+	<td>64×12</td>
+	<td>0～127</td>
+	<td>スケール・オクターブ・チューニング 1Byteフォーマット用の引数です。<br>
+		（リアルタイム、ノン・リアルタイム共にフォーマットは同じです。）<br>
+		ド(C)～シ(B)の12音のチューニング量を指定します。<br>
+		（ <var>iOffsetB</var> － 64 ） [cent]<br>
+		0 　： -64 [cent]<br>
+		64　： 　0 [cent]（＝平均律）<br>
+		127 ： +63 [cent]</td></tr>
+<tr><td><var>ARRAY iOffsetW(12)</var>	</td>
+	<td>8192×12</td>
+	<td>0～16383</td>
+	<td>スケール・オクターブ・チューニング 2Byteフォーマット用の引数です<br>
+		（リアルタイム、ノン・リアルタイム共にフォーマットは同じです。）<br>
+		ド(C)～シ(B)の12音のチューニング量を指定します。<br>
+		（ <var>iOffsetW</var> － 8192 ） × 100 ÷ 8192 [cent]<br>
+		0 　　： -100.0 [cent]<br>
+		8192　： 　 0.0 [cent]（＝平均律）<br>
+		16383 ： + 99.9 [cent]</td></tr>
+<tr><td><var>INT idDevice</var>	</td>
+	<td>$7F</td>
+	<td>$00 ～ $7F</td>
+	<td>MIDIデバイスのDeviceIDを指定します。<br>
+		MIDI規格では、Bloadcastである$7Fを推奨しています。</td></tr>
+</table><br>
+
+
+<br>
+<h3>■返り値</h3>
+無し<br>
+<br>
+
+<br>
+<h3>■説明</h3>
+　各チャンネルの各12個の音階について、チューニングを行います。<br>
+<var>INT iChannel</var>で適用するチャンネルをビットにて指定し、
+<var>Array iOffsetB(12)</var>若しくは<var>Array iOffsetW(12)</var>の配列変数にてド(C)～シ(B)までのチューニングを指定します。<br>
+リアルタイム(Real Time)のメッセージは、MIDIデバイスがノートが発音中であっても直ちに設定が適用されます。<br>
+ノン・リアルタイム(Non Real Time)は演奏前のセットアップ用のメッセージで、MIDIデバイスがノートを発音中であった場合には
+MIDIデバイスはこのメッセージを無視する事が推奨されています。<br>
+<br>
+GM System Level.2(GM2)に対応したMIDI楽器は、ノン・リアルタイム、1ByteフォーマットのNRT_OctaveTuningB()関数が標準で使用可能です。<br>
+リアルタイムのRT_OctaveTuningB()関数については、GM System Level.2(GM2)では『推奨』となっており、実装は義務付けられておりません。<br>
+これはメッセージの受信後に、チューニングを即座に適用させるのは、高度な演算能力が必要な為です。<br>
+又、2ByteフォーマットのRT_OctaveTuningW()及びNRT_OctaveTuningW()関数についても、GM System Level.2(GM2)では実装を義務付けられておりません。<br>
+<br>
+
+<br>
+<h3>■使用例</h3>
+<table>
+<caption>List.1 </caption>
+<tr><td><pre><code>
+//---------------------------------------------------------------
+//	純正率(ハ長調) (A=440Hz)	音楽通論(著：近森一重) Version
+MasterTuning(0);		//	A=440Hz	のチューニング
+//						c  c+ d  d+ e  f   f+ g  g+ a  a+ b
+NRT_OctaveTuningB($FFFF,80,50,62,74,66,78,48,82,52,64,76,80);
+
+TR(1)	r1	c4	d4	e4	f4	g4	a4	b4>	c4<
+
+//
+//	試してみたところ、ハ長調でしか使い物にならない模様。
+//	ハ長調以外で使う場合は、ローテートする。
+//	転調する曲には不向き。
+//
+
+
+//---------------------------------------------------------------
+//	純正率(ハ長調) (C=平均率)	Roland Manual Version
+MasterTuning(1147);		//	A=440Hzに補正する。(↓でaが-14なので。)
+//						c  c+ d  d+ e  f   f+ g  g+ a  a+ b
+NRT_OctaveTuningB($FFFF,64,56,68,80,50,62,54,66,78,50,78,52);
+
+TR(1)	r1	c4	d4	e4	f4	g4	a4	b4>	c4<
+
+//
+//	これも、ハ長調用。
+//	ハ長調以外で使う場合は、ローテートする。
+//	転調する曲には不向き。
+//
+
+//------------------------------------------------------------------------------
+//ヴェルクマイスター第1技法第3番(for C major)
+MasterTuning(0);		//	A=440Hz
+//						c  c+ d  d+ e  f  f+ g  g+ a  a+ b
+NRT_OctaveTuningB($FFFF,76,66,68,70,66,74,64,72,68,64,72,68)
+
+TR(1)	r1	c4	d4	e4	f4	g4	a4	b4>	c4<
+
+//
+//	ハ長調用。転調にもある程度耐えられる。
+//	（転調を考慮して作られた調律）
+//	ハ長調以外が基本の調律となる場合は、ローテートする。
+//
+
+//---------------------------------------------------------------
+//	平均率(A=440Hz)
+MasterTuning(0);		//	A=440Hz	のチューニング
+NRT_OctaveTuningB($FFFF,64,64,64,64,64,64,64,64,64,64,64,64);
+
+TR(1)	r1	c4	d4	e4	f4	g4	a4	b4>	c4<
+
+//
+//	妥協の産物。（MIDIのデフォルトはこの調律）
+//	どの調でも使えるが、響きは悪くなる。
+//	ピアノは、音質が向上したため、平均率の調律でもそれなりの響きが得られるようになった。
+//
+</code></pre></td></tr>
+</table><br>
+
+
+<br>
+<!------------------------------------------------------------->
+<h3>■関連項目</h3>
+
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

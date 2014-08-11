@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS"><META name="GENERATOR" content="IBM HomePage Builder 2000 V4.0.2  for Windows">
+
+<TITLE>音源操作</TITLE>
+<STYLE><!--TABLE{font-family : "ＭＳ ゴシック";font-size : 14px;line-height : 18px;}
+BODY{list-style-type : upper-roman;list-style-position : outside;}
+--></STYLE>
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+<H2>音源操作</H2>
+<HR>
+<P>現在のMIDI音源は、音がリアルになっただけでなく、どんどん機能も充実してきて、様々なエフェクトをかけたり、音色をエディットしたり、楽しい機能がたくさんあります。</P>
+<P>しかし、そのエフェクトのかかり具合や、どのようにエフェクトを操作するのかなど、MIDI音源ごとに違ってくるので、ご利用のMIDI音源の取扱説明書を見てもらうしかないのですが、ここでは、普通の音源に共通の音源操作方法を見ていきます。</P>
+<HR>
+<P>・代表的な音源操作の方法</P>
+<OL>
+  <LI><A href="#コントロールチェンジ">コントロールチェンジ</A> ( <FONT color="#ff0000" size="+1"><B>y</B></FONT>n1,n2 )
+  <LI><A href="#ピッチベンド">ピッチベンド</A>( <FONT color="#ff0000" size="+1"><B>p</B></FONT>n1 )
+  <LI><A href="#エクスクルーシブ">RPN　と　NRPN</A> ( <FONT color="#ff0000"><B>RPN</B></FONT> = n1,n2,n3 ||<FONT color="#ff0000"> <B>NRPN</B></FONT> = n1,n2,n3 )
+  <LI><A href="#エクスクルーシブ">システム・エクスクルーシブ・メッセージ</A> ( <FONT color="#ff0000"><B>SysEx</B></FONT> = n1,n2,n3 ... )
+</OL>
+<HR>
+<OL>
+  <LI><A name="コントロールチェンジ"><B>コントロールチェンジ</B></A><BR>
+  <BR>
+  ・代表的で手軽な音源操作の方法です。<BR>
+  →メインボリュームや、パンポット（音の定位）、リバーブ（エコー・残響音）などを操作できます。それぞれのコントロールチェンジの<B>値は、０～１２７まで</B>です。<BR>
+  <BR>
+  ・比較的よく使うコントロールチェンジは、マクロとして定義してあります。詳しくは、ヘルプのMML・コントロールチェンジ・ピッチベンドの項を参照してください。<BR>
+  <BR>
+  使い方：<BR>
+  ここでは、コントロールチェンジ１０番のパンポットを使ってみます。これは、音の定位を設定するものです。サクラでは、&quot;Panpot&quot;という名前で定義されています。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#3300ff">Panpot(0)</FONT> cdef<BR>
+        <FONT color="#3300ff">Panpot(127)</FONT> cdef<BR>
+        <FONT color="#3300ff">Panpot(64)</FONT> cdef　//定位中央</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  と、このように使います。<BR>
+  次に、コントロールチェンジ１番の<FONT color="#6600ff">Modulation</FONT>です。これは、ビブラートの深さを調節します。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#6600ff">Modulation(0)</FONT>; l4 cdef<BR>
+        <FONT color="#6600ff">Modulation(127)</FONT>; l4 cdef<BR>
+        <FONT color="#6600ff">Modulation(0)</FONT>; l4 cdef</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  （このように最小値と最大値で聞き比べると何が起こってるのか解り易いですね。）<BR>
+  <BR>
+  
+  <LI><B>コントロールチェンジ・オプション</B><BR>
+  <BR>
+  さて、コントールチェンジにも、ノートオン関連コマンドのような先行指定オプションが存在します。<BR>
+  ただし、微妙に使い勝手が違いますので、ご注意ください。<BR>
+  <BR>
+  <FONT color="#3300ff"><B>.onNote( n1,n2,n3...)<BR>
+  </B></FONT>これは、ノートオンの度に、コントロールチェンジを１つ出力します。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#3300ff">Chorus(0)</FONT>; l4 cdef<BR>
+        <FONT color="#3300ff">Chorus.onNote(0,127)</FONT>; l4 cdef<BR>
+        <FONT color="#3300ff">Chorus(30)</FONT>;//.onNote 解除<BR>
+        <BR>
+        <FONT color="#3300ff">Panpot(0)</FONT>; l4 cdef<BR>
+        <FONT color="#3300ff">Panpot.onNote(0,127)</FONT>; l4 cdef<BR>
+        <FONT color="#3300ff">Panpot(64)</FONT>;//.onNote 解除</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <B><FONT color="#3300ff">.onTime( (低値, 高値, ステップタイム),...)</FONT></B><BR>
+  これは、ステップタイムの間に<FONT color="#3300ff"><FONT color="#330000">低値から高値</FONT></FONT>へ向かって、コントロールチェンジを一通り連続出力します。繰り返し出力はされません。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#3300ff">Modulation(0)</FONT>; l4 cdef<BR>
+        <FONT color="#3300ff">Modulation.onTime(0,127,!1)</FONT>;<BR>
+        l4 cdef g2g2<BR>
+        <FONT color="#3300ff">Modulation(0)</FONT>; c1</TD>
+      </TR>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#6600ff">Panpot.onTime((0,127,!1),(127,0,!1))</FONT>;<BR>
+        l4 cccc cccc cccc cccc<BR>
+        <FONT color="#6600ff">Panpot(64)</FONT> eeee</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <B><FONT color="#3300ff">.onNoteWave( (低値, 高値, ステップタイム),...)</FONT><BR>
+  </B>ノートオンの度にステップタイムの間に低値から高値へコントロールチェンジを連続出力します。<B>解除</B>は、<FONT color="#3333ff">コマンド</FONT><FONT color="#9900cc">値</FONT>を普通に指定します。また、.Repeat(off)にしておくと、一度きりで解除されます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#3300ff">Panpot.onNoteWave((0,127,!4))</FONT>;<BR>
+        l4 cccc cccc<BR>
+        <FONT color="#3300ff">Panpot.onNoteWave((0,127,!2))</FONT>;<BR>
+        cccc cccc<BR>
+        <FONT color="#3300ff">Panpot(64)</FONT><FONT color="#ff3300">//.onNoteWave解除</FONT><BR>
+        <FONT color="#ff3300"><FONT color="#330000">eeee</FONT></FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <B><FONT color="#3300ff">.onNoteWaveEx( (低値, 高値, 割合),.</FONT></B><FONT color="#3300ff"><B>..</B><B>)</B></FONT><BR>
+  これは基本的には.onNoteWaveと同じですが、ノートの音長に応じて、値の変化のスピードが変わってきます。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#6600ff">Panpot.onNoteWaveEx((0,127,!8),(127,64,!4))</FONT><BR>
+        q100 l1cc l2cccc l4cccccccc<BR>
+        <FONT color="#3300ff">Panpot(64)</FONT><FONT color="#ff3300">//.onNoteWaveEx解除</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  <B><FONT color="#3300ff">.onNoteWaveR( (低値, 高値, ステップタイム),.</FONT><FONT color="#3300ff">..)</FONT><BR>
+  </B>これも基本的には.onNoteWaveと同じですが、ノートの音長が続く限り、パラメーターの低値から高値を繰り返します。<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc"><FONT color="#6600ff">Panpot.onNoteWaveR((0,127,!8),(127,0,!8))</FONT><BR>
+        q100 [4 l1cccc]<BR>
+        <FONT color="#3300ff">Panpot(64)</FONT><FONT color="#ff3300">//.onNoteWaveR解除</FONT></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <B><BR>
+  </B><B><FONT color="#3300ff">.Frequency(ステップタイム)</FONT></B><BR>
+  コントロールチェンジを書き込む頻度を設定します。<BR>
+  <BR>
+  <B><FONT color="#3300ff">.Range(低値,高値)</FONT></B><BR>
+  コントロールチェンジの値を制限します。ノートオン・オプションの.Rangeと同じです。<BR>
+  <BR>
+  
+  <LI><B><A name="ピッチベンド">ピッチベンド</A>(PitchBend)</B><BR>
+  ピッチベンドとは、その名の通りピッチを調整するものです。<B><FONT color="#6600ff">PitchBend(n)</FONT></B>で指定し、値の範囲は、-8192～8191までです。-8192は、１６進法で-2000Hです。サクラでは、値の前に<FONT color="#ff0000">$</FONT>をつけるとその値を１６進法と見なします。<BR>
+  よってピッチベンドの範囲は、-$2000～$1FFFまでと書けます。<BR>
+  <BR>
+  また、ピッチベンドもコントロールチェンジ・オプションと同等のオプションが指定できます。<BR>
+  （ピッチベンドを使って遊んでみました。）<BR>
+  <TABLE border="1">
+    <TBODY>
+      <TR>
+        <TD bgcolor="#ffffcc">r%4q100 o5<BR>
+        <BR>
+        <FONT color="#ff0000">PitchBendSensitivity</FONT><FONT color="#ff0000">(24)</FONT>;//ベンドレンジを２４半音に<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#ff0000">(0)</FONT>; c2<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#0000ff">.onNote</FONT><FONT color="#ff0000">(20</FONT><FONT color="#ff0000">,90</FONT><FONT color="#ff0000">,-10</FONT><FONT color="#ff0000">,0</FONT><FONT color="#ff0000">)</FONT>; <BR>
+        l4 cdefgfed<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#0000ff">.onTime</FONT><FONT color="#ff0000">(0</FONT><FONT color="#ff0000">,$1FFF</FONT><FONT color="#ff0000">,!1</FONT><FONT color="#ff0000">)</FONT>;<BR>
+        c1c2 <FONT color="#ff0000">PitchBend</FONT><FONT color="#ff0000">(0)</FONT>; c2<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#0000ff">.onNoteWave</FONT><FONT color="#ff0000">((-$2000,0,!4),(0,-$2000,!4))</FONT>;<BR>
+        l1cc l2 cccc l4 cccccccc<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#0000ff">.onNoteWaveEx<FONT color="#ff0000">((-$2000,0,!4),(0</FONT><FONT color="#ff0000">,-$2000</FONT><FONT color="#ff0000">,!4))</FONT></FONT>;<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#3300ff">.Frequency</FONT><FONT color="#ff0000">(3)</FONT>;//書き込み頻度を変えて遊ぶ<BR>
+        l1cc l2 cccc l4 cccccccc<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#3300ff">.Frequency</FONT><FONT color="#ff0000">(!32)</FONT>;<BR>
+        l1cccc<BR>
+        <FONT color="#ff0000">PitchBend</FONT><FONT color="#3300ff">.Frequency</FONT><FONT color="#ff0000">(!16)</FONT>;<BR>
+        l1cccc</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+  <BR>
+  
+  <LI><B><A name="エクスクルーシブ">RPN　NRPN　エクスクルーシブメッセージ</A></B><BR>
+  <BR>
+  これらは、音源の様々な細かい情報を設定するのに使われます。<BR>
+  数が多く音源によっても対象が違います。<BR>
+  <BR>
+  しかし、各音源共通の<B>GM規格</B>ものと、現在主流であるローランド提唱の<B>GS音源</B>と、ヤマハ提唱の<B>XG音源</B>の音源操作命令のいくつかは、Includeフォルダーにて関数として定義されています。代表的なものは、&quot;stdmsg.h&quot;に、ＧＳ音源は、&quot;gs.h&quot;に、ＸＧ音源は、&quot;xg.h&quot;にて定義されています。<BR>
+  <BR>
+  これらの関数を使うには、MML先頭に、Include(ファイル名);
+  の一文を書き加えてください。<BR>
+  <BR>
+  音源操作の名前をそのまま関数名として定義してありますので、音源の説明書と見比べれば、すぐ使えるかと思います。<BR>
+  <BR>
+  <A href="mml4.htm#関数">関数の詳しい説明</A>は、また後ほど。
+</OL>
+<HR>
+<P align="right"><A href="index.htm">戻る</A>｜<A href="mml4.htm">次へ</A></P>
+</BODY>
+</HTML>

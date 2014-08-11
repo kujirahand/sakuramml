@@ -1,0 +1,61 @@
+'コマンドのインデックス作成
+『command.txt』を、開く。
+0列目を、表ソート。
+//「sort.txt」へ、保存。
+目次=「」
+索引=「」
+結果=『<TABLE border=1><TR><TD>名前</TD><TD>引数</TD><TD>説明</TD></TR>』&"\n"
+重複チェック=「」
+反復(
+	LINE=それ
+	もし、MID(LINE,1,2)<>`//`ならば(
+		S=MID(LINE,1,1)
+		もし、S="`"ならば、S="‘"
+		もし、S<>索引ならば（
+			CS=ASC(S);
+			結果＝結果＆「<TR bgcolor=blue><TD colspan=3><A name=\"word_{CS}\"><FONT color=white>{S}</FONT></A></TD></TR>\n」
+			目次=目次&「<A href=\"#word_{CS}\">{S}</A>/」
+		）。
+		HTML化する。
+		NAME=それ#0#0　；もし、NAME="`"ならば、NAME="‘"
+		ARG＝それ#1#0　；もし、ARG="`"ならば、ARG="‘"
+		TXT=それ#2#0
+		NO=それ#3#0
+		重複チェックの中で、「?{NAME}?」が、何文字目
+		もし、それ=0ならば（
+		もし、NAME＜＞「」ならば（
+			ARGを、トリムして、ARGに、入れる。
+			もし、ARG=""ならば、ARG="　";
+			TXTを、トリムして、TXTに、入れる。
+			もし、TXT=""ならば、TXT="　";
+		もし、NO=""ならば（
+			結果＝結果＆「<TR><TD>{NAME}</TD><TD>{ARG}</TD><TD>{TXT}</TD><TR>\n」
+		）違えば（
+			結果＝結果＆「<TR><TD><A href=\"{NO}.htm\">{NAME}</A></TD><TD>{ARG}</TD><TD>{TXT}</TD></TR>\n」
+		）））。
+		索引=S
+		重複チェック＝重複チェック＆「?{NAME}? 」
+		NAME="";ARG="";TXT="";
+	）
+）。
+
+「<HTML>
+<HEAD>
+<TITLE>命令一覧　５０音順</TITLE>
+</HEAD>
+<BODY>
+<H1>システムの命令一覧　５０音順</H1>
+<P>索引</P>
+{目次}
+<BR><HR><BR>
+{結果}</TABLE>
+</BODY>
+</HTML>」を、「command\\index.htm」へ、保存。
+「command\\index.htm」を、起動。
+おわり。
+
+＊HTML化する
+『&』を、『&amp;』に、置換。
+『<』を、『&lt;』に、置換。
+『>』を、『&gt;』に、置換。
+戻る

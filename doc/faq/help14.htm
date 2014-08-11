@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META name="GENERATOR" content="IBM WebSphere Homepage Builder V6.0.1 for Windows">
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>パンポット</TITLE>
+</HEAD>
+<BODY background="cta03.gif">
+<TABLE width="100%">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#004d00"><B><FONT size="+2" color="#ffffff">　パンポット</FONT></B></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<BLOCKQUOTE><B><FONT color="#004d00"><BR>
+<BR>
+何もしないと音は全部真ん中から出てしまいますが、せっかくステレオなんですから左からとか右からとか音を出したい事もあるかと思います。<BR>
+<BR>
+ストトンでは変えられないので、ＭＭＬからちょっと借りてきていじってみましょう。<BR>
+<BR>
+半角で<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">P( ? )<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">と書くと音の出る方向を変えられます。<BR>
+（？には０～１２７の数字を書いてください）<BR>
+<BR>
+<BR>
+</FONT></B>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD align="center">０</TD>
+      <TD align="center">６４</TD>
+      <TD align="center">１２７</TD>
+    </TR>
+    <TR>
+      <TD align="center">左</TD>
+      <TD align="center">真ん中</TD>
+      <TD align="center">右</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<B><FONT color="#004d00"><BR>
+<BR>
+のようになっていて、初期状態では６４になっています。<BR>
+３２くらいだったら左斜め前、９６くらいだったら右斜め前あたりから音が出るって事ですね。<BR>
+<BR>
+<BR>
+同じ場所から出てる音はお互い潰しあってしまうので、ストリングスは左、ベースは真ん中、ピアノは左…などと分けておくと、音の輪郭がはっきりします。演出だけでなく、実用面でも使える機能です。<BR>
+<BR>
+同じ楽器でもドは左、ミは真ん中、ソは右…と和音を分ける方法も中々効果的。<BR>
+(私はよく、ドとソは左、ミとシは右、というように使って広がり感を出すのに使います)<BR>
+<BR>
+ただし同じ<A href="help12.htm">チャンネル</A>の音符は全部同じ場所になってしまうので注意してください。<BR>
+同じ楽器でも違う場所からバラバラに出したい場合は違うチャンネルを用意しましょう。<BR>
+<BR>
+<BR>
+<BR>
+じわじわ位置を移動させる方法もあります。<BR>
+<BR>
+音符に対して一個一個場所を指定していくのは大変なので、<BR>
+</FONT></B></BLOCKQUOTE>
+<BLOCKQUOTE><FONT color="#000000" size="-1">P.T( 0, 127, !2 )<FONT color="#000000" size="-1"><BR>
+</FONT></FONT></BLOCKQUOTE>
+<BLOCKQUOTE><B><FONT color="#004d00">という風に書くと、自動で音の位置をじわじわ移動してくれます。<BR>
+<BR>
+</FONT><FONT color="#ff0000">Ｐ．Ｔ(始まりの場所，終わりの場所，！長さ)</FONT><FONT color="#004d00"><BR>
+<BR>
+という意味です。<BR>
+<BR>
+例では「左から右まで２分音符の長さで移動せよ」と書いてる訳ですね。<BR>
+<BR>
+<BR>
+<BR>
+</FONT></B><BR>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

@@ -1,0 +1,1304 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<meta http-equiv="Content-Style-Type" content="text/html; charset=Shift_JIS">
+	<link rel="stylesheet" type="text/css" href="bwb_scale.css">
+	<link rev="made" href="mailto:bluewhitebear@hotmail.com">
+	<link rel="index"	href="../bwb_scale.htm">
+	<link rel="prev" 	href="7.htm">
+	<title>bwb_scale.h マニュアル 「８．リファレンス」</title>
+</head>
+<body>
+<h1>８．リファレンス</h1>
+<p>アルファベット順に並んでるので、活用してください。</p>
+<p>見方における備考<br>
+値転調モード・・・BS_K,BS_KEY等の転調タイプ。ちなみにBS_K2,BS_KEY2は値転調モード２で、BS_K3,BS_KEY3は値転調モード３<br>
+Int・・・引数のタイプが数値型であること。BS_FK(Int X)の場合、Intの場所には数字をいれること。</p>
+<hr>
+<ul>
+	<li><a href="#BS_A()">BS_A()</a></li>
+	<li><a href="#BS_Ab()">BS_Ab()</a></li>
+	<li><a href="#BS_Ap()">BS_Ap()</a></li>
+	<li><a href="#BS_B()">BS_B()</a></li>
+	<li><a href="#BS_Bb()">BS_Bb()</a></li>
+	<li><a href="#BS_Bp()">BS_Bp()</a></li>
+	<li><a href="#BS_C()">BS_C()</a></li>
+	<li><a href="#BS_Cb()">BS_Cb()</a></li>
+	<li><a href="#BS_CLEAR()">BS_CLEAR()</a></li>
+	<li><a href="#BS_Cp()">BS_Cp()</a></li>
+	<li><a href="#BS_D()">BS_D()</a></li>
+	<li><a href="#BS_Db()">BS_Db()</a></li>
+	<li><a href="#BS_DOWN()">BS_DOWN()</a></li>
+	<li><a href="#BS_Dp()">BS_Dp()</a></li>
+	<li><a href="#BS_E()">BS_E()</a></li>
+	<li><a href="#BS_Eb()">BS_Eb()</a></li>
+	<li><a href="#BS_Ep()">BS_Ep()</a></li>
+	<li><a href="#BS_F()">BS_F()</a></li>
+	<li><a href="#BS_Fb()">BS_Fb()</a></li>
+	<li><a href="#BS_FK(IntX)">BS_FK(Int X)</a></li> 
+	<li><a href="#BS_FK(IntX)">BS_FKEY(Int X)</a></li> 
+	<li><a href="#BS_Fp()">BS_Fp()</a></li>
+	<li><a href="#BS_G()">BS_G()</a></li>
+	<li><a href="#BS_Gb()">BS_Gb()</a></li>
+	<li><a href="#BS_Gp()">BS_Gp()</a></li>
+	<li><a href="#BS_HMINOR(IntX)">BS_HMINOR(Int X)</a></li> 
+	<li><a href="#BS_K(IntX)">BS_K(Int X)</a></li>
+	<li><a href="#BS_K2(IntX)">BS_K2(Int X)</a></li>
+	<li><a href="#BS_K2DOWN()">BS_K2DOWN()</a></li>
+	<li><a href="#BS_K2UP()">BS_K2UP()</a></li>
+	<li><a href="#BS_K3(IntX)">BS_K3(Int X)</a></li>
+	<li><a href="#BS_K3DOWN()">BS_K3DOWN()</a></li>
+	<li><a href="#BS_K3UP()">BS_K3UP()</a></li>
+	<li><a href="#BS_DOWN()">BS_KDOWN()</a></li>
+	<li><a href="#BS_K(IntX)">BS_KEY(Int X)</a></li>
+	<li><a href="#BS_K2(IntX)">BS_KEY2(Int X)</a></li>
+	<li><a href="#BS_K3(IntX)">BS_KEY3(Int X)</a></li>
+	<li><a href="#BS_UP()">BS_KUP()</a></li>
+	<li><a href="#BS_MMINOR(IntX)">BS_MMINOR(Int X)</a></li>
+	<li><a href="#BS_MODE(IntX)">BS_MODE(Int X)</a></li>
+	<li><a href="#BS_O(IntX)">BS_O(Int X)</a></li>
+	<li><a href="#BS_O(IntX)">BS_OCTAVE(Int X)</a></li>
+	<li><a href="#BS_ODOWN()">BS_ODOWN()</a></li>
+	<li><a href="#BS_OTHER(IntX)">BS_OTHER(Int X)</a></li>
+	<li><a href="#BS_OUP()">BS_OUP()</a></li>
+	<li><a href="#BS_PRINT()">BS_PRINT()</a></li>
+	<li><a href="#BS_SCALE_MINOR()">BS_SCALE_AEOLIAN()</a></li>
+	<li><a href="#BS_SCALE_AEOLIAN_b5()">BS_SCALE_AEOLIAN_b5()</a></li>
+	<li><a href="#BS_SCALE_ALTERED()">BS_SCALE_ALTERED()</a></li>
+	<li><a href="#BS_SCALE_ALTERED()">BS_SCALE_ALTEREDDOMINANT()</a></li>
+	<li><a href="#BS_SCALE_ALTERED_b7()">BS_SCALE_ALTERED_b7()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b1()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b2()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b3()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b4()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b5()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b6()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b7()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b9()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b11()</a></li>
+	<li><a href="#BS_SCALE_b1()">BS_SCALE_b13()</a></li>
+	<li><a href="#BS_SCALE_DORIAN()">BS_SCALE_DORIAN()</a></li>
+	<li><a href="#BS_SCALE_DORIAN_b2()"> BS_SCALE_DORIAN_b2()</a></li>
+	<li><a href="#BS_SCALE_DORIAN_b2()">BS_SCALE_DORIAN_b9()</a></li>
+	<li><a href="#BS_SCALE_DORIAN_p11()">BS_SCALE_DORIAN_p11()</a></li>
+	<li><a href="#BS_SCALE_HMINOR()">BS_SCALE_HMINOR()</a></li>
+	<li><a href="#BS_SCALE_HMINORP5B()">BS_SCALE_HMINORP5B()</a></li>
+	<li><a href="#BS_SCALE_HMINORP5B()">BS_SCALE_HMINORPERFECT5THBELOW()</a></li>
+	<li><a href="#BS_SCALE_MAJOR()">BS_SCALE_IONIAN()</a></li>
+	<li><a href="#BS_SCALE_IONIAN_p5()">BS_SCALE_IONIAN_p5()</a></li>
+	<li><a href="#BS_SCALE_IONIAN_p5()">BS_SCALE_IONIANAUGEMENTED()</a></li>
+	<li><a href="#BS_SCALE_LOCRIAN()">BS_SCALE_LOCRIAN()</a></li>
+	<li><a href="#BS_SCALE_AEOLIAN_b5()">BS_SCALE_LOCRIAN_2()</a></li>
+	<li><a href="#BS_SCALE_LOCRIAN_6()">BS_SCALE_LOCRIAN_6()</a></li>
+	<li><a href="#BS_SCALE_LOCRIAN_6()">BS_SCALE_LOCRIAN_13()</a></li>
+	<li><a href="#BS_SCALE_LYDIAN()">BS_SCALE_LYDIAN()</a></li>
+	<li><a href="#BS_SCALE_LYDIANAUGEMENTED()">BS_SCALE_LYDIANAUGEMENTED()</a></li>
+	<li><a href="#BS_SCALE_MIXOLYDIAN_p11()">BS_SCALE_LYDIAN_b7()</a></li>
+	<li><a href="#BS_SCALE_LYDIAN_p2()">BS_SCALE_LYDIAN_p2()</a></li>
+	<li><a href="#BS_SCALE_LYDIANAUGEMENTED()">BS_SCALE_LYDIAN_p5()</a></li>
+	<li><a href="#BS_SCALE_LYDIAN_p2()">BS_SCALE_LYDIAN_p9()</a></li>
+	<li><a href="#BS_SCALE_MAJOR()">BS_SCALE_MAJOR()</a></li>
+	<li><a href="#BS_SCALE_MINOR()">BS_SCALE_MINOR()</a></li>
+	<li><a href="#BS_SCALE_MIXOLYDIAN()">BS_SCALE_MIXOLYDIAN()</a></li>
+	<li><a href="#BS_SCALE_MIXOLYDIAN_b6()">BS_SCALE_MIXOLYDIAN_b6()</a></li>
+	<li><a href="#BS_SCALE_MIXOLYDIAN_b6()">BS_SCALE_MIXOLYDIAN_b13()</a></li>
+	<li><a href="#BS_SCALE_MIXOLYDIAN_p11()">BS_SCALE_MIXOLYDIAN_p11()</a></li>
+	<li><a href="#BS_SCALE_MINOR()">BS_SCALE_MMINOR()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p1()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p2()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p3()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p4()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p5()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p6()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p7()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p9()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p11()</a></li>
+	<li><a href="#BS_SCALE_p1()">BS_SCALE_p13()</a></li>
+	<li><a href="#BS_SCALE_PHRYGIAN()">BS_SCALE_PHRYGIAN()</a></li>
+	<li><a href="#BS_SCALE_AEOLIAN_b5()">BS_SCALE_SUPERLOCRIAN()</a></li>
+	<li><a href="#BS_SCALE_UNDO(IntX)">BS_SCALE_UNDO(Int X)</a></li> 
+	<li><a href="#BS_TK(IntX)">BS_TK(Int X)</a></li> 
+	<li><a href="#BS_TK(IntX)">BS_TKEY(Int X)</a></li> 
+	<li><a href="#BS_UP()">BS_UP()</a></li>
+	<li><a href="#BS_WORLD(IntX)">BS_WORLD(Int X)</a></li> 
+</ul>
+<hr>
+
+<ul>
+	<li><p><a name="BS_A()">BS_A（）</a></p>
+		<p>A調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(0,0,1,0,0,1,1)です。</p>
+	</li>
+	<li><p><a name="BS_Ab()">BS_Ab()</a></p>
+		<p>A♭(=G♯)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(-1,-1,0,-1,-1,0,0)です。</p>
+	</li>
+	<li><p><a name="BS_Ap()">BS_Ap()</a></p>
+		<p>A♯(=B♭)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(1,1,2,1,1,2,2)です。</p>
+	</li>
+	<li><p><a name="BS_B()">BS_B()</a></p>
+		<p>B調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(1,0,1,1,0,1,1)です。</p>
+	</li>
+	<li><p><a name="BS_Bb()">BS_Bb()</a></p>
+		<p>B♭(=A♯)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(0,-1,0,0,-1,0,0)です。</p>
+	</li>
+	<li><p><a name="BS_Bp()">BS_Bp()</a></p>
+		<p>C調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(2,1,2,2,1,2,2)です。</p>
+	</li>
+	<li><p><a name="BS_C()">BS_C()</a></p>
+		<p>C調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(0,0,0,0,0,0,0)です。</p>
+	</li>
+	<li><p><a name="BS_Cb()">BS_Cb()</a></p>
+		<p>B調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(-1,-1,-1,-1,-1,-1,-1)です。</p>
+	</li>
+	<li><p><a name="BS_CLEAR()">BS_CLEAR()</a></p>
+		<p>現在の調のデータなどを全てリセットし、<br>
+		はじめと同じ状態にします。</p>
+	</li>
+	<li><p><a name="BS_Cp()">BS_Cp()</a></p>
+		<p>C♯(=D♭)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(1,1,1,1,1,1,1)です。</p>
+	</li>
+	<li><p><a name="BS_D()">BS_D()</a></p>
+		<p>D調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(0,0,1,0,0,1,0)です。</p>
+	</li>
+	<li><p><a name="BS_Db()">BS_Db()</a></p>
+		<p>D♭(=C♯)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(-1,-1,0,-1,-1,0,-1)です。</p>
+	</li>
+	<li><a name="BS_DOWN()">BS_DOWN()</a></li>
+	<li><p>BS_KDOWN()</p>
+		<p>半音下に転調します。（値転調モード１）<br>
+		ヘッダー内部ではBS_Kの値がマイナスされる動作がおきます。<br>
+		ですので、BS_Kで６半音上に転調していると<br>
+		BS_K(5)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_Dp()">BS_Dp()</a></p>
+		<p>D♯(=E♭)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(1,1,2,1,1,2,1)です。</p>
+	</li>
+	<li><p><a name="BS_E()">BS_E()</a></p>
+		<p>E調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(0,0,1,1,0,1,1)です。</p>
+	</li>
+	<li><p><a name="BS_Eb()">BS_Eb()</a></p>
+		<p>E♭(=D♯)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(-1,-1,0,0,-1,0,0)です。</p>
+	</li>
+	<li><p><a name="BS_Ep()">BS_Ep()</a></p>
+		<p>F調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(1,1,2,2,1,2,2)です。</p>
+	</li>
+	<li><p><a name="BS_F()">BS_F()</a></p>
+		<p>F調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(0,-1,0,0,0,0,0)です。</p>
+	</li>
+	<li><p><a name="BS_Fb()">BS_Fb()</a></p>
+		<p>E調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(-1,-2,-1,-1,-1,-1,-1)です。</p>
+	</li>
+	<li><a name="BS_FK(IntX)">BS_FK(Int X)</a></li> 
+	<li><p>BS_FKEY(Int X)</p> 
+		<p>Xの値だけ５度転調を行います。（chord5.hにおけるTrans(Int X)と同じです。）<br>
+		BS_FK(1)だと5半音上に転調しますが、(BS_KEY(5)と同じ効果です。）<br>
+		BS_FK(2)だと極端な転調を避けるため、10半音上にあがらず、2半音下に転調します。<br>
+		BS_FK(3)だと15半音上ではなく3半音上に転調します。<br>
+		BS_FK(-1)ですと、5半音下に転調しますが、<br>
+		BS_FK(-2)だと、極端なオクターブ下がりを防ぐため、2半音上に転調します。<br>
+		このように、BS_FKは自動的にオクターブの値もコントロールしてくれます。<br>
+		もし意図的にオクターブ操作を望む場合は<br>
+		BS_O,BS_OUP,BS_ODOWN等で調整してください。</p>
+	</li>
+	<li><p><a name="BS_Fp()">BS_Fp()</a></p>
+		<p>F♯(=G♭)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(1,0,1,1,1,1,1)です。</p>
+	</li>
+	<li><p><a name="BS_G()">BS_G()</a></p>
+		<p>G調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(0,0,0,0,0,1,0)です。</p>
+	</li>
+	<li><p><a name="BS_Gb()">BS_Gb()</a></p>
+		<p>G♭(=A♯)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(1,1,1,1,1,2,1)です。</p>
+	</li>
+	<li><p><a name="BS_Gp()">BS_Gp()</a></p>
+		<p>G♭(=F♯)調に転調します。<br>
+		実際に修正されるキーフラグの値は<br>
+		abcdefg→(-1,-1,-1,-1,-1,0,-1)です。</p>
+	</li>
+	<li><p><a name="BS_HMINOR(IntX)">BS_HMINOR(Int X)</a></p> 
+		<p>Xの番号に対応したハーモニックマイナー系のスケールに変えます。<br>
+		番号の対応は下の表の通りです。</p>
+	
+
+	<table border="1" summary="ハーモニック・マイナー">
+		<tr>
+			<td>X</td>
+			<td>スケール名</td>
+			<td>キーＣにおける構成音</td>
+		</tr>
+		<tr>
+			<td><p><strong>０</strong></p></td>
+			<td><p><strong>Harmonic Minor</strong></p>
+				<p>BS_HMINOR(0)<br>BS_SCALE_HMINOR</p></td>
+			<td><img style="border:0px;" alt="Harmonic Minor" src="bwb_scale_hminor_harmonicminor_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>１</strong></p></td>
+			<td><p><strong>Locrian 6<br>(Locrian 13)</strong></p>
+				<p>BS_HMINOR(1)<br>BS_SCALE_LOCRIAN_6</p></td>
+			<td><img style="border:0px;" alt="Locrian 6" src="bwb_scale_hminor_locrian_6_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>２</strong></p></td>
+			<td><p><strong>Ionian #5<br>(Ionian Augemented)</strong></p>
+				<p>BS_HMINOR(2)<br>BS_SCALE_IONIAN_p5</p></td>
+			<td><img style="border:0px;" alt="Ionian #5" src="bwb_scale_hminor_ionian_p5_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>３</strong></p></td>
+			<td><p><strong>Dorian #11</strong></p>
+				<p>BS_HMINOR(3)<br>BS_SCALE_DORIAN_p11</p></td>
+			<td><img style="border:0px;" alt="Dorian #11" src="bwb_scale_hminor_dorian_p11_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>４</strong></p></td>
+			<td><p><strong>Harmonic Minor Perfect 5th Below<br>
+					(表示の効率のためにヘッダーでは、<br>
+					　「Harmonic Minor P5th Below」<br> 
+					　と表示します。)</strong></p></td>
+			<td><img style="border:0px;" alt="Harmonic Minor Perfect 5th Below" width="480" height="120" src="bwb_scale_hminor_hminorp5b_01.JPG"></td>
+		</tr>
+		<tr>
+			<td><p><strong>５</strong></p></td>
+			<td><p><strong>Lydian #9</strong></p></td>
+			<td><img style="border:0px;" alt="Lydian #9" width="480" height="120" src="bwb_scale_hminor_lydian_p9_01.JPG"></td>
+		</tr>
+		<tr>
+			<td><p><strong>６</strong></p></td>
+			<td><p><strong>Altered ♭7</strong></p></td>
+			<td><img style="border:0px;" alt="Altered b7" width="480" height="120" src="bwb_scale_hminor_altered_b7_01.JPG"></td>
+		</tr>
+	</table><br></li>
+
+	<li><a name="BS_K(IntX)">BS_K(Int X)</a></li>
+	<li><p>BS_KEY(Int X)</p>
+		<p>Xの値だけ半音転調します。（値転調モード１）<br>
+		上に転調したい場合はプラスの値を。<br>
+		下に転調したい場合はマイナスの値をいれてください。</p>
+	</li>
+	<li><a name="BS_K2(IntX)">BS_K2(Int X)</a></li>
+	<li><p>BS_KEY2(Int X)</p>
+		<p>Xの値だけ半音転調します。（値転調モード２）<br>
+		上に転調したい場合はプラスの値を。<br>
+		下に転調したい場合はマイナスの値をいれてください。<br>
+		ヘッダー内部ではBS_Kと別々に変数の管理が行われていますので、<br>
+		BS_K(2)、BS_K2(-2)を行った後にBS_K(0)を行うと、<br>
+		2半音下に転調されていることになります。</p>
+	</li>
+	<li><a name="BS_K3(IntX)">BS_K3(Int X)</a></li>
+	<li><p>BS_KEY3(Int X)</p>
+		<p>Xの値だけ半音転調します。（値転調モード３）<br>
+		上に転調したい場合はプラスの値を。<br>
+		下に転調したい場合はマイナスの値をいれてください。<br>
+		ヘッダー内部ではBS_Kと別々に変数の管理が行われていますので、<br>
+		BS_K(4)、BS_K2(-1)を行った後にBS_K(0)を行うと、<br>
+		1半音下に転調されていることになります。</p>
+	</li>
+	<li><p><a name="BS_K2DOWN()">BS_K2DOWN()</a></p>
+		<p>半音下に転調します。（値転調モード２）<br>
+		ヘッダー内部ではBS_K2の値がマイナスされる動作がおきます。<br>
+		ですので、BS_K2で3半音上に転調していると<br>
+		BS_K2(2)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_K2UP()">BS_K2UP()</a></p>
+		<p>半音上に転調します。（値転調モード２）<br>
+		ヘッダー内部ではBS_K2の値がプラスされる動作がおきます。<br>
+		ですので、BS_K2で-3半音上に転調していると<br>
+		BS_K2(-2)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_K3DOWN()">BS_K3DOWN()</a></p>
+		<p>半音下に転調します。（値転調モード３）<br>
+		ヘッダー内部ではBS_K3の値がマイナスされる動作がおきます。<br>
+		ですので、BS_K3で-2半音上に転調していると<br>
+		BS_K3(-3)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_K3UP()">BS_K3UP()</a></p>
+		<p>半音上に転調します。（値転調モード３）<br>
+		ヘッダー内部ではBS_K3の値がプラスされる動作がおきます。<br>
+		ですので、BS_K3で6半音上に転調していると<br>
+		BS_K3(7)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_MMINOR(IntX)">BS_MMINOR(Int X)</a></p>
+		<p>Xの番号に対応したメロディックマイナー系のスケールに変えます。<br>
+		番号の対応は下の表の通りです。</p>
+
+	<table border="1" summary="メロディック・マイナー">
+		<tr>
+			<td>番号</td>
+			<td>スケール名</td>
+			<td>キーＣにおける構成音</td>
+		</tr>
+		<tr>
+			<td><p><strong>０</strong></p></td>
+			<td><p><strong>Melodic Minor</strong></p></td> 
+			<td><img style="border:0px;" alt="Melodic Minor" src="bwb_scale_mminor_melodicminor_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>１</strong></p></td>
+			<td><p><strong>Dorian ♭9<br>(Dorian ♭2)</strong></p></td>
+			<td><img style="border:0px;" alt="Dorian b9" src="bwb_scale_mminor_dorian_b9_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>２</strong></p></td>
+			<td><p><strong>Lydian #5<br>(Lydian Augemented)</strong></p></td>
+			<td><img style="border:0px;" alt="Lydian #5" src="bwb_scale_mminor_lydian_p5_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>３</strong></p></td>
+			<td><p><strong>Mixolydian #11<br>(Lydian ♭7)</strong></p></td>
+			<td><img style="border:0px;" alt="Mixolydian #11" src="bwb_scale_mminor_mixolydian_p11_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>４</strong></p></td>
+			<td><p><strong>Mixolydian ♭6<br>(Mixolydian ♭13)</strong></p></td>
+			<td><img style="border:0px;" alt="Mixolydian b6" width="480" height="120" src="bwb_scale_mminor_mixolydian_b13_01.JPG"></td>
+		</tr>
+		<tr>
+			<td><p><strong>５</strong></p></td>
+			<td><p><strong>Aeolian ♭5<br>(Super Locrian)</strong></p></td>
+			<td><img style="border:0px;" alt="Aeolian b5" width="480" height="120" src="bwb_scale_mminor_aeolian_b5_01.JPG"></td>
+		</tr>
+		<tr>
+			<td><p><strong>６</strong></p></td>
+			<td><p><strong>Altered<br>(Altered Dominant)</strong></p></td>
+			<td><img style="border:0px;" alt="Altered" width="480" height="120" src="bwb_scale_mminor_altered_01.JPG"></td>
+		</tr>
+	</table><br></li>
+
+	<li><p><a name="BS_MODE(IntX)">BS_MODE(Int X)</a></p>
+		<p>Xの番号に対応したチャーチモードのスケールに変えます。<br>
+		番号の対応は下の表の通りです。</p>
+
+	<table border="1" summary="チャーチモード">
+		<tr>
+			<td>番号</td>
+			<td>スケール名</td>
+			<td>キーＣにおける構成音</td>
+		</tr>
+		<tr>
+			<td><p><strong>０</strong></p></td>
+			<td><p><strong>Ionian Scale<br>(Major Scale)</strong></p></td>
+			<td><img style="border:0px;" alt="Ionian Scale" src="bwb_scale_mode_ionian_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>１</strong></p></td>
+			<td><p><strong>Dorian Scale</strong></p></td>
+			<td><img style="border:0px;" alt="Dorian Scale" src="bwb_scale_mode_dorian_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>２</strong></p></td>
+			<td><p><strong>Phrygian Scale</strong></p></td>
+			<td><img style="border:0px;" alt="Phrygian Scale" src="bwb_scale_mode_phrygian_01.JPG" width="480" height="120"></td>
+	 	</tr>
+		<tr>
+			<td><p><strong>３</strong></p></td>
+			<td><p><strong>Lydian Scale</strong></p></td>
+			<td><img style="border:0px;" alt="Lydian Scale" src="bwb_scale_mode_lydian_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>４</strong></p></td>
+			<td><p><strong>Mixolydian Scale</strong></p></td>
+			<td><img style="border:0px;" alt="Mixolydian Scale" src="bwb_scale_mode_mixolydian_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>５</strong></p></td>
+			<td><p><strong>Aeolian Scale<br>(Minor Scale)</strong></p></td>
+			<td><img style="border:0px;" alt="Aeolian Scale" src="bwb_scale_mode_aeolian_01.JPG" width="480" height="120"></td>
+		</tr>
+		<tr>
+			<td><p><strong>６</strong></p></td>
+			<td><p><strong>Locrian Scale</strong></p></td>
+			<td><img style="border:0px;" alt="Locrian Scale" src="bwb_scale_mode_locrian_01.JPG" width="480" height="120"></td>
+		</tr>
+	</table><br></li>
+
+	<li><a name="BS_O(IntX)">BS_O(Int X)</a></li>
+	<li><p>BS_OCTAVE(Int X)</p>
+		<p>Xの値だけオクターブをずらします。<br>
+		上にずらしたい場合はプラスの値を。<br>
+		下にずらしたい場合はマイナスの値をいれてください。</p>
+	</li>
+	<li><p><a name="BS_ODOWN()">BS_ODOWN()</a></p>
+		<p>１オクターブ下にずらします。<br>
+		ヘッダー内部ではBS_Oの値がマイナスされる動作がおきます。<br>
+		でｓので、BS_Oで３オクターブ上ずらしてあると、<br>
+		BS_O(2)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_OTHER(IntX)">BS_OTHER(Int X)</a></p>
+		<p>Xの番号に対応した特殊なスケールに変えます。<br>
+		番号の対応は下の表の通りです。</p>
+	
+	<table border="1" summary="特殊スケール">
+		<tr>
+			<td>スケール名</td>
+			<td>使い方</td>
+			<td>キーＣの構成音（ストトン）</td>
+			<td>キーＣの構成音（MML）</td>
+		</tr>
+		<tr>
+			<td>Pentatonic</td>
+			<td>BS_OTHER(0)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_e">ミ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_e">e</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span></td>
+		</tr>
+		<tr>
+			<td>Pentatonic Minor Blues</td> 
+			<td>BS_OTHER(1)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_g">ソ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_eb">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>Bluenote Pentatonic</td>
+			<td>BS_OTHER(2)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>Bluenote ♭3,♭7</td> 
+			<td>BS_OTHER(3)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_a">ラ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_eb">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_fp">f+</span>
+				<span class="note_a">a</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>Combination Diminish</td> 
+			<td>BS_OTHER(4)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_g">ミ</span>
+				<span class="note_gb">ソ♭</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_bar">| </span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_g">e</span>
+				<span class="note_gb">g-</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_bar">| </span>
+				<span class="note_bb">b-(b+ c--)</span></td>
+		</tr>
+		<tr>
+			<td>Wholetone Scale</td> 
+			<td>BS_OTHER(5)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_e">ミ</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_gp">ソ♯</span>
+				<span class="note_ap">ラ♯</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_e">e</span>
+				<span class="note_fp">f+</span>
+				<span class="note_gp">g+</span>
+				<span class="note_ap">a+</span></td>
+		</tr>
+		<tr>
+			<td>Diminish Scale</td> 
+			<td>BS_OTHER(6)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_gb">ソ♭</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_a">ラ </span>
+				<span class="note_bar">| </span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_eb">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_gb">g-</span>
+				<span class="note_ab">a-</span>
+				<span class="note_a">a</span>
+				<span class="note_bar">| </span>
+				<span class="note_b">b(b++ c-)</span></td>
+		</tr>
+		<tr>
+			<td>Harmonic Major Scale</td>
+			<td>BS_OTHER(7)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_e">ミ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_e">e</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_b">b</span></td>
+		</tr>
+	</table><br></li>
+
+	<li><p><a name="BS_OUP()">BS_OUP()</a></p>
+		<p>１オクターブ上にずらします。<br>
+		ヘッダー内部ではBS_Oの値がプラスされる動作がおきます。<br>
+		でｓので、BS_Oで２オクターブ下にずらしてあると、<br>
+		BS_O(-1)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_PRINT()">BS_PRINT()</a></p>
+		<p>現在の転調具合などを下のように表示します。</p>
+		<p><img style="border:2px;" alt="BS_PRINT sample" src="bwb_scale_bsprint_02.JPG" width="640" height="160"></p>
+	</li>
+	<li><a name="BS_SCALE_AEOLIAN_b5()">BS_SCALE_AEOLIAN_b5()</a></li>
+	<li>BS_SCALE_LOCRIAN_2()</li>
+	<li><p>BS_SCALE_SUPERLOCRIAN()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_AEOLIAN_b5()" src="bwb_scale_mminor_aeolian_b5_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MMINOR(5)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_ALTERED()">BS_SCALE_ALTERED()</a></li>
+	<li><p>BS_SCALE_ALTEREDDOMINANT()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_ALTERED()" src="bwb_scale_mminor_altered_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MMINOR(6)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_ALTERED_b7()">BS_SCALE_ALTERED_b7()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_ALTERED_b7()" src="bwb_scale_hminor_altered_b7_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_HMINOR(6)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_b1()">BS_SCALE_b1()</a></li>
+	<li>BS_SCALE_b2()</li>
+	<li>BS_SCALE_b3()</li>
+	<li>BS_SCALE_b4()</li>
+	<li>BS_SCALE_b5()</li>
+	<li>BS_SCALE_b6()</li>
+	<li>BS_SCALE_b7()</li>
+	<li>BS_SCALE_b9()</li>
+	<li>BS_SCALE_b11()</li>
+	<li><p>BS_SCALE_b13()</p>
+		<p>下記の表に対応した音の音程を１半音上昇修正します。</p>
+		<p><img style="border:2px;" alt="スケール修正マイナス" src="bwb_scale_scaleedit_01.JPG" width="640" height="160"></p>
+		<p>例えばキーＣのときにBS_SCALE_b2()を行うとレの音が半音下がります。</p>
+	</li>
+	<li><p><a name="BS_SCALE_DORIAN()">BS_SCALE_DORIAN()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_DORIAN()" src="bwb_scale_mode_dorian_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MODE(6)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_DORIAN_b2()">BS_SCALE_DORIAN_b2()</a></li>
+	<li><p>BS_SCALE_DORIAN_b9()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_DORIAN_b2()" src="bwb_scale_hminor_locrian_6_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MMINOR(1)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_DORIAN_p11()">BS_SCALE_DORIAN_p11()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_DORIAN_p11()" src="bwb_scale_hminor_dorian_p11_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_HMINOR(3)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_HMINOR()">BS_SCALE_HMINOR()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_HMINOR()"  src="bwb_scale_hminor_harmonicminor_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_HMINOR(0)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_HMINORP5B()">BS_SCALE_HMINORP5B()</a></li>
+	<li><p>BS_SCALE_HMINORPERFECT5THBELOW()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_HMINORP5B()" src="bwb_scale_hminor_hminorp5b_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_HMINOR(4)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_IONIAN_p5()">BS_SCALE_IONIAN_p5()</a></li>
+	<li><p>BS_SCALE_IONIANAUGEMENTED()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_IONIAN_p5()" src="bwb_scale_hminor_ionian_p5_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_HMINOR(2)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_LOCRIAN()">BS_SCALE_LOCRIAN()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_LOCRIAN()" src="bwb_scale_mode_locrian_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MODE(6)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_LOCRIAN_6()">BS_SCALE_LOCRIAN_6()</a></li>
+	<li><p>BS_SCALE_LOCRIAN_13()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_LOCRIAN_6()" src="bwb_scale_hminor_locrian_6_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_HMINOR(1)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_LYDIAN()">BS_SCALE_LYDIAN()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_LYDIAN()" src="bwb_scale_mode_lydian_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MODE(3)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_LYDIANAUGEMENTED()">BS_SCALE_LYDIANAUGEMENTED()</a></li>
+	<li><p>BS_SCALE_LYDIAN_p5()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_LYDIANAUGEMENTED()" src="bwb_scale_mminor_lydian_p5_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MMINOR(2)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_LYDIAN_p2()">BS_SCALE_LYDIAN_p2()</a></li>
+	<li><p>BS_SCALE_LYDIAN_p9()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_LYDIAN_p2()" src="bwb_scale_hminor_lydian_p9_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_HMINOR(5)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_MAJOR()">BS_SCALE_MAJOR()</a></li>
+	<li><p>BS_SCALE_IONIAN()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_MAJOR()" src="bwb_scale_mode_ionian_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MODE(0)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_MINOR()">BS_SCALE_MINOR()</a></li>
+	<li><p>BS_SCALE_AEOLIAN()</p>
+		<p>キーCでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_MINOR()" src="bwb_scale_mode_aeolian_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MODE(5)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_MIXOLYDIAN()">BS_SCALE_MIXOLYDIAN()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_MIXOLYDIAN()" src="bwb_scale_mode_mixolydian_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MODE(4)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_MIXOLYDIAN_b6()">BS_SCALE_MIXOLYDIAN_b6()</a></li>
+	<li><p>BS_SCALE_MIXOLYDIAN_b13()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_MIXOLYDIAN_b6()" src="bwb_scale_mminor_mixolydian_b13_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MMINOR(4)と全く同じ効果です。</p>
+	</li>
+	<li><a name="BS_SCALE_MIXOLYDIAN_p11()">BS_SCALE_MIXOLYDIAN_p11()</a></li>
+	<li><p>BS_SCALE_LYDIAN_b7()</p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_MIXOLYDIAN_p11()" src="bwb_scale_mminor_mixolydian_p11_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MMINOR(3)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_MMINOR()">BS_SCALE_MMINOR()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_MMINOR()" src="bwb_scale_mminor_melodicminor_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MMINOR(0)と全く同じ効果です。</p>
+	</li>
+
+	<li><a name="BS_SCALE_p1()">BS_SCALE_p1()</a></li>
+	<li>BS_SCALE_p2()</li>
+	<li>BS_SCALE_p3()</li>
+	<li>BS_SCALE_p4()</li>
+	<li>BS_SCALE_p5()</li>
+	<li>BS_SCALE_p6()</li>
+	<li>BS_SCALE_p7()</li>
+	<li>BS_SCALE_p9()</li>
+	<li>BS_SCALE_p11()</li>
+	<li><p>BS_SCALE_p13()</p>
+		<p>下記の表に対応した音の音程を１半音上昇修正します。</p>
+		<p><img style="border:2px;" alt="スケール修正プラス" src="bwb_scale_scaleedit_01.JPG" width="640" height="160"></p>
+		<p>例えばキーＣのときにBS_SCALE_p5()を行うとソの音が半音上がります。</p>
+	</li>
+	<li><p><a name="BS_SCALE_PHRYGIAN()">BS_SCALE_PHRYGIAN()</a></p>
+		<p>キーＣでの構成音は<br>
+		<img style="border:2px;" alt="BS_SCALE_PHRYGIAN()" src="bwb_scale_mode_phrygian_01.JPG" width="640" height="160"><br>
+		です。<br>
+		BS_MODE(2)と全く同じ効果です。</p>
+	</li>
+	<li><p><a name="BS_SCALE_UNDO(IntX)">BS_SCALE_UNDO(Int X)</a></p> 
+		<p>一つ前のスケールに戻します。<br>
+		Xに数字をいれた場合、その回数だけ戻ります。</p>
+		<ol>
+			<li>Major</li>
+			<li>Lydian</li>
+			<li>Harmonic Minor</li>
+			<li>Minor</li>
+		</ol>
+		<p>となったスケールチェンジした後に、<br>
+		BS_SCALE_UNDOとやればHarmonic Minorに戻りますし、<br>
+		BS_SCALE_UNDO(3)とやればMajorに戻ります。</p>
+	</li>
+	<li><a name="BS_TK(IntX)">BS_TK(Int X)</a></li> 
+	<li><p>BS_TKEY(Int X)</p>
+		<p>Xの値だけ短3度転調を行います。<br>
+		BS_TK(1)だと3半音上に転調し、<br>
+		BS_TK(3)だと9半音上に転調します。<br>
+		BS_TK(-1)ですと、3半音下に転調します。<br>
+		BS_TKによって過剰なオクターブになってしまった場合、<br>
+		BS_O,BS_OUP,BS_ODOWN等で調整してください。</p>
+	</li>
+	<li><a name="BS_UP()">BS_UP()</a></li>
+	<li><p>BS_KUP()</p>
+		<p>半音上に転調します。（値転調モード１）<br>
+		ヘッダー内部ではBS_Kの値がプラスされる動作がおきます。<br>
+		ですので、BS_Kで３半音上に転調していると<br>
+		BS_K(4)と同じ動作がします。</p>
+	</li>
+	<li><p><a name="BS_WORLD(IntX)">BS_WORLD(Int X)</a></p> 
+		<p>Xの番号に対応した特殊なスケールに変えます。<br>
+		番号の対応は下の表の通りです。</p>
+	<table border="1" summary="民族スケール">
+		<tr>
+			<td>スケール名</td>
+			<td>使い方</td>
+			<td>キーＣの構成音（ストトン）</td>
+			<td>キーＣの構成音（MML）</td>
+		</tr>
+		<tr>
+			<td>律旋法1</td>
+			<td>BS_WORLD(0)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span></td>
+		</tr>
+		<tr>
+			<td>律旋法2</td>
+			<td>BS_WORLD(1)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_eb">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>呂旋法1</td>
+			<td>BS_WORLD(2)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_e">ミ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_e">e</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span></td>
+		</tr>
+		<tr>
+			<td>呂旋法2</td>
+			<td>BS_WORLD(3)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_e">ミ</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_e">e</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>陰旋法(上行形)</td>
+			<td>BS_WORLD(4)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ap">ラ♯</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ap">a+</span></td>
+		</tr>
+		<tr>
+			<td>陰旋法(下行形)</td>
+			<td>BS_WORLD(5)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span></td>
+		</tr>
+		<tr>
+			<td>陽旋法(上行形)</td>
+			<td>BS_WORLD(6)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ap">ラ♯</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ap">a+</span></td>
+		</tr>
+		<tr>
+			<td>陽旋法(下行形)</td>
+			<td>BS_WORLD(7)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span></td>
+		</tr>
+		<tr>
+			<td>バリスケール</td>
+			<td>BS_WORLD(8)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span></td>
+		</tr>
+		<tr>
+			<td>ジャワスケール</td>
+			<td>BS_WORLD(9)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_ab">ラ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_g">f</span>
+				<span class="note_ab">a-</span></td>
+		</tr>
+		<tr>
+			<td>スパニッシュスケール</td>
+			<td>BS_WORLD(10)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_e">ミ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_bar">| </span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_e">e</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_bar">| </span>
+				<span class="note_bb">b-(b++ c--)</span></td>
+		</tr>
+		<tr>
+			<td>ペルシャンスケール</td>
+			<td>BS_WORLD(11)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_e">ミ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_e">e</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>ハンガリアンスケール</td>
+			<td>BS_WORLD(12)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_gb">ソ</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_eb">e-</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>エニグマチックスケール</td>
+			<td>BS_WORLD(13)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_dp">レ♯</span>
+				<span class="note_e">ミ</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_gp">ソ♯</span>
+				<span class="note_ap">ラ♯</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_dp">d+</span>
+				<span class="note_e">e</span>
+				<span class="note_fp">f+</span>
+				<span class="note_gp">g+</span>
+				<span class="note_ap">a+</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>ナポリタンスケール</td>
+			<td>BS_WORLD(14)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>ヒンズースケール1</td>
+			<td>BS_WORLD(15)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_e">ミ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_e">e</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>ヒンズースケール2</td>
+			<td>BS_WORLD(16)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>ジプシースケール</td>
+			<td>BS_WORLD(17)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_eb">e-</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>ペログスケール</td>
+			<td>BS_WORLD(18)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span></td>
+		</tr>
+		<tr>
+			<td>スレンドロスケール</td>
+			<td>BS_WORLD(19)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_e">ミ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_e">e</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span></td>
+		</tr>
+		<tr>
+			<td>メシアン</td>
+			<td>BS_WORLD(20)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_e">ミ</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_bar">| </span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_e">e</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_bar">| </span>
+				<span class="note_bb">b-(b+ c--)</span></td>
+		</tr>
+		<tr>
+			<td>アラブ(マカーム・ヒジャーズ)</td>
+			<td>BS_WORLD(21)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_eb">e-</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>インド(ラーガ・バイラヴィ)</td>
+			<td>BS_WORLD(22)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>インド(ラーガ・トーディ)</td>
+			<td>BS_WORLD(23)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_g">ソ</span>
+				<span class="note_ab">ラ♭</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_eb">e-</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_ab">a-</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>インド(ラーガ・マルワ)</td>
+			<td>BS_WORLD(24)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_db">レ♭</span>
+				<span class="note_e">ミ</span>
+				<span class="note_fp">ファ♯</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_db">d-</span>
+				<span class="note_e">e</span>
+				<span class="note_fp">f+</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>エジプトスケール</td>
+			<td>BS_WORLD(25)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">レ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">d</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+		<tr>
+			<td>沖縄スケール</td>
+			<td>BS_WORLD(26)</td>
+			<td><span class="note_c">ド</span>
+				<span class="note_d">ミ</span>
+				<span class="note_f">ファ</span>
+				<span class="note_g">ソ</span>
+				<span class="note_b">シ</span></td>
+			<td><span class="note_c">c</span>
+				<span class="note_d">e</span>
+				<span class="note_f">f</span>
+				<span class="note_g">g</span>
+				<span class="note_b">b</span></td>
+		</tr>
+		<tr>
+			<td>演歌</td>
+			<td>BS_WORLD(27)</td>
+			<td><span class="note_d">レ</span>
+				<span class="note_eb">ミ♭</span>
+				<span class="note_g">ソ</span>
+				<span class="note_a">ラ</span>
+				<span class="note_bb">シ♭</span></td>
+			<td><span class="note_d">d</span>
+				<span class="note_eb">e-</span>
+				<span class="note_g">g</span>
+				<span class="note_a">a</span>
+				<span class="note_bb">b-</span></td>
+		</tr>
+</table>
+
+</li>
+</ul>
+
+<hr>
+<p><a href="../bwb_scale.htm">戻る</a></p>
+</body>
+</html>

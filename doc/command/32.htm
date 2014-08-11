@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>PlayFrom</TITLE>
+</HEAD><BODY>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF9C" align="center">名称</TD>
+      <TD bgcolor="#FFFF9C" align="center">書式</TD>
+      <TD bgcolor="#FFFF9C" align="center">説明</TD>
+      <TD bgcolor="#FFFF9C" align="center">キー</TD>
+    </TR>
+    <TR>
+      <TD align="left">PlayFrom</TD>
+      <TD align="left">PlayFrom(time|[.option])</TD>
+      <TD align="left">途中から演奏する場合の設定を行う</TD>
+      <TD align="left">トラック・チャンネル</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<P>【解説】</P>
+<BLOCKQUOTE>曲の途中から演奏する場合の設定を行う。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ccffcc">PlayFrom(time)</TD>
+      <TD>(小節数：拍数：ステップ数）または（総ステップ数）を指定して、演奏開始位置を指定する。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffcc">PlayFrom.SysEx(on/off)</TD>
+      <TD>システムエクスクルーシブを送信するか。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffcc">PlayFrom.CtrlChg(on/off)</TD>
+      <TD>コントロールチェンジを先読みするか。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffcc">PlayFrom.RPN_NRPN(on/off)</TD>
+      <TD>RPN/NRPNを先読みするか。</TD>
+    </TR>
+    <TR>
+      <TD bgcolor="#ccffcc">PlayFrom.Wait=value</TD>
+      <TD>エクスクルーシブや、コントロールチェンジを送信するために、演奏の前に挿入する待ち時間の指定。初期値は、96。</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【サンプル】</P>
+<BLOCKQUOTE>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99"><CODE><B><FONT color="#ff0033">//PlayFrom のサンプル</FONT></B><BR>
+      PlayFrom(4:1:0)//４小節目から演奏<BR>
+      <FONT color="#FF0033">//ここまで</FONT></CODE></TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<P>【関連項目】</P>
+<BLOCKQUOTE>なし</BLOCKQUOTE>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

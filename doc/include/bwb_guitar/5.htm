@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<meta http-equiv="Content-Style-Type" content="text/html; charset=Shift_JIS">
+	<link rel="stylesheet" type="text/css" href="bwb_guitar.css">
+	<link rev="made" href="mailto:bluewhitebear@hotmail.com">
+	<link rel="index"	href="../bwb_guitar.htm">
+	<link rel="next" 	href="6.htm">
+	<link rel="prev" 	href="4.htm">
+	<title>bwb_guitar.h マニュアル 「５．アルペジオストローク」</title>
+</head>
+<body>
+<h1>５．アルペジオストローク</h1>
+<hr>
+<ul>
+	<li><a href="#bwb_guitar_5_01">BGA関数の概要</a></li>
+	<li><a href="#bwb_guitar_5_02">音を持続させる</a></li>
+	<li><a href="#bwb_guitar_5_03">通常のストロークを入力する</a></li>
+	<li><a href="#bwb_guitar_5_04">ミュートされている弦の扱い</a></li>
+</ul>
+<hr>
+<ul>
+	<li><p><a name="bwb_guitar_5_01">BGA関数の概要</a></p>
+
+		<p>bwb_guitar.hの目玉機能の一つ、<strong>アルペジオストローク</strong>機能について説明したいと思います。<br>
+		この機能を駆使することで、アルペジオの入力が簡略化され、非常に便利です。</p>
+	
+		<table border="1" width="90%" style="background-color:white;" cellpadding="8" summary="BGA">
+		<tr><td>
+			<p><span style="color:black;"><strong>BGA{文字列}</strong></span></p>
+			<p><span style="color:black;">
+			文字列の中にはbwb_guitar.h特有のMML（＝アルペジオコマンド入力モード）が使われる。<br>
+			以下にその特有のMMLを示す。
+			</span></p>
+			<p><span style="color:black;">
+			コマンド<br>
+			A：６弦を弾きます。<br>
+			B：５弦を弾きます。<br>
+			C：４弦を弾きます。<br>
+			D：３弦を弾きます。<br>
+			E：２弦を弾きます。<br>
+			F：１弦を弾きます。<br>
+			a：６弦を弱く弾きます。<br>
+			b：５弦を弱く弾きます。<br>
+			c：４弦を弱く弾きます。<br>
+			d：３弦を弱く弾きます。<br>
+			e：２弦を弱く弾きます。<br>
+			f：１弦を弱く弾きます。<br>
+			r：休符<br>
+			^：タイ<br>
+			&lt;：アルペジオコマンド入力モードから一時的に抜け出す<br>
+			&gt;：アルペジオコマンド入力モードに戻る
+			</span></p>
+		</td></tr>
+		</table>
+	
+		<p>サンプルで、実際にどのような使われ方するか見ていただきましょう。</p>
+	
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		TR(01) @25 l8 q99<br>
+		<br>
+		GEm7(1) BGA{ABCDEF^^abcdefrr&nbsp;&lt;&nbsp;Print("bwb_guitar.h arpeggio!!")&nbsp;&gt;}
+		</span></p>
+	
+		<p>上の関数の説明の通り、<span class="function">BGA関数</span>は引数として入れられた文字列を<br>
+		独自のMML文法で解析し、ギターの音程として演奏する機能があります。</p>
+	
+		<p>ABCDEFabcdefは通常通り音を鳴らす作業として処理されます。<br>
+		タイや休符はそのまま通常通り処理されます。</p>
+	
+		<p>ここで、<span class="function">BGA関数</span>の文字列内に通常のMMLを入力したくなったというときは、<br>
+		そのMMLを「&lt;」と「&gt;」で括ると、その部分は通常通り処理されます。<br>
+		その代わり、その中では通常のオクターブ上下の操作を行う「&lt;」と「&gt;」は使えなくなります。<br>
+		BGA関数で鳴らされる音はオクターブに影響されることはありませんので、<br>
+		まず、使用する機会はないと思われますが、<br>
+		どうしても使用する場合、「o+」と「o-」でオクターブの上下を行ってください。</p>
+	
+		<p>以下に、アルペジオ関数を応用するテクニックを紹介します。</p>
+
+	</li>
+	<li><p><a name="bwb_guitar_5_02">音を持続させる</a></p>
+	
+		<p>上のサンプルはどうも音が切れてしまいます。<br>
+		左手はコードフォームを押さえたままですから、音が切れるのもおかしな話です。<br>
+		これを解消するために<span class="function">BG_PEDAL</span>という機能があります。<br>
+		以下にサンプルを示します。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		BG_PEDAL=on<br>
+		<br>
+		TR(01) @25 l8 q99<br>
+		<br>
+		GEm7(1) BGA{ABCDEF^^abcdefrr}  BGD(!2,,,,on)<br>
+		GC(1) BGA{AbCdEf^^aBcDeFrr}<br>
+		r1<br>
+		y64,0	//ストトンだったら、「放す」<br>
+		r1
+		</span></p>
+
+		<p><span class="function">BG_PEDAL=on</span>にすると、コードを握るたびに<br>
+		コントロールチェンジ64番のペダルの機能を使い、音を持続させます。<br>
+		ストトンでいえば、「ペダル」「放す」です。</p>
+
+		<p>ですから、最後に音を鳴らしたとき、コントロールチェンジ64番がオンになったままなので、<br>
+		最後にコントロールチェンジ64番をオフにしてやる必要があります。<br>
+		これがサンプルだと、最後の<strong>y64,0	//ストトンだったら、「放す」</strong>にあたります。</p>
+	</li>
+	<li><p><a name="bwb_guitar_5_03">通常のストロークを入力する</a></p>
+	
+		<p><span class="function">BGA関数</span>はアルペジオに特化された関数ですが、<br>
+		通常のダウンアップストロークを入力する機能はついていません。<br>
+		そういうときは一度<span class="function">BGA関数</span>を分割してください。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		BG_PEDAL=on<br>
+		<br>
+		TR(01) @25 l8 q99<br>
+		<br>
+		GEm7(1) BGA{ABCDEF^} BGU(!8,,,,,,4,6) BGA{BCDE} BGD(!2,,,,on) 
+		</span></p>
+		
+		<p><strong>「&lt;」と「&gt;」でBGD,BGU関数を括る</strong>方法も考えられますが、<br>
+		7章で後述される<span class="function">BG_PRINT=onによる表示機能</span>と非常に相性が悪いので、<br>
+		あまりお勧めできません。</p>
+	</li>
+	<li><p><a name="bwb_guitar_5_04">ミュートされている弦の扱い</a></p>
+	
+		<p>bwb_guitar.h関数には様々なコードフォームが用意されてあり、<br>
+		その中には当然、ミュート弦なども含まれているコードフォームもあるでしょう。<br>
+		そういったとき、例えば３弦がミュートされているのに、<br>
+		<span class="function">BGA{C}</span>で、強引に３弦を鳴らそうとしたら？<br>
+		そのときは代わりに<strong>休符のr</strong>が挿入されます。<br>
+		コードフォームで押さえている弦の状況は<span class="function">BG_CHORDFORM</span>でわかります。<br>
+		サンプルを示します。</p>
+		
+		<p><span class="mmlsample">
+		Include(bwb_guitar.h);<br>
+		<br>
+		GAm7(1) BG_CHORDFORM<br>
+		<br>
+		↓実行結果↓<br>
+		[表示] bwb_guitar.h(117): ６弦,５弦,４弦,３弦,２弦,１弦 = M,0,2,0,1,0<br>
+		[終了] 0.13 秒
+		</span></p>
+		
+		<p>数字が表示されている弦はそのフレットを押さえてください。<br>
+		<strong>M</strong>はミュート、もしくは押さえない弦です。</p>
+		<p>これを頼りにアルペジオを入力していってください。</p>
+	</li>
+</ul>
+<hr>
+<p><a href="../bwb_guitar.htm">戻る</a></p>
+</body>
+</html>

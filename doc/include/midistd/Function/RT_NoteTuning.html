@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='../midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='../index.html'>MIDI Standard</a>＼
+	<a href='../exclusive.html'>Exclusive Message</a>＼
+	<a href='../TuningStandard.html'>MIDI Tuning Standard</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2>Single Note Tuning</h2>				<!--（コマンドの名前。）-->
+<!------------------------------------------------------------->
+<h3>■概要</h3>
+この機能は、各ノートについて周波数単位でチューニングを設定します。。<br>
+周波数データはプログラム用のメモリに格納され、
+<a href='../ControlChange.html#100'>Registered Parameter</a> No.3 & 4の<a href='../ControlChange.html#RPN03'>Tuning Preset & Bank</a>を設定する事で、各チャンネルに適用可能です。<br>
+<br>
+
+
+<br>
+<h3>■書式</h3>
+<h4>リアルタイム・メッセージ (Rail Time Message)</h4>
+<code>
+RT_NoteTuning(<var>INT iProgramNo</var>, <var>INT szTuning</var>, <var>Array iTuning(szTuning×4)</var>);<br>
+RT_NoteTuning_Bank(<var>INT iBank</var>, <var>INT iProgramNo</var>, <var>INT szTuning</var>, <var>Array iTuning(szTuning×4)</var>);<br>
+</code>
+<br>
+[備考]<br>
+※この命令は、コンパイラ内部で以下のMMLに変換されます。<br>
+<code>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, RT_Tuning, RT_Tuning_SingleNoteTuningChange, <var>iProgramNo</var>, <var>szTuning</var>, <var>iTuning(szTuning×4)[szTuning×4Byte]</var>, $F7<br>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, RT_Tuning, RT_Tuning_SingleNoteTuningChange_Bank, <var>iBank</var>, <var>iProgramNo</var>, <var>szTuning</var>, <var>iTuning(szTuning×4)[szTuning×4Byte]</var>, $F7<br>
+</code>
+
+<h4>ノン・リアルタイム・メッセージ (Rail Time Message)</h4>
+<code>
+NRT_NoteTuning(<var>INT iProgramNo</var>, <var>INT szTuning</var>, <var>Array iTuning(szTuning×4)</var>);<br>
+NRT_NoteTuning_Bank(<var>INT iBank</var>, <var>INT iProgramNo</var>, <var>INT szTuning</var>, <var>Array iTuning(szTuning×4)</var>);<br>
+</code>
+<br>
+[備考]<br>
+※この命令は、コンパイラ内部で以下のMMLに変換されます。<br>
+<code>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, NRT_Tuning, NRT_Tuning_SingleNoteTuningChange, <var>iProgramNo</var>, <var>szTuning</var>, <var>iTuning(szTuning×4)[szTuning×4Byte]</var>, $F7<br>
+SysEx = $F0, MakerID_RealTime,<var>idDevice</var>, NRT_Tuning, NRT_Tuning_SingleNoteTuningChange_Bank, <var>iBank</var>, <var>iProgramNo</var>, <var>szTuning</var>, <var>iTuning(szTuning×4)[szTuning×4Byte]</var>, $F7<br>
+</code>
+
+<br>
+<h3>■引数</h3>
+<table>
+<tr><th width='64pt'>引数名	</th>
+	<th width='64pt'>初期値	</th>
+	<th width='64pt'>範囲	</th>
+	<th width='448pt'>機能	</th></tr>
+<tr><td><var>INT iProgramNo</var>	</td>
+	<td> - </td>
+	<td>0 ～ 127</td>
+	<td>チューニングを設定するプログラムNo.を設定します。</td></tr>
+<tr><td><var>INT iBank</var>	</td>
+	<td> - </td>
+	<td>0 ～ 127</td>
+	<td>チューニングを設定するバンクNo.を設定します。</td></tr>
+<tr><td><var>INT szTuning</var>	</td>
+	<td> - </td>
+	<td>1 ～ 127</td>
+	<td>チューニングを設定するノートの数を指定します。</td></tr>
+<tr><td><var>ARRAY iTuning(szTuning×4)</var><br>4Byteで1setです。<br>説明の為、先頭からkk,xx,yy,zzとします。</td>
+	<td>kk : - <br>xx : $7F<br>yy : $7F<br>zz : $7F</td>
+	<td>kk : 0～127<br>xx : 0～127<br>yy : 0～127<br>zz : 0～127</td>
+	<td>各ノートのチューニング量を指定します。<br>
+		１ノート当り4Byteの配列変数となり、<var>szTuning</var>で指定した量だけ必要となります。<br>
+		kk : チューニングを設定したいノート番号<br>
+		xx, yy, zz : ノートの周波数データ(3Byte1組)</td></tr>
+<tr><td><var>INT idDevice</var>	</td>
+	<td>$7F</td>
+	<td>$00 ～ $7F</td>
+	<td>MIDIデバイスのDeviceIDを指定します。<br>
+		MIDI規格では、Bloadcastである$7Fを推奨しています。</td></tr>
+</table><br>
+
+
+<br>
+<h3>■返り値</h3>
+無し<br>
+<br>
+
+<br>
+<h3>■説明</h3>
+各プログラムについて、ノートレベルでチューニングを周波数レベルで行います。<br>
+MIDIデバイスの各チャンネルに適用させる為には、Registered Parameter(RPN)を使用します。<br>
+RPN : MSB=$00, LSB=$03 … Preset No<br>
+RPN : MSB=$00, LSB=$04 … Bank No<br>
+<br>
+<h3>■使用例</h3>
+<table>
+<caption>List.1 </caption>
+<tr><td><pre><code>
+RT_NoteTuning(1,1,NoteNo("o5c"),$3C,$00,$00);	//Preset 1番のo5cを、平均律の周波数にする。
+RPN(0,3,1);				//Tuning Presetの1番を選択する。
+TR(1)	o4 l4 cdefgabc
+</code></pre></td></tr>
+</table><br>
+
+
+<br>
+<!------------------------------------------------------------->
+<h3>■関連項目</h3>
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

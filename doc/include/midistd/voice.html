@@ -1,0 +1,463 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+	<a href='index.html'>MIDI Standard</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h2 align='center'>Channel Voice Message</h2>
+
+MIDIの各チャンネルへ個別に送信されるメッセージです。<br>
+<br>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='note'>Note On / Note Off Message</a></h3>
+Note Onメッセージは、音を出す(Key On)時に送信されるメッセージです。<br>
+Note On Velocityにより、Key onする音の強さを指定できます。(SakuraのMMLではv命令にて指定します。)<br>
+<br>
+Note Offメッセージは、音を止める(Key Off)時に送出されるメッセージです。<br>
+Note Off Velocityにより、Key off後の音の減衰の速さを指定できます。
+(Sakuraの標準命令では対応していません。又、対応しているMIDIデバイスも少ないです。)<br>
+<br>
+同一のChannel且つ同一のNoteで複数のNote Onを送出していた場合は、同じ数のNote Offを送信する必要があります。<br>
+<br>
+Sakuraでは、MMLの『cdefgab』、ストトンの『ドレミファソラシ』等の命令で記述可能です。<br>
+上述の命令は、コンパイル時にNote On及びNote Offメッセージとなる為、
+ユーザーがこれらのMIDIメッセージを意識する必要はありません。<br>
+又、関数として、NoteOn()関数及び、NoteOff()関数等が用意されています。<br>
+<br>
+
+<table>
+<caption>ノートオン・オフ一覧</caption>
+<tr><th>Message					</th><th>GM1</th><th>GM2</th><th>Command		</th><th>Define file</th></tr>
+<tr><td>Note On					</td><td>○	</td><td>○	</td><td rowspan='2'>NoteOn<br>c,d,e,f,g,a,b</td><td rowspan='2'>Sakura標準	</td></tr>
+<tr><td>Note On Velocity		</td><td>○	</td><td>○	</td></tr>
+<tr><td>Note Off				</td><td>○	</td><td>○	</td><td rowspan='2'>NoteOff<br>c,d,e,f,g,a,b</td><td rowspan='2'>Sakura標準	</td></tr>
+<tr><td>Note Off Velocity		</td><td>×	</td><td>×	</td></tr>
+</table>
+<br>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='after'>After Touch Message</a></h3>
+Noto Onの後のKeyの強さよって送信され、鳴っている音を変化させる為に用います。<br>
+<br>
+Polyhonic Key Pressureは、特定のNoteのみに影響します。<br>
+Channel Pressureは、Channel全体のNoteに影響します。<br>
+<br>
+アフタータッチの機能は、
+<a href='exclusive.html#RT'>Universal Real Time Exclusive Message</a>の
+<a href='ControllerDestination.html'>Controller Destination Setting(Sub ID#1=$09)</a>
+にて設定する事が可能です。<br>
+<br>
+
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>DirectSMF($A0+<var>Channel</var>-1, <var>Note No.</var>, <var>Value</var>)<br>
+<li>DirectSMF($D0+<var>Channel</var>-1, <var>Value</var>)<br>
+</ul>
+くじら飛行机さんへ。<br>
+この機能について、DirectSMF以外で操作する為の命令作って頂けると嬉しいです。<br>
+その際は、コントロールチェンジ同様の先行指定に対応して頂けると、尚、嬉しいです。<br>
+<br>
+
+<table>
+<caption>アフタータッチ一覧</caption>
+<tr><th>Message					</th><th>GM1</th><th>GM2</th><th>Command		</th><th>Define file</th></tr>
+<tr><td>Polyhonic Key Pressure	</td><td>×	</td><td>×	</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr><td>Channel Pressure		</td><td>×	</td><td>○	</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+</table>
+<br>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a href='ControlChange.html' name='cc'>Control Change Message</a></h3>
+各チャンネルの、音量やパンポット等を設定する事が可能です。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>y<var>No.</var>, <var>Value</var><br>
+</ul>
+
+又、<a href='exclusive.html#RT'>Universal Real Time Exclusive Message</a>の
+<a href='ControllerDestination.html'>Controller Destination Setting(Sub ID#1=$09)</a>
+にて、特定のコントロールNo.に、機能を設定する事が可能です。<br>
+<br>
+
+現在、MIDI規格にて標準化されているパラメータは以下のとおりです。<br>
+<table>
+<caption>コントロールチェンジ一覧</caption>
+<tr>
+	<th>Name		</th>
+	<th>CC No.		</th>
+	<th>GM1			</th>
+	<th>GM2			</th>
+	<th>Command		</th>
+	<th>Define file	</th>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#00'>Bank Select					</a></td>
+	<td>0 (msb),<br>32 (lsb)		</td>
+	<td>×</td><td>○</td>
+	<td>@<br>Voice</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#01'>Modlation					</a></td>
+	<td>1</td>
+	<td>○</td><td>○</td>
+	<td>M<br>Modulation</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td>Breath Controller			</td>
+	<td>2</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>Foot Controller			</td>
+	<td>4							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#05'>Portamento Time				</a></td>
+	<td>5							</td>
+	<td>×</td><td>○</td>
+	<td>PT<br>PortamentoTime</td><td>Sakura標準<br>Sakura標準</td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#98'>Data Entry					</a></td>
+	<td>6 (msb),<br>38 (lsb)		</td>
+	<td>○</td><td>○</td>
+	<td>Y<br>DataMSB<br>DataLSB</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#07'>Channel Volume<br>(Main Volume)</a></td>
+	<td>7							</td>
+	<td>○</td><td>○</td>
+	<td>V<br>MainVolume</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td>Balance						</td>
+	<td>8							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#10'>Panpot						</a></td>
+	<td>10							</td>
+	<td>○</td><td>○</td>
+	<td>P<br>Panpot</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#11'>Expression (音量)			</a></td>
+	<td>11							</td>
+	<td>○</td><td>○</td>
+	<td>EP<br>Expression</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td>Effect Control 1			</td>
+	<td>12							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>Effect Control 2			</td>
+	<td>13							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 1	</td>
+	<td>16							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 2	</td>
+	<td>17							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 3	</td>
+	<td>18							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 4	</td>
+	<td>19							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#64'>Hold (Dumper pedal, Sustain)</a></td>
+	<td>64							</td>
+	<td>○</td><td>○</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#65'>Portamento on/off			</a></td>
+	<td>65							</td>
+	<td>×</td><td>○</td>
+	<td>PS<br>PortamentoSwitch</td><td>Sakura標準<br>Sakura標準</td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#66'>Sostenuto					</a></td>
+	<td>66							</td>
+	<td>×</td><td>○</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#67'>Soft Pedal					</a></td>
+	<td>67							</td>
+	<td>×</td><td>○</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>Legato Foot Switch			</td>
+	<td>68							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>Hold 2						</td>
+	<td>69							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>Sound Controller 1 (Sound Variation)</td>
+	<td>70							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#71'>Sound Controller 2 (Timbre / Harmonic Intensity)</a></td>
+	<td>71							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#72'>Sound Controller 3 (Release time)</a></td>
+	<td>72							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#73'>Sound Controller 4 (Attack time)</a></td>
+	<td>73							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#74'>Sound Controller 5 (Brightness)</a></td>
+	<td>74							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#75'>Sound Controller 6 (Decay Time)</a></td>
+	<td>75							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#76'>Sound Controller 7 (Vibrato Rate)</a></td>
+	<td>76							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#77'>Sound Controller 8 (Vibrato Depth)</a></td>
+	<td>77							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#78'>Sound Controller 9 (Vibrato Decay)</a></td>
+	<td>78							</td>
+	<td>×</td><td>△</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>Sound Controller 10			</td>
+	<td>79							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 5	</td>
+	<td>80							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 6	</td>
+	<td>81							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 7	</td>
+	<td>82							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>General Purpose Control 8	</td>
+	<td>83							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td>Portamento control			</td>
+	<td>84							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#91'>Effect Depth 1 (Reverb)		</a></td>
+	<td>91							</td>
+	<td>×</td><td>○</td>
+	<td>REV<br>Reverb</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td>Effect Depth 2 (Tremolo)	</td>
+	<td>92							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#93'>Effect Depth 3 (Chorus)		</a></td>
+	<td>93							</td>
+	<td>×</td><td>○</td>
+	<td>CHO<br>Chorus</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td>Effect Depth 4 (Celeste)	</td>
+	<td>94							</td>
+	<td>×</td><td>×</td>
+	<td>VAR</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td>Effect Depth 5 (Phaser)		</td>
+	<td>95							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#98'>Data Increment				</a></td>
+	<td>96							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#98'>Data Decrement				</a></td>
+	<td>97							</td>
+	<td>×</td><td>×</td>
+	<td><font color='red'>No Defined</font></td><td><font color='red'>No Defined</font></td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#98'>Non Registered Parameter</a></td>
+	<td>98(lsb),<br>99(msb)			</td>
+	<td>×</td><td>×</td>
+	<td>NRPN</td><td>Sakura標準</td>
+</tr>
+<tr>
+	<td><a href='ControlChange.html#100'>Registered Parameter</a></td>
+	<td>100(lsb),<br>101(msb)		</td>
+	<td>○</td><td>○</td>
+	<td>RPN</td><td>Sakura標準</td>
+</tr>
+</table>
+<br>
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='program'>Program Change Message</a></h3>
+Program（Sound, Voice Tone, Preset, Patch）を変える時に送信します。<br>
+Control Changeの0番及び32番で、ProgramのBankを切り換える事が可能です。<br>
+<br>
+Sakuraでは@以下の命令で、バンクを含み指定する事が可能です。<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>@<var>Program No.</var>[,<var>Bank LSB</var>,<var>Bank MSB</var>]<br>
+<li>Voice(<var>Program No.</var>[,<var>Bank LSB</var>,<var>Bank MSB</var>])<br>
+<li>音色(<var>Program No.</var>[,<var>Bank LSB</var>,<var>Bank MSB</var>])<br>
+</ul>
+
+
+<br><br>
+<!------------------------------------------------------------->
+<h3><a name='bend'>Pitch Bend Change Message</a></h3>
+ピッチ(音程のズレ)を変える時に指定します。<br>
+変化量 ＝ （ <var>PitchBend</var> － 8192 ） × 100 × <var>PitchBendSensitivity</var> ÷ 8192 [cent]<br>
+General MIDI(GM)では、<var>PitchBendSensitivity</var>のデフォルトは2と規定されています。<br>
+<var>PitchBendSensitivity</var>は、<a href='ControlChange.html#100'>Registered Parameter</a> No.0の<a href='ControlChange.html#RPN00'>Pitch Bend Sensitivity</a>(SakuraではBR()命令)にて変更可能です。<br>
+尚、SakuraのSulr()命令にてPitch Bendを操作するモードを使用した場合、
+自動的に<var>PitchBendSensitivity</var>が変更される可能性があります。<br>
+General MIDI(GM)のデフォルト状態での指定値は、以下の通りとなります。<br>
+0　　　	： -200.0 [cent]<br>
+8192　	： 　　0.0 [cent] (＝ズレ無し)<br>
+16383	： +199.9 [cent]<br>
+<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>PitchBend(<var>value</var>)<br>
+<li>p%(<var>value</var>)<br>
+<li>p(<var>valueMSB</var>)<br>
+</ul>
+
+<br><br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>

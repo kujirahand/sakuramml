@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>よくある質問とその回答～その他</TITLE>
+</HEAD><BODY>
+<H1>よくある質問とその回答～その他</H1>
+<HR>
+<A name="1"><P><FONT size="+1"><FONT color="#cc0000">[Q] メタイベントに漢字を書くと、文字が化ける。</FONT></FONT></P></A>
+<BLOCKQUOTE>全ての漢字（２バイト文字）は、ストトン表記の変換対象になるので、文字列の中まで変換されてしまうのです。それを避けるために、メタイベントなどで漢字を使う場合は、{&quot;漢字&quot;}のように、&quot;&quot;で囲ってください。<BR>
+<TABLE border="1">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#ffff99">TrackName = {&quot;わにの歌&quot;}<BR>
+      Copyright = {&quot;クジラ飛行机&quot;}</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+</BLOCKQUOTE>
+<HR>
+<A name="2"><P><FONT color="#cc0000" size="+1">[Q] &quot;t&quot;コマンドの使い方が分からない</FONT></P></A>
+<BLOCKQUOTE>t は、発音タイミングの調整をします。発音のタイミングを少し前にしたいとか、後ろにしたいとか細かい打ち込みの時に使います。　t(ステップ指定)　の形で指定します。<BR>
+<TABLE border="1" bgcolor="#FFFF99">
+  <TBODY>
+    <TR>
+      <TD bgcolor="#FFFF99">16 cdef // 1<BR>
+      l16 t0c t5d t0 e t5f // 2</TD>
+    </TR>
+  </TBODY>
+</TABLE>
+2 のフレーズは、16分音符の裏が　5 ステップ後ろになります。（１６分でシャッフルします。）<BR>
+しかし、t は、このように１音づつ指定するのは、面倒なので、<A href="../kouza/mml2.htm">予約先行指定</A>を使います。</BLOCKQUOTE>
+<HR>
+<A name="3"><P><FONT size="+1"><FONT color="#cc0000"><FONT color="#cc0000" size="+1">[Q] </FONT>打ち込んだものが、他の</FONT><FONT color="#cc0000" size="+1">楽譜表示</FONT><FONT color="#cc0000">ソフトで、期待通り表示されない。</FONT></FONT></P></A>
+<BLOCKQUOTE>楽譜情報と言うのは、微妙なもので、１つの表現に対し、いろいろな表記ができます。<BR>
+例えば、スタッカート四分音符は、八分音符＋八部休符という書き方もできます。そのため、楽譜作成ソフトへの入力にサクラを使う場合は、トラックの頭に『ゲート１００』の一文を加えてください。これで、ベタな四分音符が表示されます。（初期値は、『ゲート８０』に設定されています。）</BLOCKQUOTE>
+<HR><HR>
+<HR>
+<P><A href="index.htm">戻る</A></P>
+</BODY></HTML>

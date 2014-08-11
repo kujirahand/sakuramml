@@ -1,0 +1,815 @@
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+ <style type="text/css">
+ <!--
+  body{font-size:small;background-color:#000000;color:#ffffff;margin:0px;padding:16px;
+        scrollbar-face-color: #000000;
+        scrollbar-highlight-color: #000000;
+        scrollbar-shadow-color: #000000;
+        scrollbar-3dlight-color: #000000;
+        scrollbar-arrow-color: #ffffff;
+        scrollbar-track-color: #000000;
+        scrollbar-darkshadow-color: #000000;}
+  p          {font-size:small;margin-left:24px;}
+  blockquote {font-size:small;margin-left:48px;}
+  h2{color:#ff9999;font-size:large;font-weight:normal;padding:1px 4px;
+     border-width:0px 0px 3px 0px;border-color:#f0f0f0;border-style:double;}
+  h3{color:#9999ff;font-size:medium;font-weight:normal;padding:1px 4px;
+     border-width:0px 0px 1px 0px;border-color:#f0f0f0;border-style:solid;}
+  code {color:#ff9900;font-weight:bold;font-style:normal;}
+  var  {color:#00ff99;font-weight:normal;font-style:normal;}
+  samp {color:#0099ff;font-weight:normal;font-style:normal;}
+  cite {color:#99ff00;font-weight:bold;font-style:normal;}
+  b    {color:#ffaaaa;font-weight:bold;font-style:normal;}
+  span.strike{text-decoration:line-through;}
+  a:link    {color:#22aaff;text-decoration:none;}
+  a:visited {color:#ffaa22;text-decoration:none;}
+  a:active  {color:#22aaff;text-decoration:none;}
+  a:hover   {color:#22aaff;text-decoration:underline;}
+ -->
+ </style>
+ <title>SC-8850.h : Roland SC-8850(GS汎用)関数セット マニュアル</title>
+ <base target="_blank">
+</head>
+<body>
+
+ <hr noshade size="1" color="#f0f0f0">
+ <div style="color:#00ffbb;font-size:large;font-weight:bold;margin-left:12px;">
+  Roland SC-8850(GS汎用)関数セット &quot;SC-8850.h&quot; ver.1.0<br>
+ </div>
+ <hr noshade size="1" color="#f0f0f0">
+
+ <p>
+  Roland SCシリーズのエクスクルーシブを簡単に送信する為の関数セットです。 全ての情報はエクスクルーシブによって送信されます。<br>
+  コントロールチェンジによる送信には対応していません。コントロールチェンジによるデータ送信は、&quot;GM2CC.h&quot;(作成中)を使用してください。<br>
+  <br>
+  対象音源はRoland SCシリーズ全てです。ただし、SC-55系では使えるエクスクルーシブが極端に減りますのでSC-88以上での使用を推奨します。<br>
+  <br>
+  なお、ソフトウェアシンセサイザー VSCシリーズは互換性にかなり難があるので一切サポート致しません。<br>
+  また、Microsoft GS Wavetable SW Synthは、GSとは名ばかりのGM音源なので動作しません。<br>
+  <br>
+  現時点ではパラメータ値の解説などは記載しておりませんので、マニュアル片手に使うことになります。<br>
+  まぁ、ある程度使い込めば体で覚えるはずですから大丈夫でしょう。<br>
+  <br>
+  関数名はMIDIインプリメンテーションに記載されている名称をそのまま使っていますので、参照しやすいかと思います。<br>
+  ちょっと長ったらしい関数名の物もありますが、サクラのエディターから挿入することを前提にしているので問題ないでしょう。<br>
+  ただし、全ての関数名の先頭に「GS_」が追加されています。これは同じ関数名が拙作のMU1000.hに存在するので区別の為です。<br>
+  <br>
+  <b>※重要※</b><br>
+  当関数セットを使用する際には汎用関数セット"<cite>4neria.h</cite>"をインクルードする必要があります。<br>
+  使用される際には下記の２行を<b>MMLの出来る限り先頭(タイトル情報の後など)に記述</b>してください。<br>
+  <br>
+  Include(4neria.h);<br>
+  Include(SC-8850.h);<br>
+ </p>
+
+ <h2>▼対応音源</h2>
+ <blockquote> 
+  SC-8850、SC-8820、SC-D70、SC-88Pro、SK-88Pro、SC-88ST Pro、SC-880<br>
+  SC-88、SC-88VL、SC-88ST、M-GS64、SC-55、SC-55mkII、SC-55ST、SC-33、SC-155<br>
+ </blockquote>
+
+ <h2>▼非対応エクスクルーシブ</h2>
+ <blockquote>
+  ・ディスプレイパラメータに関わるエクスクルーシブ<br>
+  ・ユーザーパッチに関わるエクスクルーシブ<br>
+  ・ユーザーエフェクトに関わるエクスクルーシブ<br>
+ </blockquote>
+
+ <p>
+  上記のエクスクルーシブに関しては今後も対応予定はありません。<br>
+ </p>
+
+ <h2>▼音源とエクスクルーシブの対応状況</h2>
+ <p>
+  SC-88Pro以降であればポート数の設定さえ行えば(後述)、実装されている関数は全て動作します。<br>
+  SC-88以下ではＥＦＸに関わるエクスクルーシブは動作しません。SC-55系は使えないエクスクルーシブばかりです。<br>
+ </p>
+ <p>
+  SC-88Pro系以外で使用される方は、SC-8850.hファイル内の下記の行を書き換えて使ってください。エラーチェックが少しだけ強化されます。
+ </p>
+ <p>
+  先ずは25行目の「<b>Int</b> <code>PortNumberGS_MAX</code> = <var>2</var>;」で、使用される音源のポート数を記述してください。<br>
+  各音源のポート数は、25行目の上にコメントで書いてあります。<br>
+  <br>
+  また、デバイスナンバーを変更されている方は12行目を変更してください。
+ </p>
+
+ <h2>▼実装しているエクスクルーシブ関数一覧</h2>
+ <blockquote>
+  <h3>マスターパート</h3>
+  <blockquote>
+   <code>GS_SYSTEM_MODE_SET</code>()<br>
+   SC-88以降のモードセットをします。この関数ではMODE-1、シングルモジュールモードで使用することを前提にしています。<br>
+   パラメータ値はありません。値は<var>0</var>が自動的に送信されます。<br>
+   <br>
+   <code>GS_CHANNEL_MSG_RX_PORT</code>(<var>Port,Channel,n</var>) <samp>Port:1-4 Channel:1-16 n:0-3</samp><br>
+   各チャンネルの受信ポートを設定します。<var>Port</var>で設定を変えるポートを指定します。値は<var>1からPortNumberGS_MAXで設定した値</var>までです。<br>
+   <var>Channel</var>で設定を変えるチャンネルを指定します。値は<var>1～16</var>までです。<br>
+   <var>n</var>で目的のポート＆チャンネルの受信ポートをどれに変更するか指定します。値は<var>0-3</var>までで、<cite>PortA-D</cite>に対応します。<br>
+   (PortC-Dが使えるのはSC-8850だけです。それ以外の機種では<var>0-1</var>の範囲に留めてください。エラーチェックは行っていません。)<br>
+   <br>
+   <code>GS_MASTER_TUNE</code>(<var>a,b,c,d</var>)<br>
+   マスターチューンを設定します。<br>
+   <br>
+   <code>GS_MASTER_VOLUME</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   マスターヴォリュームを設定します。<br>
+   <br>
+   <code>GS_MASTER_KEY_SHIFT</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   マスターキーシフトを設定します。<br>
+   <br>
+   <code>GS_MASTER_PAN</code>(<var>n</var>) <samp>n:$01～$00～$7F (L63～CENTER～R63)</samp><br>
+   マスターパンを設定します。<br>
+   <br>
+   <code>GS_MODE_SET</code>()<br>
+   所謂、GSリセットです。パラメータ値はありません。<br>
+   <br>
+  </blockquote>
+  <h3>リバーブ</h3>
+  <blockquote>
+   <code>GS_REVERB_MACRO</code>(<var>n</var>) <samp>n:0-7</samp><br>
+   リバーブマクロを設定します。<br>
+   <br>
+   <code>GS_REVERB_CHARACTER</code>(<var>n</var>) <samp>n:0-7</samp><br>
+   リバーブキャラクターを設定します。<br>
+   <br>
+   <code>GS_REVERB_PRE_LPF</code>(<var>n</var>) <samp>n:0-7</samp><br>
+   リバーブPRE LPFを設定します。<br>
+   <br>
+   <code>GS_REVERB_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   リバーブレベルを設定します。<br>
+   <br>
+   <code>GS_REVERB_TIME</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   リバーブタイムを設定します。<br>
+   <br>
+   <code>GS_REVERB_DELAY_FEEDBACK</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ディレイフィードバックを設定します。<br>
+   <br>
+   <code>GS_REVERB_PREDELAY_TIME</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ディレイタイムを設定します。<br>
+   <br>
+  </blockquote>
+  <h3>コーラス</h3>
+  <blockquote>
+   <code>GS_CHORUS_MACRO</code>(<var>n</var>) <samp>n:0-7</samp><br>
+   コーラスマクロを設定します。<br>
+   <br>
+   <code>GS_CHORUS_PRE_LPF</code>(<var>n</var>) <samp>n:0-7</samp><br>
+   コーラスPRE LPFを設定します。<br>
+   <br>
+   <code>GS_CHORUS_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスレベルを設定します。<br>
+   <br>
+   <code>GS_CHORUS_FEEDBACK</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスフィードバックを設定します。<br>
+   <br>
+   <code>GS_CHORUS_DELAY</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスディレイを設定します。<br>
+   <br>
+   <code>GS_CHORUS_RATE</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスの周期を設定します。<br>
+   <br>
+   <code>GS_CHORUS_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスの深さを設定します。<br>
+   <br>
+   <code>GS_CHORUS_SEND_LEVEL_TO_REVERB</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスからリバーブへの送り値を設定します。<br>
+   <br>
+   <code>GS_CHORUS_SEND_LEVEL_TO_DELAY</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスからディレイへの送り値を設定します。<br>
+   <br>
+  </blockquote>
+  <h3>ディレイ</h3>
+  <blockquote>
+   <code>GS_DELAY_MACRO</code>(<var>n</var>) <samp>n:0-9</samp><br>
+   ディレイマクロを設定します。<br>
+   <br>
+   <code>GS_DELAY_PRE_LPF</code>(<var>n</var>) <samp>n:0-7</samp><br>
+   ディレイPRE LPFを設定します。<br>
+   <br>
+   <code>GS_DELAY_TIME_CENTER</code>(<var>n</var>) <samp>n:$01-$73</samp><br>
+   中央のディレイタイムを設定します。<br>
+   <br>
+   <code>GS_DELAY_TIME_RAITO_LEFT</code>(<var>n</var>) <samp>n:$01-$78</samp><br>
+   左のディレイタイムの中央に対する割合を設定します。<br>
+   <br>
+   <code>GS_DELAY_TIME_RAITO_RIGHT</code>(<var>n</var>) <samp>n:$01-$78</samp><br>
+   右のディレイタイムの中央に対する割合を設定します。<br>
+   <br>
+   <code>GS_DELAY_LEVEL_CENTER</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   中央のディレイレベルを設定します。<br>
+   <br>
+   <code>GS_DELAY_LEVEL_LEFT</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   左のディレイレベルを設定します。<br>
+   <br>
+   <code>GS_DELAY_LEVEL_RIGHT</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   右のディレイレベルを設定します。<br>
+   <br>
+   <code>GS_DELAY_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ディレイレベルを設定します。<br>
+   <br>
+   <code>GS_DELAY_FEEDBACK</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+64)</samp><br>
+   ディレイフィードバックを設定します。<br>
+   <br>
+   <code>GS_DELAY_SEND_LEVEL_TO_REVERB</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ディレイからリバーブへの送り値を設定します。<br>
+   <br>
+  </blockquote>
+  <h3>ＥＱ</h3>
+  <blockquote>
+   <code>GS_EQ_LOW_FREQ</code>(<var>n</var>) <samp>n:0-1 (200Hz/400Hz)</samp><br>
+   EQ LOWの周波数を設定します。<br>
+   <br>
+   <code>GS_EQ_LOW_GAIN</code>(<var>n</var>) <samp>n:$34～$40～$4C (-12～0～+12[dB])</samp><br>
+   EQ LOWのゲインを設定します。<br>
+   <br>
+   <code>GS_EQ_HIGH_FREQ</code>(<var>n</var>) <samp>n:0-1 (3KHz/6KHz)</samp><br>
+   EQ HIGHの周波数を設定します。<br>
+   <br>
+   <code>GS_EQ_HIGH_GAIN</code>(<var>n</var>) <samp>n:$34～$40～$4C (-12～0～+12[dB])</samp><br>
+   EQ HIGHのゲインを設定します。<br>
+   <br>
+  </blockquote>
+  <h3>ＥＦＸ</h3>
+  <blockquote>
+   <code>GS_EFX_TYPE</code>(<var>a,b</var>)<br>
+   EFXタイプを設定します。<br>
+   <br>
+   <code>GS_EFX_PARAMETER</code>(<var>lsb,n</var>) <samp>lsb:$03-$16 n:$00-$7F</samp><br>
+   EFXパラメータを設定します。<var>lsb</var>で<b>実際のアドレスのLSB</b>を指定します。<br>
+   SC-88Proのマニュアルにはパラメータ番号でなく、アドレスのLSBが直接書いてありますのでこの方式になっています。<br>
+   <code>GS_EFX_SEND_LEVEL_TO_REVERB</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   EFXからリバーブへの送り値を設定します。<br>
+   <br>
+   <code>GS_EFX_SEND_LEVEL_TO_CHORUS</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   EFXからコーラスへの送り値を設定します。<br>
+   <br>
+   <code>GS_EFX_SEND_LEVEL_TO_DELAY</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   EFXからディレイへの送り値を設定します。<br>
+   <br>
+   <code>GS_EFX_COTROL_SOURCE1</code>(<var>n</var>) <samp>n:$00-$7F (OFF,CC1-95,CAf,BEND)</samp><br>
+   EFXをコントロールするソースを設定します。<br>
+   <br>
+   <code>GS_EFX_COTROL_DEPTH1</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100～0～+100[%])</samp><br>
+   EFXをコントロールする深さを設定します。<br>
+   <br>
+   <code>GS_EFX_COTROL_SOURCE2</code>(<var>n</var>) <samp>n:$00-$7F (OFF,CC1-95,CAf,BEND)</samp><br>
+   EFXをコントロールするソースを設定します。<br>
+   <br>
+   <code>GS_EFX_COTROL_DEPTH2</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100～0～+100[%])</samp><br>
+   EFXをコントロールする深さを設定します。<br>
+   <br>
+   <code>GS_EFX_SEND_EQ_SWITCH</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   EFXからEQへ送るか否かの設定をします。<br>
+   <br>
+  </blockquote>
+  <h3>パート</h3>
+  <blockquote>
+   パート情報に関するエクスクルーシブは送信先チャンネルとポートを指定する事ができます。<br>
+   デフォルトでは関数が呼び出されたトラックのチャンネル、ポートを自動的に読みとって送信先を取得します。<br>
+   これらを変更するには、下記の変数を変更します(これらの変数はSC-8850.h内で定義済みです)<br>
+   <br>
+   <samp>＞ PortNumberGS</samp><br>
+   <samp>＞ ChannelNumberGS</samp><br>
+   <br>
+   ポートを変更するには<code>PortNumberGS</code>の値を変更します。&quot;0&quot;で自動取得になります。&quot;1&quot;以降でポート1以降を指定できます。<br>
+   サクラのPort()命令は&quot;0&quot;から定義できますが、&quot;0&quot;でポート1に対応する事に注意してください。以後も1つずつズレます。<br>
+   チャンネルを変更するには<code>ChannelNumberGS</code>の値を変更します。&quot;0&quot;で自動取得になります。&quot;1～16&quot;でチャンネル1-16に対応します。<br>
+   <br>
+   <samp>
+   ＞ Track(1) Channel(1) Port(0)<br>
+   ＞ GS_PART_LEVEL(2);<br>
+   </samp>
+   　この場合、GS_PART_LEVELは<b>ポート1のチャンネル1</b>に送信されます(デフォルト状態)<br>
+   <br>
+   <samp>
+   ＞ Track(1) Channel(1) Port(0)<br>
+   ＞ PortNumberGS = 2; ChannelNumberGS = 3;<br>
+   ＞ GS_PART_LEVEL(2);<br>
+   </samp>
+   　この場合、GS_PART_LEVELは<b>ポート2のチャンネル3</b>に送信されます。<br>
+   <br>
+   <code>PortNumberGS</code>と<code>ChannelNumberGS</code>の値を変更した時は、必要がなくなったら<b>&quot;0&quot;の自動取得に戻す</b>事を忘れないでください。<br>
+   忘れると以後のエクスクルーシブはずっとそのポートとチャンネルに送信されてしまいます。<br>
+   <br>
+   ※上記の変数と<code>GS_RX_CHANNNEL</code>と<code>GS_CHANNEL_MSG_RX_PORT</code>を活用することで、1ポートだけで複数のポート/チャンネルを操ることができます。<br>
+   <br>
+   <br>
+   <code>GS_TONE_NUMBER</code>(<var>a,b</var>) a,b:0-127<br>
+   プログラムチェンジを行います。aで音色マップのMSBを、bでプログラムナンバーを指定します。<br>
+   <br>
+   <code>GS_RX_CHANNNEL</code>(<var>n</var>) <samp>n:$00-$10 (1-16,OFF)</samp><br>
+   受信するチャンネルを変更します。<br>
+   <br>
+   <code>GS_RX_PITCH_BEND</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ピッチベンドを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_CH_PRESSURE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   チャンネルアフタータッチを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_PROGRAM_CHANGE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   プログラムチェンジを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_CONTROL_CHANGE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   コントロールチェンジを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_POLY_PRESSURE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ポリフォニックアフタータッチを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_NOTE_MESSAGE</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートオンとノートオフを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_RPN</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   RPNを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_NRPN</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   NRPNを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_MODULATION</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   モジュレーションを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_VOLUME</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ヴォリュームを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_PANPOT</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   パンポットを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_EXPRESSION</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   エクスプレッションを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_HOLD1</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   HOLD1を受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_PORTAMENTO</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ポルタメントを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_SOSTENUTO</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ソステヌートを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_SOFT</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ソフトを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_MONO_POLY_MODE</code>(<var>n</var>) <samp>n:0-1 (MONO/POLY)</samp><br>
+   MONOモード、POLYモードの設定をします。<br>
+   <br>
+   <code>GS_ASSIGN_MODE</code>(<var>n</var>) <samp>n:0-2 (SINGLE/LIMITED-MULTI/FULL-MULTI)</samp><br>
+   アサインモードを設定します。<br>
+   <br>
+   <code>GS_USE_FOR_RHYTHM_PART</code>(<var>n</var>) <samp>n:0-2 (OFF/MAP1/MAP2)</samp><br>
+   ドラムパートに変更するか否かの設定を行います。<br>
+   <br>
+   <code>GS_PITCH_KEY_SHIFT</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   ピッチキーシフトを設定します。<br>
+   <br>
+   <code>GS_PITCH_OFFSET_FINE</code>(<var>n</var>) <samp>n:$08～$40～$F8 (-12.0～0～+12.0[Hz])</samp><br>
+   ピッチオフセットファインを設定します。<br>
+   <br>
+   <code>GS_PART_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴォリュームを設定します。<br>
+   <br>
+   <code>GS_VELOCITY_SENSE_DEPTH</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴェロシティセンスデプスを設定します。<br>
+   <br>
+   <code>GS_VELOCITY_SENSE_OFFSET</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ヴェロシティセンスオフセットを設定します。<br>
+   <br>
+   <code>GS_PART_PANPOT</code>(<var>n</var>) <samp>n:$00～$40～$7F (RND/L63～CENTER～R63)</samp><br>
+   パンを設定します。<br>
+   <br>
+   <code>GS_KEYBOARD_RANGE_LOW</code>(<var>n</var>) <samp>n:$00-$7F (C-1～G9)</samp><br>
+   発音する下限を設定します。<br>
+   <br>
+   <code>GS_KEYBOARD_RANGE_HIGH</code>(<var>n</var>) <samp>n:$00-$7F (C-1～G9)</samp><br>
+   発音する上限を設定します。<br>
+   <br>
+   <code>GS_CC1_CONTROLLER_NUMBER</code>(<var>n</var>) <samp>n:0-95</samp><br>
+   アサイナブルコントローラ１の設定をします。<br>
+   <br>
+   <code>GS_CC2_CONTROLLER_NUMBER</code>(<var>n</var>) <samp>n:0-95</samp><br>
+   アサイナブルコントローラ２の設定をします。<br>
+   <br>
+   <code>GS_CHORUS_SEND_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   コーラスへの送り値を設定します。<br>
+   <br>
+   <code>GS_REVERB_SEND_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   リバーブへの送り値を設定します。<br>
+   <br>
+   <code>GS_RX_BANK_SELECT</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   バンクセレクト(MSB)を受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_RX_BANK_SELECT_LSB</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   バンクセレクト(LSB)を受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_PITCH_FINE_TUNE</code>(<var>a,b</var>)<br>
+   ピッチファインチューンの設定をします。<br>
+   <br>
+   <code>GS_DELAY_SEND_LEVEL</code>(<var>n</var>) <samp>n:0-127</samp><br>
+   ディレイへの送り値を設定します。<br>
+   <br>
+   <code>GS_VIBRATO_RATE</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートの周期を設定します。<br>
+   <br>
+   <code>GS_VIBRATO_DEPTH</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートの深さを設定します。<br>
+   <br>
+   <code>GS_TVF_CUTOFF_FREQ</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   カットオフ周波数を設定します。<br>
+   <br>
+   <code>GS_TVF_RESONANCE</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   レゾナンスの設定をします。<br>
+   <br>
+   <code>GS_TVF_TVA_ENV_ATTACK</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   アタックタイムの設定をします。<br>
+   <br>
+   <code>GS_TVF_TVA_ENV_DECAY</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ディケイタイムの設定をします。<br>
+   <br>
+   <code>GS_TVF_TVA_ENV_RELEASE</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   リリースタイムの設定をします。<br>
+   <br>
+   <code>GS_VIBRATO_DELAY</code>(<var>n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートのディレイを設定します。<br>
+   <br>
+   <code>GS_SCALE_TUNING</code>(<var>a1,a2,a3……a12</var>) <samp>an:$00-$7F</samp><br>
+   スケールチューニングを設定します。値はc～bまで12個必須です。<br>
+   <br>
+   <code>GS_MOD_PITCH_CONTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   モジュレーションによるピッチコントロールを設定します。<br>
+   <br>
+   <code>GS_MOD_TVF_CUTOFF_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-9600～0～+9600[セント])</samp><br>
+   モジュレーションによるカットオフコントロールを設定します。<br>
+   <br>
+   <code>GS_MOD_AMPLITUDE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100.0～0～+100.0[%])</samp><br>
+   モジュレーションによるアンプリチュードコントロールを設定します。<br>
+   <br>
+   <code>GS_MOD_LFO1_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   モジュレーションによるLFO1の周期を設定します。<br>
+   <br>
+   <code>GS_MOD_LFO1_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   モジュレーションによるLFO1のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_MOD_LFO1_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   モジュレーションによるLFO1のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_MOD_LFO1_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   モジュレーションによるLFO1のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_MOD_LFO2_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   モジュレーションによるLFO2の周期を設定します。<br>
+   <br>
+   <code>GS_MOD_LFO2_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   モジュレーションによるLFO2のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_MOD_LFO2_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   モジュレーションによるLFO2のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_MOD_LFO2_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   モジュレーションによるLFO2のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_BEND_PITCH_CONTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   ピッチベンドによるピッチコントロールを設定します。<br>
+   <br>
+   <code>GS_BEND_TVF_CUTOFF_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-9600～0～+9600[セント])</samp><br>
+   ピッチベンドによるカットオフコントロールを設定します。<br>
+   <br>
+   <code>GS_BEND_AMPLITUDE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100.0～0～+100.0[%])</samp><br>
+   ピッチベンドによるアンプリチュードコントロールを設定します。<br>
+   <br>
+   <code>GS_BEND_LFO1_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   ピッチベンドによるLFO1の周期を設定します。<br>
+   <br>
+   <code>GS_BEND_LFO1_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   ピッチベンドによるLFO1のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_BEND_LFO1_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   ピッチベンドによるLFO1のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_BEND_LFO1_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   ピッチベンドによるLFO1のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_BEND_LFO2_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   ピッチベンドによるLFO2の周期を設定します。<br>
+   <br>
+   <code>GS_BEND_LFO2_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   ピッチベンドによるLFO2のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_BEND_LFO2_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   ピッチベンドによるLFO2のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_BEND_LFO2_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   ピッチベンドによるLFO2のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CAF_PITCH_CONTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   チャンネルアフタータッチによるピッチコントロールを設定します。<br>
+   <br>
+   <code>GS_CAF_TVF_CUTOFF_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-9600～0～+9600[セント])</samp><br>
+   チャンネルアフタータッチによるカットオフコントロールを設定します。<br>
+   <br>
+   <code>GS_CAF_AMPLITUDE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100.0～0～+100.0[%])</samp><br>
+   チャンネルアフタータッチによるアンプリチュードコントロールを設定します。<br>
+   <br>
+   <code>GS_CAF_LFO1_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   チャンネルアフタータッチによるLFO1の周期を設定します。<br>
+   <br>
+   <code>GS_CAF_LFO1_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   チャンネルアフタータッチによるLFO1のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CAF_LFO1_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   チャンネルアフタータッチによるLFO1のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CAF_LFO1_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   チャンネルアフタータッチによるLFO1のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CAF_LFO2_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   チャンネルアフタータッチによるLFO2の周期を設定します。<br>
+   <br>
+   <code>GS_CAF_LFO2_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   チャンネルアフタータッチによるLFO2のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CAF_LFO2_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   チャンネルアフタータッチによるLFO2のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CAF_LFO2_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   チャンネルアフタータッチによるLFO2のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_PAF_PITCH_CONTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   ポリフォニックアフタータッチによるピッチコントロールを設定します。<br>
+   <br>
+   <code>GS_PAF_TVF_CUTOFF_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-9600～0～+9600[セント])</samp><br>
+   ポリフォニックアフタータッチによるカットオフコントロールを設定します。<br>
+   <br>
+   <code>GS_PAF_AMPLITUDE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100.0～0～+100.0[%])</samp><br>
+   ポリフォニックアフタータッチによるアンプリチュードコントロールを設定します。<br>
+   <br>
+   <code>GS_PAF_LFO1_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   ポリフォニックアフタータッチによるLFO1の周期を設定します。<br>
+   <br>
+   <code>GS_PAF_LFO1_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   ポリフォニックアフタータッチによるLFO1のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_PAF_LFO1_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   ポリフォニックアフタータッチによるLFO1のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_PAF_LFO1_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   ポリフォニックアフタータッチによるLFO1のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_PAF_LFO2_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   ポリフォニックアフタータッチによるLFO2の周期を設定します。<br>
+   <br>
+   <code>GS_PAF_LFO2_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   ポリフォニックアフタータッチによるLFO2のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_PAF_LFO2_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   ポリフォニックアフタータッチによるLFO2のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_PAF_LFO2_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   ポリフォニックアフタータッチによるLFO2のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC1_PITCH_CONTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   アサイナブルコントローラ１によるピッチコントロールを設定します。<br>
+   <br>
+   <code>GS_CC1_TVF_CUTOFF_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-9600～0～+9600[セント])</samp><br>
+   アサイナブルコントローラ１によるカットオフコントロールを設定します。<br>
+   <br>
+   <code>GS_CC1_AMPLITUDE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100.0～0～+100.0[%])</samp><br>
+   アサイナブルコントローラ１によるアンプリチュードコントロールを設定します。<br>
+   <br>
+   <code>GS_CC1_LFO1_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   アサイナブルコントローラ１によるLFO1の周期を設定します。<br>
+   <br>
+   <code>GS_CC1_LFO1_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   アサイナブルコントローラ１によるLFO1のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC1_LFO1_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   アサイナブルコントローラ１によるLFO1のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC1_LFO1_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   アサイナブルコントローラ１によるLFO1のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC1_LFO2_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   アサイナブルコントローラ１によるLFO2の周期を設定します。<br>
+   <br>
+   <code>GS_CC1_LFO2_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   アサイナブルコントローラ１によるLFO2のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC1_LFO2_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   アサイナブルコントローラ１によるLFO2のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC1_LFO2_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   アサイナブルコントローラ１によるLFO2のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC2_PITCH_CONTROL</code>(<var>n</var>) <samp>n:$28～$40～$58 (-24～0～+24)</samp><br>
+   アサイナブルコントローラ２によるピッチコントロールを設定します。<br>
+   <br>
+   <code>GS_CC2_TVF_CUTOFF_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-9600～0～+9600[セント])</samp><br>
+   アサイナブルコントローラ２によるカットオフコントロールを設定します。<br>
+   <br>
+   <code>GS_CC2_AMPLITUDE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-100.0～0～+100.0[%])</samp><br>
+   アサイナブルコントローラ２によるアンプリチュードコントロールを設定します。<br>
+   <br>
+   <code>GS_CC2_LFO1_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   アサイナブルコントローラ２によるLFO1の周期を設定します。<br>
+   <br>
+   <code>GS_CC2_LFO1_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   アサイナブルコントローラ２によるLFO1のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC2_LFO1_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   アサイナブルコントローラ２によるLFO1のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC2_LFO1_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   アサイナブルコントローラ２によるLFO1のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC2_LFO2_RATE_CONTROL</code>(<var>n</var>) <samp>n:$00～$40～$7F (-10.0～0～+10.0[Hz])</samp><br>
+   アサイナブルコントローラ２によるLFO2の周期を設定します。<br>
+   <br>
+   <code>GS_CC2_LFO2_PITCH_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-600[セント])</samp><br>
+   アサイナブルコントローラ２によるLFO2のピッチに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC2_LFO2_TVF_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-2400[セント])</samp><br>
+   アサイナブルコントローラ２によるLFO2のTVFカットオフに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_CC2_LFO2_TVA_DEPTH</code>(<var>n</var>) <samp>n:$00～$7F (0-100.0[%])</samp><br>
+   アサイナブルコントローラ２によるLFO2のTVAアンプリチュードに変化を与える深さを設定します。<br>
+   <br>
+   <code>GS_TONE_MAP_NUMBER</code>(<var>n</var>) <samp>n:0-4 (SELECTED/SC-55MAP/SC-88MAP/SC-88ProMAP/SC-8850MAP)</samp><br>
+   トーンマップを設定します。<br>
+   <br>
+   <code>GS_TONE_MAP0_NUMBER</code>(<var>n</var>) <samp>n:1-4 (SC-55MAP/SC-88MAP/SC-88ProMAP/SC-8850MAP)</samp><br>
+   トーンマップが0の時のマップを設定します。<br>
+   <br>
+   <code>GS_EQ_ON_OFF</code>(<var>n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   EQへ通すか否かの設定をします。<br>
+   <br>
+   <code>GS_OUTPUT_ASSIGN</code>(<var>n</var>) <samp>n:0-3 (OUTPUT1/OUTPUT2/OUTPUT2L/OUTPUT2R)</samp><br>
+   アウトプットの設定をします。<br>
+   <br>
+   <code>GS_PART_EFX_ASSIGN</code>(<var>n</var>) <samp>n:0-1 (BYPASS/EFX)</samp><br>
+   EFXへ通すか否かの設定をします。<br>
+   <br>
+  </blockquote>
+  <h3>ドラムパート</h3>
+  <blockquote>
+   ドラムセットに関するエクスクルーシブには共通のパラメータ&quot;DNumber&quot;,&quot;NNumber&quot;を設定します。<br>
+   <var>DNumber</var>はパラメータを変更したい<cite>ドラムマップのナンバー</cite>を記述します。値は<cite>1～2</cite>の範囲です。<br>
+   <var>NNumber</var>はパラメータを変更したい<cite>ノートナンバー</cite>を記述します値の範囲は&quot;<cite>$00-$7F</cite>&quot;(<cite>o0c～o8g</cite>に対応)です。<br>
+   また、<b>{}で括って</b>o4cなどと記述すると自動的にノートナンバーに変換します。<br>
+   <br>
+   <samp>
+   ＞ GS_DRUM_LEVEL(1,{o2c},127)<br>
+   ＞ GS_DRUM_LEVEL(1,24,127)<br>
+   </samp>
+   <br>
+   どちらもドラムマップ１のノートナンバー24のヴォリュームを127に設定します。<br>
+   <br>
+   <b>※重要※</b><br>
+   <var>NNumber</var>を{o4c}のような形式で指定した場合、NoteNo()関数を用いて数値に変換します。<br>
+   NoteNo()関数はKeyFlagの影響などを受けますので注意して使用してください。<br>
+   <br>
+   <br>
+   <code>GS_DRUM_PLAY_NOTE_NUMBER</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00-$7F</samp><br>
+   ピッチコースの設定をします。<br>
+   <br>
+   <code>GS_DRUM_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   ヴォリュームの設定をします。<br>
+   <br>
+   <code>GS_DRUM_ASSIGN_GROUP_NUMBER</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00-$7F</samp><br>
+   アサイングループの設定をします。<br>
+   <br>
+   <code>GS_DRUM_PANPOT</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (RND/L63～CENTER～R63)</samp><br>
+   パンの設定をします。<br>
+   <br>
+   <code>GS_DRUM_REVERB_SEND_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   リバーブへの送り値の設定をします。<br>
+   <br>
+   <code>GS_DRUM_CHORUS_SEND_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   コーラスへの送り値の設定をします。<br>
+   <br>
+   <code>GS_DRUM_RX_NOTE_OFF</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートオフを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_DRUM_RX_NOTE_ON</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートオンを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_DRUM_DELAY_SEND_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   ディレイへの送り値の設定をします。<br>
+   <br>
+  </blockquote>
+  <h3>ユーザーインストゥルメント</h3>
+  <blockquote>
+   ユーザーインストゥルメントに関するエクスクルーシブには共通のパラメータ&quot;INumber&quot;,&quot;PNumber&quot;を設定します。<br>
+   <var>INumber</var>はパラメータを変更したい<cite>ユーザーインストゥルメントマップのナンバー</cite>を記述します。値は<cite>1～2</cite>の範囲です。<br>
+   <var>PNumber</var>はパラメータを変更したい<cite>プログラムナンバー</cite>を記述します。値は<cite>0-127</cite>の範囲です。<br>
+   <br>
+   <br>
+   <code>GS_USERINST_SOURCE_TONE_BANK_LSB</code>(<var>INumber,PNumber,n</var>) <samp>n:1-3</samp><br>
+   ソースとなる音色のトーンマップを設定します。<br>
+   <br>
+   <code>GS_USERINST_SOURCE_TONE_BANK_MSB</code>(<var>INumber,PNumber,n</var>) <samp>n:0-127</samp><br>
+   ソースとなる音色のトーンバンクを設定します。<br>
+   <br>
+   <code>GS_USERINST_SOURCE_TONE_NUMBER</code>(<var>INumber,PNumber,n</var>) <samp>n:0-127</samp><br>
+   ソースとなる音色のトーンを設定します。<br>
+   <br>
+   <code>GS_USERINST_VIBRATO_RATE</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートの周期を設定します。<br>
+   <br>
+   <code>GS_USERINST_VIBRATO_DEPTH</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートの深さを設定します。<br>
+   <br>
+   <code>GS_USERINST_TVF_CUTOFF_FREQ</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   カットオフ周波数を設定します。<br>
+   <br>
+   <code>GS_USERINST_TVF_RESONANCE</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   レゾナンスの設定をします。<br>
+   <br>
+   <code>GS_USERINST_TVF_TVA_ENV_ATTACK</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   アタックタイムの設定をします。<br>
+   <br>
+   <code>GS_USERINST_TVF_TVA_ENV_DECAY</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ディケイタイムの設定をします。<br>
+   <br>
+   <code>GS_USERINST_TVF_TVA_ENV_RELEASE</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   リリースタイムの設定をします。<br>
+   <br>
+   <code>GS_USERINST_VIBRATO_DELAY</code>(<var>INumber,PNumber,n</var>) <samp>n:$00～$40～$7F (-64～0～+63)</samp><br>
+   ヴィブラートのディレイを設定します。<br>
+   <br>
+  </blockquote>
+  <h3>ユーザードラム</h3>
+  <blockquote>
+   ユーザードラムに関するエクスクルーシブには共通のパラメータ&quot;DNumber&quot;,&quot;NNumber&quot;を設定します。<br>
+   <var>DNumber</var>はパラメータを変更したい<cite>ユーザードラムマップのナンバー</cite>を記述します。値は<cite>1～2</cite>の範囲です。<br>
+   <var>NNumber</var>はパラメータを変更したい<cite>ノートナンバー</cite>を記述します値の範囲は&quot;<cite>$00-$7F</cite>&quot;(<cite>o0c～o8g</cite>に対応)です。<br>
+   また、<b>{}で括って</b>o4cなどと記述すると自動的にノートナンバーに変換します。<br>
+   <br>
+   <samp>
+   ＞ GS_USERDRUM_LEVEL(1,{o2c},127)<br>
+   ＞ GS_USERDRUM_LEVEL(1,24,127)<br>
+   </samp>
+   <br>
+   どちらもユーザードラムマップ１のノートナンバー24のヴォリュームを127に設定します。<br>
+   <br>
+   <b>※重要※</b><br>
+   <var>NNumber</var>を{o4c}のような形式で指定した場合、NoteNo()関数を用いて数値に変換します。<br>
+   NoteNo()関数はKeyFlagの影響などを受けますので注意して使用してください。<br>
+   <br>
+   <br>
+   <code>GS_USERDRUM_PLAY_NOTE</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00-$7F</samp><br>
+   ピッチコースの設定をします。<br>
+   <br>
+   <code>GS_USERDRUM_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   ヴォリュームの設定をします。<br>
+   <br>
+   <code>GS_USERDRUM_ASSIGN_GROUP</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00-$7F</samp><br>
+   アサイングループの設定をします。<br>
+   <br>
+   <code>GS_USERDRUM_PAN</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00～$40～$7F (RND,L63～CENTER～R63)</samp><br>
+   パンの設定をします。<br>
+   <br>
+   <code>GS_USERDRUM_REVERB_SEND_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   リバーブへの送り値を設定します。<br>
+   <br>
+   <code>GS_USERDRUM_CHORUS_SEND_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   コーラスへの送り値を設定します。<br>
+   <br>
+   <code>GS_USERDRUM_RX_NOTE_OFF</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートオフを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_USERDRUM_RX_NOTE_ON</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-1 (OFF/ON)</samp><br>
+   ノートオンを受信するか否かの設定をします。<br>
+   <br>
+   <code>GS_USERDRUM_DELAY_SEND_LEVEL</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   ディレイへの送り値を設定します。<br>
+   <br>
+   <code>GS_USERDRUM_SOURCE_DRUM_BANK_LSB</code>(<var>DNumber,NNumber,n</var>) <samp>n:1-3</samp><br>
+   ソースとなるドラムセットのトーンマップを設定します。<br>
+   <br>
+   <code>GS_USERDRUM_SOURCE_DRUM_TONE_NUMBER</code>(<var>DNumber,NNumber,n</var>) <samp>n:0-127</samp><br>
+   ソースとなるドラムセットのトーンを設定します。<br>
+   <br>
+   <code>GS_USERDRUM_SOURCE_DRUM_NOTE_NUMBER</code>(<var>DNumber,NNumber,n</var>) <samp>n:$00-$7F</samp><br>
+   ソースとなるドラムセットのノートナンバーを設定します。<br>
+   <br>
+  </blockquote>
+ </blockquote>
+
+ <h2>SPECIAL THANKS</h2>
+ <p>
+  SC-8850のマニュアルを貸してくださった、<a href="http://www.fire-candy.com/xoops/modules/news/">Fire-Candy.com</a>のmhintさん。<br>
+  <br>
+  お忙しい中、どうもありがとうございましたm(__)m<br>
+ </p>
+
+ <h2>サポート</h2>
+ <p>
+  当関数セットのサポートは、<a href="mailto:4neria@mcn.ne.jp">4neria</a>が行います。<br>
+  バグ情報や要望などは、メールでお願いいたします(サクラの掲示板だと見落とす可能性があるかもしれません…)<br>
+  <br>
+  なお、HTMLメールは送らないでください。メーラーの設定により表示せずに削除されます(ウィルス対策です)<br>
+ </p>
+
+ <hr noshade size="1" color="#f0f0f0">
+
+</body>
+</html>

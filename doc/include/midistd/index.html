@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'
+            'http://www.w3.org/TR/html4/loose.dtd'>
+
+<html lang='ja'>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+	<meta http-equiv='Content-Style-Type' content='text/css'>
+	<meta name='ROBOTS' content='ALL'>
+	<meta name='keywords'
+		  content='Sakura Universal Message'>
+	<meta name='description'
+		  content='Sakura Universal Message'>
+	<meta name='GENERATOR' content='Microsoft Visual J++ 6.0'>
+	<meta name='ProgId' content='Visual J++.Editor.Document'>
+	<link rel='stylesheet' type='text/css' href='midistd.css'>
+	<title>Sakura - MIDI Standard</title>
+</head>
+
+<BODY>
+<!-----------------------------------------------------------------------------
+	ツールバー（レイヤー２）
+------------------------------------------------------------------------------>
+<div id='header'>
+
+<table>
+<tr><td width='640pt'><i>Sakura - MIDI Standard</i></td></tr>
+<tr><td width='640pt'>
+	<a href='../index.html'>定義ファイルのマニュアル</a>＼
+</td></tr>
+</table>
+<!--（↑このコンテンツの位置。）-->
+
+</div>
+<!-----------------------------------------------------------------------------
+	コンテンツ本体（レイヤー１）
+------------------------------------------------------------------------------>
+<div id='contents'>
+
+<h1 align='center'>MIDI Standard</h1>
+
+"midistd.h"及び、"midistd.h"内にて呼び出される各種定義ファイルは、
+MIDI規格にて標準化されており、且つ、Sakuraの標準命令セットに無い機能について関数化し、
+ユーザーに提供されるMIDIの機能を補完する事を目的としています。<br>
+更に、各種定義ファイルには、ユーザーの関数製作を助ける為、各種機能やIDの番号等を定数化しています。<br>
+（定義内容の詳細については本マニュアルには記載していませんので、各種関数の定義ファイルを参照してください。）<br>
+<br>
+又、本マニュアルにて、Sakura及びMIDIによるDTM活動に必要な情報を記載しています。<br>
+<br>
+■本マニュアルの表中の"GM1","GM2"について。<br>
+○ … General MIDIの仕様書にて実装が義務つけられている機能。<br>
+△ … General MIDIの仕様書にて実装が推奨されている機能。<br>
+× … General MIDIの仕様書にて実装は任意とされている機能。<br>
+<br>
+<!------------------------------------------------------------->
+<h2><a href='voice.html'>Channel Voice Message</a></h2>
+
+MIDIデバイスの1～16の各チャンネルを制御する為のメッセージす。<br>
+大別すると、以下の５つつのメッセージがあります。<br>
+<ul>
+<li><a href='voice.html#note'>Note on / Note off Message</a><br>
+<li><a href='voice.html#after'>After Touch Message</a><br>
+<li><a href='voice.html#cc'>Control Change Message</a><br>
+<li><a href='voice.html#program'>Program Change Message</a><br>
+<li><a href='voice.html#bend'>Pitch Bend Change Message</a><br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h2>Channel Mode Message</h2>
+
+MIDIデバイスの1～16の各チャンネルのモードを設定する為のメッセージす。<br>
+
+<!-------この文は、リンク先に移す。------->
+General MIDI(GM)規格に対応した音源デバイスは、初期モードは３となります。<br>
+<!-------この文は、リンク先に移す。------->
+
+<ul>
+<li>Mode1<br>
+<li>Mode2<br>
+<li>Mode3<br>
+<li>Mode4<br>
+</ul>
+
+<br><br>
+<!------------------------------------------------------------->
+<h2><a href='exclusive.html'>System Exclusive Message</a></h2>
+
+チャンネルに関係なく、MIDIデバイスのシステム全体に共通するメッセージです。<br>
+各楽器メーカーにID番号(1 or 3Byte)が割り振られており、MIDIデバイス固有の機能を設定する事が可能です。<br>
+その為、ID番号によって様々なフォーマットがあります。<br>
+又、$7D～$7Fの３つのメーカーID番号は、全てのMIDIデバイスに共通するメッセージとして割り振られいます。<br>
+$7Dは、教育機関、研究機関等のテスト用で商用のMIDIデバイスでの使用は禁止されています。<br>
+$7E～$7FはUniversal Exclusive Messageで、MIDI規格の拡張として使用されます。<br>
+<br>
+<h4>命令一覧 (Sakura標準命令)</h4>
+<ul>
+<li>SysEx = $F0, <var>Data1</var>, <var>Data2</var>, …, <var>DataN</var>, $F7<br>
+<li>SysEx$ = F0, <var>Data1</var>, <var>Data2</var>, …, <var>DataN</var>, F7<br>
+</ul>
+
+<table>
+<tr><th>ID番号</th><th>Maker</th></tr>
+<tr><td>$7D</td><td>Test</td></tr>
+<tr><td>$7E</td><td><a href='exclusive.html#NRT'>Universal Non Real Time Exclusive Message</a></td></tr>
+<tr><td>$7F</td><td><a href='exclusive.html#RT'>Universal Real Time Exclusive Message</a></td></tr>
+</table>
+<br>
+
+<br><br>
+<!------------------------------------------------------------->
+<h2>Reference</h2>
+
+<li><a href='http://www.amei.or.jp/'>社団法人 音楽電子事業協会</a><br>
+<li><a href='http://www.midi.org/'>MIDI Manufacture Association (米国)</a><br>
+<br>
+
+<br><br>
+<!------------------------------------------------------------->
+<h2>Copyright</h2>
+
+	Ｓ．Ｗ．<br>
+	<br>
+	メール：<a href='http://homepage1.nifty.com/~sha_w/'>S.W. Homepage</a><br>
+	ＵＲＬ：<img src='mail.jpg'><br>
+	<br>
+	誤植、改善案等ありましたら、お気兼ねなく連絡頂けると幸いです。<br>
+
+<br>
+</div>
+<!-----------------------------------------------------------------------------
+	フッター
+------------------------------------------------------------------------------>
+<div id='footer'>
+
+<table>
+<tr><td width='640pt' colspan='4'><i>Sakura - MIDI Standard</i><br></td></tr>
+</table>
+
+</div>
+<!---------------------------------------------------------------------------->
+</BODY>
+</html>
