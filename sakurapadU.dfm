@@ -438,7 +438,7 @@ object frmSakuraPad: TfrmSakuraPad
         Top = 16
         Width = 183
         Height = 330
-        ActivePage = tabList
+        ActivePage = tabTemplate
         Align = alClient
         DockSite = True
         Font.Charset = SHIFTJIS_CHARSET
@@ -777,7 +777,7 @@ object frmSakuraPad: TfrmSakuraPad
           end
         end
         object tabTemplate: TTabSheet
-          Caption = #38619#22411
+          Caption = #12402#12394#22411
           ImageIndex = 5
           object lstTemplate: TListBox
             Tag = 3
@@ -1042,12 +1042,12 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsDropDown
       end
       object btnSave: TToolButton
-        Left = 63
+        Left = 61
         Top = 2
         Action = actSaveAs
       end
       object ToolButton9: TToolButton
-        Left = 86
+        Left = 84
         Top = 2
         Width = 8
         Caption = 'ToolButton9'
@@ -1055,27 +1055,27 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsSeparator
       end
       object btnUndo: TToolButton
-        Left = 94
+        Left = 92
         Top = 2
         Action = actZ
       end
       object btnCut: TToolButton
-        Left = 117
+        Left = 115
         Top = 2
         Action = actX
       end
       object ToolButton7: TToolButton
-        Left = 140
+        Left = 138
         Top = 2
         Action = actC
       end
       object btnPaste: TToolButton
-        Left = 163
+        Left = 161
         Top = 2
         Action = actV
       end
       object ToolButton13: TToolButton
-        Left = 186
+        Left = 184
         Top = 2
         Width = 8
         Caption = 'ToolButton13'
@@ -1083,28 +1083,28 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsSeparator
       end
       object btnKeyInput: TToolButton
-        Left = 194
+        Left = 192
         Top = 2
         Caption = 'btnKeyInput'
         ImageIndex = 4
         OnClick = mnuShowKeyboardClick
       end
       object btnGosenInput: TToolButton
-        Left = 217
+        Left = 215
         Top = 2
         Caption = 'btnGosenInput'
         ImageIndex = 10
         OnClick = mnuShowGosenfuClick
       end
       object btnMon: TToolButton
-        Left = 240
+        Left = 238
         Top = 2
         Caption = 'btnMon'
         ImageIndex = 21
         OnClick = mnuShowMonitorClick
       end
       object ToolButton17: TToolButton
-        Left = 263
+        Left = 261
         Top = 2
         Width = 8
         Caption = 'ToolButton17'
@@ -1112,27 +1112,27 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsSeparator
       end
       object btnPlayFirst: TToolButton
-        Left = 271
+        Left = 269
         Top = 2
         Action = actRunFirst
       end
       object btnPlay: TToolButton
-        Left = 294
+        Left = 292
         Top = 2
         Action = actRun
       end
       object btnStop: TToolButton
-        Left = 317
+        Left = 315
         Top = 2
         Action = actStop
       end
       object btnPrev: TToolButton
-        Left = 340
+        Left = 338
         Top = 2
         Action = actPlayPrev
       end
       object ToolButton22: TToolButton
-        Left = 363
+        Left = 361
         Top = 2
         Width = 8
         Caption = 'ToolButton22'
@@ -1140,7 +1140,7 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsSeparator
       end
       object track: TTrackBar
-        Left = 371
+        Left = 369
         Top = 2
         Width = 114
         Height = 22
@@ -1149,7 +1149,7 @@ object frmSakuraPad: TfrmSakuraPad
         OnEnter = trackEnter
       end
       object ToolButton23: TToolButton
-        Left = 485
+        Left = 483
         Top = 2
         Width = 8
         Caption = 'ToolButton23'
@@ -1157,7 +1157,7 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsSeparator
       end
       object cmbPlaySpeed: TComboBox
-        Left = 493
+        Left = 491
         Top = 2
         Width = 52
         Height = 22
@@ -1179,7 +1179,7 @@ object frmSakuraPad: TfrmSakuraPad
           '400%')
       end
       object ToolButton24: TToolButton
-        Left = 545
+        Left = 543
         Top = 2
         Width = 8
         Caption = 'ToolButton24'
@@ -1187,7 +1187,7 @@ object frmSakuraPad: TfrmSakuraPad
         Style = tbsSeparator
       end
       object Panel3: TPanel
-        Left = 553
+        Left = 551
         Top = 2
         Width = 143
         Height = 22
