@@ -22,7 +22,7 @@ const
   ARUKAS          = 'tools\arukas.exe';
   SHOW_LOGO_FILE  = 'tools\nologo';
   Kakikake        = 'ÉTÉNÉâèëÇ´Ç©ÇØ.txt';
-  WEB_URL         = 'http://oto.chu.jp/';
+  WEB_URL         = 'https://sakuramml.com/';
 
   NOTE_NO_TABLE: array [0..6] of Integer = (9,11,0,2,4,5,7);
 
@@ -1797,7 +1797,7 @@ end;
 
 procedure TfrmSakuraPad.mnuHomePageClick(Sender: TObject);
 begin
-    OpenApp('http://oto.chu.jp/');
+    OpenApp(WEB_URL);
 end;
 
 procedure TfrmSakuraPad.MakeCommandTree;
@@ -2819,7 +2819,7 @@ var
               begin
                 key := key + '%' + IntToHex(Ord(s[i]),2);
               end;
-              show_doc('http://oto.chu.jp/wiki/index.php?' + Key);
+              show_doc('https://sakuramml.com/wiki/index.php?' + Key);
             end else
             begin
               show_doc(AppPath + 'doc\command\'+str+'.htm');

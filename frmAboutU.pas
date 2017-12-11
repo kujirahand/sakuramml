@@ -9,7 +9,7 @@ uses
 const
   HISTORY = 'history.txt';
   TITLE_JPG = 'doc\title.jpg';
-  WEB_URL = 'http://oto.chu.jp/';
+  WEB_URL = 'https://sakuramml.com/';
 
 type
   TfrmAbout = class(TForm)
