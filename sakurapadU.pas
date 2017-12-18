@@ -4438,7 +4438,7 @@ var
           '日本語プログラム言語「ひまわり」が必要です'#13#10+
           'ひまわりのダウンロードページを表示しますか？') then
           begin
-            OpenApp('http://www.text2music.com/hima/download.htm');
+            OpenApp('https://sakuramml.com/hima/download.htm');
           end;
         end else
           OpenApp(c);

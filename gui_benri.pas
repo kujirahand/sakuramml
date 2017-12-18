@@ -1,6 +1,6 @@
 unit gui_benri;
 // 説　明：面倒な手続きをユニットにまとめたもの
-// 作　者：山本峰章(mine@text2music.com)
+// 作　者：山本峰章(web@kujirahand.com)
 // 公開日：2001/10/21
 
 interface

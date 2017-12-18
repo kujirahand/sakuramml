@@ -73,7 +73,7 @@ uses StrUtils, StrUnit, sakurapadU, gui_benri;
 {$R *.dfm}
 
 const
-    CGI_PATH = 'http://text2music.com/midi/midi.cgi';
+    CGI_PATH = 'https://sakuramml.com/midi/midi.cgi';
     //CGI_PATH = 'http://localhost/cgi/midi.cgi';
 
 procedure TfrmToukou.btnToukouClick(Sender: TObject);

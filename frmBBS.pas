@@ -238,7 +238,7 @@ begin
 
     //indexを、取得
     try
-        s := http.Get('http://www.text2music.com/tools/sakura/mml_bbs3/bbs-data.txt');
+        s := http.Get('https://sakuramml.com/tools/sakura/mml_bbs3/bbs-data.txt');
     except
         ShowWarn('ダウンロードに失敗！','サクラ曲掲示板の取得');
         Exit;
@@ -335,7 +335,7 @@ begin
     begin
         //ダウンロード
         lblBar.Caption := 'WEB より取得します。';
-        url := 'http://www.text2music.com/tools/sakura/mml_bbs3/mml/'+id+'.mml';
+        url := 'https://sakuramml.com/tools/sakura/mml_bbs3/mml/'+id+'.mml';
         try
         try
             grdList.Enabled := False;
@@ -387,7 +387,7 @@ begin
     temp := JReplace(temp, '@@TITLE@@', csv.Cells[field_title,row] ,True);
     temp := JReplace(temp, '@@COMMENT@@', csv.Cells[field_comment,row] ,True);
     temp := JReplace(temp, '@@ID@@', id ,True);
-    temp := JReplace(temp, '@@LINK@@', '<A href="http://www.text2music.com/tools/sakura/mml_bbs3/bbs.cgi?mode=show&id='+id+'">書き込みと投票はこちら</A>' ,True);
+    temp := JReplace(temp, '@@LINK@@', '<A href="https://sakuramml.com/tools/sakura/mml_bbs3/bbs.cgi?mode=show&id='+id+'">書き込みと投票はこちら</A>' ,True);
     //kanso
     ss := csv.Cells[field_kanso,row];
     ss := JReplace(ss, COMMA, #13#10, True);
@@ -427,7 +427,7 @@ var
 begin
     row := grdList.Row ;
     id := viewDb.Cells[0,row];
-    OpenApp('http://www.text2music.com/tools/sakura/mml_bbs3/bbs.cgi?mode=show&id='+id);
+    OpenApp('https://sakuramml.com/tools/sakura/mml_bbs3/bbs.cgi?mode=show&id='+id);
 end;
 
 procedure TfrmGetBBS.mnuLogListClick(Sender: TObject);
@@ -436,7 +436,7 @@ begin
 
     btnGetLog.Enabled := False;
     try
-    s := http.Get('http://www.text2music.com/tools/sakura/mml_bbs3/bbs.cgi?mode=old_log');
+    s := http.Get('https://sakuramml.com/tools/sakura/mml_bbs3/bbs.cgi?mode=old_log');
     WriteTextFile(AppPath+LOG_LIST, s);
     mnuChangeLogClick(nil) ;
     finally
@@ -502,7 +502,7 @@ begin
     end;
     //ネットからダウンロード
     try
-        s := http.Get('http://www.text2music.com/tools/sakura/mml_bbs3/'+f);
+        s := http.Get('https://sakuramml.com/tools/sakura/mml_bbs3/'+f);
     except
         ShowMessage('ログ取得に失敗');
         Exit;
@@ -530,7 +530,7 @@ end;
 
 procedure TfrmGetBBS.mnuGotoBBSClick(Sender: TObject);
 begin
-    OpenApp('http://www.text2music.com/tools/sakura/mml_bbs3/bbs.cgi');
+    OpenApp('https://sakuramml.com/tools/sakura/mml_bbs3/bbs.cgi');
 end;
 
 procedure TfrmGetBBS.mnuGotoBBSzatudanClick(Sender: TObject);

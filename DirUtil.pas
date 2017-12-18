@@ -1,6 +1,6 @@
 unit DirUtil;
 // 説　明：汎用ディレクトリ処理ユニット。PerlのGlobライクに使える
-// 作　者：山本峰章(mine@text2music.com) http://www.text2music.com
+// 作　者：山本峰章(web@kujirahand.com) https://sakuramml.com
 // 公開日：2001/10/21
 {------------------------------------------------
 フォルダ内のファイルを列挙したり、サブディレクトリ以下の全ファイルを列挙。

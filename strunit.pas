@@ -4,7 +4,7 @@ unit StrUnit;
 
 全ての関数は、マルチバイト文字(S-JIS)に対応している
 
-作成者：山本峰章( mine@text2music.com ) http://www.text2music.com
+作成者：山本峰章( web@kujirahand.com ) https://sakuramml.com
 作成日：2001/11/24
 
 履歴：

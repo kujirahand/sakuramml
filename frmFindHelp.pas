@@ -103,7 +103,7 @@ var
   procedure findBBS;
   var s: string;
   begin
-    s := 'http://www.text2music.com/tools/sakura/sakura-q/srch.cgi?no=0&word='+key+'&andor=and&logs=all&KYO=1&PAGE=20';
+    s := 'https://sakuramml.com/tools/sakura/sakura-q/srch.cgi?no=0&word='+key+'&andor=and&logs=all&KYO=1&PAGE=20';
     OpenApp(s);
   end;
 

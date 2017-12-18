@@ -2,7 +2,7 @@ unit wildcard;
 (*------------------------------------------------------------------------------
 ワイルドカードによるマッチ (VB の "Like"上位互換)
 
-Mineaki Yamamoto (mine@text2music.com) http://www.text2music.com
+Mineaki Yamamoto (web@kujirahand.com) https://sakuramml.com
 2002/02/15 ver.1.00
 --------------------------------------------------------------------------------
 *** WildCard ***

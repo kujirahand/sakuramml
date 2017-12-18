@@ -1,6 +1,6 @@
 unit smf_unit;
 // 用途：MIDIファイル演奏のための各種イベントのクラスを定義したもの
-// 作成：クジラ飛行机 (http://www.text2music.com)
+// 作成：クジラ飛行机 (https://sakuramml.com)
 // 日付：2002/11/25
 
 interface
