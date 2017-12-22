@@ -2,7 +2,7 @@ unit smf_const;
 
 interface
 uses
-  Windows,
+  {$ifdef Win32}Windows,{$endif}
   SysUtils,
   Classes;
 

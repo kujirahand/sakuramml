@@ -4,7 +4,7 @@ unit StrUnit;
 
 全ての関数は、マルチバイト文字(S-JIS)に対応している
 
-作成者：山本峰章( web@kujirahand.com ) https://sakuramml.com
+作成者：クジラ飛行机( web@kujirahand.com ) https://sakuramml.com
 作成日：2001/11/24
 
 履歴：
@@ -13,7 +13,10 @@ unit StrUnit;
 ------------------------------------------------------------------------------*)
 interface
 uses
-  Windows, SysUtils, Classes, EasyMasks,
+  {$ifdef Win32}
+  Windows, 
+  {$endif}
+  SysUtils, Classes, EasyMasks,
   Variants;
 
 type
@@ -51,12 +54,6 @@ function convToFull(const str: string): string;
 function convToHalf(const str: string): string;
 {数字とアルファベットと記号のみ半角に変換する/但し遅い}
 function convToHalfAnk(const str: string): string;
-{ひらがな・カタカナの変換}
-function convToHiragana(const str: string): string;
-function convToKatakana(const str: string): string;
-{MutiByteを考慮した大文字、小文字化}
-function LowerCaseEx(const str: string): string;
-function UpperCaseEx(const str: string): string;
 function RomajiToKana(romaji: String): String;
 {ｱ 愛知県 のような行頭の半角カナを削除して返す}
 function TrimLeftKana(str: string): string;
@@ -604,6 +601,7 @@ var
     buf: string;
 
     function convToHalfMini(sSrc: string): string;
+    {$ifdef Win32}
     var
       cSrc : array [0..255] of char;
       cDst : array [0..255] of char;
@@ -613,7 +611,11 @@ var
       LCMapString( LOCALE_SYSTEM_DEFAULT, LCMAP_HALFWIDTH, cSrc, strlen(cSrc),cDst, sizeof(cDst) );
       Result := cDst;
     end;
-
+    {$else}
+    begin
+      Result := convToHalf(sSrc);
+    end;
+    {$endif}
 begin
 
     // はじめに、数字を半角にする
@@ -760,8 +762,8 @@ begin
 	if html='' then Exit;
 	p := PChar(html);
     top := p;
-    ltag := LowerCaseEx(tag);
-    utag := UpperCaseEx(tag);
+    ltag := LowerCase(tag);
+    utag := UpperCase(tag);
 
     res_in := nil;
     //res_out := nil;
@@ -1037,8 +1039,8 @@ var
     strFind: string;
 begin
 	Result := Str;
-    oldStrFind := UpperCaseEx(oldStr);
-    strFind := UpperCaseEx(Result);
+    oldStrFind := UpperCase(oldStr);
+    strFind := UpperCase(Result);
     // ****
 	i := JPosEx(oldStrFind, strFind, 1);
     if i=0 then Exit;
@@ -1049,8 +1051,8 @@ begin
     // *** Loop
     while True do
     begin
-        oldStrFind := UpperCaseEx(oldStr);
-        strFind := UpperCaseEx(Result);
+        oldStrFind := UpperCase(oldStr);
+        strFind := UpperCase(Result);
     	i := JPosEx(oldStrFind, strFind, idx);
         if i=0 then Exit;
         Delete(result, i, Length(oldStr));
@@ -1062,6 +1064,7 @@ end;
 
 {LCMapString-------------------------------------------------------------------}
 function LCMapStringEx(const str: string; MapFlag: DWORD): string;
+{$ifdef Win32}
 var
     pDes: PChar;
     len,len2: Integer;
@@ -1074,7 +1077,14 @@ begin
     LCMapString( LOCALE_SYSTEM_DEFAULT, MapFlag, PChar(str), len, pDes, len2-1);
     Result := string( pDes );
 end;
+{$else}
+begin
+    Result := convToHalfAnk(str);
+end;
+{$endif}
+
 function LCMapStringExHalf(const str: string; MapFlag: DWORD): string;
+{$ifdef Win32}
 var
     pDes: PChar;
     len,len2: Integer;
@@ -1087,33 +1097,32 @@ begin
     LCMapString( LOCALE_SYSTEM_DEFAULT, MapFlag, PChar(str), len, pDes, len2-1);
     Result := string( pDes );
 end;
+{$else}
+begin
+  Result := convToHalfAnk(str);
+end;
+{$endif}
 function convToFull(const str: string): string;
+{$ifdef Win32}
 begin
     Result := LCMapStringEx( str, LCMAP_FULLWIDTH );
 end;
+{$else}
+begin
+  raise Exception.Create('not implements');
+end;
+{$endif}
 
 function convToHalf(const str: string): string;
+{$ifdef Win32}
 begin
     Result := LCMapStringEx( str, LCMAP_HALFWIDTH );
 end;
-{ひらがな・カタカナの変換}
-function convToHiragana(const str: string): string;
+{$else}
 begin
-    Result := LCMapStringEx( str, LCMAP_HIRAGANA );
+    Result := convToHalfAnk(str);
 end;
-function convToKatakana(const str: string): string;
-begin
-    Result := LCMapStringEx( str, LCMAP_KATAKANA );
-end;
-{MutiByteを考慮した大文字、小文字化}
-function LowerCaseEx(const str: string): string;
-begin
-    Result := LCMapStringExHalf( str, LCMAP_LOWERCASE );
-end;
-function UpperCaseEx(const str: string): string;
-begin
-    Result := LCMapStringExHalf( str, LCMAP_UPPERCASE );
-end;
+{$endif}
 
 function convToHalfAnk(const str: string): string;
 var
@@ -1155,6 +1164,12 @@ begin
     pr^ := #0;
     Result := string(PChar(Result));
 end;
+
+function convToFullAnk(const str: string): string;
+begin
+
+end;
+
 
 {トークン処理}
 {トークン切り出し／区切り文字分を進める}

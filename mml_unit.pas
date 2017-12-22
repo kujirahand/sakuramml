@@ -15,7 +15,9 @@ unit mml_unit;
 interface
 
 uses
+  {$ifdef Win32}
   Windows,
+  {$endif}
   Classes,
   SysUtils,
   mml_error,

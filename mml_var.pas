@@ -11,7 +11,9 @@ unit mml_var;
 
 interface
 uses
+  {$ifdef Win32}
   Windows,
+  {$endif}
   SysUtils,
   Classes,
   hashUnit,
@@ -19,6 +21,10 @@ uses
   mml_error;
 
 type
+  {$ifdef Win32}
+  {$else}
+  PBOOL = ^Boolean;
+  {$endif}
   PMmlOnProgress = ^TMmlOnProgress;
   TMmlOnProgress = procedure (NowLine, LineCount: Integer; msg: PChar; StopCompile: PBOOL); stdcall;
 

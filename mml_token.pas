@@ -12,11 +12,13 @@ unit mml_token;
 interface
 
 uses
+  {$ifdef Win32}
+  Windows,
+  {$endif}
   SysUtils,
   Classes,
   hashUnit,
-  mml_variable,
-  Windows;
+  mml_variable;
 
 type
   TStrHashNode = class(THashNode)

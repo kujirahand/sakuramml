@@ -1,6 +1,6 @@
 unit csvDB;
 { Csvユーティリティユニット(CSVの入出力、ソート、検索)
-　作成者：山本峰章(web@kujirahand.com) https://sakuramml.com
+　作成者：クジラ飛行机(web@kujirahand.com) https://sakuramml.com
   作成日：2001/11/26
   更新日：2002/04/02
 }

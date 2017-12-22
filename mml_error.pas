@@ -13,10 +13,12 @@ unit mml_error;
 interface
 
 uses
+  {$ifdef Win32}
   Windows,
+  mmsystem,
+  {$endif}
   SysUtils,
-  Classes,
-  mmsystem;
+  Classes;
 
 type
   EMml = class(Exception)
@@ -67,18 +69,40 @@ const
   MML_ERR_FUNCTION_ALREADY_EXISTS = '関数"%s"を、再定義しています。';
   MML_WARN_VAR_SYNTAX = '非推奨な文法の警告。';
 
+  {$ifdef Win32}
+  {$else}
+  function timeGetTime: Int64;
+  {$endif}
+
 implementation
+
+{$ifdef Win32}
+{$else}
+uses dateutils;
+function timeGetTime: Int64;
+begin
+  Result := DateTimeToUnix(Now);
+end;
+{$endif}
 
 procedure _debug(s: string); 
 begin
+    {$ifdef Win32}
     MessageBox(0, PChar(s), 'debug', MB_OK);
+    {$else}
+    Writeln(s);
+    {$endif}
 end;
 procedure _debug(i: Integer);
 var
     s: string;
 begin
     s := IntToStr(i);
+    {$ifdef Win32}
     MessageBox(0, PChar(s), 'debug', MB_OK);
+    {$else}
+    Writeln(s);
+    {$endif}
 end;
 
 procedure WriteLog(s: string);

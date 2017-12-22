@@ -12,7 +12,9 @@ unit mml_base;
 
 interface
 uses
+  {$ifdef Win32}
   Windows,
+  {$endif}
   Classes,           
   SysUtils,
   mml_const,
@@ -233,6 +235,16 @@ implementation
 
 uses StrUnit, mml_token;
 
+{$ifdef Win32}
+{$else}
+const MB_OK = 1;
+procedure MessageBox(windowid: Integer; msg: PChar; title: PChar; id: Integer);
+begin
+  Writeln('[' + title + ']');
+  Writeln(msg);
+end;
+{$endif}
+
 
 { TMmlBase }
 
@@ -347,7 +359,7 @@ begin
     cmd( 'RYTHM', scriptRythm,29 );//Rhythm{...}//{...}の中を、リズムモードにする
     cmd( 'Rhythm', scriptRythm,29 );//Rhythm{...}//{...}の中を、リズムモードにする
     cmd( 'RHYTHM', scriptRythm,29 );//Rhythm{...}//{...}の中を、リズムモードにする
-    cmd( '$', scriptRythmChar,30 );//$(char){...}//リズムモードで利用するマクロを設定する
+    cmd( '$', scriptRythmChar,30 );// $(char){...}//リズムモードで利用するマクロを設定する
     cmd( 'Stretch', scriptStretch,31 );//Stretch{ mml }(len)//フレーズmmlを、lenの長さにストレッチして書き込む
     cmd( 'PlayFrom', scriptPlayFrom,32 );//PlayFrom(time|[.option])//途中から演奏する場合の設定を行う
     cmd( 'PlayTo', scriptPlayTo,108 );//PlayTo(time)//演奏を途中で終わらせる設定を行う
@@ -599,7 +611,7 @@ end;
 procedure TMmlBase.Compile(var sp: TSrcPos);
 var
   s: string;
-  IsStopCompile: BOOL;
+  IsStopCompile: Boolean;
 begin
   if FlagStopCompile then Exit;
 

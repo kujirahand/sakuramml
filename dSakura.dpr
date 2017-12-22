@@ -1,6 +1,6 @@
 (*-------------------------------------------------------------------------------
 ソフト：テキスト音楽「サクラ」
-作　者：クジラ飛行机 http://www.text2music.com
+作　者：クジラ飛行机(https://sakuramml.com)
 説　明：ＤＬＬのエントリポイント
 
 サクラ履歴：
@@ -19,10 +19,12 @@
 library dSakura;
 
 uses
+  {$ifdef Win32}
   Windows,
+  mmsystem,
+  {$endif}
   SysUtils,
   Classes,
-  mmsystem,
   mml_unit in 'mml_unit.pas',
   StrUnit in 'strunit.pas',
   wildcard in 'wildcard.pas',
@@ -38,7 +40,6 @@ uses
   smf_types in 'smf_types.pas',
   smf_const in 'smf_const.pas',
   mml_token2 in 'mml_token2.pas';
-
 
 const
   MML_OPTION_NORMAL       =   0;
@@ -79,8 +80,8 @@ function MMLtoMIDI2(
     FuncProgress: PMmlOnProgress): Boolean; stdcall;
 var
     mml: TMml2Smf;
-    s: string;
     p: PChar;
+    s: string;
 
     procedure subOption;
     begin
@@ -150,7 +151,7 @@ begin
     MsgLen := mLen;
 end;
 
-procedure SutotonMode(mode: BOOL); stdcall;
+procedure SutotonMode(mode: Boolean); stdcall;
 begin
     //ver.2.xx
     //not support

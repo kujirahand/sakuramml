@@ -12,7 +12,9 @@ s
 interface
 
 uses
+  {$ifdef Win32}
   Windows,
+  {$endif}
   SysUtils,
   Classes;
 

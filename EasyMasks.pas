@@ -16,7 +16,11 @@ unit EasyMasks;
 
 interface
 uses
-  SysUtils;
+  SysUtils
+  {$ifdef Win32}
+  {$else}
+  {$endif}
+  ;
 
 type
   TEasyMask = class
@@ -35,10 +39,25 @@ type
 function MatchesMask(const FileName, Masks: string) : Boolean;
 //(ëÂï∂éöè¨ï∂éöÇãÊï Ç∑ÇÈ)
 function MatchesMask2(const FileName, Masks: string) : Boolean;
+function MatchesMask2W(const FileName, Masks: WideString) : Boolean;
 
 implementation
 
 function MatchesMask2(const FileName, Masks: string) : Boolean;
+var
+  e: TEasyMask;
+begin
+  e := TEasyMask.Create ;
+  try
+    e.FStr  := WideString(FileName);
+    e.FMask := WideString(Masks);
+    Result := e.Match ;
+  finally
+    e.Free ;
+  end;
+end;
+
+function MatchesMask2W(const FileName, Masks: WideString) : Boolean;
 var
   e: TEasyMask;
 begin
@@ -81,7 +100,7 @@ var
       str2  := Copy(FStr,  si, Length(FStr)  - si + 1);
       mask2 := Copy(FMask, mi, Length(FMask) - mi + 1);
 
-      if MatchesMask2(str2, mask2) then
+      if MatchesMask2W(str2, mask2) then
       begin
         Result := True; Exit;
       end;
@@ -149,8 +168,8 @@ var m: TEasyMask;
 begin
     m := TEasyMask.Create ;
     try
-        m.FStr  := FileName;
-        m.FMask := Masks;
+        m.FStr  := WideString(FileName);
+        m.FMask := WideString(Masks);
 
         m.FStr  := UpperCase(m.FStr);
         m.FMask := UpperCase(m.FMask);

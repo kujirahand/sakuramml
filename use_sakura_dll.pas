@@ -2,7 +2,9 @@ unit use_sakura_dll;
 
 interface
 uses
+  {$ifdef Win32}
   Windows,
+  {$endif}
   SysUtils,
   Classes;
 
@@ -32,9 +34,16 @@ function mmlCompile2(source, fname: string; func: PMmlOnProgress): Boolean;
 implementation
 
 const
+  {$ifdef Win32}
   DSAKURA = 'plug-ins\dSakura.dll';
-
-function MMLtoMIDI(MMLText: PChar; FileName: PChar; ErrMsg: PChar): BOOL; stdcall; external DSAKURA;
+  {$else}
+    {$ifdef DARWIN}
+    DSAKURA = 'libdSakura.dylib';
+    {$else}
+    DSAKURA = 'dSakura.so';
+    {$endif}
+  {$endif}
+function MMLtoMIDI(MMLText: PChar; FileName: PChar; ErrMsg: PChar): Boolean; stdcall; external DSAKURA;
 procedure SetErrMsgLen(mLen: Integer); stdcall; external DSAKURA;
 procedure SetOption(opt: Integer); stdcall; external DSAKURA;
 procedure GetVerInfo(s: PChar); stdcall; external DSAKURA;

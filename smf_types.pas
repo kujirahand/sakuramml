@@ -3,7 +3,7 @@ unit smf_types;
 interface
 
 uses
-  Windows,
+  {$ifdef Win32}Windows,{$endif}
   SysUtils,
   Classes,
   smf_const,
