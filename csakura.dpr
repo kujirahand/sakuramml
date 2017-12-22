@@ -1,11 +1,32 @@
+{%BuildCommand $(CompPath) -Mdelphi $(EdFile)}
 program csakura;
 
 {$APPTYPE CONSOLE}
 
 uses
+  {$ifdef Win32}
+  Windows,
+  mmsystem,
+  {$endif}
   SysUtils,
   Classes,
-  use_sakura_dll in 'use_sakura_dll.pas';
+  csakurautils in 'csakurautils.pas',
+  mml_unit in 'mml_unit.pas',
+  StrUnit in 'strunit.pas',
+  wildcard in 'wildcard.pas',
+  mml_base in 'mml_base.pas',
+  mml_error in 'mml_error.pas',
+  hashUnit in 'hashUnit.pas',
+  mml_types in 'mml_types.pas',
+  mml_const in 'mml_const.pas',
+  mml_token in 'mml_token.pas',
+  mml_system in 'mml_system.pas',
+  mml_var in 'mml_var.pas',
+  mml_calc in 'mml_calc.pas',
+  smf_types in 'smf_types.pas',
+  smf_const in 'smf_const.pas',
+  mml_token2 in 'mml_token2.pas';
+
 
 procedure showHelp;
 begin
@@ -79,8 +100,7 @@ begin
   begin
     Writeln('Success!');
   end else begin
-    Writeln('Failed...');
-    Writeln(mmlErrorMessage);
+    Writeln('Failed...' + SakuraError);
   end;
   
 end.

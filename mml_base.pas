@@ -5894,7 +5894,7 @@ begin
     v := Commands.Items[s];
     if (v=nil)or(v.value=nil) then raise EMml.CreateFmt(ErrMsg(MML_ERR_ARG, sp),['SizeOf']);
 
-    TMInt(Result).value := TMArray(v).Count;
+    TMInt(Result).value := TMHashNode(v).Count;
 
     if v.value.ClassType = TMInt then
     begin

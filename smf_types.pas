@@ -10,6 +10,11 @@ uses
   Math;
 
 type
+  TMergeList = class(TList)
+  public
+    procedure Sort(Compare: TListSortCompare);
+  end;
+  
   //ＭＩＤＩ情報のスーパークラス
   TSmfCustomNode = class
   public
@@ -36,7 +41,7 @@ type
   end;
 
   //ＭＩＤＩデータを保持しておくトラック・クラス
-  TSmfTrack = class(TList)
+  TSmfTrack = class(TMergeList)
   public
     MuteTrack: Boolean;
     LastTime: Integer;//EndOfTrackの書き込みのため
@@ -191,10 +196,6 @@ type
     procedure SetTempo(tp: Integer);
   end;
 
-  TMergeList = class(TList)
-  public
-    procedure Sort(Compare: TListSortCompare);
-  end;
 
 //ビッグエンディアンと、リトルエンディアンを入れ替える
 function SwapEndian4(x: DWORD): DWORD; overload;

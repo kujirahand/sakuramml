@@ -1109,6 +1109,7 @@ begin
 end;
 {$else}
 begin
+  Result := str;
   raise Exception.Create('not implements');
 end;
 {$endif}
@@ -1167,7 +1168,7 @@ end;
 
 function convToFullAnk(const str: string): string;
 begin
-
+  Result := str;
 end;
 
 

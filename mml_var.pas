@@ -137,6 +137,7 @@ type
     tag: Integer;
     constructor Create(key: string);
     destructor Destroy; override;
+    function Count: Integer;
   end;
 
   TMVarHash = class(THash)
@@ -284,7 +285,7 @@ end;
 function TMArray.clone: TMVarCustom;
 begin
     Result := TMArray.Create ;
-    TMArray(Result).Assign(Self); 
+    TMArray(Result).Assign(Self);
 end;
 
 function TMArray.Count: Integer;
@@ -572,6 +573,21 @@ begin
 end;
 
 { TMHashNode }
+
+function TMHashNode.Count: Integer;
+var
+  cnt: Integer;
+  p: THashNode;
+begin
+  cnt := 0;
+  p := Self;
+  while p <> nil do
+  begin
+    Inc(cnt);
+    p := p.LinkNext;
+  end;
+  Result := cnt;
+end;
 
 constructor TMHashNode.Create(key: string);
 begin
