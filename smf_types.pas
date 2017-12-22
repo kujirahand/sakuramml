@@ -394,6 +394,7 @@ end;
 
 constructor TSmfTrack.Create;
 begin
+    inherited Create;
     MuteTrack := False;
 end;
 
@@ -836,6 +837,7 @@ end;
 
 constructor TSmfSong.Create;
 begin
+    inherited Create;
     TimeBase := 96;
     CCShift := 1;
     Format := 1;
@@ -845,13 +847,9 @@ end;
 
 procedure TSmfSong.CreateTrack(Index: Integer);
 begin
-    if Index >= Count then
+    while Index >= Count do
     begin
-        Count := Index+1; // 0 ‚Å‰Šú‰»‚³‚ê‚Ä‚é‚æ‚¤‚¾B
-    end;
-    if Items[Index] = nil then
-    begin
-        Items[Index] := TSmfTrack.Create;
+      Self.Add(TSmfTrack.Create);
     end;
 end;
 

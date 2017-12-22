@@ -154,8 +154,8 @@ function mmlCompile(source: string; midifile: string): Boolean;
 var
   mml: TMml2Smf;
 begin
-    SakuraError := '';
     CompilerMessage := '';
+    SakuraError := '';
     mml := TMml2Smf.Create ;
     try
         try

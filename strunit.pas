@@ -44,19 +44,12 @@ function JPosM(const sub, str: string): Integer;
 {------------------------------------------------------------------------------}
 {文字種類の変換}
 
-{ LCMapString を簡単に使うための関数 変換後の文字列は、str * 2 以内}
-function LCMapStringEx(const str: string; MapFlag: DWORD): string;
-{ LCMapString を簡単に使うための関数 変換後の文字列は、str 以内}
-function LCMapStringExHalf(const str: string; MapFlag: DWORD): string;
 {全角変換}
 function convToFull(const str: string): string;
 {半角変換}
 function convToHalf(const str: string): string;
 {数字とアルファベットと記号のみ半角に変換する/但し遅い}
 function convToHalfAnk(const str: string): string;
-function RomajiToKana(romaji: String): String;
-{ｱ 愛知県 のような行頭の半角カナを削除して返す}
-function TrimLeftKana(str: string): string;
 
 {------------------------------------------------------------------------------}
 {文字種類の判別}
@@ -599,29 +592,12 @@ var
     st,p,mem,pt: PChar;
     len, sig: Integer;
     buf: string;
-
-    function convToHalfMini(sSrc: string): string;
-    {$ifdef Win32}
-    var
-      cSrc : array [0..255] of char;
-      cDst : array [0..255] of char;
-    begin
-      StrLCopy( cSrc, PChar(sSrc), 254  );
-      FillChar( cDst, sizeof(cDst), 0);
-      LCMapString( LOCALE_SYSTEM_DEFAULT, LCMAP_HALFWIDTH, cSrc, strlen(cSrc),cDst, sizeof(cDst) );
-      Result := cDst;
-    end;
-    {$else}
-    begin
-      Result := convToHalf(sSrc);
-    end;
-    {$endif}
 begin
 
     // はじめに、数字を半角にする
     if str='' then begin Result := 0; Exit; end;
 
-    buf := Trim(JReplace(ConvToHalfMini(str),',','',True));//カンマを削除
+    buf := Trim(JReplace(convToHalf(str),',','',True));//カンマを削除
 
     p := PChar(buf);
     while p^ in [' ',#9] do Inc(p);
@@ -844,144 +820,6 @@ begin
     end;
 end;
 
-function RomajiToKana(romaji: String): String;
-const
-    kana_list = 'k,ｶｷｸｹｺ,s,ｻｼｽｾｿ,t,ﾀﾁﾂﾃﾄ,n,ﾅﾆﾇﾈﾉ,h,ﾊﾋﾌﾍﾎ,m,ﾏﾐﾑﾒﾓ,y,2ﾔ ｲ ﾕ ｲｪﾖ ,r,ﾗﾘﾙﾚﾛ,w,2ﾜ ｳｨｳ ｳｪｦ ,'+
-    'g,2ｶﾞｷﾞｸﾞｹﾞｺﾞ,z,2ｻﾞｼﾞｽﾞｾﾞｿﾞ,d,2ﾀﾞﾁﾞﾂﾞﾃﾞﾄﾞ,b,2ﾊﾞﾋﾞﾌﾞﾍﾞﾎﾞ,p,2ﾊﾟﾋﾟﾌﾟﾍﾟﾎﾟ,'+
-    'q,2ｸｧｸｨｸ ｸｪｸｫ,f,2ﾌｧﾌｨﾌ ﾌｪﾌｫ,j,3ｼﾞｬｼﾞ ｼﾞｭｼﾞｪｼﾞｮ,l,ｧｨｩｪｫ,x,ｧｨｩｪｫ,c,ｶｼｸｾｺ,'+
-    'v,3ｳﾞｧｳﾞｨｳﾞ ｳﾞｪｳﾞｫ,f,ﾊﾋﾌﾍﾎ'+
-    'ky,2ｷｬｷｨｷｭｷｪｷｮ,sy,2ｼｬｼｨｼｭｼｪｼｮ,ty,2ﾁｬﾁｨﾁｭﾁｪﾁｮ,ny,2ﾆｬﾆｨﾆｭﾆｪﾆｮ,hy,2ﾋｬﾋｨﾋｭﾋｪﾋｮ,'+
-    'my,2ﾐｬﾐｨﾐｭﾐｪﾐｮ,by,3ﾋﾞｬﾋﾞｨﾋﾞｭﾋﾞｪﾋﾞｮ,cy,2ﾁｬﾁｨﾁｭﾁｪﾁｮ,ch,2ﾁｬﾁ ﾁｭﾁｪﾁｮ,sh,2ｼｬｼ ｼｭｼｪｼｮ';
-var
-    p: PChar;
-    siin: string;
-    siin_s, siin_k: array [0..50] of string;
-
-    function GetBoinNo(c: Char): Integer;
-    begin
-        case c of
-        'a': Result := 0;
-        'i': Result := 1;
-        'u': Result := 2;
-        'e': Result := 3;
-        'o': Result := 4;
-        else Result := 0;
-        end;
-    end;
-
-    function GetSiinCh(s: string; c: Char): string;
-    var i,len: Integer;
-    begin
-        Result := '';
-        if s='' then Exit;
-        i := GetBoinNo(c);
-        if s[1] in ['1'..'9'] then
-        begin
-            len := StrToIntDef(s[1],1);
-            Delete(s,1,1);
-            Result := Trim(Copy(s, i*2+1, len));
-        end else
-        begin
-            Result := s[i+1];
-        end;
-    end;
-
-    procedure DecideChar(c: Char);
-    var i:Integer;
-    begin
-        if siin = '' then begin
-            Result := Result + Copy('ｱｲｳｴｵ',GetBoinNo(c)+1,1);
-        end else
-        begin
-            for i:=0 to High(siin_k) do
-            begin
-                if siin = siin_s[i] then
-                begin
-                    Result := Result + GetSiinCh( siin_k[i], c);
-                    Break;
-                end;
-            end;
-        end;
-
-    end;
-
-    procedure getKanaList;
-    var i: Integer; s,ss: string;
-    begin
-        ss := kana_list; i:=0;
-        while ss<>'' do
-        begin
-            s := GetToken(',', ss);
-            siin_s[i] := s;
-            s := GetToken(',', ss);
-            siin_k[i] := s;
-            Inc(i);
-        end;
-    end;
-
-begin
-    Result := '';
-    romaji := LowerCase(convToHalf(romaji));
-    if romaji='' then Exit;
-
-    getKanaList;
-
-    siin := '';
-    p := PChar(romaji);
-    while p^ <> #0 do
-    begin
-        if p^='-' then
-        begin
-            Result := Result + 'ｰ';
-            Inc(p); siin := '';
-            Continue;
-        end else
-        if p^ in ['a','i','u','e','o'] then
-        begin //母音なので決定
-            DecideChar(p^);
-            Inc(p);
-            siin := '';
-            Continue;
-        end else
-        if p^ in ['a'..'z'] then
-        begin
-            if (siin='n')and(p^<>'y') then
-            begin
-                Result := Result + 'ﾝ';
-                siin := p^;
-                Inc(p);
-                Continue;
-            end;
-            if Copy(siin,Length(siin),1)=p^ then
-            begin
-                Inc(p);
-                Result := Result + 'ｯ';
-                Continue;
-            end;
-            siin := siin + p^;
-            Inc(p);
-        end else
-        begin //記号数字など
-            Result := Result + p^;
-            Inc(p);
-        end;
-    end;
-
-end;
-
-{ｱ 愛知県 のような行頭の半角カナを削除して返す}
-function TrimLeftKana(str: string): string;
-begin
-    Result := '';
-    if str='' then Exit;
-
-    if (str[1] in ['ｱ'..'ﾝ'])and(Copy(str,2,1)=' ') then
-    begin
-        Delete(str,1,1);
-    end;
-    Result := Trim(str);
-end;
-
 function JPosEx(const sub, str:string; idx:Integer): Integer;
 var
 	p, sub_p, temp: PChar; len, str_len: Integer;
@@ -1061,69 +899,16 @@ begin
     end;
 end;
 
-
-{LCMapString-------------------------------------------------------------------}
-function LCMapStringEx(const str: string; MapFlag: DWORD): string;
-{$ifdef Win32}
-var
-    pDes: PChar;
-    len,len2: Integer;
-begin
-    if str='' then begin Result := ''; Exit; end;
-    len  := Length(str);
-    len2 := len*2+2;
-    GetMem(pDes, len2);//half -> full
-    FillChar( pDes^, len2, 0 );
-    LCMapString( LOCALE_SYSTEM_DEFAULT, MapFlag, PChar(str), len, pDes, len2-1);
-    Result := string( pDes );
-end;
-{$else}
-begin
-    Result := convToHalfAnk(str);
-end;
-{$endif}
-
-function LCMapStringExHalf(const str: string; MapFlag: DWORD): string;
-{$ifdef Win32}
-var
-    pDes: PChar;
-    len,len2: Integer;
-begin
-    if str='' then begin Result := ''; Exit; end;
-    len  := Length(str);
-    len2 := len+2;
-    GetMem(pDes, len2);
-    FillChar( pDes^, len2, 0 );
-    LCMapString( LOCALE_SYSTEM_DEFAULT, MapFlag, PChar(str), len, pDes, len2-1);
-    Result := string( pDes );
-end;
-{$else}
-begin
-  Result := convToHalfAnk(str);
-end;
-{$endif}
 function convToFull(const str: string): string;
-{$ifdef Win32}
-begin
-    Result := LCMapStringEx( str, LCMAP_FULLWIDTH );
-end;
-{$else}
 begin
   Result := str;
   raise Exception.Create('not implements');
 end;
-{$endif}
 
 function convToHalf(const str: string): string;
-{$ifdef Win32}
-begin
-    Result := LCMapStringEx( str, LCMAP_HALFWIDTH );
-end;
-{$else}
 begin
     Result := convToHalfAnk(str);
 end;
-{$endif}
 
 function convToHalfAnk(const str: string): string;
 var

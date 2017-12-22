@@ -280,9 +280,9 @@ end;
 function TSongInfo.GetTrack(Index: Integer; DefTimebase: Integer = 96): TTrackInfo;
 begin
     //‚È‚¯‚ê‚Îì‚é
-    if Index >= Count then
+    while Index >= Count do
     begin
-        Count := Index + 1;
+        Self.Add(nil);
     end;
     if Items[Index]=nil then
     begin

@@ -1,7 +1,8 @@
-{%BuildCommand $(CompPath) -Mdelphi $(EdFile)}
 program csakura;
 
+{$ifdef Win32}
 {$APPTYPE CONSOLE}
+{$endif}
 
 uses
   {$ifdef Win32}
@@ -40,11 +41,13 @@ var
   i: Integer;
   mml, midi, src: string;
   s: TStringList;
+  pause: Boolean;
 begin
   i := 1;
   mml := '';
   midi := '';
   src := '';
+  pause := False;
   while i <= ParamCount do
   begin
     // Check Parmeter options
@@ -53,6 +56,12 @@ begin
       Inc(i);
       src := ParamStr(i);
       Inc(i);
+      continue;
+    end;
+    if ParamStr(i) = '-pause' then
+    begin
+      Inc(i);
+      pause := True;
       continue;
     end;
     // get source code
@@ -95,12 +104,12 @@ begin
       s.Free;
     end;
   end;
-
   if mmlCompile(src, midi) then
   begin
     Writeln('Success!');
   end else begin
     Writeln('Failed...' + SakuraError);
   end;
+  if pause then Readln;
   
 end.
