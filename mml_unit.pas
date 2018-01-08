@@ -44,14 +44,15 @@ var
 
     function chkf(f: string): Boolean;
     begin
+      if f <> '' then f := f + PATH_FLAG;
       Result := FileExists( f + 'stdmsg.h' );
     end;
 
     procedure IncludeStdMsg; //標準ファイルを Include する処理
     begin
 
-        if chkf('Include\')or chkf('')or chkf(ExtractFilePath(ParamStr(0)))or
-          chkf(ExtractFilePath(ParamStr(0))+'Include\') then
+        if chkf('Include') or chkf('') or chkf(ExtractFilePath(ParamStr(0))) or
+          chkf(ExtractFilePath(ParamStr(0)) + 'Include') then
         begin
 
           try

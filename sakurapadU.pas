@@ -2119,7 +2119,7 @@ begin
         begin
             s := sl.Strings[i];
             //s := Trim(sl.Strings[i]);//ÉçÅ[ÉJÉãÇóÒãìÇµÇ»Ç¢
-            su := UpperCaseEx(s);
+            su := UpperCase(s);
             if (Copy(s,1,2)='~{')or(Copy(s,1,1)='#')or(Copy(su,1,8)='FUNCTION')or(Copy(su,1,3)='INT')or(Copy(su,1,3)='STR')or(Copy(su,1,5)='ARRAY') then
             begin
                 s := Trim(s);

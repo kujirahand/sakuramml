@@ -53,10 +53,10 @@ begin
     try
         cmd := frmSakuraPad.cmd ;
         //c.SetRowCommaText(0,'ƒRƒ}ƒ“ƒh, à–¾');
-        sk := LowerCaseEx(key);
+        sk := LowerCase(key);
         for i:=0 to cmd.Count -1 do
         begin
-            s := LowerCaseEx(cmd.Cells[0,i]);
+            s := LowerCase(cmd.Cells[0,i]);
             if Copy(s,1,2)='//' then Continue;
             if (Pos(sk,s) > 0)or(sk='') then
             begin

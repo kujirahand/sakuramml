@@ -121,7 +121,7 @@ begin
     if key='' then Exit;
 
     no := MakeHashKeyNo(key);
-	n := nodeTable[no];
+	  n := nodeTable[no];
     if n = nil then Exit;
 
     //top?
@@ -178,16 +178,16 @@ begin
     Result := nil;
     if key='' then Exit;
 
-	n := nodeTable[MakeHashKeyNo(key)];
+    n := nodeTable[MakeHashKeyNo(key)];
     if n = nil then Exit;
 
     //Find Loop
     while n<>nil do
     begin
-    	if n.Key = key then
+        if n.Key = key then
         begin
         	Result := n;
-            Break;
+          Break;
         end;
         n := n.LinkNext ;
     end;
@@ -201,9 +201,9 @@ end;
 
 function THash.MakeHashKeyNo(key: string): Integer;
 var
-	i,len: Integer;
+	  i,len: Integer;
 begin
-	len := Length(key) and $F;
+	  len := Length(key) and $F;
     Result := 0;
     for i:=1 to len do
     begin
@@ -221,7 +221,7 @@ begin
     if node.Key = '' then Exit;
 
     no := MakeHashKeyNo(node.key);
-	n := nodeTable[ no ];
+	  n := nodeTable[ no ];
 
     if n=nil then //TableÇ÷èâÇﬂÇƒí«â¡Ç∑ÇÈÇ∆Ç´
     begin
@@ -264,7 +264,7 @@ end;
 constructor THashNode.Create(Key: string);
 begin
 	Self.Key := Key;
-    LinkNext := nil;
+  LinkNext := nil;
 end;
 
 { TPtrHashNode }
@@ -272,7 +272,7 @@ end;
 constructor TPtrHashNode.Create(key: string; ptr: Pointer);
 begin
 	inherited Create(key);
-    Self.Ptr := ptr;
+  Self.Ptr := ptr;
 end;
 
 { TPtrHash }

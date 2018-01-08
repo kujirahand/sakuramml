@@ -35,6 +35,8 @@ const
   DATE_INFO  = '2017/12/11';
   VER_NUMBER = 2379;
 //------------------------------------------------------------------------------
+const
+  PATH_FLAG = {$IFDEF Win32}'\'{$ELSE}'/'{$ENDIF};
 
 type
   TMmlBase = class(TMmlSystem)
@@ -4668,28 +4670,28 @@ var
       AppPath := ExtractFilePath( ParamStr(0) );
       s := AppPath + fname;
       if FileExists(s) then begin Result := True; Exit; end;
-      s := AppPath + 'Include\' + fname;
+      s := AppPath + 'Include' + fname;
       if FileExists(s) then begin Result := True; Exit; end;
 
       // CurDir を検索
-      CurDir := GetCurrentDir + '\';
+      CurDir := GetCurrentDir + PATH_FLAG;
       s := CurDir + fname;
       if FileExists(s) then begin Result := True; Exit; end;
-      s := CurDir + 'Include\' + fname;
+      s := CurDir + 'Include' + PATH_FLAG + fname;
       if FileExists(s) then begin Result := True; Exit; end;
 
       // ../Include を検索
       Up := ExtractFilePath(Copy(AppPath, 1, Length(AppPath) -1));
       s := Up + fname;
       if FileExists(s) then begin Result := True; Exit; end;
-      s := Up + 'Include\' + fname;
+      s := Up + 'Include' + PATH_FLAG + fname;
       if FileExists(s) then begin Result := True; Exit; end;
 
       // ../Include を検索 (2)
       Up := ExtractFilePath(Copy(CurDir, 1, Length(CurDir) -1));
       s := Up + fname;
       if FileExists(s) then begin Result := True; Exit; end;
-      s := Up + 'Include\' + fname;
+      s := Up + 'Include' + PATH_FLAG + fname;
       if FileExists(s) then begin Result := True; Exit; end;
 
       // 環境変数内をチェック
@@ -4699,7 +4701,7 @@ var
         p := GetToken(';', ss);
         s := p + fname;
         if FileExists(s) then begin Result := True; Exit; end;
-        s := p + 'Include\' + fname;
+        s := p + 'Include' + PATH_FLAG + fname;
         if FileExists(s) then begin Result := True; Exit; end;
       end;
     end;

@@ -73,9 +73,9 @@ procedure skipSpace(var p: PChar);
 procedure skipSpaceReturn(var p: PChar; var lineNo: Integer);
 procedure skipSpaceCalc(var p: PChar);
 
-implementation
+implementation                  
 
-uses StrUnit;
+uses StrUnit, mml_base;
 
 function GetMaruKakko(var ptr: PChar; var lineNo: Integer): string;
 begin
@@ -372,21 +372,6 @@ var
       sortSutotonList;
     end;
 
-    function get2Byte(var p: PChar): string;
-    begin
-        Result := '';
-        while p^ <> #0 do
-        begin
-            if p^ in LeadBytes then
-            begin
-                Result := Result + p^ + (p+1)^;
-                Inc(p,2);
-            end else
-                Exit;
-        end;
-    end;
-
-
     function ConvToMml(var p: PChar; var lineNo: Integer):string;
     var
         i: Integer;
@@ -404,7 +389,7 @@ var
             s := ExtractFilePath(ParamStr(0)) + fname;
             if FileExists(s) = False then
             begin
-                s := ExtractFilePath(ParamStr(0)) + 'Include\' + fname;
+                s := ExtractFilePath(ParamStr(0)) + 'Include' + PATH_FLAG + fname;
                 if FileExists(s) = False then
                 begin
                     raise EFOpenError.CreateFmt('ファイル"%d"が見つかりません。',[fname]);
@@ -598,7 +583,7 @@ var
                 begin
                     raise EParserError.CreateFmt('(%d) : {" ... "}が対応していません。',[tempNo]);
                 end;
-                if p^=#13 then Inc(LineNo);
+                if p^ = #13 then Inc(LineNo);
                 Result := Result + p^;
                 Inc(p);
             end;
@@ -614,7 +599,7 @@ var
                 Inc(p, 2);
             end else
             begin
-                if p^ in [ #13, #0] then Break;
+                if p^ in [ #13, #10, #0] then Break;
                 Inc(p);
             end;
         end;
@@ -659,12 +644,11 @@ begin
         //ハッシュに変換対象文字列ペアを加える
         i := 1;
         len := Length(conv);
-        while i<len do
+        while i < len do
         begin
-            //debug--
-            if not(conv[i] in LeadBytes) then raise Exception.Create('ConvToHalfSign'+IntToStr(i)+'で、全角半角が対応していません。');
-            AddHashList(Copy(conv,i,2), Copy(conv,i+2,1));
-            Inc(i,3);
+          if not(conv[i] in LeadBytes) then raise Exception.Create('[SystemError] ConvToHalfSign'+IntToStr(i)+'で、全角半角が対応していません。');
+              AddHashList(Copy(conv,i,2), Copy(conv,i+2,1));
+              Inc(i,3);
         end;
 
         //ハッシュを参照しながら、文字列を置換する
@@ -676,7 +660,7 @@ begin
             begin
                 s := p^ + (p+1)^;
                 n := TStrHashNode( hash.Find(s) );
-                if n=nil then
+                if n = nil then
                 begin
                     Result := Result + s;
                 end else

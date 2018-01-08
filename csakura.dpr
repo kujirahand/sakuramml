@@ -1,13 +1,19 @@
 program csakura;
 
-{$ifdef Win32}
-{$APPTYPE CONSOLE}
-{$endif}
+{$IFDEF FPC}
+{$ELSE}
+  {$DEFINE DELPHI}
+{$ENDIF}
+
+{$IFDEF Win32}
+  {$APPTYPE CONSOLE}
+{$ENDIF}
+
 
 uses
   {$ifdef Win32}
-  Windows,
-  mmsystem,
+    Windows,
+    mmsystem,
   {$endif}
   SysUtils,
   Classes,
@@ -90,7 +96,6 @@ begin
       showHelp;
       Exit;
     end;
-    // ソースコードの読み込み
     s := TStringList.Create;
     try
       try
@@ -111,5 +116,5 @@ begin
     Writeln('Failed...' + SakuraError);
   end;
   if pause then Readln;
-  
+
 end.

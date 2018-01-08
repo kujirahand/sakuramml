@@ -21,6 +21,8 @@ uses
 
 type
   TCharSet = set of Char;
+var
+  LeadBytes: TCharSet;
 
 (******************************************************************************)
 // multibyte function
@@ -1019,5 +1021,11 @@ begin
     end;
     Result := True;
 end;
+
+Initialization
+begin
+  LeadBytes := [#$80..#$FF];
+end;
+
 
 end.
