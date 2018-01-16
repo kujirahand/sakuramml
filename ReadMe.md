@@ -16,11 +16,11 @@ MML Compiler (MML to MIDI File Converter)
 - 1. Install FPC
 - 2. Compile
 
-``
+```
 fpc -Mdelphi -g -gv -vewh csakura.dpr
     OR
 ./make.sh
-``
+```
 
 ### Compile (Linux)
 
@@ -40,14 +40,14 @@ fpc -Mdelphi -g -gv -vewh csakura.dpr
 
 ### Compile (Raspberry pi)
 
-``
+```
 sudo apt-get update
 sudo apt-get install fpc
 sudo apt-get install nkf
 git clone https://github.com/kujirahand/sakuramml.git
 cd sakuramml
 ./make.sh
-``
+```
 
 
 
