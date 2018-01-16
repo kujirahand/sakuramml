@@ -8,10 +8,14 @@ MML Compiler (MML to MIDI File Converter)
 
 ## Compiler
 
-- Default : Delphi7(Win)
+- Full (Default) : Delphi7 (Win)
 - Commnad line version : Delphi7 / FPC (Free Pascal Compiler)
 
-### use FPC
+## Charset 
+
+- Shift_JIS
+
+### Compile for FPC (Free Pascal compiler)
 
 - 1. Install FPC
 - 2. Compile
