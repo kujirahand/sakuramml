@@ -38,6 +38,16 @@ fpc -Mdelphi -g -gv -vewh csakura.dpr
  - 3.3 ``./make.sh``
  - ここまで来れば、警告がいくつか表示される物の、./csakuraという実行ファイルができているはず
 
+### Compile (Raspberry pi)
+
+``
+sudo apt-get update
+sudo apt-get install fpc
+sudo apt-get install nkf
+git clone https://github.com/kujirahand/sakuramml.git
+cd sakuramml
+./make.sh
+``
 
 
 
