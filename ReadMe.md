@@ -31,7 +31,7 @@ fpc -Mdelphi -g -gv -vewh csakura.dpr
 1. Install dependencies
 
 ```
-sudo apt install libc-dev fp-compiler nkf
+sudo apt install libc-dev fp-compiler
 ```
 
 2. Compile
@@ -64,7 +64,6 @@ cd sakuramml
 ```
 sudo apt-get update
 sudo apt-get install fpc
-sudo apt-get install nkf
 git clone https://github.com/kujirahand/sakuramml.git
 cd sakuramml
 ./make.sh
