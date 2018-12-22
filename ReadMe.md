@@ -26,6 +26,23 @@ fpc -Mdelphi -g -gv -vewh csakura.dpr
 ./make.sh
 ```
 
+### Compile (Debian, Ubuntu)
+
+1. Install dependencies
+
+```
+sudo apt install libc-dev fp-compiler nkf
+```
+
+2. Compile
+
+```
+git clone https://github.com/kujirahand/sakuramml.git
+cd sakuramml
+./make.sh
+```
+
+
 ### Compile (Linux)
 
 - 1. check CPU
