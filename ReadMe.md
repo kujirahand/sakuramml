@@ -8,7 +8,7 @@ MML Compiler (MML to MIDI File Converter)
 
 ## Compiler
 
-- Full (Default) : Delphi7 (Win)
+- Full (Windows only) : Delphi7
 - Commnad line version : Delphi7 / FPC (Free Pascal Compiler)
 
 ## Charset 
@@ -17,37 +17,67 @@ MML Compiler (MML to MIDI File Converter)
 
 ### Compile for FPC (Free Pascal compiler)
 
-- 1. Install FPC
-- 2. Compile
+1. Install FPC
+2. Compile
 
-```
-fpc -Mdelphi -g -gv -vewh csakura.dpr
-    OR
-./make.sh
-```
+    ```sh
+    fpc -Mdelphi -g -gv -vewh csakura.dpr
+        OR
+    ./make.sh
+    ```
 
-### Compile (Linux)
+### Compile (Debian, Ubuntu)
 
-- 1. check CPU
- - 1.1 ``uname -a``
- - 2. Install FPC
-  - 2.1 https://sourceforge.net/projects/freepascal/files/Linux/3.0.4/
-  - 2.2 (ex) wget wget https://sourceforge.net/projects/freepascal/files/Linux/3.0.4/fpc-3.0.4.x86_64-linux.tar/download
-  - 2.3 ``tar xvf download``
-  - 2.4 ``cd fpc-3.0.4.x86_64-linux/``
-  - 2.5 ``./install.sh``
-- 3. pull sourcecode
- - 3.1 ``git clone https://github.com/kujirahand/sakuramml.git``
- - 3,2 ``cd sakuramml``
- - 3.3 ``./make.sh``
- - ここまで来れば、警告がいくつか表示される物の、./csakuraという実行ファイルができているはず
+1. Install dependencies
+
+    ```sh
+    sudo apt install libc-dev fp-compiler
+    ```
+
+2. Compile
+
+    ```sh
+    git clone https://github.com/kujirahand/sakuramml.git
+    cd sakuramml
+    ./make.sh
+    ```
+
+
+### Compile (other Linux)
+
+1. Check CPU
+
+    ```sh
+    uname -a
+    ```
+
+2. Install FPC
+
+    - https://sourceforge.net/projects/freepascal/files/Linux/3.0.4/
+
+    ```sh
+    # example
+    wget https://sourceforge.net/projects/freepascal/files/Linux/3.0.4/fpc-3.0.4.x86_64-linux.tar/download
+    tar xvf download
+    cd fpc-3.0.4.x86_64-linux/
+    ./install.sh
+    ```
+
+3. Pull sourcecode
+
+    ```
+    git clone https://github.com/kujirahand/sakuramml.git
+    cd sakuramml
+    ./make.sh
+    ```
+
+    ここまで来れば、警告がいくつか表示される物の、./csakuraという実行ファイルができているはず
 
 ### Compile (Raspberry pi)
 
-```
+```sh
 sudo apt-get update
 sudo apt-get install fpc
-sudo apt-get install nkf
 git clone https://github.com/kujirahand/sakuramml.git
 cd sakuramml
 ./make.sh
