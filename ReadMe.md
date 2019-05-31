@@ -42,6 +42,22 @@ MML Compiler (MML to MIDI File Converter)
     ./make.sh
     ```
 
+### Compile (macOS)
+
+ 1. Install FPC
+
+  ```sh
+  brew install fpc
+  ```
+
+ 2. Compile
+
+  ```sh
+    git clone https://github.com/kujirahand/sakuramml.git
+    cd sakuramml
+    ./make.sh
+  ```
+
 
 ### Compile (other Linux)
 
