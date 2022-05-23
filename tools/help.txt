@@ -1,4 +1,4 @@
-トップページ, doc\index.htm
+マニュアルトップ, doc\index.htm
 エディタの使い方, doc\edit\index.htm
 簡単ドレミの書き方, doc\reference\sutoton.htm
 サクラ入門講座,doc\kouza\index.htm
@@ -6,3 +6,5 @@
 困ったときは…, doc\faq\index.htm
 コントロールチェンジ早見表,doc\reference\cc.htm
 RPN/NRPN早見表,doc\reference\rpn.htm
+サクラWEB,https://sakuramml.com/
+曲掲示板6,https://sakuramml.com/mmlbbs6/

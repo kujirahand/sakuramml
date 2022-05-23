@@ -438,7 +438,7 @@ object frmSakuraPad: TfrmSakuraPad
         Top = 16
         Width = 183
         Height = 330
-        ActivePage = tabTemplate
+        ActivePage = tabHelp
         Align = alClient
         DockSite = True
         Font.Charset = SHIFTJIS_CHARSET

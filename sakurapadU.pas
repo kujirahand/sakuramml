@@ -1,5 +1,9 @@
 unit sakurapadU;
 
+// [memo] TEditorのWin10のIME不具合に対処する方法
+// https://www.petitmonte.com/bbs/answers?question_id=29860
+// Delphi再インストールの時、上記を適用すること
+
 interface
 
 uses
@@ -3127,7 +3131,12 @@ begin
         end;
         pageBottom.ActivePageIndex := 1;
     end;
-    ShowHtml(AppPath + s); 
+    if Copy(s, 1, 4) = 'http' then
+    begin
+      ShowHtml(s);
+    end else begin
+      ShowHtml(AppPath + s);
+    end;
 end;
 
 procedure TfrmSakuraPad.popJumpDefVarClick(Sender: TObject);
