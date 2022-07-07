@@ -1,9 +1,0 @@
-//_リズムマクロの定義
-$b{n36,}//bass drum
-$s{n38,}//snare
-$h{n42,}//hi-hat
-$m{n46,}//hi-hat open
-$c{n49,}//Cymbal
-$L{n43,}//low-Tom
-$M{n47,}//Mid-Tom
-$H{n50,}//High-Toml
