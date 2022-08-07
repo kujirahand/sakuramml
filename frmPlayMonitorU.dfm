@@ -23,7 +23,7 @@ object frmPlayMonitor: TfrmPlayMonitor
     Left = 88
     Top = 22
     Width = 2
-    Height = 236
+    Height = 239
     Beveled = True
     OnMoved = splitCMoved
   end
@@ -31,7 +31,7 @@ object frmPlayMonitor: TfrmPlayMonitor
     Left = 17
     Top = 22
     Width = 71
-    Height = 236
+    Height = 239
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
@@ -39,7 +39,7 @@ object frmPlayMonitor: TfrmPlayMonitor
       Left = 0
       Top = 0
       Width = 71
-      Height = 236
+      Height = 239
       Align = alClient
       OnClick = boxCCClick
     end
@@ -48,7 +48,7 @@ object frmPlayMonitor: TfrmPlayMonitor
     Left = 90
     Top = 22
     Width = 447
-    Height = 236
+    Height = 239
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
@@ -56,7 +56,7 @@ object frmPlayMonitor: TfrmPlayMonitor
       Left = 0
       Top = 0
       Width = 447
-      Height = 236
+      Height = 239
       Align = alClient
       OnClick = boxNoteInfoClick
     end
@@ -171,7 +171,7 @@ object frmPlayMonitor: TfrmPlayMonitor
     Left = 0
     Top = 22
     Width = 17
-    Height = 236
+    Height = 239
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 3
@@ -179,7 +179,7 @@ object frmPlayMonitor: TfrmPlayMonitor
       Left = 0
       Top = 0
       Width = 17
-      Height = 236
+      Height = 239
       Align = alClient
       OnMouseDown = boxCHMouseDown
       OnPaint = boxCHPaint
@@ -187,7 +187,7 @@ object frmPlayMonitor: TfrmPlayMonitor
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 258
+    Top = 261
     Width = 537
     Height = 19
     Align = alBottom

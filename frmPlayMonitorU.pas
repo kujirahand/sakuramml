@@ -642,6 +642,8 @@ end;
 
 procedure TfrmPlayMonitor.FormCreate(Sender: TObject);
 begin
+  if frmSakuraPad.FlagForceClose then Exit;
+
   bmpKeyboard := TBitmap.Create ;
   frmSakuraPad.ini.LoadForm(Self);
   Port := 0;
@@ -652,6 +654,8 @@ end;
 
 procedure TfrmPlayMonitor.FormDestroy(Sender: TObject);
 begin
+  if frmSakuraPad.FlagForceClose then Exit;
+
   bmpKeyboard.Free ;
   frmSakuraPad.ini.SaveForm(Self); 
 end;

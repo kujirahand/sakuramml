@@ -41,7 +41,7 @@ object frmRythmBox: TfrmRythmBox
   end
   object panelBottom: TPanel
     Left = 0
-    Top = 196
+    Top = 191
     Width = 455
     Height = 37
     Align = alBottom
@@ -180,7 +180,7 @@ object frmRythmBox: TfrmRythmBox
     Left = 0
     Top = 0
     Width = 455
-    Height = 196
+    Height = 191
     Align = alClient
     BevelWidth = 3
     TabOrder = 1
@@ -188,7 +188,7 @@ object frmRythmBox: TfrmRythmBox
       Left = 3
       Top = 3
       Width = 449
-      Height = 190
+      Height = 185
       Align = alClient
       Color = clBlack
       DefaultColWidth = 20

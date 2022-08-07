@@ -259,6 +259,7 @@ procedure TfrmKeyboard.FormCreate(Sender: TObject);
 var
     r: Integer;
 begin
+    if frmSakuraPad.FlagForceClose then Exit; 
     frmSakuraPad.ini.LoadForm(Self);
 
     oldShape := nil;
@@ -317,8 +318,8 @@ end;
 
 procedure TfrmKeyboard.FormDestroy(Sender: TObject);
 begin
+  if frmSakuraPad.FlagForceClose then Exit;
   frmSakuraPad.ini.SaveForm(Self);
-
 end;
 
 procedure TfrmKeyboard.edCHChange(Sender: TObject);
