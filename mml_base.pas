@@ -4670,7 +4670,7 @@ var
       AppPath := ExtractFilePath( ParamStr(0) );
       s := AppPath + fname;
       if FileExists(s) then begin Result := True; Exit; end;
-      s := AppPath + 'Include' + fname;
+      s := AppPath + 'Include' + PATH_FLAG + fname;
       if FileExists(s) then begin Result := True; Exit; end;
 
       // CurDir Çåüçı
