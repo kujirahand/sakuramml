@@ -464,6 +464,9 @@ begin
     s := TStringList.Create ;
     try
     try
+        {$IFDEF UNIX}
+        s.LineBreak := #13#10;
+        {$ENDIF}
         s.LoadFromFile(fname);
         value := s.Text ;
         Result := s.Count ;

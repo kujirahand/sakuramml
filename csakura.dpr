@@ -99,6 +99,9 @@ begin
     s := TStringList.Create;
     try
       try
+        {$IFDEF UNIX}
+        s.LineBreak := #13#10;
+        {$ENDIF}
         s.LoadFromFile(mml);
         src := s.Text;
       except

@@ -397,6 +397,9 @@ var
             end;
             sl := TStringList.Create ;
             try
+                {$IFDEF UNIX}
+                sl.LineBreak := #13#10;
+                {$ENDIF}
                 sl.LoadFromFile(s);
                 s := sl.Text ;
             finally
