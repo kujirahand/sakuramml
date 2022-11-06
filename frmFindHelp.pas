@@ -126,13 +126,14 @@ end;
 
 procedure TfrmFindHelpF.FormCreate(Sender: TObject);
 begin
+  if frmSakuraPad.FlagForceClose then Exit;
   frmSakuraPad.ini.LoadForm(Self);
 end;
 
 procedure TfrmFindHelpF.FormDestroy(Sender: TObject);
 begin
+  if frmSakuraPad.FlagForceClose then Exit;
   frmSakuraPad.ini.SaveForm(Self);
-
 end;
 
 end.

@@ -125,6 +125,7 @@ end;
 
 procedure TfrmReplace.FormCreate(Sender: TObject);
 begin
+    if frmSakuraPad.FlagForceClose then Exit;
     frmSakuraPad.ini.LoadForm(Self);
     edts[0] := edtKey ;
     edts[1] := edtReplace ;
@@ -143,8 +144,8 @@ end;
 
 procedure TfrmReplace.FormDestroy(Sender: TObject);
 begin
+  if frmSakuraPad.FlagForceClose then Exit;
   frmSakuraPad.ini.SaveForm(Self);
-
 end;
 
 end.

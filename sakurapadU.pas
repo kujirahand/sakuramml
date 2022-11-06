@@ -435,6 +435,8 @@ type
     Label5: TLabel;
     ToolButton7: TToolButton;
     cbarTop: TControlBar;
+    mnuOpenConfigDir: TMenuItem;
+    timerAutoClose: TTimer;
     procedure WMMousewheel(var Msg: TMessage); message WM_MOUSEWHEEL;
     procedure MMDone(var Msg: TMessage); message MM_MOM_DONE; 
     procedure mnuAboutClick(Sender: TObject);
@@ -641,6 +643,8 @@ type
     procedure popDefCH16Click(Sender: TObject);
     procedure mnuOutMidClockClick(Sender: TObject);
     procedure popupShowManWebClick(Sender: TObject);
+    procedure mnuOpenConfigDirClick(Sender: TObject);
+    procedure timerAutoCloseTimer(Sender: TObject);
   private
     { Private 宣言 }
     SaveFileName: string;
@@ -703,6 +707,7 @@ type
     IniWindowMaxize: Boolean;
     ManualOnline: Boolean;
     ActiveEditor: TEditor;
+    FlagForceClose: Boolean;
     procedure GotoLine(lineNo: Integer);
     procedure mciClose;
     procedure PlayWave(no: Integer);
@@ -742,8 +747,41 @@ end;
 
 procedure TfrmSakuraPad.FormCreate(Sender: TObject);
 
+    function CheckInstall: Boolean;
+    var
+      i: Integer;
+      ini: TIniFile;
+      f, full: string;
+    begin
+      Result := False;
+      ini := TIniFile.Create(AppPath + 'setup.inf');
+      for i := 1 to 9999 do
+      begin
+        f := ini.ReadString('install', IntToStr(i), '');
+        if f = '' then Break;
+        full := AppPath + f;
+        if not FileExists(full) then
+        begin
+          Result := False;
+          ShowMessage(IntToStr(i) + ':ファイル『' + f + '』が見当たりません。');
+          Exit;
+        end;
+      end;
+      Result := True;
+    end;
+    
     procedure install;
     begin
+        // インストールの正当性のチェック
+        if not CheckInstall then begin
+          FlagForceClose := True;
+          ShowMessage(
+            'インストールのチェックを行ったところ、ファイルが破損しているようです。'#13#10+
+            '正しくファイルがコピーされていないようです。'#13#10+
+            '改めて「setup.exe」を利用してインストールしてください。');
+          Exit;
+        end;
+        // 初回起動時のメッセージ
         MessageBox(Handle,'テキスト音楽「サクラ」'#13#10+
         ''#13#10+
         '今からサクラを快適に使うための設定をします。'#13#10+
@@ -756,6 +794,36 @@ procedure TfrmSakuraPad.FormCreate(Sender: TObject);
         end;
     end;
 
+    procedure makeBookmarkMenu;
+    var
+        mi: TMenuItem;
+        i: Integer;
+        s: string;
+    begin
+        //menu add Bookmark
+
+        for i:=0 to 9 do
+        begin
+            mi := TMenuItem.Create(mnuRecBookmark);
+            mi.Caption := '&'+IntToStr(i);
+            s := IntToStr(i);
+            mi.ShortCut := ShortCut(Ord(s[1]),[ssCtrl,ssShift]);
+            mi.Visible := True;
+            mi.Tag := i;
+            mi.OnClick := OnRecBookmarkClick;
+            mnuRecBookmark.Add(mi);
+
+            mi := TMenuItem.Create(mnuGotoBookmark);
+            mi.Caption := '&'+IntToStr(i);
+            s := IntToStr(i);
+            mi.ShortCut := ShortCut(Ord(s[1]),[ssCtrl]);
+            mi.Visible := True;
+            mi.Tag := i;
+            mi.OnClick := OnBookmarkClick;
+            mnuGotoBookmark.Add(mi);
+        end;
+    end;
+    
     procedure InitializeVariable;
     begin
         //todo:変数の初期化
@@ -780,6 +848,7 @@ procedure TfrmSakuraPad.FormCreate(Sender: TObject);
         begin
             install;
             if FileExists(AppPath + SHOW_LOGO_FILE) then DeleteFile(AppPath + SHOW_LOGO_FILE);
+            if FlagForceClose then Exit;
         end;
         ini := TIniSakura.Create(AppPath+'sakura.ini');
         cmd := TCsvDb.Create ;
@@ -816,7 +885,7 @@ procedure TfrmSakuraPad.FormCreate(Sender: TObject);
         end;
         if FileExists(AppPath + HELP_TXT) then
         begin
-            lstHelp.Items.LoadFromFile(AppPath + HELP_TXT); 
+            lstHelp.Items.LoadFromFile(AppPath + HELP_TXT);
         end;
         FileHelp := '';
         dlgOpen.InitialDir := AppPath;
@@ -831,43 +900,15 @@ procedure TfrmSakuraPad.FormCreate(Sender: TObject);
         IsLeftClick := False;
         DirPlugins := AppPath + 'plug-ins\';
         FDefPlayChannel := 1;
-    end;
-
-    procedure makeBookmarkMenu;
-    var
-        mi: TMenuItem;
-        i: Integer;
-        s: string;
-    begin
-        //menu add Bookmark
-
-        for i:=0 to 9 do
-        begin
-            mi := TMenuItem.Create(mnuRecBookmark);
-            mi.Caption := '&'+IntToStr(i);
-            s := IntToStr(i);
-            mi.ShortCut := ShortCut(Ord(s[1]),[ssCtrl,ssShift]);
-            mi.Visible := True;
-            mi.Tag := i;
-            mi.OnClick := OnRecBookmarkClick;
-            mnuRecBookmark.Add(mi);
-
-            mi := TMenuItem.Create(mnuGotoBookmark);
-            mi.Caption := '&'+IntToStr(i);
-            s := IntToStr(i);
-            mi.ShortCut := ShortCut(Ord(s[1]),[ssCtrl]);
-            mi.Visible := True;
-            mi.Tag := i;
-            mi.OnClick := OnBookmarkClick;
-            mnuGotoBookmark.Add(mi);
-        end;
+        makeBookmarkMenu;
     end;
 
 begin
     IsInit := True;
+    ini := nil;
     //変数の初期化
     InitializeVariable;
-    makeBookmarkMenu;
+    if FlagForceClose then Close;
 end;
 
 procedure TfrmSakuraPad.mnuNewClick(Sender: TObject);
@@ -1470,6 +1511,7 @@ procedure TfrmSakuraPad.FormClose(Sender: TObject;
 var
     i: Integer;
 begin
+    if (ini = nil) or FlagForceClose then Exit;
     if (ini.PlayerType = mpTMIDI) then
     begin
       midiOut.CloseAll ;
@@ -2174,6 +2216,7 @@ end;
 
 procedure TfrmSakuraPad.FormDestroy(Sender: TObject);
 begin
+    if FlagForceClose then Exit;
     FreeAndNil(midiOut);
     FreeAndNil(voiceList);
     FreeAndNil(skinPic);
@@ -2983,6 +3026,10 @@ var
     end;
 
 begin
+    if FlagForceClose then begin
+      timerAutoClose.Enabled := True;
+      Exit;
+    end;
     IsInit := True;
 
     //設定ファイル "sakura.ini"を読む
@@ -3885,14 +3932,28 @@ end;
 
 procedure TfrmSakuraPad.MakeTemplateList;
 var
-    dir: string;
+    dir, fname, line: string;
     g: TGlob;
+    i: Integer;
+    s: TStringList;
 begin
-    dir := AppPath + 'tools\template\*';
-    g := TGlob.Create(dir);
+    dir := AppPath + 'tools\template\';
+    g := TGlob.Create(dir + '*');
     try
         lstTemplate.Sorted := True;
-        lstTemplate.Items.Text := g.FileList.Text ;
+        // lstTemplate.Items.Text := g.FileList.Text ;
+        lstTemplate.Items.Clear;
+        for i := 0 to g.FileList.Count - 1 do
+        begin
+          fname := g.FileList[i];
+          s := TStringList.Create;
+          s.LoadFromFile(dir + fname);
+          line := s.Strings[0];
+          line := Trim(JReplace(line, '//_', '', False));
+          line := Trim(JReplace(line, '//', '', False));
+          s.Free;
+          lstTemplate.Items.Add(fname + ';' + line);
+        end;
     finally
         g.Free;
     end;
@@ -3905,7 +3966,7 @@ var
     canvas: TCanvas;
 begin
     s := lstTemplate.Items[Index];
-    s := GetToken('.',s); 
+    GetToken(';', s); // ファイルパスを捨てる
     //
     canvas := TListBox(Control).Canvas ;
     if odSelected in State then
@@ -3930,13 +3991,15 @@ end;
 
 procedure TfrmSakuraPad.lstTemplateDblClick(Sender: TObject);
 var
-    path, s: string;
+    path, s, f: string;
     i: Integer;
 begin
     i := lstTemplate.ItemIndex ;
     if i<0 then Exit;
 
-    path := AppPath + 'tools\template\'+lstTemplate.Items[i];
+    f := lstTemplate.Items[i];
+    f := GetToken(';', f);
+    path := AppPath + 'tools\template\' + f;
     ReadTextFile(path, s);
 
     ActiveEditor.SelText := s;
@@ -3945,13 +4008,15 @@ end;
 
 procedure TfrmSakuraPad.lstTemplateClick(Sender: TObject);
 var
-    path, s: string;
+    path, s, f: string;
     i: Integer;
 begin
     i := lstTemplate.ItemIndex ;
     if i<0 then Exit;
 
-    path := AppPath + 'tools\template\'+lstTemplate.Items[i];
+    f := lstTemplate.Items[i];
+    f := GetToken(';', f);
+    path := AppPath + 'tools\template\' + f;
     ReadTextFile(path, s);
     lblBar.Caption := Copy(JReplace(s,#13#10,'...',True),1,100);
 
@@ -4680,6 +4745,7 @@ end;
 procedure TfrmSakuraPad.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
+  if FlagForceClose then Exit;
   if mnuUseCloseEx.Checked then // 書きかけ終了
   begin
     makeKakikake;
@@ -4950,6 +5016,16 @@ procedure TfrmSakuraPad.popupShowManWebClick(Sender: TObject);
 begin
     ManualOnline := True;
     barClick(nil);
+end;
+
+procedure TfrmSakuraPad.mnuOpenConfigDirClick(Sender: TObject);
+begin
+  // Open Config Dir
+end;
+
+procedure TfrmSakuraPad.timerAutoCloseTimer(Sender: TObject);
+begin
+  Close;
 end;
 
 initialization

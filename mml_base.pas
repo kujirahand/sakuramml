@@ -31,9 +31,9 @@ uses
 //------------------------------------------------------------------------------
 const
   //TODO: ÉoÅ[ÉWÉáÉìèÓïÒ
-  VER_INFO   = '2.380';
-  DATE_INFO  = '2022/05/23';
-  VER_NUMBER = 2380;
+  VER_INFO   = '2.383';
+  DATE_INFO  = '2022/08/08';
+  VER_NUMBER = 2383;
 //------------------------------------------------------------------------------
 const
   PATH_FLAG = {$IFDEF Win32}'\'{$ELSE}'/'{$ENDIF};
@@ -4670,7 +4670,7 @@ var
       AppPath := ExtractFilePath( ParamStr(0) );
       s := AppPath + fname;
       if FileExists(s) then begin Result := True; Exit; end;
-      s := AppPath + 'Include' + fname;
+      s := AppPath + 'Include' + PATH_FLAG + fname;
       if FileExists(s) then begin Result := True; Exit; end;
 
       // CurDir Çåüçı

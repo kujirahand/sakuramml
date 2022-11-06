@@ -230,6 +230,8 @@ procedure TfrmOnpu1.FormCreate(Sender: TObject);
 var
     w,h: Integer;
 begin
+    if frmSakuraPad.FlagForceClose then Exit; 
+
     w := Self.Width ;
     h := Self.Height ;
     frmSakuraPad.ini.LoadForm(Self);
@@ -346,8 +348,8 @@ end;
 
 procedure TfrmOnpu1.FormDestroy(Sender: TObject);
 begin
+  if frmSakuraPad.FlagForceClose then Exit;
   frmSakuraPad.ini.SaveForm(Self);
-
 end;
 
 procedure TfrmOnpu1.OutputTypeSutoton(IsSutoton: Boolean);
