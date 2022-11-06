@@ -75,8 +75,9 @@ begin
         for i:=0 to s.Count -1 do
         begin
             ss := Trim(s.Strings[i]);
-            if Copy(ss,1,2)='20' then
+            if Copy(ss,1,3)='Å£2' then
             begin
+                ss := Copy(ss,3,999);
                 Break;
             end;
         end;

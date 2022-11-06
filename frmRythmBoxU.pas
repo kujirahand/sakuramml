@@ -156,6 +156,8 @@ end;
 
 procedure TfrmRythmBox.FormCreate(Sender: TObject);
 begin
+    if frmSakuraPad.FlagForceClose then Exit; 
+
     frmSakuraPad.ini.LoadForm(Self);
     csv := TCsvDb.Create ;
     csv.UseHeader := False;
@@ -366,6 +368,7 @@ end;
 
 procedure TfrmRythmBox.FormDestroy(Sender: TObject);
 begin
+    if frmSakuraPad.FlagForceClose then Exit;
     csv.Free ;
     frmSakuraPad.ini.SaveForm(Self);
 end;
