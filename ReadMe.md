@@ -13,7 +13,7 @@ MML Compiler (MML to MIDI File Converter)
 
 ## Charset 
 
-- Shift_JIS
+- Shift_JIS (not UTF-8)
 
 ### Compile for FPC (Free Pascal compiler)
 
