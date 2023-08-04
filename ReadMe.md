@@ -58,6 +58,20 @@ MML Compiler (MML to MIDI File Converter)
     ./make.sh
   ```
 
+### (memo) macOSでエラーが出たとき
+
+Apple SilliconのmacOSで、うまくエラーが出ないエラーを観測しました。
+以下の勧めに応じてコンパイラオプションを修正すると良いです。
+
+https://wiki.freepascal.org/Mac_Installation_FAQ#ld:_library_not_found_for_-lc
+
+具体的には以下の手順でSDKのパスを指定しました。
+
+- `/opt/homebrew/etc/fpc.cfg` をテキストエディタで開く
+- 適当な場所に `-XR/Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk/` を追加。
+- なお、上記パスはSDKのバージョンに応じて変わると思うのでパスが存在するか確認してください。
+
+
 
 ### Compile (other Linux)
 
