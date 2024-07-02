@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # sakuramml - テキスト音楽「サクラ」第三版
 
 MML Compiler (MML to MIDI File Converter)
@@ -218,8 +217,3 @@ git clone https://github.com/kujirahand/sakuramml.git
 cd sakuramml
 ./make.sh
 ```
-
-
-
-
->>>>>>> 82dc252f7b5f089a0e92096834bc56b8f2558607
