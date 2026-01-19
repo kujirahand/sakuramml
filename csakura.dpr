@@ -60,7 +60,6 @@ begin
     // Check Parmeter options
     if ParamStr(i) = '-v' then
     begin
-      Inc(i);
       Writeln(VER_INFO);
       Exit;
     end;
