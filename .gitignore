@@ -11,6 +11,8 @@
 *.~dpr
 /src/pascal/csakura
 /src/pascal/csakura.exe
+# default output of `csakura -e "..."`
+a.mid
 
 # Rust / wasm build artifacts
 /src/rust/target/

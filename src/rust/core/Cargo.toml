@@ -1,0 +1,10 @@
+[package]
+name = "sakuramml-core"
+description = "MML (Music Macro Language) to Standard MIDI File compiler core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+encoding_rs = "0.8"
