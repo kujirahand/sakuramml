@@ -17,6 +17,11 @@ Include/      Macro/definition files loaded by #Include (shared)
 tools/        Tools
 ```
 
+`src/pascal/` contains symlinks back to `doc/`, `sample/`, `Include/` and
+`tools/`, so the Pascal build keeps finding them by executable-relative path
+as it did before the reorganization. (On Windows, git needs `core.symlinks=true`
+for these to materialize as real links.)
+
 The Rust rewrite is planned in [plan.md](plan.md); its command spec is in
 [src/rust/SPEC.md](src/rust/SPEC.md). The Pascal implementation below remains
 the reference implementation.
