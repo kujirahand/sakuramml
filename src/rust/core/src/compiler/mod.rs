@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 
 use crate::encoding::encode_cp932;
 use crate::error::{MmlError, Result, Warning};
-use crate::expr::{self, Value, Variables};
+use crate::expr::{self, EvalContext, Value, Variables};
 use crate::include::{IncludeResolver, NoIncludes};
 use crate::lexer::Cursor;
 use crate::smf::{event, Event, Song, Track};
@@ -79,6 +79,7 @@ pub struct Compiler<'a> {
     warnings: Vec<Warning>,
     depth: usize,
     variables: Variables,
+    functions: BTreeMap<String, FunctionDef>,
     /// Sharps/flats applied per pitch class (c d e f g a b), from `KeyFlag`.
     key_flags: [i64; 7],
     /// Global transpose, in semitones (`System.Keyshift`).
@@ -113,6 +114,7 @@ impl<'a> Compiler<'a> {
             warnings: Vec::new(),
             depth: 0,
             variables: Variables::new(),
+            functions: BTreeMap::new(),
             key_flags: [0; 7],
             key_shift: 0,
             q_max: 100,
@@ -202,6 +204,22 @@ impl<'a> Compiler<'a> {
     fn step(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         let Some(ch) = cur.peek() else { return Ok(()) };
+
+        // A user-defined function wins over the built-in meaning of its name,
+        // so `Function f(){...}` makes a later `f` a call, not the note F.
+        // The Pascal build behaves the same way: definitions overwrite the
+        // command table.
+        if ch.is_ascii_alphabetic() || ch == '_' {
+            let mut probe = cur.clone();
+            if let Some(word) = probe.read_word() {
+                if self.functions.contains_key(&word) {
+                    *cur = probe;
+                    let args = self.read_call_args(cur)?;
+                    self.call_function(&word, args, line)?;
+                    return Ok(());
+                }
+            }
+        }
 
         match ch {
             'a'..='g' => self.note(cur),
@@ -361,6 +379,12 @@ impl<'a> Compiler<'a> {
                 self.messages.push(value.as_str());
                 Ok(())
             }
+            "Function" | "FUNCTION" => self.define_function(cur),
+            "Result" | "RESULT" => {
+                let value = self.read_value(cur)?;
+                self.variables.insert(RESULT_VAR.to_string(), value);
+                Ok(())
+            }
             "If" | "IF" => self.if_statement(cur),
             "While" | "WHILE" => self.while_statement(cur),
             "For" | "FOR" => self.for_statement(cur),
@@ -398,6 +422,13 @@ impl<'a> Compiler<'a> {
             "Marker" => self.meta_text(cur, event::META_MARKER, line),
             "CuePoint" => self.meta_text(cur, event::META_CUE_POINT, line),
             "InstrumentName" => self.meta_text(cur, event::META_INST_NAME, line),
+            // A user-defined function, called as a command: `f` or `f(1,2)`.
+            other if self.functions.contains_key(other) => {
+                let name = other.to_string();
+                let args = self.read_call_args(cur)?;
+                self.call_function(&name, args, line)?;
+                Ok(())
+            }
             // A known variable name here is an assignment: `i=(i+1)`.
             other if self.variables.contains_key(other) => {
                 let name = other.to_string();
@@ -408,6 +439,136 @@ impl<'a> Compiler<'a> {
                 format!("\"{other}\"は未定義です。綴りを確かめてください。"),
             )),
         }
+    }
+
+    /// `Function name(Int a, Str b=\"x\"){ ... }`
+    fn define_function(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        cur.skip_trivia();
+        let name = cur
+            .read_word()
+            .ok_or_else(|| MmlError::new(line, "関数名を指定してください"))?;
+
+        cur.skip_trivia();
+        let params = if cur.eat('(') {
+            let source = cur
+                .read_balanced('(', ')')
+                .ok_or_else(|| MmlError::new(line, "関数の引数宣言が閉じていません"))?;
+            self.parse_params(&source, line)?
+        } else {
+            Vec::new()
+        };
+
+        let body = self.read_block(cur, line)?;
+        self.functions
+            .insert(name, FunctionDef { params, body, line });
+        Ok(())
+    }
+
+    /// Parse `Int a, Str b=\"x\", c` into parameters.
+    ///
+    /// The type name is accepted and ignored: values carry their own type, so
+    /// the declaration only matters for readability.
+    fn parse_params(&mut self, source: &str, line: usize) -> Result<Vec<Param>> {
+        let mut params = Vec::new();
+        for part in source.split(',') {
+            let part = part.trim();
+            if part.is_empty() {
+                continue;
+            }
+            let mut cur = Cursor::with_line(part, line);
+            let mut name = cur
+                .read_word()
+                .ok_or_else(|| MmlError::new(line, format!("引数宣言を読み取れません: {part}")))?;
+
+            cur.skip_spaces();
+            // "Int x" — the first word was the type, so the next is the name.
+            if let Some(second) = cur.read_word() {
+                name = second;
+                cur.skip_spaces();
+            }
+
+            let default = if cur.eat('=') {
+                Some(expr::eval(&mut cur, self)?)
+            } else {
+                None
+            };
+            params.push(Param { name, default });
+        }
+        Ok(params)
+    }
+
+    /// Read the arguments of a call in statement position: `f`, `f()`, `f(1,2)`.
+    fn read_call_args(&mut self, cur: &mut Cursor) -> Result<Vec<Value>> {
+        cur.skip_spaces();
+        if !cur.eat('(') {
+            return Ok(Vec::new());
+        }
+        let mut args = Vec::new();
+        cur.skip_spaces();
+        if cur.eat(')') {
+            return Ok(args);
+        }
+        loop {
+            args.push(expr::eval(cur, self)?);
+            cur.skip_spaces();
+            if cur.eat(',') {
+                continue;
+            }
+            cur.eat(')');
+            return Ok(args);
+        }
+    }
+
+    /// Run a function body with its parameters bound.
+    ///
+    /// Variables are global in MML, so a call saves the names it shadows and
+    /// puts them back afterwards rather than building a fresh scope — that way
+    /// a function can still read and write the song's globals.
+    fn call_function(
+        &mut self,
+        name: &str,
+        args: Vec<Value>,
+        line: usize,
+    ) -> Result<Option<Value>> {
+        let function = self
+            .functions
+            .get(name)
+            .ok_or_else(|| MmlError::new(line, format!("関数\"{name}\"は未定義です")))?
+            .clone();
+
+        let mut shadowed: Vec<(String, Option<Value>)> = Vec::new();
+        for (index, param) in function.params.iter().enumerate() {
+            let value = match (args.get(index), &param.default) {
+                (Some(value), _) => value.clone(),
+                (None, Some(default)) => default.clone(),
+                (None, None) => {
+                    return Err(MmlError::new(
+                        line,
+                        format!("関数\"{name}\"の引数\"{}\"が指定されていません", param.name),
+                    ))
+                }
+            };
+            shadowed.push((param.name.clone(), self.variables.get(&param.name).cloned()));
+            self.variables.insert(param.name.clone(), value);
+        }
+        let previous_result = self.variables.remove(RESULT_VAR);
+
+        let outcome = self.run_fragment(&function.body, function.line);
+
+        // Restore what the call shadowed, whether or not the body succeeded.
+        for (param_name, previous) in shadowed {
+            match previous {
+                Some(value) => self.variables.insert(param_name, value),
+                None => self.variables.remove(&param_name),
+            };
+        }
+        let result = self.variables.remove(RESULT_VAR);
+        if let Some(previous) = previous_result {
+            self.variables.insert(RESULT_VAR.to_string(), previous);
+        }
+        outcome?;
+        Ok(result)
     }
 
     /// `Include(file)` — pull in a definition file through the resolver.
@@ -584,7 +745,7 @@ impl<'a> Compiler<'a> {
             .split(':')
             .map(|part| {
                 let mut cursor = Cursor::with_line(part.trim(), line);
-                expr::eval(&mut cursor, &self.variables).and_then(|v| v.as_int(line))
+                expr::eval(&mut cursor, self).and_then(|v| v.as_int(line))
             })
             .collect::<Result<Vec<_>>>()?;
 
@@ -767,7 +928,7 @@ impl<'a> Compiler<'a> {
 
     fn eval_source(&mut self, src: &str, line: usize) -> Result<Value> {
         let mut cur = Cursor::with_line(src.trim(), line);
-        expr::eval(&mut cur, &self.variables)
+        expr::eval(&mut cur, self)
     }
 
     /// Read a parenthesised condition and evaluate it.
@@ -802,7 +963,7 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         cur.eat('=');
         cur.skip_spaces();
-        expr::eval(cur, &self.variables)
+        expr::eval(cur, self)
     }
 
     /// Changing the timebase rescales the default note length of every track
@@ -953,7 +1114,7 @@ impl<'a> Compiler<'a> {
                             || c.is_ascii_alphabetic() =>
                     {
                         let line = cur.line();
-                        Some(expr::eval(cur, &self.variables)?.as_int(line)?)
+                        Some(expr::eval(cur, self)?.as_int(line)?)
                     }
                     _ => None,
                 }
@@ -975,7 +1136,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn meta_text(&mut self, cur: &mut Cursor, meta_type: u8, line: usize) -> Result<()> {
-        let text = self.read_braced_string(cur, line)?;
+        let text = self.read_text_value(cur, line)?;
         let (bytes, warnings) = encode_cp932(&text, line);
         self.warnings.extend(warnings);
         let time = self.track().time;
@@ -983,6 +1144,18 @@ impl<'a> Compiler<'a> {
             .events
             .push(Event::meta(time, meta_type, &bytes));
         Ok(())
+    }
+
+    /// Read the text for a meta event: a literal `{"..."}`, or an expression
+    /// such as a `Str` variable (`TrackName=s`).
+    fn read_text_value(&mut self, cur: &mut Cursor, line: usize) -> Result<String> {
+        cur.skip_spaces();
+        cur.eat('=');
+        cur.skip_spaces();
+        match cur.peek() {
+            Some('{') | Some('"') | Some('(') => self.read_braced_string(cur, line),
+            _ => Ok(expr::eval(cur, self)?.as_str()),
+        }
     }
 
     /// Read `={"..."}`, `{"..."}` or `("...")`.
@@ -1228,10 +1401,24 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         cur.skip_spaces();
         if cur.peek() == Some('(') {
-            let value = expr::eval(cur, &self.variables)?;
+            let value = expr::eval(cur, self)?;
             return Ok(Some(value.as_int(line)?));
         }
         Ok(cur.read_int())
+    }
+}
+
+impl EvalContext for Compiler<'_> {
+    fn lookup(&self, name: &str) -> Option<Value> {
+        self.variables.get(name).cloned()
+    }
+
+    fn call(&mut self, name: &str, args: Vec<Value>, line: usize) -> Result<Option<Value>> {
+        self.call_function(name, args, line)
+    }
+
+    fn has_function(&self, name: &str) -> bool {
+        self.functions.contains_key(name)
     }
 }
 
@@ -1257,6 +1444,25 @@ fn pitch_class_semitone(index: usize) -> i64 {
 /// Guard against a runaway `For`/`While`: an MML typo should be an error, not
 /// a hung browser tab.
 const MAX_ITERATIONS: u32 = 100_000;
+
+/// Where a function's return value lives while it runs. `Result` is a
+/// keyword, so it cannot collide with a user variable name.
+const RESULT_VAR: &str = "\u{0}Result";
+
+/// A user-defined `Function`: its parameters and its body, kept as source so
+/// each call re-runs it in the caller's musical context.
+#[derive(Debug, Clone)]
+struct FunctionDef {
+    params: Vec<Param>,
+    body: String,
+    line: usize,
+}
+
+#[derive(Debug, Clone)]
+struct Param {
+    name: String,
+    default: Option<Value>,
+}
 
 /// Which kind of variable a declaration creates.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

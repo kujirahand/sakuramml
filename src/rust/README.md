@@ -70,14 +70,24 @@ Implemented:
 * loops `[n ... : ...]`, including nesting
 * variables (`Int`/`Str`/`Array`), expressions, `If`/`Else`, `For`, `While`,
   `Exit`, `Print`
+* `Function` definitions and calls: parameters with defaults, `Result` return
+  values, recursion, and calls from inside expressions. A definition overrides
+  the built-in meaning of its name, so `Function f(){...}` makes a later `f` a
+  call rather than the note F
 * `System.*` options — `KeyFlag`, `Keyshift`, `qMax`, `vMax`, `MeasureShift`,
   `TimeBase`; unimplemented ones are skipped with a warning rather than failing
 * the sutoton (Japanese) notation layer — `テンポ120 ドレミ` compiles
 * `Include`, resolved through a caller-supplied [`IncludeResolver`]
 
-Still to port: `Function` definitions and calls, `SysEx`, `$` hex literals,
-rhythm macros (`$`/`~`), `Div`, `Sub`, `Play`, and the先行指定 (`.onNote`)
-family. Those are what the remaining `sample/*.mml` files need.
+Still to port: `SysEx` and `$` hex literals, rhythm macros (`$`/`~`), `Div`,
+`Sub`, `Play`, and the 先行指定 (`.onNote`) family. Those are what the
+remaining `sample/*.mml` files need — `Include/stdmsg.h` reaches `SysEx` on
+its 19th line, which is the next thing standing between the Rust build and
+the sample songs.
+
+`core/tests/script.rs` covers the scripting layer on its own: variables,
+expressions, control flow, functions, and the error cases that must not
+panic (division by zero, runaway loops, runaway recursion).
 
 ## Regenerating golden test data
 

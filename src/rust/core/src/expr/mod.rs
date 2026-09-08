@@ -55,20 +55,52 @@ impl Value {
 
 pub type Variables = HashMap<String, Value>;
 
-/// Evaluate an expression at the cursor, stopping at the first character that
-/// cannot continue it (typically the closing parenthesis).
-pub fn eval(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
-    parse_or(cur, vars)
+/// What an expression can reach outside itself: variables, and functions.
+///
+/// The compiler implements this; expressions stay independent of it so the
+/// evaluator can be tested on its own.
+pub trait EvalContext {
+    fn lookup(&self, name: &str) -> Option<Value>;
+
+    /// Call `name` with already-evaluated arguments. `Ok(None)` means the
+    /// function exists but returned nothing.
+    fn call(&mut self, name: &str, args: Vec<Value>, line: usize) -> Result<Option<Value>>;
+
+    fn has_function(&self, name: &str) -> bool;
 }
 
-fn parse_or(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
-    let mut left = parse_and(cur, vars)?;
+/// A plain variable map, for expressions that cannot call functions.
+impl EvalContext for Variables {
+    fn lookup(&self, name: &str) -> Option<Value> {
+        self.get(name).cloned()
+    }
+
+    fn call(&mut self, name: &str, _args: Vec<Value>, line: usize) -> Result<Option<Value>> {
+        Err(MmlError::new(
+            line,
+            format!("関数\"{name}\"は呼び出せません"),
+        ))
+    }
+
+    fn has_function(&self, _name: &str) -> bool {
+        false
+    }
+}
+
+/// Evaluate an expression at the cursor, stopping at the first character that
+/// cannot continue it (typically the closing parenthesis).
+pub fn eval(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    parse_or(cur, ctx)
+}
+
+fn parse_or(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    let mut left = parse_and(cur, ctx)?;
     loop {
         cur.skip_spaces();
         if cur.peek() == Some('|') && cur.peek_at(1) == Some('|') {
             cur.advance();
             cur.advance();
-            let right = parse_and(cur, vars)?;
+            let right = parse_and(cur, ctx)?;
             left = Value::Int((left.truthy() || right.truthy()) as i64);
         } else {
             return Ok(left);
@@ -76,14 +108,14 @@ fn parse_or(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
     }
 }
 
-fn parse_and(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
-    let mut left = parse_comparison(cur, vars)?;
+fn parse_and(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    let mut left = parse_comparison(cur, ctx)?;
     loop {
         cur.skip_spaces();
         if cur.peek() == Some('&') && cur.peek_at(1) == Some('&') {
             cur.advance();
             cur.advance();
-            let right = parse_comparison(cur, vars)?;
+            let right = parse_comparison(cur, ctx)?;
             left = Value::Int((left.truthy() && right.truthy()) as i64);
         } else {
             return Ok(left);
@@ -91,9 +123,9 @@ fn parse_and(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
     }
 }
 
-fn parse_comparison(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
+fn parse_comparison(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
-    let left = parse_additive(cur, vars)?;
+    let left = parse_additive(cur, ctx)?;
     cur.skip_spaces();
 
     let op = match (cur.peek(), cur.peek_at(1)) {
@@ -109,7 +141,7 @@ fn parse_comparison(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
         cur.advance();
     }
 
-    let right = parse_additive(cur, vars)?;
+    let right = parse_additive(cur, ctx)?;
     // Strings compare as strings; anything else compares numerically.
     let result = match (&left, &right) {
         (Value::Str(a), Value::Str(b)) => match op {
@@ -135,9 +167,9 @@ fn parse_comparison(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
     Ok(Value::Int(result as i64))
 }
 
-fn parse_additive(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
+fn parse_additive(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
-    let mut left = parse_multiplicative(cur, vars)?;
+    let mut left = parse_multiplicative(cur, ctx)?;
     loop {
         cur.skip_spaces();
         let op = match cur.peek() {
@@ -147,7 +179,7 @@ fn parse_additive(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
             _ => return Ok(left),
         };
         cur.advance();
-        let right = parse_multiplicative(cur, vars)?;
+        let right = parse_multiplicative(cur, ctx)?;
 
         left = match (&left, op) {
             // `+` concatenates when either side is a string.
@@ -167,9 +199,9 @@ fn parse_additive(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
     }
 }
 
-fn parse_multiplicative(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
+fn parse_multiplicative(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
-    let mut left = parse_unary(cur, vars)?;
+    let mut left = parse_unary(cur, ctx)?;
     loop {
         cur.skip_spaces();
         let op = match cur.peek() {
@@ -179,7 +211,7 @@ fn parse_multiplicative(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
             _ => return Ok(left),
         };
         cur.advance();
-        let right = parse_unary(cur, vars)?;
+        let right = parse_unary(cur, ctx)?;
         let (a, b) = (left.as_int(line)?, right.as_int(line)?);
         let value = match op {
             '*' => a.wrapping_mul(b),
@@ -191,36 +223,36 @@ fn parse_multiplicative(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
     }
 }
 
-fn parse_unary(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
+fn parse_unary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
     cur.skip_spaces();
     match cur.peek() {
         Some('-') => {
             cur.advance();
-            let value = parse_unary(cur, vars)?;
+            let value = parse_unary(cur, ctx)?;
             Ok(Value::Int(-value.as_int(line)?))
         }
         Some('+') => {
             cur.advance();
-            parse_unary(cur, vars)
+            parse_unary(cur, ctx)
         }
         Some('!') if cur.peek_at(1) != Some('=') => {
             cur.advance();
-            let value = parse_unary(cur, vars)?;
+            let value = parse_unary(cur, ctx)?;
             Ok(Value::Int(!value.truthy() as i64))
         }
-        _ => parse_primary(cur, vars),
+        _ => parse_primary(cur, ctx),
     }
 }
 
-fn parse_primary(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
+fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
     cur.skip_spaces();
 
     match cur.peek() {
         Some('(') => {
             cur.advance();
-            let value = eval(cur, vars)?;
+            let value = eval(cur, ctx)?;
             cur.skip_spaces();
             if !cur.eat(')') {
                 return Err(MmlError::new(line, "括弧が閉じられていません"));
@@ -266,15 +298,12 @@ fn parse_primary(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
                 "off" | "OFF" => return Ok(Value::Int(0)),
                 _ => {}
             }
-            let value = vars
-                .get(&name)
-                .ok_or_else(|| MmlError::new(line, format!("変数\"{name}\"は未定義です")))?;
-
-            // `name(index)` indexes an array.
             cur.skip_spaces();
-            if let Value::Array(items) = value {
+
+            // `name(index)` indexes an array; `name(args)` calls a function.
+            if let Some(Value::Array(items)) = ctx.lookup(&name) {
                 if cur.eat('(') {
-                    let index = eval(cur, vars)?.as_int(line)?;
+                    let index = eval(cur, ctx)?.as_int(line)?;
                     cur.skip_spaces();
                     cur.eat(')');
                     return items
@@ -286,9 +315,41 @@ fn parse_primary(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
                         });
                 }
             }
-            Ok(value.clone())
+
+            if ctx.has_function(&name) {
+                let args = if cur.peek() == Some('(') {
+                    cur.advance();
+                    parse_call_args(cur, ctx)?
+                } else {
+                    Vec::new()
+                };
+                return ctx
+                    .call(&name, args, line)?
+                    .ok_or_else(|| MmlError::new(line, format!("関数\"{name}\"は値を返しません")));
+            }
+
+            ctx.lookup(&name)
+                .ok_or_else(|| MmlError::new(line, format!("変数\"{name}\"は未定義です")))
         }
         _ => Err(MmlError::new(line, "式を読み取れません")),
+    }
+}
+
+/// Parse `a, b, c)` — the opening parenthesis is already consumed.
+fn parse_call_args(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Vec<Value>> {
+    let mut args = Vec::new();
+    cur.skip_spaces();
+    if cur.eat(')') {
+        return Ok(args);
+    }
+    loop {
+        args.push(eval(cur, ctx)?);
+        cur.skip_spaces();
+        if cur.eat(',') {
+            continue;
+        }
+        cur.eat(')');
+        return Ok(args);
     }
 }
 
@@ -296,9 +357,11 @@ fn parse_primary(cur: &mut Cursor, vars: &Variables) -> Result<Value> {
 mod tests {
     use super::*;
 
+    /// Evaluate `src` against a plain variable map (no functions available).
     fn eval_str(src: &str, vars: &Variables) -> Result<Value> {
         let mut cur = Cursor::new(src);
-        eval(&mut cur, vars)
+        let mut vars = vars.clone();
+        eval(&mut cur, &mut vars)
     }
 
     fn int(src: &str) -> i64 {

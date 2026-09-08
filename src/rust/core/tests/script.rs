@@ -1,0 +1,332 @@
+//! The scripting layer: variables, expressions, control flow and functions.
+//!
+//! Most assertions compare a script against the plain MML it should be
+//! equivalent to, which says what the script *means* rather than restating a
+//! byte string. A few cases are pinned to bytes captured from the Pascal
+//! build, and the semantics of every case here was checked against it.
+
+use sakuramml_core::{compile, MemoryIncludes};
+
+/// Compiling `script` must produce exactly what `equivalent` produces.
+#[track_caller]
+fn assert_same(script: &str, equivalent: &str) {
+    let actual = compile(script).unwrap_or_else(|e| panic!("failed to compile {script:?}: {e}"));
+    let expected =
+        compile(equivalent).unwrap_or_else(|e| panic!("failed to compile {equivalent:?}: {e}"));
+    assert_eq!(
+        hex(&actual.smf),
+        hex(&expected.smf),
+        "\n  script:     {script:?}\n  equivalent: {equivalent:?}"
+    );
+}
+
+#[track_caller]
+fn assert_error_contains(script: &str, needle: &str) {
+    let error = compile(script)
+        .err()
+        .unwrap_or_else(|| panic!("expected {script:?} to fail"));
+    assert!(
+        error.message.contains(needle),
+        "expected error about {needle:?}, got: {}",
+        error.message
+    );
+}
+
+fn hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+fn from_hex(s: &str) -> Vec<u8> {
+    let s: String = s.chars().filter(|c| !c.is_whitespace()).collect();
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+        .collect()
+}
+
+// --- variables -------------------------------------------------------------
+
+#[test]
+fn int_declaration_and_use() {
+    assert_same("Int x=60; n(x)", "n60");
+    assert_same("Int x; n((x+60))", "n60");
+    assert_same("Int x=5; o(x) c", "o5 c");
+}
+
+#[test]
+fn assignment_updates_a_variable() {
+    assert_same("Int x=60; x=(x+2); n(x)", "n62");
+    assert_same("Int x=1; Int y=2; x=(y); n((x+60))", "n62");
+}
+
+#[test]
+fn string_variables() {
+    assert_same(
+        r#"Str s={"タイトル"}; TrackName=s; c"#,
+        r#"TrackName={"タイトル"} c"#,
+    );
+    assert_same(
+        r#"Str a={"あ"}; Str b=(a+"い"); TrackName=b; c"#,
+        r#"TrackName={"あい"} c"#,
+    );
+}
+
+#[test]
+fn arrays_declare_and_index() {
+    assert_same("Array a=(60,64,67); n(a(0)) n(a(1)) n(a(2))", "n60 n64 n67");
+    assert_same("Array a=(1,2); n((a(0)+a(1)+57))", "n60");
+}
+
+#[test]
+fn array_index_out_of_range_is_an_error() {
+    assert_error_contains("Array a=(60); n(a(5))", "範囲外");
+}
+
+#[test]
+fn undefined_variable_is_an_error() {
+    assert_error_contains("n(nope)", "未定義");
+}
+
+// --- expressions -----------------------------------------------------------
+
+#[test]
+fn arithmetic_precedence() {
+    assert_same("n((2+3*4+46))", "n60");
+    assert_same("n(((2+3)*12))", "n60");
+    assert_same("n((120/2))", "n60");
+    assert_same("n((121%61))", "n60");
+    assert_same("n((-1+61))", "n60");
+}
+
+#[test]
+fn comparisons_and_logic() {
+    assert_same("If(1==1){c}Else{d}", "c");
+    assert_same("If(1!=1){c}Else{d}", "d");
+    assert_same("If(2>1){c}Else{d}", "c");
+    assert_same("If(2<=1){c}Else{d}", "d");
+    assert_same("If(1&&0){c}Else{d}", "d");
+    assert_same("If(1||0){c}Else{d}", "c");
+    assert_same("If(!0){c}Else{d}", "c");
+    assert_same("If(on){c}Else{d}", "c");
+    assert_same("If(off){c}Else{d}", "d");
+}
+
+#[test]
+fn strings_compare_as_strings() {
+    assert_same(r#"Str s={"ab"}; If(s=="ab"){c}Else{d}"#, "c");
+    assert_same(r#"Str s={"ab"}; If(s=="zz"){c}Else{d}"#, "d");
+}
+
+/// Bare expressions are rejected — the Pascal build rejects them too, and the
+/// rule is what keeps `v100 <c` meaning "velocity, then octave down".
+#[test]
+fn expressions_need_parentheses() {
+    // The message differs from the Pascal build's, but both reject it.
+    assert!(compile("Tempo=100+20 c").is_err());
+    assert!(compile("Int x=5; ox c").is_err());
+    assert_same("v100 <c", "v100 o4 c");
+}
+
+#[test]
+fn division_by_zero_is_an_error_not_a_panic() {
+    assert_error_contains("n((1/0))", "0で割る");
+    assert_error_contains("n((1%0))", "0で割る");
+}
+
+// --- control flow ----------------------------------------------------------
+
+#[test]
+fn if_else_branches() {
+    assert_same("Int x=1; If(x==1){c}Else{d}", "c");
+    assert_same("Int x=0; If(x==1){c}Else{d}", "d");
+    // An If with no Else and a false condition emits nothing.
+    assert_same("Int x=0; If(x==1){c} d", "d");
+}
+
+#[test]
+fn nested_if() {
+    assert_same("Int x=1; If(x==1){If(x>0){c}Else{d}}Else{e}", "c");
+    assert_same("Int x=1; If(x==2){c}Else{If(x==1){d}Else{e}}", "d");
+}
+
+#[test]
+fn for_loop_runs_its_body() {
+    assert_same("Int i; For(i=0;i<3;i=i+1){c}", "c c c");
+    assert_same("Int i; For(i=0;i<3;i=i+1){n((60+i))}", "n60 n61 n62");
+}
+
+#[test]
+fn for_loop_with_a_false_condition_never_runs() {
+    assert_same("Int i; For(i=0;i<0;i=i+1){c} d", "d");
+}
+
+#[test]
+fn while_loop_runs_its_body() {
+    assert_same("Int i=0; While(i<3){c;i=(i+1)}", "c c c");
+    assert_same("Int i=5; While(i<3){c} d", "d");
+}
+
+#[test]
+fn exit_leaves_the_enclosing_loop() {
+    assert_same("Int i=0; While(i<3){c;Exit;i=(i+1)}", "c");
+    assert_same("Int i; For(i=0;i<3;i=i+1){c;Exit}", "c");
+}
+
+/// A runaway loop must fail rather than hang: a frozen browser tab is worse
+/// than an error message.
+#[test]
+fn runaway_loops_error_instead_of_hanging() {
+    assert_error_contains("Int i=0; While(i>=0){i=(i+1)}", "繰り返し");
+    assert_error_contains("Int i; For(i=0;i>=0;i=i+1){}", "繰り返し");
+}
+
+#[test]
+fn loops_and_repeats_nest() {
+    assert_same("Int i; For(i=0;i<2;i=i+1){[2 c]}", "c c c c");
+    assert_same("[2 Int i; For(i=0;i<2;i=i+1){c}]", "c c c c");
+}
+
+// --- functions -------------------------------------------------------------
+
+#[test]
+fn function_without_arguments() {
+    // Both call forms work, and match the Pascal build's bytes.
+    let expected = from_hex("4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00");
+    assert_eq!(compile("Function f(){c} f").unwrap().smf, expected);
+    assert_eq!(compile("Function f(){c} f()").unwrap().smf, expected);
+}
+
+/// A definition overrides the built-in meaning of its name, so `f` is a call
+/// rather than the note F. The Pascal build overwrites its command table the
+/// same way.
+#[test]
+fn function_name_shadows_a_note_letter() {
+    assert_same("Function f(){c} f", "c");
+    assert_same("Function e(){n60} e e", "n60 n60");
+}
+
+#[test]
+fn function_arguments() {
+    assert_same("Function f(Int x){n(x)} f(60)", "n60");
+    assert_same("Function f(Int a,Int b){n(a) n(b)} f(60,64)", "n60 n64");
+    assert_same("Function f(Int a,Int b){n((a+b))} f(20,40)", "n60");
+}
+
+#[test]
+fn function_argument_defaults() {
+    let expected = from_hex("4d546864000000060001000100604d54726b0000000c00903e644b803e6415ff2f00");
+    assert_eq!(
+        compile("Function f(Int x=62){n(x)} f").unwrap().smf,
+        expected
+    );
+    // An explicit argument wins over the default.
+    assert_same("Function f(Int x=62){n(x)} f(60)", "n60");
+    // A later parameter may default while an earlier one is given.
+    assert_same("Function f(Int a,Int b=64){n(a) n(b)} f(60)", "n60 n64");
+}
+
+#[test]
+fn missing_argument_without_default_is_an_error() {
+    assert_error_contains("Function f(Int x){n(x)} f", "引数");
+}
+
+#[test]
+fn result_returns_a_value() {
+    assert_same("Function f(){Result=60} n(f())", "n60");
+    assert_same("Function f(Int x){Result=(x*2)} n(f(30))", "n60");
+    assert_same("Function f(){Result=1} If(f()==1){c}Else{d}", "c");
+}
+
+#[test]
+fn function_without_result_cannot_be_used_as_a_value() {
+    assert_error_contains("Function f(){c} n(f())", "値を返しません");
+}
+
+#[test]
+fn functions_call_other_functions() {
+    assert_same("Function g(){e} Function f(){c g} f", "c e");
+    assert_same(
+        "Function g(Int x){Result=(x+1)} Function f(){Result=(g(59))} n(f())",
+        "n60",
+    );
+}
+
+#[test]
+fn recursion_works() {
+    // fib(10) = 55, so this is n95. Byte-identical to the Pascal build.
+    let expected = from_hex("4d546864000000060001000100604d54726b0000000c00905f644b805f6415ff2f00");
+    let script = "Function fib(Int n){If(n<2){Result=n}Else{Result=(fib(n-1)+fib(n-2))}} \
+                  n((fib(10)+40))";
+    assert_eq!(compile(script).unwrap().smf, expected);
+}
+
+/// Deep recursion must produce an error, not a stack overflow — under WASM an
+/// overflow would take down the whole instance.
+#[test]
+fn runaway_recursion_errors_instead_of_overflowing() {
+    assert_error_contains("Function f(){f} f", "ネスト");
+}
+
+#[test]
+fn functions_see_and_change_globals() {
+    assert_same("Int x=60; Function f(){n(x)} f", "n60");
+    assert_same("Int x=0; Function f(){x=60} f n(x)", "n60");
+}
+
+/// A parameter shadows a global of the same name only while the call runs.
+#[test]
+fn parameters_shadow_globals_only_during_the_call() {
+    assert_same(
+        "Int x=99; Function f(Int x){n(x)} f(60) n((x-39))",
+        "n60 n60",
+    );
+}
+
+#[test]
+fn functions_work_inside_loops_and_conditionals() {
+    assert_same("Function f(){c} [3 f]", "c c c");
+    assert_same("Int i; Function f(){c} For(i=0;i<2;i=i+1){f}", "c c");
+    assert_same("Function f(){c} If(1==1){f}Else{d}", "c");
+}
+
+/// An unknown name is an error. (A name starting with a note letter is
+/// reported against that command instead — the Pascal build does the same,
+/// since `nosuch(1)` parses as the note-number command `n`.)
+#[test]
+fn calling_an_undefined_function_is_an_error() {
+    assert_error_contains("Zzz(1)", "未定義");
+    assert!(compile("nosuch(1)").is_err());
+}
+
+#[test]
+fn functions_may_be_defined_in_an_include_file() {
+    use sakuramml_core::compile_with;
+
+    let includes =
+        MemoryIncludes::new().with("lib.h", "Function middle_c(){n60}".as_bytes().to_vec());
+    let out = compile_with("Include(lib.h) middle_c", &includes).unwrap();
+    assert_eq!(out.smf, compile("n60").unwrap().smf);
+}
+
+// --- Print -----------------------------------------------------------------
+
+#[test]
+fn print_returns_messages_as_data() {
+    let out = compile("Print((1+2)) c").unwrap();
+    assert_eq!(out.messages, vec!["3".to_string()]);
+
+    let out = compile(r#"Str s={"やあ"}; Print(s) c"#).unwrap();
+    assert_eq!(out.messages, vec!["やあ".to_string()]);
+
+    let out = compile("Int i; For(i=0;i<3;i=i+1){Print((i))}").unwrap();
+    assert_eq!(out.messages, vec!["0", "1", "2"]);
+}
+
+// --- Japanese notation interop ---------------------------------------------
+
+#[test]
+fn scripts_work_with_sutoton_notation() {
+    assert_same("Int i; For(i=0;i<2;i=i+1){ドレミ}", "cde cde");
+    assert_same("Function f(){ドレミ} f", "cde");
+    assert_same("テンポ120 Int x=60; n(x)", "Tempo=120 n60");
+}
