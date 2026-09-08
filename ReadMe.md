@@ -6,6 +6,21 @@ MML Compiler (MML to MIDI File Converter)
 
 - Binary download --> https://sakuramml.com/
 
+## Repository layout
+
+```
+src/pascal/   Pascal (Delphi7 / FPC) implementation — the current, working compiler
+src/rust/     Rust rewrite (work in progress, see plan.md)
+doc/          Documentation and command reference (shared)
+sample/       Sample MML files (shared)
+Include/      Macro/definition files loaded by #Include (shared)
+tools/        Tools
+```
+
+The Rust rewrite is planned in [plan.md](plan.md); its command spec is in
+[src/rust/SPEC.md](src/rust/SPEC.md). The Pascal implementation below remains
+the reference implementation.
+
 ## Compiler
 
 - Full (Windows only) : Delphi7
@@ -13,7 +28,9 @@ MML Compiler (MML to MIDI File Converter)
 
 ## Charset 
 
-- Shift_JIS (not UTF-8)
+- Pascal version: Shift_JIS (not UTF-8)
+- Rust version (planned): UTF-8 internally, auto-detects UTF-8/CP932 input,
+  writes SMF meta text as CP932 for compatibility
 
 ### Compile for FPC (Free Pascal compiler)
 
@@ -21,6 +38,7 @@ MML Compiler (MML to MIDI File Converter)
 2. Compile
 
     ```sh
+    cd src/pascal
     fpc -Mdelphi -g -gv -vewh csakura.dpr
         OR
     ./make.sh
@@ -38,7 +56,7 @@ MML Compiler (MML to MIDI File Converter)
 
     ```sh
     git clone https://github.com/kujirahand/sakuramml.git
-    cd sakuramml
+    cd sakuramml/src/pascal
     ./make.sh
     ```
 
@@ -54,7 +72,7 @@ MML Compiler (MML to MIDI File Converter)
 
   ```sh
     git clone https://github.com/kujirahand/sakuramml.git
-    cd sakuramml
+    cd sakuramml/src/pascal
     ./make.sh
   ```
 
@@ -97,7 +115,7 @@ https://wiki.freepascal.org/Mac_Installation_FAQ#ld:_library_not_found_for_-lc
 
     ```
     git clone https://github.com/kujirahand/sakuramml.git
-    cd sakuramml
+    cd sakuramml/src/pascal
     ./make.sh
     ```
 
@@ -109,6 +127,6 @@ https://wiki.freepascal.org/Mac_Installation_FAQ#ld:_library_not_found_for_-lc
 sudo apt-get update
 sudo apt-get install fpc
 git clone https://github.com/kujirahand/sakuramml.git
-cd sakuramml
+cd sakuramml/src/pascal
 ./make.sh
 ```
