@@ -184,3 +184,313 @@ fn track_name_is_written_as_cp932() {
         "4d546864000000060001000100604d54726b0000001600ff030683658358836700903c644b803c6415ff2f00",
     );
 }
+
+// --- Phase 2: voices, control changes, pitch bend, loops ---
+
+#[test]
+fn voice_is_one_based() {
+    // @1 selects MIDI program 0.
+    assert_golden(
+        "@1 c",
+        "4d546864000000060001000100604d54726b0000000f00c00000903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn voice_with_bank_select() {
+    // @n,msb,lsb writes CC0 and CC32 before the program change.
+    assert_golden(
+        "@1,2,3 c",
+        "4d546864000000060001000100604d54726b0000001700b0000200b0200300c00000903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn control_change_by_number() {
+    assert_golden(
+        "y1,64 c",
+        "4d546864000000060001000100604d54726b0000001000b0014000903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn named_control_changes() {
+    let cases = [
+        ("M(10) c", "b0010a"),
+        ("V(10) c", "b0070a"),
+        ("P(10) c", "b00a0a"),
+        ("EP(10) c", "b00b0a"),
+        ("REV(10) c", "b05b0a"),
+    ];
+    for (mml, cc) in cases {
+        assert_golden(
+            mml,
+            &format!("4d546864000000060001000100604d54726b0000001000{cc}00903c644b803c6415ff2f00"),
+        );
+    }
+}
+
+#[test]
+fn simple_pitch_bend_writes_msb_only() {
+    assert_golden(
+        "p64 c",
+        "4d546864000000060001000100604d54726b0000001000e0004000903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "p0 c",
+        "4d546864000000060001000100604d54726b0000001000e0000000903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "p127 c",
+        "4d546864000000060001000100604d54726b0000001000e0007f00903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn full_range_pitch_bend_centres_at_zero() {
+    assert_golden(
+        "PitchBend(0) c",
+        "4d546864000000060001000100604d54726b0000001000e0004000903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn rpn_and_nrpn() {
+    assert_golden(
+        "RPN(0,0,2) c",
+        "4d546864000000060001000100604d54726b0000001800b0650000b0640000b0060200903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "NRPN(1,32,64) c",
+        "4d546864000000060001000100604d54726b0000001800b0630100b0622000b0064000903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn repeat_loop() {
+    assert_golden(
+        "[2 c]",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c6415903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn repeat_loop_with_break_marker() {
+    // [3 c:d] plays c d c d c — the tail is skipped on the final pass.
+    assert_golden(
+        "[3 c:d]",
+        "4d546864000000060001000100604d54726b0000002c00903c644b803c6415903e644b803e6415903c64\
+         4b803c6415903e644b803e6415903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn nested_repeat_loops() {
+    assert_golden(
+        "[2 [2 c]]",
+        "4d546864000000060001000100604d54726b0000002400903c644b803c6415903c644b803c6415903c64\
+         4b803c6415903c644b803c6415ff2f00",
+    );
+}
+
+// --- Phase 2: variables, expressions, control flow ---
+
+#[test]
+fn variables_in_arguments() {
+    assert_golden(
+        "Int x=60; n(x)",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "Int x=5; o(x) c",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn expressions_evaluate_inside_parentheses() {
+    assert_golden(
+        "Int x=2; Tempo=(x*60) c",
+        "4d546864000000060001000100604d54726b0000001300ff510307a12000903c644b803c6415ff2f00",
+    );
+}
+
+/// Bare expressions are rejected, exactly as the Pascal build rejects them.
+/// This is what keeps `v100 <c` meaning "velocity, then octave down".
+#[test]
+fn bare_expressions_are_rejected() {
+    assert!(compile("Tempo=100+20 c").is_err());
+    assert!(compile("Int x=5; ox c").is_err());
+}
+
+#[test]
+fn arrays() {
+    assert_golden(
+        "Array a=(60,64,67); n(a(0)) n(a(1)) n(a(2))",
+        "4d546864000000060001000100604d54726b0000001c00903c644b803c64159040644b8040641590436\
+         44b80436415ff2f00",
+    );
+}
+
+#[test]
+fn if_else() {
+    assert_golden(
+        "Int x=1; If(x==1){c}Else{d}",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "Int x=0; If(x==1){c}Else{d}",
+        "4d546864000000060001000100604d54726b0000000c00903e644b803e6415ff2f00",
+    );
+}
+
+#[test]
+fn for_loop() {
+    assert_golden(
+        "Int i; For(i=0;i<3;i=i+1){c}",
+        "4d546864000000060001000100604d54726b0000001c00903c644b803c6415903c644b803c6415903c6\
+         44b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn while_loop() {
+    assert_golden(
+        "Int i=0; While(i<3){c;i=(i+1)}",
+        "4d546864000000060001000100604d54726b0000001c00903c644b803c6415903c644b803c6415903c6\
+         44b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn exit_breaks_out_of_a_loop() {
+    // Without Exit this would be three notes.
+    assert_golden(
+        "Int i=0; While(i<3){c;Exit;i=(i+1)}",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+}
+
+/// A runaway loop must fail rather than hang — a hung browser tab is worse
+/// than an error message.
+#[test]
+fn runaway_loop_errors_instead_of_hanging() {
+    let err = compile("Int i=0; While(i>=0){i=(i+1)}").unwrap_err();
+    assert!(err.message.contains("繰り返し"));
+}
+
+// --- Phase 2: sutoton, System options, key signatures, resets ---
+
+#[test]
+fn sutoton_japanese_notation() {
+    // ドレミ is cde, so this must match the ASCII form byte for byte.
+    let japanese = compile("ドレミ").unwrap();
+    let ascii = compile("cde").unwrap();
+    assert_eq!(japanese.smf, ascii.smf);
+
+    let japanese = compile("テンポ120 音量127 音階4 ドレミ").unwrap();
+    let ascii = compile("Tempo=120 v127 o4 cde").unwrap();
+    assert_eq!(japanese.smf, ascii.smf);
+}
+
+#[test]
+fn time_signature() {
+    assert_golden(
+        "TimeSignature=3,4 c",
+        "4d546864000000060001000100604d54726b0000001400ff58040302600c00903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn sound_module_resets() {
+    assert_golden(
+        "ResetGM c",
+        "4d546864000000060001000100604d54726b0000001400f0057e7f0901f700903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "ResetGS c",
+        "4d546864000000060001000100604d54726b0000001900f00a4110421240007f0041f700903c644b803c\
+         6415ff2f00",
+    );
+    assert_golden(
+        "ResetXG c",
+        "4d546864000000060001000100604d54726b0000001700f00843104c00007e00f700903c644b803c6415\
+         ff2f00",
+    );
+}
+
+#[test]
+fn key_flag_applies_accidentals_and_writes_key_signature() {
+    // Two sharps (c and f): c and f sound a semitone higher, d and e do not.
+    assert_golden(
+        "System.KeyFlag#(cf) cdef",
+        "4d546864000000060001000100604d54726b0000002a00ff5902020000903d644b803d6415903e644b80\
+         3e64159040644b804064159042644b80426415ff2f00",
+    );
+    assert_golden(
+        "System.KeyFlag-(b) b",
+        "4d546864000000060001000100604d54726b0000001200ff5902ff00009046644b80466415ff2f00",
+    );
+}
+
+#[test]
+fn key_shift_transposes() {
+    assert_golden(
+        "System.Keyshift=2 c",
+        "4d546864000000060001000100604d54726b0000000c00903e644b803e6415ff2f00",
+    );
+}
+
+#[test]
+fn q_max_and_v_max_rescale() {
+    // System.qMax=8 makes q8 a full-length note, for old MML dialects.
+    assert_golden(
+        "System.qMax=8 q8 c",
+        "4d546864000000060001000100604d54726b0000000c00903c645f803c6401ff2f00",
+    );
+    assert_golden(
+        "System.vMax=15 v15 c",
+        "4d546864000000060001000100604d54726b0000000c00903c784b803c7815ff2f00",
+    );
+}
+
+#[test]
+fn time_pointer() {
+    assert_golden(
+        "Time(2:1:0) c",
+        "4d546864000000060001000100604d54726b0000000d8300903c644b803c6415ff2f00",
+    );
+    // MeasureShift offsets the bar numbering.
+    assert_golden(
+        "System.MeasureShift(1) Time(1:1:0) c",
+        "4d546864000000060001000100604d54726b0000000d8300903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn include_resolves_through_the_resolver() {
+    use sakuramml_core::{compile_with, MemoryIncludes, NoIncludes};
+
+    let includes = MemoryIncludes::new().with("notes.h", "Int base=60;".as_bytes().to_vec());
+    let out = compile_with("Include(notes.h) n(base)", &includes).unwrap();
+    let expected = compile("n60").unwrap();
+    assert_eq!(out.smf, expected.smf);
+
+    // Without a resolver the file is simply missing — an error, not a panic.
+    assert!(compile_with("Include(notes.h) c", &NoIncludes).is_err());
+}
+
+/// Include files are read as bytes, so a CP932 one works as well as UTF-8.
+#[test]
+fn include_files_may_be_cp932() {
+    use sakuramml_core::{compile_with, MemoryIncludes};
+
+    // "テンポ150" in CP932, which is sutoton for Tempo=150.
+    let mut cp932 = vec![0x83, 0x65, 0x83, 0x93, 0x83, 0x7c];
+    cp932.extend_from_slice(b"150;");
+    let includes = MemoryIncludes::new().with("tempo.h", cp932);
+
+    let out = compile_with("Include(tempo.h) c", &includes).unwrap();
+    let expected = compile("Tempo=150 c").unwrap();
+    assert_eq!(out.smf, expected.smf);
+}

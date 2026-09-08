@@ -43,14 +43,26 @@ const { midi, warnings } = compileMml('cde');   // midi: Uint8Array
 
 ## Status
 
-Phase 1 (vertical slice) is done: notes, rests, ties, octave/length/velocity/
-gate attributes, tracks and channels, tempo, timebase, and the text meta
-events. Output is byte-identical to the Pascal build for everything covered by
-`core/tests/golden.rs`.
+Output is byte-identical to the Pascal build for everything covered by
+`core/tests/golden.rs` (42 cases).
 
-Still to port, in roughly this order: loops `[ ]`, variables and expressions,
-`If`/`For`/`While`/`Function`, CC/SysEx/RPN, the sutoton (Japanese) notation
-layer, and `#Include`.
+Implemented:
+
+* notes, rests, ties, accidentals, note numbers; octave, length, velocity and
+  gate attributes; tracks and channels; tempo, timebase, time signature
+* voices (`@`), control changes by name and number, pitch bend, RPN/NRPN,
+  GM/GS/XG resets
+* loops `[n ... : ...]`, including nesting
+* variables (`Int`/`Str`/`Array`), expressions, `If`/`Else`, `For`, `While`,
+  `Exit`, `Print`
+* `System.*` options — `KeyFlag`, `Keyshift`, `qMax`, `vMax`, `MeasureShift`,
+  `TimeBase`; unimplemented ones are skipped with a warning rather than failing
+* the sutoton (Japanese) notation layer — `テンポ120 ドレミ` compiles
+* `Include`, resolved through a caller-supplied [`IncludeResolver`]
+
+Still to port: `Function` definitions and calls, `SysEx`, `$` hex literals,
+rhythm macros (`$`/`~`), `Div`, `Sub`, `Play`, and the先行指定 (`.onNote`)
+family. Those are what the remaining `sample/*.mml` files need.
 
 ## Regenerating golden test data
 

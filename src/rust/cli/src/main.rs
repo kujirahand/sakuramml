@@ -3,6 +3,7 @@
 //! All the I/O lives here; the compiler core stays pure so the same code can
 //! run under WASI and in the browser.
 
+use sakuramml_core::IncludeResolver;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -41,8 +42,13 @@ fn run(args: &[String]) -> Result<(), String> {
         None => PathBuf::from("a.mid"),
     });
 
-    let result = sakuramml_core::compile(&source).map_err(|e| format!("Failed...{e}"))?;
+    let resolver = FileIncludes::new(origin.as_deref());
+    let result =
+        sakuramml_core::compile_with(&source, &resolver).map_err(|e| format!("Failed...{e}"))?;
 
+    for message in &result.messages {
+        println!("[表示] {message}");
+    }
     for warning in &result.warnings {
         eprintln!("{warning}");
     }
@@ -113,8 +119,47 @@ fn help_text() -> String {
     )
 }
 
-#[allow(dead_code)]
-fn is_mml_file(path: &Path) -> bool {
-    path.extension()
-        .is_some_and(|e| e.eq_ignore_ascii_case("mml"))
+/// Finds `#Include` files on disk.
+///
+/// Searches the same places the Pascal build does: next to the source file,
+/// the current directory, and an `Include/` directory in either — plus next to
+/// the executable, for an installed copy.
+struct FileIncludes {
+    roots: Vec<PathBuf>,
+}
+
+impl FileIncludes {
+    fn new(source: Option<&Path>) -> Self {
+        let mut roots = Vec::new();
+        // The source file's directory, then its ancestors: include files
+        // usually live in an Include/ directory at the top of the project.
+        if let Some(dir) = source.and_then(|p| p.parent()) {
+            let mut dir = dir.to_path_buf();
+            for _ in 0..8 {
+                roots.push(dir.clone());
+                if !dir.pop() {
+                    break;
+                }
+            }
+        }
+        roots.push(PathBuf::from("."));
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(dir) = exe.parent() {
+                roots.push(dir.to_path_buf());
+            }
+        }
+        // Each root may hold the file directly or under Include/.
+        let with_include: Vec<PathBuf> = roots.iter().map(|r| r.join("Include")).collect();
+        roots.extend(with_include);
+        Self { roots }
+    }
+}
+
+impl IncludeResolver for FileIncludes {
+    fn resolve(&self, name: &str) -> Option<Vec<u8>> {
+        self.roots
+            .iter()
+            .map(|root| root.join(name))
+            .find_map(|path| std::fs::read(path).ok())
+    }
 }

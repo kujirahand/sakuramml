@@ -15,11 +15,14 @@
 pub mod compiler;
 pub mod encoding;
 pub mod error;
+pub mod expr;
+pub mod include;
 pub mod lexer;
 pub mod smf;
 
 pub use encoding::SourceEncoding;
 pub use error::{MmlError, Warning};
+pub use include::{IncludeResolver, MemoryIncludes, NoIncludes};
 
 /// What a successful compile produced.
 #[derive(Debug, Clone)]
@@ -28,14 +31,26 @@ pub struct CompileOutput {
     pub smf: Vec<u8>,
     /// Non-fatal diagnostics; the file is still valid.
     pub warnings: Vec<Warning>,
+    /// Output of `Print(...)` statements, for the caller to display.
+    pub messages: Vec<String>,
 }
 
 /// Compile MML source text into SMF bytes.
+///
+/// `#Include` is unavailable here; use [`compile_with`] to supply a resolver.
 pub fn compile(src: &str) -> Result<CompileOutput, MmlError> {
-    let (song, warnings) = compiler::Compiler::new().compile(src)?;
+    compile_with(src, &include::NoIncludes)
+}
+
+/// Compile MML source text, resolving `#Include` through `resolver`.
+pub fn compile_with(src: &str, resolver: &dyn IncludeResolver) -> Result<CompileOutput, MmlError> {
+    let result = compiler::Compiler::new()
+        .with_includes(resolver)
+        .compile(src)?;
     Ok(CompileOutput {
-        smf: song.to_bytes(),
-        warnings,
+        smf: result.song.to_bytes(),
+        warnings: result.warnings,
+        messages: result.messages,
     })
 }
 
@@ -44,8 +59,16 @@ pub fn compile(src: &str) -> Result<CompileOutput, MmlError> {
 /// Use this for file contents; use [`compile`] when you already have a string
 /// (from JavaScript, say, where text is always UTF-8).
 pub fn compile_bytes(bytes: &[u8]) -> Result<CompileOutput, MmlError> {
+    compile_bytes_with(bytes, &include::NoIncludes)
+}
+
+/// As [`compile_bytes`], resolving `#Include` through `resolver`.
+pub fn compile_bytes_with(
+    bytes: &[u8],
+    resolver: &dyn IncludeResolver,
+) -> Result<CompileOutput, MmlError> {
     let (text, _encoding) = encoding::decode_auto(bytes);
-    compile(&text)
+    compile_with(&text, resolver)
 }
 
 #[cfg(test)]

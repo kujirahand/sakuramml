@@ -5,6 +5,7 @@
 //! so every position is a whole character and multi-byte text needs no special
 //! handling at all.
 
+pub mod sutoton;
 pub mod zenkaku;
 
 /// A character-wise cursor over the MML source, tracking the current line.
@@ -17,10 +18,16 @@ pub struct Cursor {
 
 impl Cursor {
     pub fn new(src: &str) -> Self {
+        Self::with_line(src, 1)
+    }
+
+    /// A cursor whose first line is numbered `start_line`, so diagnostics from
+    /// a fragment (a loop body, say) still point at the original source.
+    pub fn with_line(src: &str, start_line: usize) -> Self {
         Self {
             chars: src.chars().collect(),
             pos: 0,
-            line: 1,
+            line: start_line.max(1),
         }
     }
 
@@ -133,6 +140,44 @@ impl Cursor {
         }
         let value: i64 = digits.parse().ok()?;
         Some(if negative { -value } else { value })
+    }
+
+    /// Read the text up to the `close` that matches an already-consumed
+    /// `open`, honouring nesting and skipping over quoted strings.
+    ///
+    /// Returns `None` when the bracket is never closed.
+    pub fn read_balanced(&mut self, open: char, close: char) -> Option<String> {
+        let mut body = String::new();
+        let mut depth = 1usize;
+        let mut in_string = false;
+        loop {
+            let ch = self.advance()?;
+            if in_string {
+                body.push(ch);
+                if ch == '"' {
+                    in_string = false;
+                }
+                continue;
+            }
+            match ch {
+                '"' => {
+                    in_string = true;
+                    body.push(ch);
+                }
+                c if c == open => {
+                    depth += 1;
+                    body.push(c);
+                }
+                c if c == close => {
+                    depth -= 1;
+                    if depth == 0 {
+                        return Some(body);
+                    }
+                    body.push(c);
+                }
+                c => body.push(c),
+            }
+        }
     }
 
     /// Read an identifier: a letter or `_` followed by letters, digits or `_`.

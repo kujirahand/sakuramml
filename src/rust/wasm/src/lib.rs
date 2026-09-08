@@ -12,6 +12,7 @@ use wasm_bindgen::prelude::*;
 pub struct CompileResult {
     midi: Vec<u8>,
     warnings: Vec<String>,
+    messages: Vec<String>,
 }
 
 #[wasm_bindgen]
@@ -27,6 +28,12 @@ impl CompileResult {
     pub fn warnings(&self) -> Vec<JsValue> {
         self.warnings.iter().map(|w| JsValue::from_str(w)).collect()
     }
+
+    /// Output of `Print(...)` statements in the MML.
+    #[wasm_bindgen(getter)]
+    pub fn messages(&self) -> Vec<JsValue> {
+        self.messages.iter().map(|m| JsValue::from_str(m)).collect()
+    }
 }
 
 /// Compile MML text into a Standard MIDI File.
@@ -39,6 +46,7 @@ pub fn compile_mml(source: &str) -> Result<CompileResult, JsError> {
         Ok(output) => Ok(CompileResult {
             midi: output.smf,
             warnings: output.warnings.iter().map(|w| w.to_string()).collect(),
+            messages: output.messages,
         }),
         Err(error) => Err(JsError::new(&error.to_string())),
     }
