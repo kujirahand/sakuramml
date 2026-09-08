@@ -13,14 +13,31 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match run(&args) {
         Ok(()) => ExitCode::SUCCESS,
-        Err(message) => {
+        // Showing usage is not a failure, and neither is --version.
+        Err(Failure::Usage(message)) => {
+            println!("{message}");
+            ExitCode::SUCCESS
+        }
+        Err(Failure::Error(message)) => {
             eprintln!("{message}");
             ExitCode::FAILURE
         }
     }
 }
 
-fn run(args: &[String]) -> Result<(), String> {
+/// Why the run stopped: something the user asked for, or something wrong.
+enum Failure {
+    Usage(String),
+    Error(String),
+}
+
+impl From<String> for Failure {
+    fn from(message: String) -> Self {
+        Failure::Error(message)
+    }
+}
+
+fn run(args: &[String]) -> Result<(), Failure> {
     let options = parse_args(args)?;
 
     let (source, origin) = match &options.source {
@@ -61,6 +78,11 @@ fn run(args: &[String]) -> Result<(), String> {
     })?;
 
     println!("Success!");
+
+    if options.pause {
+        let mut line = String::new();
+        let _ = std::io::stdin().read_line(&mut line);
+    }
     Ok(())
 }
 
@@ -72,22 +94,30 @@ enum Source {
 struct Options {
     source: Source,
     output: Option<PathBuf>,
+    /// `-pause`: wait for Enter before exiting.
+    pause: bool,
 }
 
-fn parse_args(args: &[String]) -> Result<Options, String> {
+fn parse_args(args: &[String]) -> Result<Options, Failure> {
     let mut inline: Option<String> = None;
     let mut positional: Vec<PathBuf> = Vec::new();
+    let mut pause = false;
     let mut index = 0;
 
     while index < args.len() {
         match args[index].as_str() {
             "-e" => {
                 index += 1;
-                let code = args.get(index).ok_or("-e にMMLを指定してください")?;
+                let code = args
+                    .get(index)
+                    .ok_or_else(|| Failure::Error("-e にMMLを指定してください".to_string()))?;
                 inline = Some(code.clone());
             }
-            "-h" | "--help" => return Err(help_text()),
-            "-v" | "--version" => return Err(format!("sakuramml {VERSION}")),
+            "-h" | "--help" => return Err(Failure::Usage(help_text())),
+            "-v" | "--version" => return Err(Failure::Usage(format!("sakuramml {VERSION}"))),
+            // Kept for compatibility with the Pascal build, which used it to
+            // keep a console window open after compiling.
+            "-pause" => pause = true,
             other => positional.push(PathBuf::from(other)),
         }
         index += 1;
@@ -98,12 +128,16 @@ fn parse_args(args: &[String]) -> Result<Options, String> {
         Some(code) => Ok(Options {
             source: Source::Inline(code),
             output: positional.first().map(PathBuf::from),
+            pause,
         }),
         None => {
-            let input = positional.first().ok_or_else(help_text)?;
+            let input = positional
+                .first()
+                .ok_or_else(|| Failure::Usage(help_text()))?;
             Ok(Options {
                 source: Source::File(input.clone()),
                 output: positional.get(1).cloned(),
+                pause,
             })
         }
     }

@@ -26,6 +26,26 @@ The Rust rewrite is planned in [plan.md](plan.md); its command spec is in
 [src/rust/SPEC.md](src/rust/SPEC.md). The Pascal implementation below remains
 the reference implementation.
 
+## Rust / WebAssembly version
+
+A rewrite in Rust lives in [src/rust/](src/rust/) — see its
+[README](src/rust/README.md) and the migration plan in [plan.md](plan.md).
+It runs as a CLI, under WASI, and in the browser via WebAssembly:
+
+```sh
+cd src/rust
+cargo test --workspace                   # includes byte-for-byte tests against the Pascal output
+cargo run -p sakuramml-cli -- song.mml   # command line
+./build-wasm.sh                          # browser package (wasm/pkg/)
+```
+
+A browser demo page is at `src/rust/wasm/demo/index.html`.
+
+The Rust version is not yet a full replacement: it covers notes, tracks,
+control changes, loops, variables, control flow, the sutoton (Japanese)
+notation and `Include`, but `Function`, `SysEx` and the rhythm macros are
+still to come. The Pascal version below remains the reference implementation.
+
 ## Compiler
 
 - Full (Windows only) : Delphi7

@@ -243,6 +243,35 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
 - エラーメッセージの日本語対応確認、CLIオプション（`-e`, `-pause`）の互換確認。
 - ドキュメント更新（ReadMe、`doc/`配下にRust版・WASM版の使い方を追記）。
 
+## 進捗（2026-09-09時点）
+
+### 完了
+- **Phase 0**: ディレクトリ再編（`src/pascal/`）、`.gitignore`整備、`SPEC.md`生成（doc/から約500行抽出）。
+- **Phase 1**: ワークスペース（core/cli/wasm）、SMF書き出し、トークナイザ、基本コマンド。
+- **Phase 2**: 音色・CC・ピッチベンド・RPN/NRPN・リセット、ループ`[ ]`、変数と式評価、
+  `If`/`For`/`While`/`Exit`/`Print`、`System.*`オプション、KeyFlag、拍子、Time、
+  ストトン記法、`Include`（`IncludeResolver`経由）。
+- **Phase 3**:
+  - **サイズ最適化**: `encoding_rs`（WASMの318KB中190KBを占有）を自前のCP932変換表
+    （`tools/gen_cp932.py`で生成、9,604マッピング）へ置換。**274KB → 168KB（39%減）、
+    gzip 177KB → 113KB**。コアcrateの外部依存はゼロになった。
+  - **デモページ**: `src/rust/wasm/demo/index.html`。ブラウザで実動作を確認済み
+    （コンパイル・MIDIダウンロード・Print出力・CP932警告・エラー表示）。
+  - **CLI互換**: `-e`、`-pause`、`--help`/`--version`、拡張子自動変換、終了コード。
+  - **ドキュメント**: ルート`ReadMe.md`、`src/rust/README.md`を更新。
+
+### 残作業（Rust版が実用に達するために必要）
+`sample/*.mml`の大半はまだコンパイルできない。ブロッカーは以下：
+1. `Function`定義と呼び出し（`Include/stdmsg.h`が多用しており、これが最大の関門）
+2. `SysEx`コマンドと`$`16進リテラル
+3. リズムマクロ（`$`定義、`~`）
+4. `Div`（連符）、`Sub`、`Play`、`Stretch`
+5. 先行指定（`.onNote`、`.onTime`、`.onCycle`等）と`Cresc`/`Decresc`
+6. 組み込み関数（21件）
+
+テスト戦略は変更なし: 新コマンドは必ずPascal版の出力を実測し、
+`core/tests/golden.rs`にバイト列を固定してから実装する。
+
 ## テスト戦略
 - ユニットテスト: トークナイザ、式評価器、SMFイベントのバイト列化を個別に検証。
 - ゴールデンテスト: 同じ`.mml`を既存のPascal版（ビルド済み`csakura`）とRust版でコンパイルし、
