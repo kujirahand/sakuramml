@@ -37,7 +37,8 @@ uses
 
 procedure showHelp;
 begin
-  Writeln('=== sakuramml.com ===');
+  Writeln('=== MML Compiler sakuramml ===');
+  Writeln('version ' + VER_INFO + ' ' + DATE_INFO);
   Writeln('[USAGE]');
   Writeln('csakura mmlfile [midifile]');
   Writeln('csakura -e mmlcode [midifile]');
