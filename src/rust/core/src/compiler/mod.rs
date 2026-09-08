@@ -392,6 +392,7 @@ impl<'a> Compiler<'a> {
                 self.exiting = true;
                 Ok(())
             }
+            "SysEx" | "SYSEX" => self.sysex(cur),
             "Voice" => self.voice(cur),
             "PitchBend" => self.pitch_bend(cur),
             "RPN" | "NRPN" => {
@@ -1000,6 +1001,60 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
+    /// `SysEx(v1,v2,...)`, or `SysEx$=v1,v2,...;` where every value is
+    /// hexadecimal.
+    ///
+    /// The message is always written with an F0 status byte and a
+    /// variable-length payload count; a leading F0 in the list is the same
+    /// status byte written out, so it is not counted twice.
+    fn sysex(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        cur.skip_spaces();
+        let hex_mode = cur.eat('$');
+        cur.skip_spaces();
+        cur.eat('=');
+        cur.skip_spaces();
+        let parenthesised = cur.eat('(');
+
+        let mut values: Vec<i64> = Vec::new();
+        loop {
+            cur.skip_spaces();
+            let value = if hex_mode {
+                // In hex mode a `$` prefix is allowed but redundant.
+                cur.eat('$');
+                cur.read_hex()
+            } else {
+                self.read_number(cur)?
+            };
+            let Some(value) = value else { break };
+            values.push(value);
+            cur.skip_spaces();
+            if !cur.eat(',') {
+                break;
+            }
+        }
+        if parenthesised {
+            cur.skip_spaces();
+            cur.eat(')');
+        }
+        if values.is_empty() {
+            return Err(MmlError::new(line, "SysExには値を指定してください"));
+        }
+
+        let mut payload: Vec<u8> = values.iter().map(|v| (*v).clamp(0, 255) as u8).collect();
+        if payload.first() == Some(&0xf0) {
+            payload.remove(0);
+        }
+
+        let mut data = vec![0xf0];
+        crate::smf::write_var_len(&mut data, payload.len() as u32);
+        data.extend_from_slice(&payload);
+
+        let time = self.track().time;
+        self.track().events.push(Event::new(time, data));
+        Ok(())
+    }
+
     /// `@n[,msb,lsb]` — program change, with optional bank select first.
     ///
     /// Voice numbers are 1-based in MML and 0-based in MIDI.
@@ -1403,6 +1458,13 @@ impl<'a> Compiler<'a> {
         if cur.peek() == Some('(') {
             let value = expr::eval(cur, self)?;
             return Ok(Some(value.as_int(line)?));
+        }
+        if cur.peek() == Some('$') {
+            cur.advance();
+            return cur
+                .read_hex()
+                .map(Some)
+                .ok_or_else(|| MmlError::new(line, "$の後には16進数を指定してください"));
         }
         Ok(cur.read_int())
     }

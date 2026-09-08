@@ -494,3 +494,54 @@ fn include_files_may_be_cp932() {
     let expected = compile("Tempo=150 c").unwrap();
     assert_eq!(out.smf, expected.smf);
 }
+
+// --- SysEx and hexadecimal literals ---
+
+#[test]
+fn sysex_hex_mode() {
+    // SysEx$=... reads every value as hexadecimal; this is a GM reset.
+    assert_golden(
+        "SysEx$=f0,7E,7F,9,1,F7; c",
+        "4d546864000000060001000100604d54726b0000001400f0057e7f0901f700903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "SysEx$=f0,43,10,4c,0,0,7e,0,f7; c",
+        "4d546864000000060001000100604d54726b0000001700f00843104c00007e00f700903c644b803c6415\
+         ff2f00",
+    );
+}
+
+#[test]
+fn sysex_decimal_and_dollar_prefixed_forms() {
+    let expected =
+        "4d546864000000060001000100604d54726b0000001400f0057e7f0901f700903c644b803c6415ff2f00";
+    assert_golden("SysEx=(240,126,127,9,1,247) c", expected);
+    assert_golden("SysEx($F0,$7E,$7F,$09,$01,$F7) c", expected);
+    // A leading F0 is the status byte either way, so omitting it changes nothing.
+    assert_golden("SysEx=(126,127,9,1,247) c", expected);
+}
+
+/// A hand-written SysEx must produce the same bytes as the built-in reset.
+#[test]
+fn hand_written_sysex_matches_the_builtin_reset() {
+    let by_hand = compile("SysEx$=f0,7E,7F,9,1,F7;").unwrap();
+    let builtin = compile("ResetGM").unwrap();
+    assert_eq!(by_hand.smf, builtin.smf);
+}
+
+#[test]
+fn hexadecimal_literals() {
+    assert_golden(
+        "Int x=$10; n((x+48))",
+        "4d546864000000060001000100604d54726b0000000c009040644b80406415ff2f00",
+    );
+    assert_golden(
+        "n($3C)",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+    // Hex and decimal are the same number by another name.
+    assert_eq!(
+        compile("Int x=$FF; n((x-135))").unwrap().smf,
+        compile("n120").unwrap().smf
+    );
+}

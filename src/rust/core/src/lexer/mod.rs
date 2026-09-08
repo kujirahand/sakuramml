@@ -142,6 +142,20 @@ impl Cursor {
         Some(if negative { -value } else { value })
     }
 
+    /// Read a run of hexadecimal digits as an integer, if one is next.
+    pub fn read_hex(&mut self) -> Option<i64> {
+        let mut digits = String::new();
+        while let Some(c) = self.peek() {
+            if c.is_ascii_hexdigit() {
+                digits.push(c);
+                self.advance();
+            } else {
+                break;
+            }
+        }
+        i64::from_str_radix(&digits, 16).ok()
+    }
+
     /// Read the text up to the `close` that matches an already-consumed
     /// `open`, honouring nesting and skipping over quoted strings.
     ///
@@ -225,6 +239,15 @@ mod tests {
         assert_eq!(cur.read_word().as_deref(), Some("Tempo"));
         assert!(cur.eat('='));
         assert_eq!(cur.read_int(), Some(120));
+    }
+
+    #[test]
+    fn reads_hex_digits() {
+        let mut cur = Cursor::new("F7,");
+        assert_eq!(cur.read_hex(), Some(0xf7));
+        assert_eq!(cur.peek(), Some(','));
+        assert_eq!(Cursor::new("10").read_hex(), Some(0x10));
+        assert_eq!(Cursor::new("zz").read_hex(), None);
     }
 
     #[test]

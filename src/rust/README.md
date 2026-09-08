@@ -78,12 +78,13 @@ Implemented:
   `TimeBase`; unimplemented ones are skipped with a warning rather than failing
 * the sutoton (Japanese) notation layer — `テンポ120 ドレミ` compiles
 * `Include`, resolved through a caller-supplied [`IncludeResolver`]
+* `SysEx`, in both the `SysEx(...)` decimal form and the `SysEx$=...;` hex
+  form, plus `$` hexadecimal literals anywhere a number is expected
 
-Still to port: `SysEx` and `$` hex literals, rhythm macros (`$`/`~`), `Div`,
-`Sub`, `Play`, and the 先行指定 (`.onNote`) family. Those are what the
-remaining `sample/*.mml` files need — `Include/stdmsg.h` reaches `SysEx` on
-its 19th line, which is the next thing standing between the Rust build and
-the sample songs.
+Still to port: rhythm macros (`$`/`~`), `Div`, `Sub`, `Play`, `DirectSMF`,
+the 先行指定 (`.onNote`) family, and assignment to an undeclared variable
+(`SoundType = 0;` in `Include/stdmsg.h`, which the Pascal build accepts).
+Those are what the remaining `sample/*.mml` files need.
 
 `core/tests/script.rs` covers the scripting layer on its own: variables,
 expressions, control flow, functions, and the error cases that must not

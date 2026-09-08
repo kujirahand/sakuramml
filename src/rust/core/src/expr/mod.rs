@@ -283,6 +283,13 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
                 .unwrap_or(trimmed);
             Ok(Value::Str(inner.to_string()))
         }
+        // `$10` is hexadecimal, as in `Int DeviceNumber = $10;`.
+        Some('$') => {
+            cur.advance();
+            cur.read_hex()
+                .map(Value::Int)
+                .ok_or_else(|| MmlError::new(line, "$の後には16進数を指定してください"))
+        }
         Some(c) if c.is_ascii_digit() => {
             let value = cur
                 .read_int()
