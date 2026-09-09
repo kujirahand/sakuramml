@@ -960,3 +960,42 @@ fn max_rescales_gate_and_velocity() {
     assert_same_bytes("q.Max(8) q8 c", "System.qMax=8 q8 c");
     assert_same_bytes("v.Max(15) v15 c", "System.vMax=15 v15 c");
 }
+
+// --- DirectSMF and q% ---
+
+/// `DirectSMF(...)` puts its bytes into the track verbatim, at the current time.
+#[test]
+fn direct_smf_writes_raw_bytes() {
+    assert_golden(
+        "DirectSMF(144,60,100) r",
+        "4d546864000000060001000100604d54726b0000000800903c6460ff2f00",
+    );
+    // It lands wherever the time pointer is, between other events.
+    assert_golden(
+        "c DirectSMF(176,10,64) d",
+        "4d546864000000060001000100604d54726b0000001800903c644b803c6415b00a4000903e644b803e641\
+         5ff2f00",
+    );
+    // Hexadecimal arguments mean the same thing.
+    assert_same_bytes("DirectSMF($90,$3C,$64) r", "DirectSMF(144,60,100) r");
+}
+
+/// `q%n` gives the gate in ticks rather than as a percentage of the note.
+#[test]
+fn gate_in_steps() {
+    assert_golden(
+        "q%10 c",
+        "4d546864000000060001000100604d54726b0000000c00903c6409803c6457ff2f00",
+    );
+    assert_golden(
+        "q%48 c",
+        "4d546864000000060001000100604d54726b0000000c00903c642f803c6431ff2f00",
+    );
+    // The gate no longer follows the note's length…
+    assert_same_bytes("l8 q%10 c", "l8 q%10 c");
+    let short = compile("l8 q%10 c").unwrap();
+    let long = compile("l4 q%10 c").unwrap();
+    assert_eq!(short.smf[22..26], long.smf[22..26]); // same note-on and gate
+                                                     // …and a plain `q` goes back to percentages.
+    assert_same_bytes("q%10 q4 c", "q4 c");
+}

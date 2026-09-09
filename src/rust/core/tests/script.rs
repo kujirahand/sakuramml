@@ -519,3 +519,21 @@ fn hex_sysex_accepts_parenthesised_values() {
     let builtin = compile("ResetGS").unwrap();
     assert_eq!(by_hand.smf, builtin.smf);
 }
+
+// --- increment and decrement ---
+
+/// `I++` and `I--` step a variable by one.
+#[test]
+fn increment_and_decrement() {
+    assert_same("Int I=0; I++; n((60+I))", "n61");
+    assert_same("Int I=5; I--; n((60+I))", "n64");
+    assert_same("Int I=0; I++; I++; n((60+I))", "n62");
+    // The same thing written out longhand.
+    assert_same("Int I=0; I++; n((60+I))", "Int I=0; I=I+1; n((60+I))");
+}
+
+/// A `For` loop can step its counter with `++`.
+#[test]
+fn a_for_loop_can_increment_with_plus_plus() {
+    assert_same("Int i; For(i=0;i<3;i++){c}", "c c c");
+}

@@ -32,7 +32,8 @@
 | その他の `System.*` | 一部 | 08章に記載したもの以外は警告 |
 | `Play` | 実装済み | 引数位置を0起点トラック番号として同時記述 |
 | `PlayFrom`, `PlayTo` | 未実装 | 演奏範囲の指定 |
-| `DirectSMF`, `NoteOn`, `NoteOff` | 未実装 | 低水準イベント命令 |
+| `DirectSMF` | 実装済み | 生バイト列をイベントとして書く |
+| `NoteOn`, `NoteOff` | 未実装 | 低水準イベント命令 |
 | `TimeKey`, `TimeKeyFlag`, `TimeKey2` | 未実装 | 時間範囲つき移調・調号 |
 | `Stretch`, `Solo`, `Mute`, `TrackMute` | 未実装 | トラック編集系 |
 | `DeleteCC`, `CCMute`, `CCNoMute` | 未実装 | イベント削除・抑制 |

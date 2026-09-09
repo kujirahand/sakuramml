@@ -62,6 +62,8 @@ struct TrackState {
     last_note: Option<LastNote>,
     /// One-shot octave shift from `` ` `` or `"`, applied to the next note.
     octave_once: i64,
+    /// `q%n` gives the gate in ticks rather than as a percentage.
+    gate_in_steps: bool,
     /// Values queued by `.onNote`, cycled one per note.
     on_note: Vec<(OnNoteTarget, OnNote)>,
     /// Advance specifications attached to control changes and bends.
@@ -90,6 +92,7 @@ impl TrackState {
             events: Vec::new(),
             last_note: None,
             octave_once: 0,
+            gate_in_steps: false,
             on_note: Vec::new(),
             cc_modifiers: Vec::new(),
             random: Vec::new(),
@@ -368,8 +371,16 @@ impl<'a> Compiler<'a> {
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Gate)? {
                     return Ok(handled);
                 }
+                // `q%n` gives the gate in ticks; a later plain `q` goes back
+                // to reading it as a percentage.
+                let in_steps = cur.peek() == Some('%');
+                if in_steps {
+                    cur.advance();
+                }
                 let value = self.expect_int(cur, "q")?;
-                self.track().gate_percent = value;
+                let track = self.track();
+                track.gate_in_steps = in_steps;
+                track.gate_percent = value;
                 Ok(())
             }
             'v' => {
@@ -548,6 +559,7 @@ impl<'a> Compiler<'a> {
                 Ok(())
             }
             "SysEx" | "SYSEX" => self.sysex(cur),
+            "DirectSMF" => self.direct_smf(cur),
             "Voice" => self.voice(cur),
             "PitchBend" => {
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
@@ -854,10 +866,8 @@ impl<'a> Compiler<'a> {
                 OnNoteTarget::Gate => self.q_max = value.max(1),
                 OnNoteTarget::Velocity => self.v_max = value.max(1),
                 _ => {
-                    self.warnings.push(Warning::new(
-                        line,
-                        ".Max はこのコマンドでは無視しました",
-                    ));
+                    self.warnings
+                        .push(Warning::new(line, ".Max はこのコマンドでは無視しました"));
                 }
             }
             return Ok(Some(()));
@@ -1531,9 +1541,28 @@ impl<'a> Compiler<'a> {
     }
 
     /// `name = <value>` where the value is a literal, a `{"string"}` or a
-    /// parenthesised expression.
+    /// parenthesised expression; also `name++` and `name--`.
     fn assign(&mut self, cur: &mut Cursor, name: &str) -> Result<()> {
+        let line = cur.line();
         cur.skip_spaces();
+
+        // `I++` and `I--` step a variable by one.
+        for (sign, step) in [('+', 1), ('-', -1)] {
+            if cur.peek() == Some(sign) && cur.peek_at(1) == Some(sign) {
+                cur.advance();
+                cur.advance();
+                let current = self
+                    .variables
+                    .get(name)
+                    .map(|value| value.as_int(line))
+                    .transpose()?
+                    .unwrap_or(0);
+                self.variables
+                    .insert(name.to_string(), Value::Int(current + step));
+                return Ok(());
+            }
+        }
+
         if !cur.eat('=') {
             return Ok(()); // a bare mention of a variable does nothing
         }
@@ -1802,6 +1831,18 @@ impl<'a> Compiler<'a> {
         self.push_event(Event::new(time, data))
     }
 
+    /// `DirectSMF(b1,b2,...)` — put raw bytes into the track as one event.
+    fn direct_smf(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        let values = self.read_args(cur, usize::MAX)?;
+        if values.is_empty() {
+            return Err(MmlError::new(line, "DirectSMFには値を指定してください"));
+        }
+        let data: Vec<u8> = values.iter().map(|v| (*v & 0xff) as u8).collect();
+        let time = self.track().time;
+        self.push_event(Event::new(time, data))
+    }
+
     /// `@n[,msb,lsb]` — program change, with optional bank select first.
     ///
     /// Voice numbers are 1-based in MML and 0-based in MIDI.
@@ -1923,6 +1964,7 @@ impl<'a> Compiler<'a> {
                         if c.is_ascii_digit()
                             || c == '-'
                             || c == '('
+                            || c == '$'
                             || c.is_ascii_alphabetic() =>
                     {
                         let line = cur.line();
@@ -2115,7 +2157,11 @@ impl<'a> Compiler<'a> {
         let gate_value = self.spread(OnNoteTarget::Gate, gate_value);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
-        let gate = gate_ticks_scaled(length, gate_value, q_max);
+        let gate = if self.track().gate_in_steps {
+            (gate_value - 1).max(1)
+        } else {
+            gate_ticks_scaled(length, gate_value, q_max)
+        };
         let (time, timing, channel) = {
             let track = self.track();
             (
