@@ -1045,3 +1045,13 @@ fn an_argument_list_may_span_lines() {
 fn a_control_change_value_may_follow_without_a_comma() {
     assert_same_bytes("Int b=10; y0((b)) c", "y0,10 c");
 }
+
+/// A control change chosen by number may carry a modifier instead of a value.
+/// 256 and 257 are the bend pseudo-controllers, which is how test_01.mml
+/// writes `y256.Frequency(1)`.
+#[test]
+fn a_numbered_control_change_takes_modifiers() {
+    assert_same_bytes("y10.onNote(0,127) cd", "P.onNote(0,127) cd");
+    // Frequency only changes how often ramps write, so on its own it is silent.
+    assert_same_bytes("y256.Frequency(1) c", "c");
+}

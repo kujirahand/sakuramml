@@ -575,3 +575,15 @@ fn a_for_loop_can_declare_its_counter() {
     assert_same("For(Int J=0;J<2;J=J+1){c}", "c c");
     assert_same("For(Int J=0;J<3;J++){n((60+J))}", "n60 n61 n62");
 }
+
+/// A definition wins over the built-in meaning of its name, for commands as
+/// well as note letters: `Str S={"c"}` makes a later `S` the variable rather
+/// than the `Sub` alias.
+#[test]
+fn a_definition_shadows_a_command_name() {
+    assert_same(r#"Str S={"c"}; S"#, "c");
+    assert_same(r#"Str P={"c"}; P"#, "c");
+    assert_same("Function S(){n60} S", "n60");
+    // Without a definition in the way, the commands still work.
+    assert_same("Sub{c} d", "Sub{c} d");
+}

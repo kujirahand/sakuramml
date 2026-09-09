@@ -467,6 +467,19 @@ impl<'a> Compiler<'a> {
             .read_word()
             .ok_or_else(|| MmlError::new(line, "コマンド名を読み取れませんでした"))?;
 
+        // A user definition wins over the built-in meaning of its name, the
+        // same way it does for note letters: `Str S={"c"}` makes a later `S`
+        // the variable, not the `Sub` alias.
+        if self.functions.contains_key(&word) {
+            let args = self.read_call_args(cur)?;
+            self.call_function(&word, args, line)?;
+            return Ok(());
+        }
+        if !word.starts_with('#') && matches!(self.variables.get(&word), Some(Value::Str(_))) {
+            let name = word.clone();
+            return self.string_variable(cur, &name, line);
+        }
+
         match word.as_str() {
             "Tempo" | "TEMPO" | "TempoChange" => {
                 let bpm = self.expect_int_arg(cur, &word)?;
@@ -1963,6 +1976,26 @@ impl<'a> Compiler<'a> {
     /// `y(n),(value)` — write a control change by number.
     fn control_change_direct(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        // `y256.Frequency(1)` — the number may be followed by a modifier
+        // rather than a value. 256 and 257 are the bend pseudo-controllers.
+        {
+            let mut probe = cur.clone();
+            probe.skip_spaces();
+            if let Some(no) = probe.read_int() {
+                if probe.peek() == Some('.') {
+                    *cur = probe;
+                    let target = match no {
+                        advance_spec::BEND_FULL | advance_spec::BEND_EASY => {
+                            OnNoteTarget::PitchBend
+                        }
+                        _ => OnNoteTarget::ControlChange(no.clamp(0, 127) as u8),
+                    };
+                    if let Some(handled) = self.modifier(cur, target)? {
+                        return Ok(handled);
+                    }
+                }
+            }
+        }
         let mut args = self.read_args(cur, 2)?;
         // `y0((value))` — the value may follow the number without a comma.
         if args.len() == 1 {
