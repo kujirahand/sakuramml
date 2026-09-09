@@ -537,3 +537,41 @@ fn increment_and_decrement() {
 fn a_for_loop_can_increment_with_plus_plus() {
     assert_same("Int i; For(i=0;i<3;i++){c}", "c c c");
 }
+
+// --- NoteNo, MML, and negative values ---
+
+/// `NoteNo(...)` reads MML the way the compiler would and gives back the
+/// number, without playing anything.
+#[test]
+fn note_no_reads_a_note_without_playing_it() {
+    assert_same("Int x=NoteNo(o4c); n(x)", "n48");
+    // With no octave of its own it uses the track's.
+    assert_same("Int x=NoteNo(c); n(x)", "n60");
+    assert_same("o3 Int x=NoteNo(c); n(x)", "o3 n36");
+    assert_same("Int x=NoteNo(o4c+); n(x)", "n49");
+    assert_same("Int x=NoteNo(n70); n(x)", "n70");
+}
+
+/// `MML(...)` reports what a command is currently set to.
+#[test]
+fn mml_reports_the_current_setting() {
+    assert_same("v100 Int x=MML(v); n(x)", "n100");
+    assert_same("o4 Int x=MML(o); n((x+56))", "n60");
+    // q50 is still in effect for the note itself, so compare like for like.
+    assert_same("q50 Int x=MML(q); n((x+10))", "q50 n60");
+    assert_same("@5 Int x=MML(@); n((x+55))", "@5 n60");
+    // A length comes back in ticks, so l8 is 48 at the default timebase.
+    assert_same("l8 Int x=MML(l); n((x+12))", "l8 n60");
+}
+
+#[test]
+fn an_unknown_mml_query_is_an_error() {
+    assert_error_contains("Int x=MML(nope); c", "取得できません");
+}
+
+/// A `For` clause may declare its own counter.
+#[test]
+fn a_for_loop_can_declare_its_counter() {
+    assert_same("For(Int J=0;J<2;J=J+1){c}", "c c");
+    assert_same("For(Int J=0;J<3;J++){n((60+J))}", "n60 n61 n62");
+}

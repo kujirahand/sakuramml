@@ -64,6 +64,8 @@ struct TrackState {
     octave_once: i64,
     /// `q%n` gives the gate in ticks rather than as a percentage.
     gate_in_steps: bool,
+    /// The voice last selected with `@`, for `MML(@)`.
+    voice: i64,
     /// Values queued by `.onNote`, cycled one per note.
     on_note: Vec<(OnNoteTarget, OnNote)>,
     /// Advance specifications attached to control changes and bends.
@@ -93,6 +95,7 @@ impl TrackState {
             last_note: None,
             octave_once: 0,
             gate_in_steps: false,
+            voice: 1,
             on_note: Vec::new(),
             cc_modifiers: Vec::new(),
             random: Vec::new(),
@@ -778,6 +781,17 @@ impl<'a> Compiler<'a> {
                     .unwrap_or_default(),
             ),
             "VERSION" => Value::Int(VERSION_NUMBER),
+            // `NoteNo(o4c)` reads a note the way the compiler would and gives
+            // back its MIDI number, without playing it.
+            "NoteNo" => {
+                let text = args.first().map(|v| v.as_str()).unwrap_or_default();
+                Value::Int(self.note_number_of(&text))
+            }
+            // `MML(v)` reports what a command is currently set to.
+            "MML" => {
+                let name = args.first().map(|v| v.as_str()).unwrap_or_default();
+                Value::Int(self.command_value(&name, line)?)
+            }
             "Time" => {
                 let source = args.first().map(Value::as_str).unwrap_or_default();
                 Value::Int(self.time_value(&source, line)?)
@@ -785,6 +799,74 @@ impl<'a> Compiler<'a> {
             _ => return Err(MmlError::new(line, format!("関数\"{name}\"は未定義です"))),
         };
         Ok(Some(value))
+    }
+
+    /// The MIDI note number a fragment of MML would play, starting from the
+    /// track's current octave. Used by `NoteNo(...)`.
+    fn note_number_of(&mut self, text: &str) -> i64 {
+        let mut octave = self.track().octave;
+        let mut chars = text.chars().peekable();
+        let mut note: Option<i64> = None;
+        let mut accidental = 0;
+
+        while let Some(ch) = chars.next() {
+            match ch {
+                'o' => {
+                    let mut digits = String::new();
+                    while let Some(c) = chars.peek() {
+                        if c.is_ascii_digit() {
+                            digits.push(*c);
+                            chars.next();
+                        } else {
+                            break;
+                        }
+                    }
+                    if let Ok(value) = digits.parse::<i64>() {
+                        octave = value;
+                    }
+                }
+                '>' => octave += 1,
+                '<' => octave -= 1,
+                '+' | '#' if note.is_some() => accidental += 1,
+                '-' if note.is_some() => accidental -= 1,
+                'n' => {
+                    let mut digits = String::new();
+                    while let Some(c) = chars.peek() {
+                        if c.is_ascii_digit() {
+                            digits.push(*c);
+                            chars.next();
+                        } else {
+                            break;
+                        }
+                    }
+                    if let Ok(value) = digits.parse::<i64>() {
+                        return value;
+                    }
+                }
+                c => {
+                    if let Some(class) = pitch_class_index(c) {
+                        note = Some(pitch_class_semitone(class));
+                    }
+                }
+            }
+        }
+        octave * 12 + note.unwrap_or(0) + accidental
+    }
+
+    /// What a command is currently set to, for `MML(...)`.
+    fn command_value(&mut self, name: &str, line: usize) -> Result<i64> {
+        let key_shift = self.key_shift;
+        let track = self.track();
+        Ok(match name.trim() {
+            "l" => track.length,
+            "v" => track.velocity,
+            "o" => track.octave,
+            "q" => track.gate_percent,
+            "t" => track.timing,
+            "@" => track.voice,
+            "Key" | "TimeKey" => key_shift,
+            other => return Err(MmlError::new(line, format!("MML({other})は取得できません"))),
+        })
     }
 
     /// Run a function body with its parameters bound.
@@ -1668,6 +1750,17 @@ impl<'a> Compiler<'a> {
         let name = cur
             .read_word()
             .ok_or_else(|| MmlError::new(line, format!("代入文を読み取れません: {src}")))?;
+
+        // `For(Int J=0; ...)` — the clause may declare its own counter.
+        let kind = match name.as_str() {
+            "Int" | "INT" | "Integer" | "INTEGER" => Some(VarKind::Int),
+            "Str" | "STR" => Some(VarKind::Str),
+            "Array" | "ARRAY" => Some(VarKind::Array),
+            _ => None,
+        };
+        if let Some(kind) = kind {
+            return self.declare(&mut cur, kind);
+        }
         self.assign(&mut cur, &name)
     }
 
@@ -1858,6 +1951,7 @@ impl<'a> Compiler<'a> {
         if let Some(&lsb) = args.get(2) {
             self.write_cc(32, lsb);
         }
+        self.track().voice = voice;
         let program = (voice - 1).clamp(0, 127) as u8;
         let (time, channel) = {
             let track = self.track();
@@ -2347,6 +2441,15 @@ impl<'a> Compiler<'a> {
     fn read_number(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
         let line = cur.line();
         cur.skip_spaces();
+        // `-$2000` and `-(expr)`: the sign belongs to the value, whatever
+        // form the value takes.
+        if cur.peek() == Some('-') && matches!(cur.peek_at(1), Some('$') | Some('(')) {
+            cur.advance();
+            let value = self
+                .read_number(cur)?
+                .ok_or_else(|| MmlError::new(line, "-の後に値がありません"))?;
+            return Ok(Some(-value));
+        }
         // `!8` is a length in n-th notes, given where a tick count is wanted:
         // the same thing `Step(8)` and `StrToLen(8)` produce.
         if cur.peek() == Some('!') {
@@ -2539,6 +2642,8 @@ fn is_builtin_function(name: &str) -> bool {
             | "SizeOf"
             | "StrToNum"
             | "HEX"
+            | "NoteNo"
+            | "MML"
             | "#STR"
             | "ASC"
             | "CHR"

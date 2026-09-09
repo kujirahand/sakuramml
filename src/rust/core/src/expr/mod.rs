@@ -367,6 +367,19 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             }
 
             if ctx.has_function(&name) {
+                // A few built-ins take MML text rather than a value:
+                // `NoteNo(o4c)` and `MML(v)` are read, not evaluated.
+                if takes_raw_text(&name) && cur.peek() == Some('(') {
+                    cur.advance();
+                    let text = cur
+                        .read_balanced('(', ')')
+                        .ok_or_else(|| MmlError::new(line, "括弧が閉じられていません"))?;
+                    return ctx
+                        .call(&name, vec![Value::Str(text)], line)?
+                        .ok_or_else(|| {
+                            MmlError::new(line, format!("関数\"{name}\"は値を返しません"))
+                        });
+                }
                 let args = if cur.peek() == Some('(') {
                     cur.advance();
                     parse_call_args(cur, ctx)?
@@ -383,6 +396,11 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
         }
         _ => Err(MmlError::new(line, "式を読み取れません")),
     }
+}
+
+/// Built-ins whose argument is MML text to be read, not an expression.
+fn takes_raw_text(name: &str) -> bool {
+    matches!(name, "NoteNo" | "MML")
 }
 
 /// Parse `a, b, c)` — the opening parenthesis is already consumed.

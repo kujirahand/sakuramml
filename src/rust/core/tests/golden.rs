@@ -999,3 +999,12 @@ fn gate_in_steps() {
                                                      // …and a plain `q` goes back to percentages.
     assert_same_bytes("q%10 q4 c", "q4 c");
 }
+
+/// A negative value may be written in hex or parenthesised, and the sign
+/// belongs to the value: `p%-$2000` is the lowest bend there is.
+#[test]
+fn negative_values_in_any_form() {
+    assert_same_bytes("p%-$2000 c", "p%-8192 c");
+    assert_same_bytes("p%$1000 c", "p%4096 c");
+    assert_same_bytes("System.Keyshift=-(2) c", "System.Keyshift=-2 c");
+}
