@@ -70,6 +70,9 @@ struct TrackState {
     on_note: Vec<(OnNoteTarget, OnNote)>,
     /// Advance specifications attached to control changes and bends.
     cc_modifiers: Vec<CcModifier>,
+    /// Set once any event is recorded, so a track PlayFrom trims to empty is
+    /// still written out (an empty MTrk), matching the Pascal build.
+    used: bool,
     /// `.Random` spread per note attribute.
     random: Vec<(OnNoteTarget, i64)>,
 }
@@ -99,6 +102,7 @@ impl TrackState {
             on_note: Vec::new(),
             cc_modifiers: Vec::new(),
             random: Vec::new(),
+            used: false,
         }
     }
 }
@@ -136,6 +140,7 @@ pub struct Compiler<'a> {
     rng: Rng,
     /// Events written so far, against [`MAX_EVENTS`].
     event_count: usize,
+    play_from: PlayFromSpec,
     /// While writing a chord, the time every note in it starts at.
     chord_start: Option<i64>,
     /// `.Frequency` — how often a ramp writes, in ticks.
@@ -173,6 +178,7 @@ impl<'a> Compiler<'a> {
             exiting: false,
             rng: Rng::default(),
             event_count: 0,
+            play_from: PlayFromSpec::default(),
             chord_start: None,
             cc_frequency: advance_spec::DEFAULT_FREQUENCY,
             rythm_macros: rythm::Macros::new(),
@@ -228,10 +234,14 @@ impl<'a> Compiler<'a> {
         let normalized = self.preprocess(src);
         let mut cur = Cursor::new(&normalized);
         self.run(&mut cur)?;
+        self.apply_play_from();
 
         let mut song = Song::new(self.timebase as u16);
         for state in self.tracks.into_values() {
-            if state.events.is_empty() {
+            // A track PlayFrom trimmed to nothing is still written out (an
+            // empty MTrk), the same way the Pascal build does: it was used,
+            // even though nothing survived the cut.
+            if !state.used {
                 continue;
             }
             song.tracks.push(Track {
@@ -246,6 +256,142 @@ impl<'a> Compiler<'a> {
         })
     }
 
+    /// Apply `PlayFrom`/`PlayTo` as a post-process over every track's
+    /// recorded events, matching `TSmfTrack.ExecutePlayFrom` in
+    /// `smf_types.pas`.
+    ///
+    /// This runs once, after compiling, exactly as the Pascal build applies
+    /// it at save time rather than as the source is read — so where in the
+    /// song `PlayFrom` is written makes no difference to the result.
+    ///
+    /// Not reproduced: RPN/NRPN reconstruction at the cut point (rare, and
+    /// no sample song exercises it — see spec/10-compatibility.md).
+    fn apply_play_from(&mut self) {
+        let from_pos = self.play_from.from_pos;
+        let to_pos = self.play_from.to_pos;
+        // The Pascal build only runs any of this when one bound is set.
+        if from_pos <= 0 && to_pos <= 0 {
+            return;
+        }
+        let wait_time = self.play_from.wait_time;
+        let sysex = self.play_from.sysex;
+
+        for track in self.tracks.values_mut() {
+            track.events.sort_by_key(|e| e.time);
+
+            // PlayTo: drop the trailing run at or after `to_pos`.
+            if to_pos > 0 {
+                while matches!(track.events.last(), Some(e) if e.time >= to_pos) {
+                    track.events.pop();
+                }
+            }
+
+            // Reconstruct the state in effect just before `from_pos`, so
+            // notes that survive the cut still sound with the right voice,
+            // controller values and tempo.
+            let mut cc = [None; 128];
+            let mut pitch_bend: i64 = 0;
+            let mut program: Option<u8> = None;
+            let mut tempo: Option<u32> = None;
+            let mut channel = track.channel;
+            for event in &track.events {
+                if event.time >= from_pos {
+                    break;
+                }
+                match event.data.first().map(|b| b & 0xf0) {
+                    Some(0xb0) => {
+                        if let (Some(&no), Some(&value)) = (event.data.get(1), event.data.get(2)) {
+                            cc[no as usize] = Some(value);
+                            channel = event.data[0] & 0x0f;
+                        }
+                    }
+                    Some(0xe0) => {
+                        if let (Some(&lsb), Some(&msb)) = (event.data.get(1), event.data.get(2)) {
+                            pitch_bend = (((msb as i64) << 7) | lsb as i64) - 8192;
+                            channel = event.data[0] & 0x0f;
+                        }
+                    }
+                    Some(0xc0) => {
+                        if let Some(&prog) = event.data.get(1) {
+                            program = Some(prog);
+                            channel = event.data[0] & 0x0f;
+                        }
+                    }
+                    _ => {}
+                }
+                if event.data.first() == Some(&0xff)
+                    && event.data.get(1) == Some(&0x51)
+                    && event.data.len() >= 6
+                {
+                    let usec = ((event.data[3] as u32) << 16)
+                        | ((event.data[4] as u32) << 8)
+                        | event.data[5] as u32;
+                    tempo = Some(usec);
+                }
+            }
+
+            // Discard what falls before the cut (keeping non-tempo meta at
+            // time 0, and SysEx at an incrementing slot if `.SysEx(1)` asked
+            // for it), and shift the rest back by the cut point.
+            let mut pre_effect = 0i64;
+            let mut rebuilt = Vec::with_capacity(track.events.len());
+            for event in track.events.drain(..) {
+                if event.time < from_pos {
+                    let status = event.data.first().copied();
+                    if status == Some(0xf0) && sysex {
+                        rebuilt.push(Event::new(pre_effect, event.data));
+                        pre_effect += 1;
+                    } else if status == Some(0xff) && event.data.get(1) != Some(&0x51) {
+                        rebuilt.push(Event::new(0, event.data));
+                    }
+                    // Anything else before the cut is dropped: ordinary
+                    // events, and the tempo meta (reconstructed below).
+                } else {
+                    let shifted = (event.time - from_pos + wait_time).max(0);
+                    rebuilt.push(Event::new(shifted, event.data));
+                }
+            }
+
+            // Write the reconstructed state back in, right at the start.
+            if from_pos > 0 {
+                for (no, value) in cc.iter().enumerate() {
+                    if let Some(value) = value {
+                        rebuilt.push(Event::control_change(pre_effect, channel, no as u8, *value));
+                        pre_effect += 1;
+                    }
+                }
+                if pitch_bend != 0 {
+                    let raw = (pitch_bend + 8192).clamp(0, 16383);
+                    rebuilt.push(Event::new(
+                        pre_effect,
+                        vec![
+                            0xe0 | channel,
+                            (raw & 0x7f) as u8,
+                            ((raw >> 7) & 0x7f) as u8,
+                        ],
+                    ));
+                    pre_effect += 1;
+                }
+                if let Some(prog) = program {
+                    rebuilt.push(Event::program_change(pre_effect, channel, prog));
+                }
+                if let Some(usec) = tempo {
+                    rebuilt.push(Event::tempo(0, usec));
+                }
+            }
+
+            // The Pascal build places End-of-Track flush against whatever
+            // event survives last, in both branches — LastTime is only
+            // explicitly set in the PlayTo branch, and even there it ends up
+            // smaller than the last surviving (shifted) event in every case
+            // observed, which the SMF writer's own delta clamp already
+            // turns into "immediately after". Using the true maximum here
+            // reproduces that without depending on the clamp by luck.
+            track.time = rebuilt.iter().map(|e| e.time).max().unwrap_or(0);
+            track.events = rebuilt;
+        }
+    }
+
     /// Record an event on the current track, against the compile's budget.
     fn push_event(&mut self, event: Event) -> Result<()> {
         self.event_count += 1;
@@ -255,7 +401,9 @@ impl<'a> Compiler<'a> {
                 format!("生成イベント数が上限({MAX_EVENTS})を超えました"),
             ));
         }
-        self.track().events.push(event);
+        let track = self.track();
+        track.used = true;
+        track.events.push(event);
         Ok(())
     }
 
@@ -528,6 +676,8 @@ impl<'a> Compiler<'a> {
             "Include" | "INCLUDE" => self.include(cur),
             "Div" | "DIV" => self.div(cur),
             "Play" | "PLAY" => self.play(cur),
+            "PlayFrom" => self.play_from_command(cur, line),
+            "PlayTo" => self.play_to_command(cur, line),
             "Cresc" | "CRESC" => self.cresc(cur, 40, 127, line),
             "Decresc" | "DECRESC" => self.cresc(cur, 127, 40, line),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
@@ -1471,6 +1621,56 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
+    /// `PlayFrom(time)` or `PlayFrom.option(v)` — where a partial render
+    /// should start. Applied once, after the whole song is compiled (see
+    /// [`Self::apply_play_from`]), matching the Pascal build's post-process
+    /// (`TSmfTrack.ExecutePlayFrom` in `smf_types.pas`).
+    fn play_from_command(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        cur.skip_spaces();
+        if cur.peek() == Some('.') {
+            cur.advance();
+            let name = cur
+                .read_word()
+                .ok_or_else(|| MmlError::new(line, ".の後にはオプション名が必要です"))?;
+            let value = self.expect_int_arg(cur, &name)?;
+            match name.as_str() {
+                "SysEx" => self.play_from.sysex = value != 0,
+                // Parsed for compatibility; the Pascal build never actually
+                // reads this field either (a dead option there too).
+                "CtrlChg" => {}
+                "RPN_NRPN" => self.play_from.rpn_nrpn = value != 0,
+                "Wait" => self.play_from.wait_time = value,
+                other => return Err(MmlError::new(line, format!("\"{other}\"は未定義です"))),
+            }
+            return Ok(());
+        }
+        cur.eat('=');
+        cur.skip_spaces();
+        if !cur.eat('(') {
+            return Err(MmlError::new(line, "PlayFromには時間を指定してください"));
+        }
+        let body = cur
+            .read_balanced('(', ')')
+            .ok_or_else(|| MmlError::new(line, "PlayFromの括弧が閉じていません"))?;
+        self.play_from.from_pos = self.time_value(&body, line)?;
+        Ok(())
+    }
+
+    /// `PlayTo(time)` — where a partial render should stop.
+    fn play_to_command(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        cur.skip_spaces();
+        cur.eat('=');
+        cur.skip_spaces();
+        if !cur.eat('(') {
+            return Err(MmlError::new(line, "PlayToには時間を指定してください"));
+        }
+        let body = cur
+            .read_balanced('(', ')')
+            .ok_or_else(|| MmlError::new(line, "PlayToの括弧が閉じていません"))?;
+        self.play_from.to_pos = self.time_value(&body, line)?;
+        Ok(())
+    }
+
     /// `Include(file)` — pull in a definition file through the resolver.
     fn include(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
@@ -1509,6 +1709,8 @@ impl<'a> Compiler<'a> {
             "Include" | "INCLUDE" => self.include(cur),
             "KeyFlag" => self.key_flag(cur),
             "Div" | "DIV" => self.div(cur),
+            "PlayFrom" => self.play_from_command(cur, line),
+            "PlayTo" => self.play_to_command(cur, line),
             "Cresc" | "CRESC" => self.cresc(cur, 40, 127, line),
             "Decresc" | "DECRESC" => self.cresc(cur, 127, 40, line),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
@@ -2849,6 +3051,33 @@ fn builtin_variables() -> Variables {
     variables.insert("on".to_string(), Value::Int(1));
     variables.insert("off".to_string(), Value::Int(0));
     variables
+}
+
+/// `PlayFrom`/`PlayTo`'s settings, applied once after the whole song is
+/// compiled. Defaults match `TSmfPlayFrom.Create` in `smf_types.pas`
+/// (`FromPos`/`ToPos` at -1 mean "unset").
+#[derive(Debug, Clone)]
+struct PlayFromSpec {
+    from_pos: i64,
+    to_pos: i64,
+    wait_time: i64,
+    sysex: bool,
+    /// Parsed for compatibility; RPN/NRPN reconstruction at the cut point is
+    /// not implemented (see spec/10-compatibility.md), so this has no effect.
+    #[allow(dead_code)]
+    rpn_nrpn: bool,
+}
+
+impl Default for PlayFromSpec {
+    fn default() -> Self {
+        Self {
+            from_pos: -1,
+            to_pos: -1,
+            wait_time: 192,
+            sysex: false,
+            rpn_nrpn: true,
+        }
+    }
 }
 
 /// Where a function's return value lives while it runs. `Result` is a

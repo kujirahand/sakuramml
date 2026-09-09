@@ -286,7 +286,9 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
    括弧形式`Cresc(len,v1,v2)`が値を無視するバグがあると判明（`=`形式は正常）。
    ストトンの「大きく」「小さく」は常に`=`形式に展開されるため実害はなく、
    バグごと再現した（詳細は`spec/10-compatibility.md`）。
-2. `PlayFrom`/`PlayTo`（sakura2.mml）— 演奏開始位置の指定。
+2. ~~`PlayFrom`/`PlayTo`~~ 完了。実測の結果、保存時の後処理（間引き・巻き戻し・
+   状態復元）と判明。ソース中の記述位置は結果に影響しない。RPN/NRPN再構成のみ
+   簡略化（未実装、詳細は`spec/10-compatibility.md`）。sakura2.mmlが通過。
 3. 音長の`-`記法（seija.mml、230.mml）。`r-2.` のような負値付き音長で、
    Pascal版の挙動が特異（時刻が戻る）。要調査。
 4. `Stretch`、`Solo`/`Mute`/`TrackMute`、`DeleteCC`/`CCMute`

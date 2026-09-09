@@ -1142,3 +1142,83 @@ fn cresc_does_not_advance_the_time_pointer() {
     };
     assert_eq!(note_bytes(&with_cresc.smf), note_bytes(&without.smf));
 }
+
+// --- PlayFrom / PlayTo ---
+
+/// `PlayFrom(1:1:0)` — the common "start from the beginning" idiom — resolves
+/// to position 0, which the Pascal build treats as a genuine no-op: the whole
+/// post-process only runs when `FromPos > 0` or `ToPos > 0`.
+#[test]
+fn play_from_the_start_is_a_no_op() {
+    assert_same_bytes("PlayFrom(1:1:0) c", "c");
+}
+
+/// A note before the cut is discarded; one that straddles or follows it is
+/// kept and shifted back — by `time - fromPos + waitTime`, not simply
+/// `time - fromPos`. `waitTime` defaults to 192 ticks, room for the
+/// reconstructed state PlayFrom writes ahead of the first surviving note.
+#[test]
+fn play_from_discards_and_shifts() {
+    assert_golden(
+        "c PlayFrom(96) d",
+        "4d546864000000060001000100604d54726b0000000d8140903e644b803e6400ff2f00",
+    );
+}
+
+/// Where in the source `PlayFrom` appears makes no difference: it is applied
+/// once, after the whole song is compiled, exactly as the Pascal build
+/// applies it at save time rather than as the source is read.
+#[test]
+fn play_from_position_in_source_does_not_matter() {
+    assert_same_bytes("c PlayFrom(96) d", "PlayFrom(96) c d");
+}
+
+/// A track `PlayFrom` trims to nothing is still written out, as an empty
+/// MTrk — it was used, even though nothing survived the cut.
+#[test]
+fn play_from_can_trim_a_track_to_nothing() {
+    assert_golden(
+        "PlayFrom(96) c",
+        "4d546864000000060001000100604d54726b0000000400ff2f00",
+    );
+}
+
+/// `PlayTo` drops the trailing events at or after the cut, without touching
+/// anything at the start — usable on its own, with no `PlayFrom`.
+#[test]
+fn play_to_trims_the_end() {
+    assert_golden(
+        "PlayTo(200) c d e f",
+        "4d546864000000060001000100604d54726b000000198141903c644b803c6415903e644b803e64159040\
+         6400ff2f00",
+    );
+}
+
+/// A control change, pitch bend and tempo in effect just before the cut are
+/// all reconstructed and written back in, so a note that survives still
+/// sounds the way it would have without the cut.
+#[test]
+fn play_from_reconstructs_state_across_the_cut() {
+    assert_golden(
+        "y10,64 c PlayFrom(96) d",
+        "4d546864000000060001000100604d54726b0000001100b00a408140903e644b803e6400ff2f00",
+    );
+    assert_golden(
+        "p%1000 c PlayFrom(96) d",
+        "4d546864000000060001000100604d54726b0000001100e068478140903e644b803e6400ff2f00",
+    );
+    assert_golden(
+        "Tempo=140 c PlayFrom(96) d",
+        "4d546864000000060001000100604d54726b0000001400ff5103068a1b8140903e644b803e6400ff2f00",
+    );
+}
+
+/// `.Wait` changes the gap left for the reconstructed state — small enough
+/// here that the surviving note starts before its original position.
+#[test]
+fn play_from_wait_option_changes_the_gap() {
+    assert_golden(
+        "PlayFrom.Wait(48) c d PlayFrom(96) e",
+        "4d546864000000060001000100604d54726b0000001430903e644b803e64159040644b80406400ff2f00",
+    );
+}
