@@ -1843,7 +1843,7 @@ impl<'a> Compiler<'a> {
     fn repeat(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         cur.skip_spaces();
-        let count = cur.read_int().unwrap_or(2);
+        let count = self.read_number(cur)?.unwrap_or(2);
         let body = cur
             .read_balanced('[', ']')
             .ok_or_else(|| MmlError::new(line, "ループが ] で閉じられていません"))?;
@@ -1963,7 +1963,14 @@ impl<'a> Compiler<'a> {
     /// `y(n),(value)` — write a control change by number.
     fn control_change_direct(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let args = self.read_args(cur, 2)?;
+        let mut args = self.read_args(cur, 2)?;
+        // `y0((value))` — the value may follow the number without a comma.
+        if args.len() == 1 {
+            cur.skip_spaces();
+            if let Some(value) = self.read_number(cur)? {
+                args.push(value);
+            }
+        }
         if args.len() < 2 {
             return Err(MmlError::new(
                 line,
@@ -2033,7 +2040,12 @@ impl<'a> Compiler<'a> {
         let parenthesised = cur.eat('(');
         let mut args = Vec::new();
         loop {
-            cur.skip_spaces();
+            // Inside parentheses a list may run over several lines.
+            if parenthesised {
+                cur.skip_trivia();
+            } else {
+                cur.skip_spaces();
+            }
             let value = if assigned && !parenthesised {
                 // `Voice=Vo` — a bare term, which may be a variable or a call.
                 let line = cur.line();
@@ -2071,12 +2083,20 @@ impl<'a> Compiler<'a> {
             };
             let Some(value) = value else { break };
             args.push(value);
-            cur.skip_spaces();
+            if parenthesised {
+                cur.skip_trivia();
+            } else {
+                cur.skip_spaces();
+            }
             if args.len() >= max || !cur.eat(',') {
                 break;
             }
         }
-        cur.skip_spaces();
+        if parenthesised {
+            cur.skip_trivia();
+        } else {
+            cur.skip_spaces();
+        }
         if parenthesised && !cur.eat(')') {
             return Err(MmlError::new(cur.line(), "引数の括弧が閉じられていません"));
         }
@@ -2251,7 +2271,7 @@ impl<'a> Compiler<'a> {
         let gate_value = self.spread(OnNoteTarget::Gate, gate_value);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
-        let gate = if self.track().gate_in_steps {
+        let gate = if options.gate_in_steps || self.track().gate_in_steps {
             (gate_value - 1).max(1)
         } else {
             gate_ticks_scaled(length, gate_value, q_max)
@@ -2295,8 +2315,9 @@ impl<'a> Compiler<'a> {
         let mut options = NoteOptions::default();
         let mut length = self.read_length(cur);
 
-        // Preserve the parenthesised form accepted by the Rust port, while
-        // also supporting Sakura's native `c4,80,100,0,5` form.
+        // The two forms differ, as they do in the Pascal build: `c(4,...)`
+        // sets only the length and ignores the rest, while `c4,80,100,0,5`
+        // sets length, gate, velocity, timing and octave in turn.
         if cur.peek() == Some('(') {
             let line = cur.line();
             cur.advance();
@@ -2306,7 +2327,16 @@ impl<'a> Compiler<'a> {
                 if cur.eat(')') {
                     break;
                 }
-                self.read_note_option(cur, index, &mut length, &mut options)?;
+                if index == 0 {
+                    self.read_note_option(cur, index, &mut length, &mut options)?;
+                } else {
+                    // Skip it: past the length these values have no effect,
+                    // and they may be written in forms a number parser would
+                    // reject (`c(4,%10)`).
+                    while !matches!(cur.peek(), Some(',') | Some(')') | None) {
+                        cur.advance();
+                    }
+                }
                 cur.skip_spaces();
                 if cur.eat(')') {
                     break;
@@ -2334,6 +2364,13 @@ impl<'a> Compiler<'a> {
         length: &mut Option<i64>,
         options: &mut NoteOptions,
     ) -> Result<()> {
+        // A `%` on the gate means it is given in ticks, as `q%n` does. Only
+        // the comma form accepts it; `c(4,%10)` ignores everything past the
+        // length, so this is never reached from there.
+        let in_steps = index == 1 && cur.peek() == Some('%');
+        if in_steps {
+            cur.advance();
+        }
         let value = if index == 0 {
             self.read_length(cur)
         } else if matches!(cur.peek(), Some(',') | Some(')') | None) {
@@ -2341,6 +2378,9 @@ impl<'a> Compiler<'a> {
         } else {
             self.read_number(cur)?
         };
+        if in_steps {
+            options.gate_in_steps = true;
+        }
         match (index, value) {
             (0, Some(v)) => *length = Some(v),
             (1, Some(v)) => options.gate_percent = Some(v),
@@ -2356,15 +2396,27 @@ impl<'a> Compiler<'a> {
     fn read_length(&mut self, cur: &mut Cursor) -> Option<i64> {
         let mut total: Option<i64> = None;
         loop {
+            // `*` introduces a length that may be an expression: `r*%(Delay)`
+            // is a rest of `Delay` ticks, `c*3` a third note. Only there does
+            // a bare `(` mean a length — elsewhere it opens note options.
+            let starred = cur.peek() == Some('*');
+            if starred {
+                cur.advance();
+            }
             let part = if cur.peek() == Some('%') {
                 cur.advance();
-                cur.read_int()
+                self.read_number(cur).ok().flatten()
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
                 let n = cur.read_int()?;
                 if n <= 0 {
                     Some(0)
                 } else {
                     Some(self.timebase * 4 / n)
+                }
+            } else if starred && cur.peek() == Some('(') {
+                match self.read_number(cur).ok().flatten() {
+                    Some(n) if n > 0 => Some(self.timebase * 4 / n),
+                    other => other,
                 }
             } else if total.is_some() && cur.peek() == Some('.') {
                 Some(0)
@@ -2738,6 +2790,8 @@ fn split_loop_break(body: &str) -> (&str, Option<&str>) {
 #[derive(Debug, Default, Clone, Copy)]
 struct NoteOptions {
     gate_percent: Option<i64>,
+    /// The gate was written `%n`, so it is a tick count.
+    gate_in_steps: bool,
     velocity: Option<i64>,
     timing: Option<i64>,
     octave: Option<i64>,

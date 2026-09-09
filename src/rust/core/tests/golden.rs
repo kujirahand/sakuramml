@@ -740,9 +740,15 @@ fn on_note_accepts_the_equals_form() {
     assert_same_bytes("v.onNote=120,50 cd", "v.onNote(120,50) cd");
 }
 
+/// The two note-option forms differ, which is easy to get backwards: `c(4,...)`
+/// sets only the length, so a `.onNote` velocity still applies, while the
+/// comma form `c4,80,64` sets the velocity itself and wins.
 #[test]
-fn a_note_option_still_wins_over_on_note() {
-    assert_same_bytes("v.onNote(120,50) c(4,80,64)", "c(4,80,64)");
+fn the_comma_form_sets_options_and_the_bracket_form_only_a_length() {
+    assert_same_bytes("c(4,80,64)", "c");
+    assert_same_bytes("c(4,30)", "c4");
+    assert_same_bytes("v.onNote(120,50) c(4,80,64)", "v120 c");
+    assert_same_bytes("v.onNote(120,50) c4,80,64", "q80 v64 c");
 }
 
 /// A ramp belongs on a control change; on a note attribute it warns rather
@@ -1007,4 +1013,35 @@ fn negative_values_in_any_form() {
     assert_same_bytes("p%-$2000 c", "p%-8192 c");
     assert_same_bytes("p%$1000 c", "p%4096 c");
     assert_same_bytes("System.Keyshift=-(2) c", "System.Keyshift=-2 c");
+}
+
+// --- lengths written as expressions, and multi-line argument lists ---
+
+/// `*` introduces a length that may be an expression, so a rest can last a
+/// variable number of ticks — which is how Include/bend.h delays its bends.
+#[test]
+fn a_length_may_be_an_expression() {
+    assert_same_bytes("r*%(48) c", "r%48 c");
+    assert_same_bytes("Int d=48; r*%(d) c", "r%48 c");
+    // `c*3` is a third note, the same as writing the length plainly.
+    assert_same_bytes("c*3", "c3");
+    assert_same_bytes("c*2", "c2");
+    // It ignores the current default length, as a written length does.
+    assert_same_bytes("l8 c*3", "c3");
+}
+
+#[test]
+fn a_loop_count_may_be_an_expression() {
+    assert_same_bytes("Int i=2; [(i) c]", "[2 c]");
+}
+
+#[test]
+fn an_argument_list_may_span_lines() {
+    assert_same_bytes("Array a=(1,\n2,3); n((a(0)+59))", "n60");
+}
+
+/// `y` takes its value in parentheses without a comma, as 169.mml writes it.
+#[test]
+fn a_control_change_value_may_follow_without_a_comma() {
+    assert_same_bytes("Int b=10; y0((b)) c", "y0,10 c");
 }
