@@ -1,0 +1,81 @@
+# コマンド索引
+
+この索引は現行 Rust で受理する主要コマンドを中心にしています。従来版の全コマンド名と旧 HTML ページ番号は
+`src/rust/SPEC.md` を参照してください。状態の意味は [互換性表](10-compatibility.md) に従います。
+
+## 音符と構造
+
+| コマンド | 書式 | 状態 | 詳細 |
+|---|---|---|---|
+| `a`〜`g` | `c[length][,q,v,t,o]` | 実装済み | [02](02-notes.md) |
+| `n` | `n(note)[,length,q,v,t,o]` | 実装済み | [02](02-notes.md) |
+| `r` | `r[length]` | 実装済み | [02](02-notes.md) |
+| `^` | `^[length]` | 実装済み | [02](02-notes.md) |
+| `o` | `o(value)` | 実装済み | [02](02-notes.md) |
+| `l` | `l(length)` | 実装済み | [02](02-notes.md) |
+| `q` | `q(value)` | 実装済み | [02](02-notes.md) |
+| `v` | `v(value)` | 実装済み | [02](02-notes.md) |
+| `t` | `t(value)` | 実装済み | [02](02-notes.md) |
+| `Div` | `Div{mml}length` | 実装済み | [02](02-notes.md) |
+| `Sub` / `S` | `Sub{mml}` | 実装済み | [03](03-tracks-and-time.md) |
+| 反復 | `[count body:final]` | 実装済み | [06](06-scripting.md) |
+| 和音 | `'notes'length` | 実装済み | [02](02-notes.md) |
+
+## 時間とトラック
+
+| コマンド | 書式 | 状態 | 詳細 |
+|---|---|---|---|
+| `Track` / `TR` / `NowTrack` | `TR=n` | 実装済み | [03](03-tracks-and-time.md) |
+| `Channel` / `CH` | `CH=n` | 実装済み | [03](03-tracks-and-time.md) |
+| `TrackSync` | `TrackSync` | 実装済み | [03](03-tracks-and-time.md) |
+| `TimeBase` | `TimeBase=n` | 実装済み | [03](03-tracks-and-time.md) |
+| `TimeSignature` | `TimeSignature=n,d` | 実装済み | [03](03-tracks-and-time.md) |
+| `Time` | `Time(tick)` / `Time(m:b:s)` | 実装済み | [03](03-tracks-and-time.md) |
+| `Tempo` | `Tempo=bpm` | 実装済み | [09](09-smf.md) |
+| `TempoChange` | `TempoChange=bpm` | 一部 | [10](10-compatibility.md) |
+
+## MIDI イベント
+
+| コマンド | 書式 | 状態 | 詳細 |
+|---|---|---|---|
+| `Voice` / `@` | `@voice[,msb,lsb]` | 実装済み | [04](04-midi-control.md) |
+| `y` | `y(cc,value)` / `ycc,value` | 実装済み | [04](04-midi-control.md) |
+| 名前付き CC | `P(value)`, `EP(value)` など | 実装済み | [04](04-midi-control.md) |
+| `p` | `p(value)` / `p%(value)` | 実装済み | [04](04-midi-control.md) |
+| `PitchBend` | `PitchBend(value)` | 実装済み | [04](04-midi-control.md) |
+| `RPN` / `NRPN` | `RPN(msb,lsb,data)` | 実装済み | [04](04-midi-control.md) |
+| `SysEx` | `SysEx(...)` / `SysEx$=...;` | 実装済み | [04](04-midi-control.md) |
+| `ResetGM/GS/XG` | `ResetGM` | 実装済み | [04](04-midi-control.md) |
+
+## メタ、キー、外部定義
+
+| コマンド | 書式 | 状態 | 詳細 |
+|---|---|---|---|
+| `TrackName` | `TrackName={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `Copyright` | `Copyright={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `MetaText` / `Text` | `MetaText={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `Lyric` | `Lyric={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `Marker` | `Marker={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `CuePoint` | `CuePoint={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `InstrumentName` | `InstrumentName={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `Key` / `KeyShift` | `Key=n` | 実装済み | [02](02-notes.md) |
+| `KeyFlag` | `KeyFlag+(notes)` / `=(...)` | 実装済み | [02](02-notes.md) |
+| `Include` | `Include(file)` | 実装済み | [07](07-macros-and-includes.md) |
+
+## スクリプトとマクロ
+
+| コマンド | 書式 | 状態 | 詳細 |
+|---|---|---|---|
+| `Int` / `Integer` | `Int name=value` | 実装済み | [06](06-scripting.md) |
+| `Str` | `Str name={"text"}` | 実装済み | [06](06-scripting.md) |
+| `Array` | `Array name=(...)` | 実装済み | [06](06-scripting.md) |
+| `If` / `Else` | `If(cond){...} Else {...}` | 実装済み | [06](06-scripting.md) |
+| `While` | `While(cond){...}` | 実装済み | [06](06-scripting.md) |
+| `For` | `For(init;cond;next){...}` | 実装済み | [06](06-scripting.md) |
+| `Exit` | `Exit` | 実装済み | [06](06-scripting.md) |
+| `Function` | `Function name(params){...}` | 実装済み | [06](06-scripting.md) |
+| `Result` | `Result=value` | 実装済み | [06](06-scripting.md) |
+| `Print` | `Print(value)` | 実装済み | [06](06-scripting.md) |
+| リズム | `$x{mml}`, `Rythm{...}` | 実装済み | [07](07-macros-and-includes.md) |
+| ストトン定義 | `~{name}={mml}` | 実装済み | [07](07-macros-and-includes.md) |
+| 文字列マクロ | `#name={"mml"}` | 実装済み | [07](07-macros-and-includes.md) |
