@@ -208,3 +208,38 @@ impl IncludeResolver for FileIncludes {
             .find_map(|path| std::fs::read(path).ok())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_inline_source_and_output() {
+        let args = vec!["-e".into(), "cde".into(), "song.mid".into()];
+        let options = match parse_args(&args) {
+            Ok(options) => options,
+            Err(_) => panic!("inline arguments should parse"),
+        };
+        assert!(matches!(options.source, Source::Inline(ref code) if code == "cde"));
+        assert_eq!(options.output, Some(PathBuf::from("song.mid")));
+        assert!(!options.pause);
+    }
+
+    #[test]
+    fn parses_file_source_output_and_pause() {
+        let args = vec!["input.mml".into(), "output.mid".into(), "-pause".into()];
+        let options = match parse_args(&args) {
+            Ok(options) => options,
+            Err(_) => panic!("file arguments should parse"),
+        };
+        assert!(matches!(options.source, Source::File(ref path) if path == Path::new("input.mml")));
+        assert_eq!(options.output, Some(PathBuf::from("output.mid")));
+        assert!(options.pause);
+    }
+
+    #[test]
+    fn missing_inline_source_is_an_error() {
+        let args = vec!["-e".into()];
+        assert!(matches!(parse_args(&args), Err(Failure::Error(_))));
+    }
+}

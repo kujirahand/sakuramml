@@ -268,6 +268,12 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
 4. `Div`（連符）、`Sub`、`Play`、`Stretch`
 5. 先行指定（`.onNote`、`.onTime`、`.onCycle`等）と`Cresc`/`Decresc`
 6. 組み込み関数（21件）
+7. 巨大入力・巨大な数値に対する資源制限とSMF範囲検証
+   - `[...]`、`For`、`While`、再帰を含むコンパイル全体で、生成イベント数または推定MIDIバイト数の
+     共通予算を設け、ブラウザのCPU枯渇・OOMを防ぐ。
+   - `Time`、音長、`TimeBase`などの時刻演算をchecked演算にし、SMFのdivision（15-bit）と
+     デルタタイムVLQ（最大`0x0fffffff`）を超える値はコンパイルエラーにする。
+   - CLIとWASMの双方で、境界値は成功し、上限超過はpanicせず診断を返すテストを追加する。
 
 テスト戦略は変更なし: 新コマンドは必ずPascal版の出力を実測し、
 `core/tests/golden.rs`にバイト列を固定してから実装する。

@@ -100,3 +100,18 @@ pub fn compile_mml(source: &str) -> Result<CompileResult, JsError> {
 pub fn version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn wrapper_compiles_mml_on_the_host() {
+        let result = match compile_mml("Print(1) c") {
+            Ok(result) => result,
+            Err(_) => panic!("WASM wrapper should return a successful result"),
+        };
+        assert_eq!(&result.midi[..4], b"MThd");
+        assert_eq!(result.messages, vec!["1"]);
+    }
+}

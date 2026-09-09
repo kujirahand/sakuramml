@@ -40,6 +40,7 @@ struct TrackState {
     length: i64,
     velocity: i64,
     gate_percent: i64,
+    timing: i64,
     events: Vec<Event>,
     /// Time at which the most recent note ended, so `^` can extend it.
     last_note: Option<LastNote>,
@@ -63,6 +64,7 @@ impl TrackState {
             length: timebase, // l4 at the default timebase
             velocity: 100,
             gate_percent: 80,
+            timing: 0,
             events: Vec::new(),
             last_note: None,
             octave_once: 0,
@@ -291,6 +293,12 @@ impl<'a> Compiler<'a> {
                 cur.advance();
                 let value = self.expect_int(cur, "v")?;
                 self.track().velocity = value;
+                Ok(())
+            }
+            't' => {
+                cur.advance();
+                let value = self.expect_int(cur, "t")?;
+                self.track().timing = value;
                 Ok(())
             }
             '@' => {
@@ -559,7 +567,12 @@ impl<'a> Compiler<'a> {
             if cur.eat(',') {
                 continue;
             }
-            cur.eat(')');
+            if !cur.eat(')') {
+                return Err(MmlError::new(
+                    cur.line(),
+                    "関数呼び出しの括弧が閉じられていません",
+                ));
+            }
             return Ok(args);
         }
     }
@@ -1040,7 +1053,15 @@ impl<'a> Compiler<'a> {
 
     fn eval_source(&mut self, src: &str, line: usize) -> Result<Value> {
         let mut cur = Cursor::with_line(src.trim(), line);
-        expr::eval(&mut cur, self)
+        let value = expr::eval(&mut cur, self)?;
+        cur.skip_trivia();
+        if !cur.is_eof() {
+            return Err(MmlError::new(
+                cur.line(),
+                "式の末尾に解釈できない文字があります",
+            ));
+        }
+        Ok(value)
     }
 
     /// Read a parenthesised condition and evaluate it.
@@ -1154,7 +1175,9 @@ impl<'a> Compiler<'a> {
         }
         if parenthesised {
             cur.skip_spaces();
-            cur.eat(')');
+            if !cur.eat(')') {
+                return Err(MmlError::new(line, "SysExの括弧が閉じられていません"));
+            }
         }
         if values.is_empty() {
             return Err(MmlError::new(line, "SysExには値を指定してください"));
@@ -1312,8 +1335,8 @@ impl<'a> Compiler<'a> {
             }
         }
         cur.skip_spaces();
-        if parenthesised {
-            cur.eat(')');
+        if parenthesised && !cur.eat(')') {
+            return Err(MmlError::new(cur.line(), "引数の括弧が閉じられていません"));
         }
         Ok(args)
     }
@@ -1370,8 +1393,11 @@ impl<'a> Compiler<'a> {
             }
         }
         cur.skip_spaces();
-        if closing != '\0' {
-            cur.eat(closing);
+        if closing != '\0' && !cur.eat(closing) {
+            return Err(MmlError::new(
+                line,
+                format!("文字列が {closing} で閉じられていません"),
+            ));
         }
         Ok(text)
     }
@@ -1394,10 +1420,10 @@ impl<'a> Compiler<'a> {
             accidental = self.key_flags[class];
         }
 
-        let (length, options) = self.read_note_options(cur);
+        let (length, options) = self.read_note_options(cur)?;
         let octave = {
             let track = self.track();
-            track.octave + std::mem::take(&mut track.octave_once)
+            options.octave.unwrap_or(track.octave) + std::mem::take(&mut track.octave_once)
         };
         let note_no = octave * 12 + base + accidental + self.key_shift;
         self.write_note(note_no, length, options, line)
@@ -1410,12 +1436,12 @@ impl<'a> Compiler<'a> {
         let note_no = self.expect_int_arg(cur, "nコマンドのノート番号")?;
         // `n60,` — the Pascal syntax allows a comma before the options.
         cur.eat(',');
-        let (length, options) = self.read_note_options(cur);
+        let (length, options) = self.read_note_options(cur)?;
         self.write_note(note_no + self.key_shift, length, options, line)
     }
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {
-        let (length, _) = self.read_note_options(cur);
+        let (length, _) = self.read_note_options(cur)?;
         let length = length.unwrap_or_else(|| self.track().length);
         let track = self.track();
         track.time += length;
@@ -1425,7 +1451,7 @@ impl<'a> Compiler<'a> {
 
     /// `^` extends the previous note; with no preceding note it is a rest.
     fn tie(&mut self, cur: &mut Cursor) -> Result<()> {
-        let (length, _) = self.read_note_options(cur);
+        let (length, _) = self.read_note_options(cur)?;
         let length = length.unwrap_or_else(|| self.track().length);
         let gate_percent = self.track().gate_percent;
         let q_max = self.q_max;
@@ -1465,7 +1491,8 @@ impl<'a> Compiler<'a> {
         let gate = gate_ticks_scaled(length, gate_value, q_max);
         let track = self.track();
 
-        let start = track.time;
+        let time = track.time;
+        let start = time + options.timing.unwrap_or(track.timing);
         let channel = track.channel;
         track
             .events
@@ -1480,16 +1507,19 @@ impl<'a> Compiler<'a> {
             off_index: track.events.len() - 1,
             start,
         });
-        track.time = start + length;
+        track.time = time + length;
         Ok(())
     }
 
     /// Note suffixes: a length spec and/or `(l,q,v,t,o)` options.
-    fn read_note_options(&mut self, cur: &mut Cursor) -> (Option<i64>, NoteOptions) {
+    fn read_note_options(&mut self, cur: &mut Cursor) -> Result<(Option<i64>, NoteOptions)> {
         let mut options = NoteOptions::default();
         let mut length = self.read_length(cur);
 
+        // Preserve the parenthesised form accepted by the Rust port, while
+        // also supporting Sakura's native `c4,80,100,0,5` form.
         if cur.peek() == Some('(') {
+            let line = cur.line();
             cur.advance();
             let mut index = 0;
             loop {
@@ -1497,25 +1527,50 @@ impl<'a> Compiler<'a> {
                 if cur.eat(')') {
                     break;
                 }
-                let value = if index == 0 {
-                    self.read_length(cur)
-                } else {
-                    cur.read_int()
-                };
-                match (index, value) {
-                    (0, Some(v)) => length = Some(v),
-                    (1, Some(v)) => options.gate_percent = Some(v),
-                    (2, Some(v)) => options.velocity = Some(v),
-                    _ => {}
-                }
+                self.read_note_option(cur, index, &mut length, &mut options)?;
                 cur.skip_spaces();
-                if !cur.eat(',') && !cur.eat(')') {
+                if cur.eat(')') {
                     break;
+                }
+                if !cur.eat(',') {
+                    return Err(MmlError::new(line, "音符引数の括弧が閉じられていません"));
                 }
                 index += 1;
             }
+        } else {
+            let mut index = 1;
+            while index <= 4 && cur.eat(',') {
+                cur.skip_spaces();
+                self.read_note_option(cur, index, &mut length, &mut options)?;
+                index += 1;
+            }
         }
-        (length, options)
+        Ok((length, options))
+    }
+
+    fn read_note_option(
+        &mut self,
+        cur: &mut Cursor,
+        index: usize,
+        length: &mut Option<i64>,
+        options: &mut NoteOptions,
+    ) -> Result<()> {
+        let value = if index == 0 {
+            self.read_length(cur)
+        } else if matches!(cur.peek(), Some(',') | Some(')') | None) {
+            None
+        } else {
+            self.read_number(cur)?
+        };
+        match (index, value) {
+            (0, Some(v)) => *length = Some(v),
+            (1, Some(v)) => options.gate_percent = Some(v),
+            (2, Some(v)) => options.velocity = Some(v),
+            (3, Some(v)) => options.timing = Some(v),
+            (4, Some(v)) => options.octave = Some(v),
+            _ => {}
+        }
+        Ok(())
     }
 
     /// A length spec: `4`, `8.`, `%48` (raw ticks), or a `^`-joined sum.
@@ -1774,6 +1829,8 @@ fn split_loop_break(body: &str) -> (&str, Option<&str>) {
 struct NoteOptions {
     gate_percent: Option<i64>,
     velocity: Option<i64>,
+    timing: Option<i64>,
+    octave: Option<i64>,
 }
 
 /// Sounding length for a note: `trunc(length * q / 100) - 1`, at least 1 tick.

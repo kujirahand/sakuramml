@@ -80,6 +80,14 @@ fn velocity() {
 }
 
 #[test]
+fn note_arguments_follow_lqvto_order() {
+    assert_same_bytes("c4,50,40", "l4 q50 v40 c");
+    assert_same_bytes("c4,,,48,6", "t48 o6 c");
+    // Per-note values affect only this note; the following note uses track state.
+    assert_same_bytes("c4,50,40,48,6 c", "t48 o6 q50 v40 c t0 o5 q80 v100 c");
+}
+
+#[test]
 fn octave_and_accidentals() {
     assert_golden(
         "o4 c",

@@ -133,6 +133,21 @@ fn division_by_zero_is_an_error_not_a_panic() {
     assert_error_contains("n((1%0))", "0で割る");
 }
 
+#[test]
+fn integer_overflow_is_an_error_not_a_panic() {
+    assert_error_contains("Print((9223372036854775807+1))", "範囲");
+    assert_error_contains("Print(((-9223372036854775807-1)/-1))", "範囲");
+}
+
+#[test]
+fn malformed_delimiters_and_trailing_expression_text_are_errors() {
+    assert_error_contains("Voice(1 c", "括弧");
+    assert_error_contains("TrackName={\"x\" c", "閉じられていません");
+    assert_error_contains("c(4,80,100", "括弧");
+    assert_error_contains("Print(Random(1,2)", "括弧");
+    assert_error_contains("If(1 xyz){c}", "式の末尾");
+}
+
 // --- control flow ----------------------------------------------------------
 
 #[test]

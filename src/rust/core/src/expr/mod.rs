@@ -191,21 +191,30 @@ fn parse_additive(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> 
         cur.advance();
         let right = parse_multiplicative(cur, ctx)?;
 
-        left = match (&left, op) {
-            // `+` concatenates when either side is a string.
-            (Value::Str(s), '+') => Value::Str(format!("{s}{}", right.as_str())),
-            _ => {
-                if op == '+' {
-                    if let Value::Str(s) = &right {
-                        Value::Str(format!("{}{s}", left.as_str()))
+        left =
+            match (&left, op) {
+                // `+` concatenates when either side is a string.
+                (Value::Str(s), '+') => Value::Str(format!("{s}{}", right.as_str())),
+                _ => {
+                    if op == '+' {
+                        if let Value::Str(s) = &right {
+                            Value::Str(format!("{}{s}", left.as_str()))
+                        } else {
+                            let a = left.as_int(line)?;
+                            let b = right.as_int(line)?;
+                            Value::Int(a.checked_add(b).ok_or_else(|| {
+                                MmlError::new(line, "整数の加算結果が範囲を超えました")
+                            })?)
+                        }
                     } else {
-                        Value::Int(left.as_int(line)? + right.as_int(line)?)
+                        let a = left.as_int(line)?;
+                        let b = right.as_int(line)?;
+                        Value::Int(a.checked_sub(b).ok_or_else(|| {
+                            MmlError::new(line, "整数の減算結果が範囲を超えました")
+                        })?)
                     }
-                } else {
-                    Value::Int(left.as_int(line)? - right.as_int(line)?)
                 }
-            }
-        };
+            };
     }
 }
 
@@ -224,10 +233,16 @@ fn parse_multiplicative(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<V
         let right = parse_unary(cur, ctx)?;
         let (a, b) = (left.as_int(line)?, right.as_int(line)?);
         let value = match op {
-            '*' => a.wrapping_mul(b),
+            '*' => a
+                .checked_mul(b)
+                .ok_or_else(|| MmlError::new(line, "整数の乗算結果が範囲を超えました"))?,
             _ if b == 0 => return Err(MmlError::new(line, "0で割ることはできません")),
-            '/' => a / b,
-            _ => a % b,
+            '/' => a
+                .checked_div(b)
+                .ok_or_else(|| MmlError::new(line, "整数の除算結果が範囲を超えました"))?,
+            _ => a
+                .checked_rem(b)
+                .ok_or_else(|| MmlError::new(line, "整数の剰余演算結果が範囲を超えました"))?,
         };
         left = Value::Int(value);
     }
@@ -240,7 +255,9 @@ fn parse_unary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
         Some('-') => {
             cur.advance();
             let value = parse_unary(cur, ctx)?;
-            Ok(Value::Int(-value.as_int(line)?))
+            Ok(Value::Int(value.as_int(line)?.checked_neg().ok_or_else(
+                || MmlError::new(line, "整数の符号反転結果が範囲を超えました"),
+            )?))
         }
         Some('+') => {
             cur.advance();
@@ -365,7 +382,12 @@ fn parse_call_args(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Vec<Va
         if cur.eat(',') {
             continue;
         }
-        cur.eat(')');
+        if !cur.eat(')') {
+            return Err(MmlError::new(
+                cur.line(),
+                "関数呼び出しの括弧が閉じられていません",
+            ));
+        }
         return Ok(args);
     }
 }
@@ -438,6 +460,16 @@ mod tests {
     fn division_by_zero_is_an_error_not_a_panic() {
         assert!(eval_str("1/0", &Variables::new()).is_err());
         assert!(eval_str("1%0", &Variables::new()).is_err());
+    }
+
+    #[test]
+    fn integer_overflow_is_an_error_not_a_panic() {
+        let vars = Variables::new();
+        assert!(eval_str("9223372036854775807+1", &vars).is_err());
+        assert!(eval_str("-9223372036854775807-2", &vars).is_err());
+        assert!(eval_str("9223372036854775807*2", &vars).is_err());
+        assert!(eval_str("(-9223372036854775807-1)/-1", &vars).is_err());
+        assert!(eval_str("-(-9223372036854775807-1)", &vars).is_err());
     }
 
     #[test]
