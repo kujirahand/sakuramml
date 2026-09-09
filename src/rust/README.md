@@ -80,11 +80,15 @@ Implemented:
 * `Include`, resolved through a caller-supplied [`IncludeResolver`]
 * `SysEx`, in both the `SysEx(...)` decimal form and the `SysEx$=...;` hex
   form, plus `$` hexadecimal literals anywhere a number is expected
+* built-in functions `Random`, `RandomSelect`, `SizeOf`, `StrToLen`, `HEX`,
+  `ASC`, `CHR`, `Step`, `VERSION`, and the `SoundType`/`on`/`off` variables.
+  Randomness comes from a seeded generator in the crate (`System.RandomSeed`
+  sets it), so compiles are reproducible and WASM needs no entropy source
 
-Still to port: rhythm macros (`$`/`~`), `Div`, `Sub`, `Play`, `DirectSMF`,
-the 先行指定 (`.onNote`) family, and assignment to an undeclared variable
-(`SoundType = 0;` in `Include/stdmsg.h`, which the Pascal build accepts).
-Those are what the remaining `sample/*.mml` files need.
+Still to port, in the order the sample songs need them: rhythm macros (`$`
+definitions and `~` sutoton macros), `DirectSMF`, the 先行指定 (`.onNote`)
+family, the RPN wrapper commands (`PitchBendSensitivity` and friends), the
+`NoteNo`/`MML` functions, and `Div`/`Sub`/`Play`.
 
 `core/tests/script.rs` covers the scripting layer on its own: variables,
 expressions, control flow, functions, and the error cases that must not

@@ -93,6 +93,16 @@ pub fn eval(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     parse_or(cur, ctx)
 }
 
+/// Evaluate a single term — a number, a variable, a function call or a
+/// parenthesised expression — without consuming any binary operator.
+///
+/// This is what follows `=` in a command argument: the Pascal build accepts
+/// `Tempo=x` and `Tempo=Random(90,130)` but rejects `Tempo=100+20`, so the
+/// right-hand side is a term rather than a full expression.
+pub fn eval_term(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    parse_primary(cur, ctx)
+}
+
 fn parse_or(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let mut left = parse_and(cur, ctx)?;
     loop {

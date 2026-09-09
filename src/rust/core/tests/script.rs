@@ -330,3 +330,102 @@ fn scripts_work_with_sutoton_notation() {
     assert_same("Function f(){ドレミ} f", "cde");
     assert_same("テンポ120 Int x=60; n(x)", "Tempo=120 n60");
 }
+
+// --- built-in variables and the `=` argument form ---
+
+/// `SoundType` is a built-in variable (mml_base.pas registers it, along with
+/// `on` and `off`); assigning to an *undeclared* name stays an error, as it is
+/// in the Pascal build.
+#[test]
+fn builtin_variables() {
+    assert_same("SoundType=0; c", "c");
+    assert_same("If(SoundType==0){c}Else{d}", "c");
+    assert!(compile("undeclared=5; c").is_err());
+}
+
+/// After `=`, a named command takes a term — a variable or a call — but not a
+/// compound expression. The single-letter note attributes take neither, which
+/// is what keeps `v100 <c` meaning "velocity, then octave down".
+#[test]
+fn equals_form_accepts_a_variable_but_not_an_expression() {
+    assert_same("Int x=5; Tempo=x c", "Tempo=5 c");
+    assert_same("Int vo=5; Voice=vo c", "@5 c");
+    assert_same("Int x=60; n=x", "n60");
+
+    assert!(compile("Tempo=100+20 c").is_err());
+    assert!(compile("Int x=5; o=x c").is_err()); // `o` has no `=` form
+    assert!(compile("Int x=5; ox c").is_err());
+    assert_same("v100 <c", "v100 o4 c");
+}
+
+// --- built-in functions ---
+
+#[test]
+fn random_stays_within_its_range() {
+    // A single-value range is deterministic, so this pins an exact result.
+    assert_same("Tempo=Random(120,120) c", "Tempo=120 c");
+    assert_same("n(Random(60,60))", "n60");
+
+    // Over a real range, every draw must still land inside it.
+    for _ in 0..20 {
+        let out = compile("Int x; x=(Random(90,130)); Print((x))").unwrap();
+        let value: i64 = out.messages[0].parse().unwrap();
+        assert!((90..=130).contains(&value), "out of range: {value}");
+    }
+}
+
+/// Compiles are reproducible: the generator is seeded, not drawn from the OS,
+/// which also means WASM needs no randomness plumbing.
+#[test]
+fn random_is_reproducible_across_compiles() {
+    let script = "Int i; For(i=0;i<5;i=i+1){Print((Random(0,1000)))}";
+    let first = compile(script).unwrap().messages;
+    let second = compile(script).unwrap().messages;
+    assert_eq!(first, second);
+}
+
+#[test]
+fn random_seed_changes_the_sequence() {
+    let with_seed = |seed: i64| {
+        compile(&format!(
+            "System.RandomSeed={seed}; Int i; For(i=0;i<5;i=i+1){{Print((Random(0,1000)))}}"
+        ))
+        .unwrap()
+        .messages
+    };
+    assert_eq!(with_seed(1), with_seed(1));
+    assert_ne!(with_seed(1), with_seed(2));
+}
+
+#[test]
+fn random_select_picks_one_of_its_arguments() {
+    for _ in 0..20 {
+        let out = compile("Print((RandomSelect(10,20,30)))").unwrap();
+        assert!(["10", "20", "30"].contains(&out.messages[0].as_str()));
+    }
+}
+
+#[test]
+fn size_of_and_string_functions() {
+    let out = compile(r#"Array a=(1,2,3); Print((SizeOf(a))) Print((HEX(255))) Print((CHR(65)))"#)
+        .unwrap();
+    assert_eq!(out.messages, vec!["3", "FF", "A"]);
+
+    let out = compile(r#"Print((ASC({"A"})))"#).unwrap();
+    assert_eq!(out.messages, vec!["65"]);
+}
+
+/// `StrToLen(4)` is a quarter note in ticks — 96 at the default timebase.
+#[test]
+fn str_to_len_converts_note_lengths_to_ticks() {
+    let out = compile("Print((StrToLen(4))) Print((StrToLen(8)))").unwrap();
+    assert_eq!(out.messages, vec!["96", "48"]);
+}
+
+#[test]
+fn a_user_function_overrides_a_built_in_one() {
+    assert_same(
+        "Function Random(Int a,Int b){Result=60} n(Random(1,2))",
+        "n60",
+    );
+}

@@ -12,6 +12,7 @@ use crate::error::{MmlError, Result, Warning};
 use crate::expr::{self, EvalContext, Value, Variables};
 use crate::include::{IncludeResolver, NoIncludes};
 use crate::lexer::Cursor;
+use crate::rng::Rng;
 use crate::smf::{event, Event, Song, Track};
 
 /// Default division (ticks per quarter note).
@@ -96,6 +97,7 @@ pub struct Compiler<'a> {
     messages: Vec<String>,
     /// Set by `Exit` to unwind out of the enclosing loop.
     exiting: bool,
+    rng: Rng,
 }
 
 impl Default for Compiler<'_> {
@@ -113,7 +115,7 @@ impl<'a> Compiler<'a> {
             current: 1,
             warnings: Vec::new(),
             depth: 0,
-            variables: Variables::new(),
+            variables: builtin_variables(),
             functions: BTreeMap::new(),
             key_flags: [0; 7],
             key_shift: 0,
@@ -123,6 +125,7 @@ impl<'a> Compiler<'a> {
             time_signature: (4, 4),
             messages: Vec::new(),
             exiting: false,
+            rng: Rng::default(),
         }
     }
 
@@ -304,7 +307,7 @@ impl<'a> Compiler<'a> {
 
         match word.as_str() {
             "Tempo" | "TEMPO" | "TempoChange" => {
-                let bpm = self.expect_int(cur, &word)?;
+                let bpm = self.expect_int_arg(cur, &word)?;
                 if bpm <= 0 {
                     return Err(MmlError::new(line, "テンポには正の値を指定してください"));
                 }
@@ -314,7 +317,7 @@ impl<'a> Compiler<'a> {
                 Ok(())
             }
             "Track" | "TRACK" | "TR" | "NowTrack" => {
-                let no = self.expect_int(cur, &word)?;
+                let no = self.expect_int_arg(cur, &word)?;
                 self.current = no;
                 let timebase = self.timebase;
                 self.tracks
@@ -323,7 +326,7 @@ impl<'a> Compiler<'a> {
                 Ok(())
             }
             "Channel" | "CHANNEL" | "CH" => {
-                let no = self.expect_int(cur, &word)?;
+                let no = self.expect_int_arg(cur, &word)?;
                 if !(1..=16).contains(&no) {
                     return Err(MmlError::new(
                         line,
@@ -334,7 +337,7 @@ impl<'a> Compiler<'a> {
                 Ok(())
             }
             "TimeBase" | "TIMEBASE" | "Timebase" => {
-                let value = self.expect_int(cur, &word)?;
+                let value = self.expect_int_arg(cur, &word)?;
                 if value <= 0 {
                     return Err(MmlError::new(line, "TimeBaseには正の値を指定してください"));
                 }
@@ -355,7 +358,7 @@ impl<'a> Compiler<'a> {
             "TimeSignature" => self.time_signature(cur),
             "KeyFlag" => self.key_flag(cur),
             "Keyshift" | "KeyShift" => {
-                self.key_shift = self.expect_int(cur, &word)?;
+                self.key_shift = self.expect_int_arg(cur, &word)?;
                 Ok(())
             }
             "Time" | "TIME" => self.time_command(cur),
@@ -412,7 +415,7 @@ impl<'a> Compiler<'a> {
             }
             _ if control_change_number(&word).is_some() => {
                 let cc = control_change_number(&word).expect("checked");
-                let value = self.expect_int(cur, &word)?;
+                let value = self.expect_int_arg(cur, &word)?;
                 self.write_cc(cc, value);
                 Ok(())
             }
@@ -521,6 +524,69 @@ impl<'a> Compiler<'a> {
         }
     }
 
+    /// The built-in functions (`Random`, `SizeOf`, …).
+    fn call_builtin(&mut self, name: &str, args: Vec<Value>, line: usize) -> Result<Option<Value>> {
+        let int_arg = |index: usize| -> Result<i64> {
+            args.get(index)
+                .ok_or_else(|| {
+                    MmlError::new(line, format!("{name}の{}番目の引数がありません", index + 1))
+                })?
+                .as_int(line)
+        };
+
+        let value = match name {
+            // Random(n) is 0..n; Random(a,b) is a..b.
+            "Random" => {
+                let value = match args.len() {
+                    0 => return Err(MmlError::new(line, "Randomには範囲を指定してください")),
+                    1 => self.rng.range(0, int_arg(0)?),
+                    _ => self.rng.range(int_arg(0)?, int_arg(1)?),
+                };
+                Value::Int(value)
+            }
+            "RandomSelect" => {
+                if args.is_empty() {
+                    return Err(MmlError::new(
+                        line,
+                        "RandomSelectには候補を指定してください",
+                    ));
+                }
+                let index = self.rng.range(0, args.len() as i64 - 1) as usize;
+                args[index].clone()
+            }
+            // `Step(n)` and `!n` are the same thing: a length in raw ticks.
+            "Step" | "STEP" => Value::Int(int_arg(0)?),
+            "StrToLen" => Value::Int(self.timebase * 4 / int_arg(0)?.max(1)),
+            "SizeOf" => match args.first() {
+                Some(Value::Array(items)) => Value::Int(items.len() as i64),
+                Some(Value::Str(text)) => Value::Int(text.chars().count() as i64),
+                _ => Value::Int(0),
+            },
+            "StrToNum" => Value::Int(
+                args.first()
+                    .map(|v| v.as_int(line))
+                    .transpose()?
+                    .unwrap_or(0),
+            ),
+            "HEX" => Value::Str(format!("{:X}", int_arg(0)?)),
+            "ASC" => Value::Int(
+                args.first()
+                    .map(|v| v.as_str())
+                    .and_then(|s| s.chars().next())
+                    .map(|c| c as i64)
+                    .unwrap_or(0),
+            ),
+            "CHR" => Value::Str(
+                char::from_u32(int_arg(0)? as u32)
+                    .map(String::from)
+                    .unwrap_or_default(),
+            ),
+            "VERSION" => Value::Int(VERSION_NUMBER),
+            _ => return Err(MmlError::new(line, format!("関数\"{name}\"は未定義です"))),
+        };
+        Ok(Some(value))
+    }
+
     /// Run a function body with its parameters bound.
     ///
     /// Variables are global in MML, so a call saves the names it shadows and
@@ -612,7 +678,7 @@ impl<'a> Compiler<'a> {
             "KeyFlag" => self.key_flag(cur),
             "TimeSignature" => self.time_signature(cur),
             "TimeBase" | "Timebase" => {
-                let value = self.expect_int(cur, name)?;
+                let value = self.expect_int_arg(cur, name)?;
                 if value <= 0 {
                     return Err(MmlError::new(line, "TimeBaseには正の値を指定してください"));
                 }
@@ -620,21 +686,26 @@ impl<'a> Compiler<'a> {
                 Ok(())
             }
             "Keyshift" | "KeyShift" => {
-                self.key_shift = self.expect_int(cur, name)?;
+                self.key_shift = self.expect_int_arg(cur, name)?;
                 Ok(())
             }
             "qMax" => {
-                let value = self.expect_int(cur, name)?;
+                let value = self.expect_int_arg(cur, name)?;
                 self.q_max = value.max(1);
                 Ok(())
             }
             "vMax" => {
-                let value = self.expect_int(cur, name)?;
+                let value = self.expect_int_arg(cur, name)?;
                 self.v_max = value.max(1);
                 Ok(())
             }
+            "RandomSeed" => {
+                let seed = self.expect_int_arg(cur, name)?;
+                self.rng.reseed(seed);
+                Ok(())
+            }
             "MeasureShift" => {
-                self.measure_shift = self.expect_int(cur, name)?;
+                self.measure_shift = self.expect_int_arg(cur, name)?;
                 Ok(())
             }
             other => {
@@ -1117,7 +1188,7 @@ impl<'a> Compiler<'a> {
     fn pitch_bend(&mut self, cur: &mut Cursor) -> Result<()> {
         cur.skip_spaces();
         cur.eat('%');
-        let value = self.expect_int(cur, "PitchBend")?;
+        let value = self.expect_int_arg(cur, "PitchBend")?;
         self.write_pitch_bend(value);
         Ok(())
     }
@@ -1153,13 +1224,22 @@ impl<'a> Compiler<'a> {
     /// `(1,2,3)`, `=1,2,3` or a bare `1,2,3`.
     fn read_args(&mut self, cur: &mut Cursor, max: usize) -> Result<Vec<i64>> {
         cur.skip_spaces();
-        cur.eat('=');
+        let assigned = cur.eat('=');
         cur.skip_spaces();
         let parenthesised = cur.eat('(');
         let mut args = Vec::new();
         loop {
             cur.skip_spaces();
-            let value = if parenthesised {
+            let value = if assigned && !parenthesised {
+                // `Voice=Vo` — a bare term, which may be a variable or a call.
+                let line = cur.line();
+                match cur.peek() {
+                    Some(c) if c.is_ascii_alphanumeric() || c == '_' || c == '$' || c == '-' => {
+                        Some(expr::eval_term(cur, self)?.as_int(line)?)
+                    }
+                    _ => None,
+                }
+            } else if parenthesised {
                 // Inside parentheses each argument may be an expression.
                 match cur.peek() {
                     Some(c)
@@ -1273,9 +1353,9 @@ impl<'a> Compiler<'a> {
 
     fn note_number(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let note_no = self
-            .read_number(cur)?
-            .ok_or_else(|| MmlError::new(line, "nコマンドにはノート番号を指定してください"))?;
+        // Keep the underlying error: it says which variable or expression
+        // failed, which is more useful than "n needs a note number".
+        let note_no = self.expect_int_arg(cur, "nコマンドのノート番号")?;
         // `n60,` — the Pascal syntax allows a comma before the options.
         cur.eat(',');
         let (length, options) = self.read_note_options(cur);
@@ -1441,12 +1521,32 @@ impl<'a> Compiler<'a> {
         total
     }
 
+    /// A note-attribute argument: a literal, or a parenthesised expression.
+    ///
+    /// The single-letter attributes (`o`, `l`, `q`, `v`, `p`) take no `=`
+    /// form — the Pascal build rejects `o=x` — and a bare name is not a
+    /// variable here, which is what keeps `v100 <c` meaning "velocity, then
+    /// octave down".
     fn expect_int(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
         let line = cur.line();
         cur.skip_spaces();
-        cur.eat('=');
         self.read_number(cur)?
             .ok_or_else(|| MmlError::new(line, format!("{name}には数値を指定してください")))
+    }
+
+    /// A named command's argument, which may be written `Cmd=value`.
+    ///
+    /// After `=` the value may be a variable or a function call (`Tempo=x`,
+    /// `Voice=Vo`, `Tempo=Random(90,130)`) but not a compound expression:
+    /// `Tempo=100+20` is an error in the Pascal build too.
+    fn expect_int_arg(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
+        let line = cur.line();
+        cur.skip_spaces();
+        if cur.eat('=') {
+            cur.skip_spaces();
+            return expr::eval_term(cur, self)?.as_int(line);
+        }
+        self.expect_int(cur, name)
     }
 
     /// Read a numeric argument: a bare integer literal, or — inside
@@ -1476,11 +1576,15 @@ impl EvalContext for Compiler<'_> {
     }
 
     fn call(&mut self, name: &str, args: Vec<Value>, line: usize) -> Result<Option<Value>> {
-        self.call_function(name, args, line)
+        // A user definition of the same name wins, as it does for commands.
+        if self.functions.contains_key(name) {
+            return self.call_function(name, args, line);
+        }
+        self.call_builtin(name, args, line)
     }
 
     fn has_function(&self, name: &str) -> bool {
-        self.functions.contains_key(name)
+        self.functions.contains_key(name) || is_builtin_function(name)
     }
 }
 
@@ -1506,6 +1610,39 @@ fn pitch_class_semitone(index: usize) -> i64 {
 /// Guard against a runaway `For`/`While`: an MML typo should be an error, not
 /// a hung browser tab.
 const MAX_ITERATIONS: u32 = 100_000;
+
+/// Reported by the `VERSION` function, matching the Pascal build's numbering.
+const VERSION_NUMBER: i64 = 2385;
+
+/// Functions the compiler provides itself.
+fn is_builtin_function(name: &str) -> bool {
+    matches!(
+        name,
+        "Random"
+            | "RandomSelect"
+            | "Step"
+            | "STEP"
+            | "StrToLen"
+            | "SizeOf"
+            | "StrToNum"
+            | "HEX"
+            | "ASC"
+            | "CHR"
+            | "VERSION"
+    )
+}
+
+/// Variables the compiler defines itself. `mml_base.pas` registers exactly
+/// these three (`SoundType`, `on`, `off`); everything else must be declared,
+/// so a bare `x=5` stays an error here as it is in the Pascal build.
+fn builtin_variables() -> Variables {
+    let mut variables = Variables::new();
+    // 0:GM / 1:GS / 2:XG — set by the reset macros in Include/stdmsg.h.
+    variables.insert("SoundType".to_string(), Value::Int(0));
+    variables.insert("on".to_string(), Value::Int(1));
+    variables.insert("off".to_string(), Value::Int(0));
+    variables
+}
 
 /// Where a function's return value lives while it runs. `Result` is a
 /// keyword, so it cannot collide with a user variable name.

@@ -18,6 +18,7 @@ pub mod error;
 pub mod expr;
 pub mod include;
 pub mod lexer;
+pub mod rng;
 pub mod smf;
 
 pub use encoding::SourceEncoding;
