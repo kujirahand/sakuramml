@@ -412,13 +412,18 @@ impl<'a> Compiler<'a> {
         let total = base
             .checked_add(delta)
             .ok_or_else(|| MmlError::new(line, "時間の計算があふれました"))?;
-        if total > MAX_TIME {
+        if !(-MAX_TIME..=MAX_TIME).contains(&total) {
             return Err(MmlError::new(
                 line,
                 format!("時間が上限({MAX_TIME})を超えました: {total}"),
             ));
         }
-        Ok(total.max(0))
+        // Not clamped to 0: a rest with a negative length (`r-2.`) rewinds the
+        // pointer, and the Pascal build lets it go negative internally — only
+        // the SMF writer clamps, one event at a time, which is what makes a
+        // later positive-length event land at the right position relative to
+        // the rewound one rather than at an arbitrary reset point.
+        Ok(total)
     }
 
     /// Turn source into plain ASCII MML: symbols first, then the Japanese
@@ -2541,13 +2546,21 @@ impl<'a> Compiler<'a> {
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        // A leading sign rewinds instead of advancing: `r-2.` moves the
+        // pointer backward by a dotted half note. `+` is accepted too, and
+        // is simply the ordinary direction — `r+2` and `r2` are identical.
+        let rewind = cur.eat('-');
+        if !rewind {
+            cur.eat('+');
+        }
         let (length, _) = self.read_note_options(cur)?;
         let length = length.unwrap_or_else(|| self.track().length);
+        let signed = if rewind { -length } else { length };
         let time = self.track().time;
         // A rest advances the specifications as a note does — the Pascal
         // build calls checkNoteOnCC for both.
-        self.write_cc_modifiers(time, length)?;
-        let next = self.checked_time(time, length, line)?;
+        self.write_cc_modifiers(time, length.max(0))?;
+        let next = self.checked_time(time, signed, line)?;
         let track = self.track();
         track.time = next;
         track.last_note = None;
@@ -2557,12 +2570,21 @@ impl<'a> Compiler<'a> {
     /// `^` extends the previous note; with no preceding note it is a rest.
     fn tie(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        // As with `r`, a leading sign only makes sense when there is no
+        // previous note to extend — the Pascal build routes both through the
+        // same handler (funcNoteR).
+        let no_previous_note = self.track().last_note.is_none();
+        let rewind = no_previous_note && cur.peek() == Some('-');
+        if rewind || (no_previous_note && cur.peek() == Some('+')) {
+            cur.advance();
+        }
         let (length, _) = self.read_note_options(cur)?;
         let length = length.unwrap_or_else(|| self.track().length);
+        let signed = if rewind { -length } else { length };
         let gate_percent = self.track().gate_percent;
         let q_max = self.q_max;
         let time = self.track().time;
-        let next = self.checked_time(time, length, line)?;
+        let next = self.checked_time(time, signed, line)?;
         let track = self.track();
         track.time = next;
 

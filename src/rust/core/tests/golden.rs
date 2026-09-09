@@ -1222,3 +1222,46 @@ fn play_from_wait_option_changes_the_gap() {
         "4d546864000000060001000100604d54726b0000001430903e644b803e64159040644b80406400ff2f00",
     );
 }
+
+// --- negative-length rests: `r-2.` rewinds the time pointer ---
+
+/// A leading `-` on a rest's length rewinds the pointer rather than
+/// advancing it — `r-2.` moves back by a dotted half note. The Pascal build
+/// lets the pointer go genuinely negative; only individual event writes are
+/// clamped, which is what lets a later positive-length event land at the
+/// right position relative to the rewound one.
+#[test]
+fn a_negative_rest_length_rewinds_the_pointer() {
+    assert_golden(
+        "r-2.c",
+        "4d546864000000060001000100604d54726b0000000c00903c6400803c6400ff2f00",
+    );
+    assert_golden(
+        "r-8c",
+        "4d546864000000060001000100604d54726b0000000c00903c641b803c6415ff2f00",
+    );
+}
+
+/// `+` is accepted too, and is simply the ordinary direction: `r+2` and `r2`
+/// are identical.
+#[test]
+fn a_leading_plus_on_a_rest_is_the_ordinary_direction() {
+    assert_golden(
+        "r+2 c",
+        "4d546864000000060001000100604d54726b0000000d8140903c644b803c6415ff2f00",
+    );
+    assert_same_bytes("r+2 c", "r2 c");
+}
+
+/// `^` with no preceding note behaves like a rest, sign included.
+#[test]
+fn a_tie_with_no_preceding_note_accepts_a_sign_too() {
+    assert_same_bytes("^-2 c", "r-2 c");
+}
+
+/// The idiom 230.mml actually uses: rewind to write an effect, then advance
+/// back by the same amount before the next note.
+#[test]
+fn the_rewind_then_advance_idiom() {
+    assert_same_bytes("cd r-1 c r*1 e", "cd r-1 c r+1 e");
+}
