@@ -429,3 +429,49 @@ fn a_user_function_overrides_a_built_in_one() {
         "n60",
     );
 }
+
+// --- the standard include ---
+
+/// `stdmsg.h` is loaded before the song, the way `TMml2Smf.Execute` does it in
+/// the Pascal build. That is where the GM instrument names come from, so
+/// `@(GrandPiano)` works without the song asking for anything.
+#[test]
+fn standard_include_is_loaded_automatically() {
+    use sakuramml_core::compile_with;
+
+    let includes = MemoryIncludes::new().with(
+        "stdmsg.h",
+        "Int GrandPiano = 1; Function Middle(){n60}"
+            .as_bytes()
+            .to_vec(),
+    );
+
+    let out = compile_with("@(GrandPiano) c", &includes).unwrap();
+    assert_eq!(out.smf, compile("@1 c").unwrap().smf);
+
+    // Its functions are available too.
+    let out = compile_with("Middle", &includes).unwrap();
+    assert_eq!(out.smf, compile("n60").unwrap().smf);
+}
+
+/// A missing standard include is a warning, not a failure — the Pascal build
+/// prints a hint and carries on the same way.
+#[test]
+fn a_missing_standard_include_only_warns() {
+    let out = compile("c").unwrap();
+    assert!(
+        out.warnings.iter().any(|w| w.message.contains("stdmsg.h")),
+        "expected a hint about stdmsg.h, got {:?}",
+        out.warnings
+    );
+}
+
+/// A parenthesised value inside a hex-mode SysEx is an ordinary expression,
+/// which is how stdmsg.h writes its GS reset:
+/// `SysEx$=F0,41,(DeviceNumber),42,...`
+#[test]
+fn hex_sysex_accepts_parenthesised_values() {
+    let by_hand = compile("Int D=$10; SysEx$=F0,41,(D),42,12,40,00,7F,00,41,F7;").unwrap();
+    let builtin = compile("ResetGS").unwrap();
+    assert_eq!(by_hand.smf, builtin.smf);
+}

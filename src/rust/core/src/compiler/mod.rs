@@ -147,8 +147,34 @@ impl<'a> Compiler<'a> {
             .or_insert_with(|| TrackState::new(no, timebase))
     }
 
+    /// The standard definition file, loaded before the song itself.
+    ///
+    /// It defines the GM instrument names (`@(GrandPiano)`), the reset macros
+    /// and much else, so songs use them without asking. The Pascal build does
+    /// the same in `TMml2Smf.Execute`, and likewise carries on with a hint
+    /// when the file is missing rather than failing.
+    fn load_standard_includes(&mut self) {
+        let Some(bytes) = self.includes.resolve(STANDARD_INCLUDE) else {
+            self.warnings.push(Warning::new(
+                0,
+                format!("{STANDARD_INCLUDE} を読み飛ばしました。"),
+            ));
+            return;
+        };
+        let (text, _) = crate::encoding::decode_auto(&bytes);
+        let converted = crate::lexer::sutoton::to_mml(&text);
+        let normalized = crate::lexer::zenkaku::normalize(&converted);
+        if let Err(error) = self.run_fragment(&normalized, 1) {
+            self.warnings.push(Warning::new(
+                0,
+                format!("標準ファイル\"{STANDARD_INCLUDE}\"のコンパイルに失敗: {error}"),
+            ));
+        }
+    }
+
     /// Compile MML source into a [`Song`].
     pub fn compile(mut self, src: &str) -> Result<CompileResult> {
+        self.load_standard_includes();
         // Japanese notation first, then full-width symbol normalisation —
         // the same order as the Pascal build's PreCompile.
         let converted = crate::lexer::sutoton::to_mml(src);
@@ -1091,9 +1117,17 @@ impl<'a> Compiler<'a> {
         loop {
             cur.skip_spaces();
             let value = if hex_mode {
-                // In hex mode a `$` prefix is allowed but redundant.
-                cur.eat('$');
-                cur.read_hex()
+                // Even in hex mode a parenthesised value is an ordinary
+                // expression, as in stdmsg.h's
+                // `SysEx$=F0,41,(DeviceNumber),42,...`.
+                if cur.peek() == Some('(') {
+                    let line = cur.line();
+                    Some(expr::eval(cur, self)?.as_int(line)?)
+                } else {
+                    // A `$` prefix is allowed here but redundant.
+                    cur.eat('$');
+                    cur.read_hex()
+                }
             } else {
                 self.read_number(cur)?
             };
@@ -1610,6 +1644,9 @@ fn pitch_class_semitone(index: usize) -> i64 {
 /// Guard against a runaway `For`/`While`: an MML typo should be an error, not
 /// a hung browser tab.
 const MAX_ITERATIONS: u32 = 100_000;
+
+/// Loaded automatically before every compile, when the resolver has it.
+pub const STANDARD_INCLUDE: &str = "stdmsg.h";
 
 /// Reported by the `VERSION` function, matching the Pascal build's numbering.
 const VERSION_NUMBER: i64 = 2385;

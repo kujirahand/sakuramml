@@ -36,8 +36,12 @@ cd wasm && python3 -m http.server 8000
 From JavaScript:
 
 ```js
-const { compileMml } = require('./wasm/pkg/sakuramml_wasm.js');
+const { compileMml, addInclude } = require('./wasm/pkg/sakuramml_wasm.js');
 const { midi, warnings } = compileMml('cde');   // midi: Uint8Array
+
+// stdmsg.h is embedded; hand over any other Include/ file you need.
+addInclude('chord2.h', await fetch('Include/chord2.h').then(r => r.arrayBuffer()));
+compileMml('Include(chord2.h) ドレミ');
 ```
 
 ## Character encoding
@@ -77,7 +81,10 @@ Implemented:
 * `System.*` options — `KeyFlag`, `Keyshift`, `qMax`, `vMax`, `MeasureShift`,
   `TimeBase`; unimplemented ones are skipped with a warning rather than failing
 * the sutoton (Japanese) notation layer — `テンポ120 ドレミ` compiles
-* `Include`, resolved through a caller-supplied [`IncludeResolver`]
+* `Include`, resolved through a caller-supplied [`IncludeResolver`].
+  `stdmsg.h` is loaded automatically before every song — that is where the GM
+  instrument names (`@(GrandPiano)`) and the reset macros come from — and a
+  missing one is a hint, not an error, matching the Pascal build
 * `SysEx`, in both the `SysEx(...)` decimal form and the `SysEx$=...;` hex
   form, plus `$` hexadecimal literals anywhere a number is expected
 * built-in functions `Random`, `RandomSelect`, `SizeOf`, `StrToLen`, `HEX`,

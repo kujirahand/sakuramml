@@ -80,7 +80,12 @@ mod tests {
     fn compiles_a_scale() {
         let out = compile("cdefg").unwrap();
         assert_eq!(&out.smf[..4], b"MThd");
-        assert!(out.warnings.is_empty());
+        // Without a resolver the standard include is missing, which is a
+        // hint rather than an error — the same as the Pascal build.
+        assert!(out
+            .warnings
+            .iter()
+            .all(|w| w.message.contains(compiler::STANDARD_INCLUDE)));
     }
 
     #[test]

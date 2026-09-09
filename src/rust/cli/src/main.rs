@@ -176,6 +176,17 @@ impl FileIncludes {
                 }
             }
         }
+        // The working directory and its ancestors, so `-e` (which has no
+        // source file) still finds the project's Include/ directory.
+        if let Ok(cwd) = std::env::current_dir() {
+            let mut dir = cwd;
+            for _ in 0..8 {
+                roots.push(dir.clone());
+                if !dir.pop() {
+                    break;
+                }
+            }
+        }
         roots.push(PathBuf::from("."));
         if let Ok(exe) = std::env::current_exe() {
             if let Some(dir) = exe.parent() {
