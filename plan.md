@@ -261,14 +261,28 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
   - **ドキュメント**: ルート`ReadMe.md`、`src/rust/README.md`を更新。
 
 ### 残作業（Rust版が実用に達するために必要）
-`sample/*.mml`の大半はまだコンパイルできない。ブロッカーは以下：
-1. `Function`定義と呼び出し（`Include/stdmsg.h`が多用しており、これが最大の関門）
-2. `SysEx`コマンドと`$`16進リテラル
-3. リズムマクロ（`$`定義、`~`）
-4. `Div`（連符）、`Sub`、`Play`、`Stretch`
-5. 先行指定（`.onNote`、`.onTime`、`.onCycle`等）と`Cresc`/`Decresc`
-6. 組み込み関数（21件）
-7. 巨大入力・巨大な数値に対する資源制限とSMF範囲検証
+`sample/*.mml`のうち`scale.mml`と`rythm-1.mml`が通るようになった。残るブロッカー：
+
+**完了済み**
+1. ~~`Function`定義と呼び出し~~ 完了
+2. ~~`SysEx`コマンドと`$`16進リテラル~~ 完了
+3. ~~リズムマクロ（`$`定義、`~`）~~ 完了（`Sub`、ユーザー定義ストトンも実装）
+   - 併せて前処理の順序をPascal版（記号変換→ストトン）に合わせた
+
+**未完了**
+4. `Div`（連符）、`Play`、`Stretch`（`Sub`は完了）
+5. 先行指定: `.onNote`は音符属性(`v`/`q`/`t`/`l`/`o`)のみ完了。残りは
+   `.onTime`/`.onCycle`/`.onNoteWave`系と、**CCへの`.onNote`**。
+   後者はPascal版が音符の1tick前に書き、さらに定義時にも1つ書くという
+   挙動をしており、規則が未特定。誤った出力を出さないよう現状は警告してスキップする。
+6. 組み込み関数: `Random`/`RandomSelect`/`SizeOf`/`StrToLen`/`HEX`/`ASC`/`CHR`/
+   `Step`/`VERSION`は完了。残りは`NoteNo`/`MML`/`MID`/`POS`/`Replace`等。
+8. その他のコマンド: `DirectSMF`、`Key`、`#`（コマンド名参照）、
+   RPNラッパー(`PitchBendSensitivity`等)
+7. ~~巨大入力・巨大な数値に対する資源制限とSMF範囲検証~~ 完了
+   （`core/tests/limits.rs`。イベント数予算100万、checked時刻演算、
+     SMFのdivision/デルタタイム範囲検証）
+   以下は当初の設計メモ:
    - `[...]`、`For`、`While`、再帰を含むコンパイル全体で、生成イベント数または推定MIDIバイト数の
      共通予算を設け、ブラウザのCPU枯渇・OOMを防ぐ。
    - `Time`、音長、`TimeBase`などの時刻演算をchecked演算にし、SMFのdivision（15-bit）と

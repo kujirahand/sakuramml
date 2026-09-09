@@ -658,3 +658,54 @@ fn user_defined_sutoton_macros() {
         "P(32) P(0)",
     );
 }
+
+// --- 先行指定: .onNote ---
+
+/// `.onNote` hands out one value per note, cycling when the list runs out.
+#[test]
+fn on_note_cycles_values_across_notes() {
+    assert_golden(
+        "v.onNote(120,50) cdef",
+        "4d546864000000060001000100604d54726b0000002400903c784b803c7815903e324b803e32159040784\
+         b804078159041324b80413215ff2f00",
+    );
+    assert_golden(
+        "q.onNote(90,30) cd",
+        "4d546864000000060001000100604d54726b0000001400903c6455803c640b903e641b803e6445ff2f00",
+    );
+    // Timing shifts the note's start without moving the track's own pointer.
+    assert_golden(
+        "t.onNote(0,2) cd",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c6417903e644b803e6413ff2f00",
+    );
+}
+
+#[test]
+fn on_note_accepts_the_equals_form() {
+    // `音量予約120,50` expands to this, so both spellings must agree.
+    assert_same_bytes("v.onNote=120,50 cd", "v.onNote(120,50) cd");
+}
+
+#[test]
+fn a_note_option_still_wins_over_on_note() {
+    assert_same_bytes("v.onNote(120,50) c(4,80,64)", "c(4,80,64)");
+}
+
+/// The parts of 先行指定 that are not ported yet warn rather than failing, so
+/// a song still compiles — and says plainly that it will not sound as written.
+#[test]
+fn unported_modifiers_warn_instead_of_failing() {
+    let out = compile("v.onNoteWave(0,127,48) cd").unwrap();
+    assert!(
+        out.warnings
+            .iter()
+            .any(|w| w.message.contains("onNoteWave")),
+        "expected a warning, got {:?}",
+        out.warnings
+    );
+    let out = compile("P.onNote(0,127) cd").unwrap();
+    assert!(out
+        .warnings
+        .iter()
+        .any(|w| w.message.contains("コントロールチェンジ")));
+}

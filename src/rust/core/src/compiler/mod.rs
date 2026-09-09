@@ -59,6 +59,8 @@ struct TrackState {
     last_note: Option<LastNote>,
     /// One-shot octave shift from `` ` `` or `"`, applied to the next note.
     octave_once: i64,
+    /// Values queued by `.onNote`, cycled one per note.
+    on_note: Vec<(OnNoteTarget, OnNote)>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -81,6 +83,7 @@ impl TrackState {
             events: Vec::new(),
             last_note: None,
             octave_once: 0,
+            on_note: Vec::new(),
         }
     }
 }
@@ -327,12 +330,18 @@ impl<'a> Compiler<'a> {
             }
             'o' => {
                 cur.advance();
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::Octave)? {
+                    return Ok(handled);
+                }
                 let value = self.expect_int(cur, "o")?;
                 self.track().octave = value;
                 Ok(())
             }
             'l' => {
                 cur.advance();
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::Length)? {
+                    return Ok(handled);
+                }
                 let value = self
                     .read_length(cur)
                     .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
@@ -341,18 +350,27 @@ impl<'a> Compiler<'a> {
             }
             'q' => {
                 cur.advance();
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::Gate)? {
+                    return Ok(handled);
+                }
                 let value = self.expect_int(cur, "q")?;
                 self.track().gate_percent = value;
                 Ok(())
             }
             'v' => {
                 cur.advance();
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::Velocity)? {
+                    return Ok(handled);
+                }
                 let value = self.expect_int(cur, "v")?;
                 self.track().velocity = value;
                 Ok(())
             }
             't' => {
                 cur.advance();
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::Timing)? {
+                    return Ok(handled);
+                }
                 let value = self.expect_int(cur, "t")?;
                 self.track().timing = value;
                 Ok(())
@@ -367,6 +385,9 @@ impl<'a> Compiler<'a> {
             }
             'p' => {
                 cur.advance();
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
+                    return Ok(handled);
+                }
                 self.simple_pitch_bend(cur)
             }
             '[' => {
@@ -503,7 +524,12 @@ impl<'a> Compiler<'a> {
             }
             "SysEx" | "SYSEX" => self.sysex(cur),
             "Voice" => self.voice(cur),
-            "PitchBend" => self.pitch_bend(cur),
+            "PitchBend" => {
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
+                    return Ok(handled);
+                }
+                self.pitch_bend(cur)
+            }
             "RPN" | "NRPN" => {
                 let is_rpn = word == "RPN";
                 let args = self.read_args(cur, 3)?;
@@ -521,6 +547,10 @@ impl<'a> Compiler<'a> {
             }
             _ if control_change_number(&word).is_some() => {
                 let cc = control_change_number(&word).expect("checked");
+                let target = OnNoteTarget::ControlChange(cc.clamp(0, 127) as u8);
+                if let Some(handled) = self.modifier(cur, target)? {
+                    return Ok(handled);
+                }
                 let value = self.expect_int_arg(cur, &word)?;
                 self.write_cc(cc, value);
                 Ok(())
@@ -747,6 +777,70 @@ impl<'a> Compiler<'a> {
         }
         outcome?;
         Ok(result)
+    }
+
+    /// A `.modifier` after a command, such as `v.onNote(120,50)`.
+    ///
+    /// Returns `Some(())` when one was there and handled, `None` when the
+    /// command carries an ordinary argument instead.
+    fn modifier(&mut self, cur: &mut Cursor, target: OnNoteTarget) -> Result<Option<()>> {
+        if cur.peek() != Some('.') {
+            return Ok(None);
+        }
+        let line = cur.line();
+        let mut probe = cur.clone();
+        probe.advance();
+        let Some(name) = probe.read_word() else {
+            return Ok(None);
+        };
+        *cur = probe;
+
+        match name.as_str() {
+            // A value per note, cycling when the list runs out.
+            "onNote" | "N" => {
+                let values = self.read_args(cur, usize::MAX)?;
+                // Control changes and bends are held back deliberately: the
+                // Pascal build writes those a tick ahead of the note and emits
+                // one at the point of definition too, and the exact rule is
+                // not pinned down yet. Emitting them on the wrong tick would
+                // be a subtly wrong song, which is worse than an honest
+                // warning that this part is not ported.
+                if matches!(
+                    target,
+                    OnNoteTarget::ControlChange(_) | OnNoteTarget::PitchBend
+                ) {
+                    self.warnings.push(Warning::new(
+                        line,
+                        "コントロールチェンジへの.onNoteは未実装のため無視しました",
+                    ));
+                    return Ok(Some(()));
+                }
+                let track = self.track();
+                track.on_note.retain(|(existing, _)| *existing != target);
+                track.on_note.push((target, OnNote { values, next: 0 }));
+                Ok(Some(()))
+            }
+            // Not ported yet. Skipping the argument keeps the song compiling,
+            // and the warning says plainly that it will not sound as written.
+            other => {
+                let _ = self.read_args(cur, 16)?;
+                self.warnings.push(Warning::new(
+                    line,
+                    format!(".{other} は未実装のため無視しました"),
+                ));
+                Ok(Some(()))
+            }
+        }
+    }
+
+    /// Take the next `.onNote` value for `target`, if a list is running.
+    fn next_on_note(&mut self, target: OnNoteTarget) -> Option<i64> {
+        let track = self.track();
+        track
+            .on_note
+            .iter_mut()
+            .find(|(existing, _)| *existing == target)
+            .and_then(|(_, list)| list.take())
     }
 
     /// `$c{mml}` — bind one character for use in rhythm mode.
@@ -1604,10 +1698,39 @@ impl<'a> Compiler<'a> {
                 format!("ノート番号が範囲外です(0〜127): {note_no}"),
             ));
         }
+        // `.onNote` values are consumed one per note, before the track's own
+        // settings are consulted.
+        let on_velocity = self.next_on_note(OnNoteTarget::Velocity);
+        let on_gate = self.next_on_note(OnNoteTarget::Gate);
+        let on_timing = self.next_on_note(OnNoteTarget::Timing);
+        let on_length = self.next_on_note(OnNoteTarget::Length);
+        let on_bend = self.next_on_note(OnNoteTarget::PitchBend);
+        let on_ccs: Vec<(u8, i64)> = {
+            let controllers: Vec<u8> = self
+                .track()
+                .on_note
+                .iter()
+                .filter_map(|(target, _)| match target {
+                    OnNoteTarget::ControlChange(cc) => Some(*cc),
+                    _ => None,
+                })
+                .collect();
+            controllers
+                .into_iter()
+                .filter_map(|cc| {
+                    self.next_on_note(OnNoteTarget::ControlChange(cc))
+                        .map(|value| (cc, value))
+                })
+                .collect()
+        };
+
         let track = self.track();
-        let length = length.unwrap_or(track.length);
-        let raw_velocity = options.velocity.unwrap_or(track.velocity);
-        let gate_value = options.gate_percent.unwrap_or(track.gate_percent);
+        let length = on_length.or(length).unwrap_or(track.length);
+        let raw_velocity = options.velocity.or(on_velocity).unwrap_or(track.velocity);
+        let gate_value = options
+            .gate_percent
+            .or(on_gate)
+            .unwrap_or(track.gate_percent);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
         let gate = gate_ticks_scaled(length, gate_value, q_max);
@@ -1615,7 +1738,7 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             (
                 track.time,
-                options.timing.unwrap_or(track.timing),
+                options.timing.or(on_timing).unwrap_or(track.timing),
                 track.channel,
             )
         };
@@ -1623,6 +1746,22 @@ impl<'a> Compiler<'a> {
         let end = self.checked_time(start, gate, line)?;
         let next = self.checked_time(time, length, line)?;
 
+        // A `.onNote` control change or bend is written just before the note
+        // it belongs to.
+        for (controller, value) in on_ccs {
+            self.push_event(Event::control_change(
+                start,
+                channel,
+                controller,
+                value.clamp(0, 127) as u8,
+            ))?;
+        }
+        if let Some(value) = on_bend {
+            self.push_event(Event::new(
+                start,
+                vec![0xe0 | (channel & 0x0f), 0, value.clamp(0, 127) as u8],
+            ))?;
+        }
         self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
         self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
 
@@ -1816,6 +1955,37 @@ impl EvalContext for Compiler<'_> {
 
     fn has_function(&self, name: &str) -> bool {
         self.functions.contains_key(name) || is_builtin_function(name)
+    }
+}
+
+/// What a `.onNote` list drives.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum OnNoteTarget {
+    Velocity,
+    Gate,
+    Timing,
+    Octave,
+    Length,
+    /// A control change, by controller number.
+    ControlChange(u8),
+    PitchBend,
+}
+
+/// A list of values handed out one per note, cycling when it runs out.
+#[derive(Debug, Clone)]
+struct OnNote {
+    values: Vec<i64>,
+    next: usize,
+}
+
+impl OnNote {
+    fn take(&mut self) -> Option<i64> {
+        if self.values.is_empty() {
+            return None;
+        }
+        let value = self.values[self.next % self.values.len()];
+        self.next += 1;
+        Some(value)
     }
 }
 

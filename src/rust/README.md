@@ -85,6 +85,12 @@ Implemented:
   accidentals, and kanji numerals are digits (`音量一二三`)
 * `` ` `` and `"`, which shift the octave for one note. A bare `"` is that
   operator, so only `{"` opens a string
+* rhythm mode — `$b{n36,}` binds a character, `Rythm{ brbr }` expands it —
+  plus `Sub{...}`, and `~{name}={mml}` for user-defined Japanese macros
+* `.onNote` on the note attributes (`v`, `q`, `t`, `l`, `o`), cycling one
+  value per note
+* resource limits: a compile-wide event budget and checked time arithmetic, so
+  runaway input is a diagnostic rather than a hung or crashed browser tab
 * `Include`, resolved through a caller-supplied [`IncludeResolver`].
   `stdmsg.h` is loaded automatically before every song — that is where the GM
   instrument names (`@(GrandPiano)`) and the reset macros come from — and a
@@ -96,10 +102,14 @@ Implemented:
   Randomness comes from a seeded generator in the crate (`System.RandomSeed`
   sets it), so compiles are reproducible and WASM needs no entropy source
 
-Still to port, in the order the sample songs need them: rhythm macros (`$`
-definitions and `~` sutoton macros), `DirectSMF`, the 先行指定 (`.onNote`)
-family, the RPN wrapper commands (`PitchBendSensitivity` and friends), the
-`NoteNo`/`MML` functions, and `Div`/`Sub`/`Play`.
+Still to port, in the order the sample songs need them: `Div` (tuplets),
+`Play`, `DirectSMF`, `Key`, the `#` command lookup, `NoteNo`/`MML`, and the
+rest of the 先行指定 family — the wave and cycle variants, and `.onNote` on
+control changes, which the Pascal build writes a tick ahead of the note by a
+rule this port has not pinned down yet. Unported modifiers warn and are
+skipped rather than failing the compile.
+
+Of the sample songs, `scale.mml` and `rythm-1.mml` compile end to end so far.
 
 `core/tests/script.rs` covers the scripting layer on its own: variables,
 expressions, control flow, functions, and the error cases that must not
