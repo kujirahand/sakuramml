@@ -49,7 +49,7 @@ pub fn compile_with(src: &str, resolver: &dyn IncludeResolver) -> Result<Compile
         .with_includes(resolver)
         .compile(src)?;
     Ok(CompileOutput {
-        smf: result.song.to_bytes(),
+        smf: result.song.to_bytes()?,
         warnings: result.warnings,
         messages: result.messages,
     })

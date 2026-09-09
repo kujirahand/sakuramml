@@ -114,7 +114,8 @@ fn parse_args(args: &[String]) -> Result<Options, Failure> {
                 inline = Some(code.clone());
             }
             "-h" | "--help" => return Err(Failure::Usage(help_text())),
-            "-v" | "--version" => return Err(Failure::Usage(format!("sakuramml {VERSION}"))),
+            // Bare version number, as the Pascal build's -v prints it.
+            "-v" | "--version" => return Err(Failure::Usage(VERSION.to_string())),
             // Kept for compatibility with the Pascal build, which used it to
             // keep a console window open after compiling.
             "-pause" => pause = true,
@@ -143,13 +144,15 @@ fn parse_args(args: &[String]) -> Result<Options, Failure> {
     }
 }
 
+/// Usage text, kept in step with the Pascal build's `showHelp`.
 fn help_text() -> String {
     format!(
-        "=== MML Compiler sakuramml (Rust) ===\n\
-         version {VERSION}\n\
+        "=== MML Compiler sakuramml v{VERSION} (Rust) ===\n\
          [USAGE]\n\
-         csakura mmlfile [midifile]\n\
-         csakura -e mmlcode [midifile]"
+         csakura mmlfile [midifile] ... Compile file\n\
+         csakura -e code [midifile] ... Evaluate code\n\
+         csakura -pause             ... Wait for Enter when done\n\
+         csakura -v                 ... Show version"
     )
 }
 

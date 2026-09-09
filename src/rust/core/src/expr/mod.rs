@@ -100,7 +100,9 @@ pub fn eval(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
 /// `Tempo=x` and `Tempo=Random(90,130)` but rejects `Tempo=100+20`, so the
 /// right-hand side is a term rather than a full expression.
 pub fn eval_term(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
-    parse_primary(cur, ctx)
+    // A leading sign belongs to the term: `System.Keyshift=-2` is accepted by
+    // the Pascal build.
+    parse_unary(cur, ctx)
 }
 
 fn parse_or(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {

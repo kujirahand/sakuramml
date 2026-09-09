@@ -18,6 +18,18 @@ use crate::smf::{event, Event, Song, Track};
 /// Default division (ticks per quarter note).
 pub const DEFAULT_TIMEBASE: i64 = 96;
 
+/// Ceiling on the events one compile may produce.
+///
+/// A loop nested a few deep can ask for billions of notes from a few lines of
+/// MML. Native would grind; in a browser tab it is an out-of-memory crash, so
+/// the compile stops with a diagnostic well before that. A million events is
+/// far more than any real song — the largest sample here writes a few thousand.
+pub const MAX_EVENTS: usize = 1_000_000;
+
+/// Ceiling on a track's time pointer, so time arithmetic cannot run away
+/// before the SMF writer would reject the delta anyway.
+pub const MAX_TIME: i64 = crate::smf::MAX_VAR_LEN;
+
 /// Maximum nesting depth for loops and other recursive constructs.
 /// Matches `NestCountCompile` in the Pascal implementation, and keeps the
 /// WASM stack out of trouble.
@@ -103,6 +115,8 @@ pub struct Compiler<'a> {
     /// Set by `Exit` to unwind out of the enclosing loop.
     exiting: bool,
     rng: Rng,
+    /// Events written so far, against [`MAX_EVENTS`].
+    event_count: usize,
 }
 
 impl Default for Compiler<'_> {
@@ -131,6 +145,7 @@ impl<'a> Compiler<'a> {
             messages: Vec::new(),
             exiting: false,
             rng: Rng::default(),
+            event_count: 0,
         }
     }
 
@@ -202,6 +217,33 @@ impl<'a> Compiler<'a> {
             warnings: self.warnings,
             messages: self.messages,
         })
+    }
+
+    /// Record an event on the current track, against the compile's budget.
+    fn push_event(&mut self, event: Event) -> Result<()> {
+        self.event_count += 1;
+        if self.event_count > MAX_EVENTS {
+            return Err(MmlError::new(
+                0,
+                format!("生成イベント数が上限({MAX_EVENTS})を超えました"),
+            ));
+        }
+        self.track().events.push(event);
+        Ok(())
+    }
+
+    /// Add to a time value, refusing a result the SMF format cannot express.
+    fn checked_time(&self, base: i64, delta: i64, line: usize) -> Result<i64> {
+        let total = base
+            .checked_add(delta)
+            .ok_or_else(|| MmlError::new(line, "時間の計算があふれました"))?;
+        if total > MAX_TIME {
+            return Err(MmlError::new(
+                line,
+                format!("時間が上限({MAX_TIME})を超えました: {total}"),
+            ));
+        }
+        Ok(total.max(0))
     }
 
     /// Run a cursor to exhaustion.
@@ -361,8 +403,7 @@ impl<'a> Compiler<'a> {
                 }
                 let usec = (60_000_000 / bpm) as u32;
                 let time = self.track().time;
-                self.track().events.push(Event::tempo(time, usec));
-                Ok(())
+                self.push_event(Event::tempo(time, usec))
             }
             "Track" | "TRACK" | "TR" | "NowTrack" => {
                 let no = self.expect_int_arg(cur, &word)?;
@@ -386,10 +427,7 @@ impl<'a> Compiler<'a> {
             }
             "TimeBase" | "TIMEBASE" | "Timebase" => {
                 let value = self.expect_int_arg(cur, &word)?;
-                if value <= 0 {
-                    return Err(MmlError::new(line, "TimeBaseには正の値を指定してください"));
-                }
-                self.set_timebase(value);
+                self.set_timebase_checked(value, line)?;
                 Ok(())
             }
             "System" | "SYSTEM" => {
@@ -732,10 +770,7 @@ impl<'a> Compiler<'a> {
             "TimeSignature" => self.time_signature(cur),
             "TimeBase" | "Timebase" => {
                 let value = self.expect_int_arg(cur, name)?;
-                if value <= 0 {
-                    return Err(MmlError::new(line, "TimeBaseには正の値を指定してください"));
-                }
-                self.set_timebase(value);
+                self.set_timebase_checked(value, line)?;
                 Ok(())
             }
             "Keyshift" | "KeyShift" => {
@@ -807,10 +842,7 @@ impl<'a> Compiler<'a> {
             (timebase / 8).clamp(0, 255) as u8,
         ];
         let time = self.track().time;
-        self.track()
-            .events
-            .push(Event::meta(time, event::META_TIME_SIGNATURE, &payload));
-        Ok(())
+        self.push_event(Event::meta(time, event::META_TIME_SIGNATURE, &payload))
     }
 
     /// `KeyFlag[+|-|#](notes)` or `KeyFlag=(a,b,c,d,e,f,g)`.
@@ -848,8 +880,7 @@ impl<'a> Compiler<'a> {
         let total: i64 = self.key_flags.iter().sum();
         let payload = [(total as i8) as u8, 0];
         let time = self.track().time;
-        self.track().events.push(Event::meta(time, 0x59, &payload));
-        Ok(())
+        self.push_event(Event::meta(time, 0x59, &payload))
     }
 
     /// `Time(measure:beat:step)` — move the track's time pointer.
@@ -876,21 +907,33 @@ impl<'a> Compiler<'a> {
 
         let (numerator, denominator) = self.time_signature;
         let beat_ticks = self.timebase * 4 / denominator.max(1);
+        // Checked throughout: `Time(999999999:1:0)` must be a diagnostic, not
+        // a time pointer that has wrapped around.
+        let overflow = || MmlError::new(line, "Timeの計算があふれました");
+        let position = |measure: i64, beat: i64, step: i64| -> Result<i64> {
+            let bars = measure
+                .checked_sub(1)
+                .and_then(|m| m.checked_add(self.measure_shift))
+                .and_then(|m| m.checked_mul(numerator))
+                .and_then(|m| m.checked_mul(beat_ticks))
+                .ok_or_else(overflow)?;
+            let beats = beat
+                .checked_sub(1)
+                .and_then(|b| b.checked_mul(beat_ticks))
+                .ok_or_else(overflow)?;
+            bars.checked_add(beats)
+                .and_then(|t| t.checked_add(step))
+                .ok_or_else(overflow)
+        };
         let time = match parts.as_slice() {
             [total] => *total,
-            [measure, beat] => {
-                (measure - 1 + self.measure_shift) * numerator * beat_ticks
-                    + (beat - 1) * beat_ticks
-            }
-            [measure, beat, step, ..] => {
-                (measure - 1 + self.measure_shift) * numerator * beat_ticks
-                    + (beat - 1) * beat_ticks
-                    + step
-            }
+            [measure, beat] => position(*measure, *beat, 0)?,
+            [measure, beat, step, ..] => position(*measure, *beat, *step)?,
             [] => return Err(MmlError::new(line, "Timeの引数が空です")),
         };
+        let time = self.checked_time(time.max(0), 0, line)?;
         let track = self.track();
-        track.time = time.max(0);
+        track.time = time;
         track.last_note = None;
         Ok(())
     }
@@ -907,8 +950,7 @@ impl<'a> Compiler<'a> {
         data.extend_from_slice(body);
         data.push(0xf7);
         let time = self.track().time;
-        self.track().events.push(Event::new(time, data));
-        Ok(())
+        self.push_event(Event::new(time, data))
     }
 
     /// `Int name[=value];`, `Str name[={"..."}];`, `Array name[=(a,b,c)];`
@@ -1099,6 +1141,21 @@ impl<'a> Compiler<'a> {
         expr::eval(cur, self)
     }
 
+    /// Set the timebase, refusing a value the SMF header cannot hold.
+    fn set_timebase_checked(&mut self, value: i64, line: usize) -> Result<()> {
+        if value <= 0 || value > crate::smf::MAX_TIMEBASE {
+            return Err(MmlError::new(
+                line,
+                format!(
+                    "TimeBaseは1〜{}の範囲で指定してください: {value}",
+                    crate::smf::MAX_TIMEBASE
+                ),
+            ));
+        }
+        self.set_timebase(value);
+        Ok(())
+    }
+
     /// Changing the timebase rescales the default note length of every track
     /// that has not been given an explicit one yet.
     fn set_timebase(&mut self, value: i64) {
@@ -1193,8 +1250,7 @@ impl<'a> Compiler<'a> {
         data.extend_from_slice(&payload);
 
         let time = self.track().time;
-        self.track().events.push(Event::new(time, data));
-        Ok(())
+        self.push_event(Event::new(time, data))
     }
 
     /// `@n[,msb,lsb]` — program change, with optional bank select first.
@@ -1217,10 +1273,7 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             (track.time, track.channel)
         };
-        self.track()
-            .events
-            .push(Event::program_change(time, channel, program));
-        Ok(())
+        self.push_event(Event::program_change(time, channel, program))
     }
 
     /// `y(n),(value)` — write a control change by number.
@@ -1274,9 +1327,7 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             (track.time, track.channel)
         };
-        self.track()
-            .events
-            .push(Event::new(time, vec![0xe0 | (channel & 0x0f), lsb, msb]));
+        let _ = self.push_event(Event::new(time, vec![0xe0 | (channel & 0x0f), lsb, msb]));
     }
 
     fn write_cc(&mut self, controller: i64, value: i64) {
@@ -1286,9 +1337,7 @@ impl<'a> Compiler<'a> {
         };
         let controller = controller.clamp(0, 127) as u8;
         let value = value.clamp(0, 127) as u8;
-        self.track()
-            .events
-            .push(Event::control_change(time, channel, controller, value));
+        let _ = self.push_event(Event::control_change(time, channel, controller, value));
     }
 
     /// Read up to `max` comma-separated integers, with or without parentheses:
@@ -1441,22 +1490,28 @@ impl<'a> Compiler<'a> {
     }
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
         let (length, _) = self.read_note_options(cur)?;
         let length = length.unwrap_or_else(|| self.track().length);
+        let time = self.track().time;
+        let next = self.checked_time(time, length, line)?;
         let track = self.track();
-        track.time += length;
+        track.time = next;
         track.last_note = None;
         Ok(())
     }
 
     /// `^` extends the previous note; with no preceding note it is a rest.
     fn tie(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
         let (length, _) = self.read_note_options(cur)?;
         let length = length.unwrap_or_else(|| self.track().length);
         let gate_percent = self.track().gate_percent;
         let q_max = self.q_max;
+        let time = self.track().time;
+        let next = self.checked_time(time, length, line)?;
         let track = self.track();
-        track.time += length;
+        track.time = next;
 
         let Some(last) = track.last_note else {
             return Ok(()); // no note to extend: behaves as a rest
@@ -1489,25 +1544,27 @@ impl<'a> Compiler<'a> {
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
         let gate = gate_ticks_scaled(length, gate_value, q_max);
-        let track = self.track();
+        let (time, timing, channel) = {
+            let track = self.track();
+            (
+                track.time,
+                options.timing.unwrap_or(track.timing),
+                track.channel,
+            )
+        };
+        let start = self.checked_time(time, timing, line)?;
+        let end = self.checked_time(start, gate, line)?;
+        let next = self.checked_time(time, length, line)?;
 
-        let time = track.time;
-        let start = time + options.timing.unwrap_or(track.timing);
-        let channel = track.channel;
-        track
-            .events
-            .push(Event::note_on(start, channel, note_no as u8, velocity));
-        track.events.push(Event::note_off(
-            start + gate,
-            channel,
-            note_no as u8,
-            velocity,
-        ));
+        self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
+        self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
+
+        let track = self.track();
         track.last_note = Some(LastNote {
             off_index: track.events.len() - 1,
             start,
         });
-        track.time = time + length;
+        track.time = next;
         Ok(())
     }
 
@@ -1845,7 +1902,9 @@ fn gate_ticks(length: i64, gate_percent: i64) -> i64 {
 /// As [`gate_ticks`], but with `q` measured against `System.qMax` instead of
 /// 100 — `System.qMax=8; q8` is a full-length note, for old MML dialects.
 fn gate_ticks_scaled(length: i64, gate_value: i64, q_max: i64) -> i64 {
-    let gate = length * gate_value / q_max.max(1) - 1;
+    // Saturating, not wrapping: an absurd length is caught downstream by the
+    // time check, and must not overflow on the way there.
+    let gate = length.saturating_mul(gate_value) / q_max.max(1) - 1;
     gate.max(1)
 }
 
@@ -1853,7 +1912,7 @@ fn gate_ticks_scaled(length: i64, gate_value: i64, q_max: i64) -> i64 {
 /// `System.vMax=15` maps v15 to 120, matching the Pascal build.
 fn scale_velocity(velocity: i64, v_max: i64) -> u8 {
     let factor = 128 / v_max.max(1);
-    (velocity * factor).clamp(0, 127) as u8
+    velocity.saturating_mul(factor).clamp(0, 127) as u8
 }
 
 #[cfg(test)]
