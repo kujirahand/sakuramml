@@ -7,6 +7,8 @@ use sakuramml_core::IncludeResolver;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+mod midi_dump;
+
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() -> ExitCode {
@@ -38,6 +40,12 @@ impl From<String> for Failure {
 }
 
 fn run(args: &[String]) -> Result<(), Failure> {
+    if matches!(
+        args.first().map(String::as_str),
+        Some("--dump-midi" | "--dump" | "-m")
+    ) {
+        return run_midi_dump(&args[1..]);
+    }
     let options = parse_args(args)?;
 
     let (source, origin) = match &options.source {
@@ -94,6 +102,27 @@ fn run(args: &[String]) -> Result<(), Failure> {
     if options.pause {
         let mut line = String::new();
         let _ = std::io::stdin().read_line(&mut line);
+    }
+    Ok(())
+}
+
+fn run_midi_dump(args: &[String]) -> Result<(), Failure> {
+    let input = args.first().ok_or_else(|| {
+        Failure::Error("--dump-midi にMIDIファイルを指定してください".to_string())
+    })?;
+    if args.len() > 2 {
+        return Err(Failure::Error(
+            "--dump-midi の出力先は1個だけ指定できます".to_string(),
+        ));
+    }
+    let bytes =
+        std::fs::read(input).map_err(|e| format!("MIDIファイルを読み込めません: {input} ({e})"))?;
+    let text = midi_dump::dump(&bytes).map_err(|e| format!("MIDIダンプに失敗しました: {e}"))?;
+    if let Some(output) = args.get(1) {
+        std::fs::write(output, text)
+            .map_err(|e| format!("MIDIダンプを書き込めません: {output} ({e})"))?;
+    } else {
+        print!("{text}");
     }
     Ok(())
 }
@@ -163,6 +192,7 @@ fn help_text() -> String {
          [USAGE]\n\
          csakura mmlfile [midifile] ... Compile file\n\
          csakura -e code [midifile] ... Evaluate code\n\
+         csakura --dump-midi file.mid [dump.txt] ... Dump normalized events\n\
          csakura -pause             ... Wait for Enter when done\n\
          csakura -v                 ... Show version"
     )
@@ -256,6 +286,12 @@ mod tests {
     fn missing_inline_source_is_an_error() {
         let args = vec!["-e".into()];
         assert!(matches!(parse_args(&args), Err(Failure::Error(_))));
+    }
+
+    #[test]
+    fn dump_mode_requires_an_input_file() {
+        let args = vec!["--dump-midi".into()];
+        assert!(matches!(run(&args), Err(Failure::Error(_))));
     }
 
     #[test]

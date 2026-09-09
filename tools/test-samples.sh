@@ -1,8 +1,11 @@
 #!/bin/sh
 
-# Compare the generated MIDI bytes from the Pascal and Rust compilers.
+# Compare the generated MIDI bytes and normalized event dumps from the Pascal
+# and Rust compilers.
 # A byte is different when it differs at the same offset, or exists only in
 # one output. The denominator is the larger of the two file sizes.
+# Event difference uses ordinary `diff`: the larger of removed/added lines,
+# divided by the larger normalized-dump line count.
 
 set -u
 
@@ -28,9 +31,11 @@ comparable_count=0
 exact_count=0
 total_different=0
 total_compared=0
+total_event_different=0
+total_event_compared=0
 
-printf '%-18s %8s %11s %19s %9s\n' 'sample' 'Pascal' 'Rust' 'different/compared' 'rate'
-printf '%-18s %8s %11s %19s %9s\n' '------------------' '--------' '-----------' '-------------------' '---------'
+printf '%-18s %8s %11s %11s %11s\n' 'sample' 'Pascal' 'Rust' 'byte差' 'event差'
+printf '%-18s %8s %11s %11s %11s\n' '------------------' '--------' '-----------' '-----------' '-----------'
 
 for source_file in "$repo_dir"/sample/*.mml; do
     [ -e "$source_file" ] || continue
@@ -88,15 +93,50 @@ for source_file in "$repo_dir"/sample/*.mml; do
         if [ "$different_bytes" -eq 0 ]; then
             exact_count=$((exact_count + 1))
         fi
-        byte_summary="$different_bytes/$compared_bytes"
-        rate_summary="${difference_rate}%"
+        byte_summary="${difference_rate}%"
+
+        pascal_dump="$result_dir/$stem.pascal.txt"
+        rust_dump="$result_dir/$stem.rust.txt"
+        "$rust_compiler" --dump-midi "$pascal_midi" "$pascal_dump" > /dev/null 2>&1
+        pascal_dump_exit=$?
+        "$rust_compiler" --dump-midi "$rust_midi" "$rust_dump" > /dev/null 2>&1
+        rust_dump_exit=$?
+        if [ "$pascal_dump_exit" -eq 0 ] && [ "$rust_dump_exit" -eq 0 ]; then
+            pascal_lines=$(wc -l <"$pascal_dump" | tr -d ' ')
+            rust_lines=$(wc -l <"$rust_dump" | tr -d ' ')
+            if [ "$pascal_lines" -ge "$rust_lines" ]; then
+                event_compared=$pascal_lines
+            else
+                event_compared=$rust_lines
+            fi
+            event_diff="$result_dir/$stem.diff"
+            diff "$pascal_dump" "$rust_dump" >"$event_diff" 2>/dev/null || true
+            removed_lines=$(grep -c '^< ' "$event_diff" 2>/dev/null || true)
+            added_lines=$(grep -c '^> ' "$event_diff" 2>/dev/null || true)
+            if [ "$removed_lines" -ge "$added_lines" ]; then
+                event_different=$removed_lines
+            else
+                event_different=$added_lines
+            fi
+            if [ "$event_compared" -eq 0 ]; then
+                event_rate=0.00
+            else
+                event_rate=$(awk -v different="$event_different" -v compared="$event_compared" \
+                    'BEGIN { printf "%.2f", different * 100 / compared }')
+            fi
+            total_event_different=$((total_event_different + event_different))
+            total_event_compared=$((total_event_compared + event_compared))
+            event_summary="${event_rate}%"
+        else
+            event_summary='-'
+        fi
     else
         byte_summary='-'
-        rate_summary='-'
+        event_summary='-'
     fi
 
-    printf '%-18s %8s %11s %19s %9s\n' \
-        "$sample_name" "$pascal_result" "$rust_result" "$byte_summary" "$rate_summary"
+    printf '%-18s %8s %11s %11s %11s\n' \
+        "$sample_name" "$pascal_result" "$rust_result" "$byte_summary" "$event_summary"
 done
 
 if [ "$total_compared" -eq 0 ]; then
@@ -105,9 +145,16 @@ else
     total_rate=$(awk -v different="$total_different" -v compared="$total_compared" \
         'BEGIN { printf "%.2f%%", different * 100 / compared }')
 fi
+if [ "$total_event_compared" -eq 0 ]; then
+    total_event_rate='-'
+else
+    total_event_rate=$(awk -v different="$total_event_different" -v compared="$total_event_compared" \
+        'BEGIN { printf "%.2f%%", different * 100 / compared }')
+fi
 
-printf '\n合計: %s件 / 比較可能: %s件 / 完全一致: %s件 / 加重差異率: %s\n' \
-    "$sample_count" "$comparable_count" "$exact_count" "$total_rate"
+printf '\n合計: %s件 / 比較可能: %s件 / バイト完全一致: %s件\n' \
+    "$sample_count" "$comparable_count" "$exact_count"
+printf '加重差異率: byte=%s / event=%s\n' "$total_rate" "$total_event_rate"
 
 if [ "$comparable_count" -ne "$sample_count" ]; then
     exit 2

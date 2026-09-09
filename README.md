@@ -44,7 +44,7 @@ Rust CLI だけをビルドする場合、FPC と `wasm-pack` は不要です。
 | `just build-rust` | Rust ワークスペースをビルド |
 | `just build-cli` | Rust CLI のみをビルド |
 | `just buld-wasm` | ブラウザ向け WASM パッケージをビルド |
-| `just test-samples` | `sample/*.mml`を両実装で変換し、MIDIのバイト差異率を表示 |
+| `just test-samples` | `sample/*.mml`を両実装で変換し、MIDIのバイト差異率とイベント差異率を表示 |
 
 生成物の主な出力先は次のとおりです。
 
@@ -65,6 +65,12 @@ src/rust/target/debug/csakura sample/scale.mml scale.mid
 
 ```sh
 src/rust/target/debug/csakura -e "Tempo=120 o5 l4 cdefgab>c" scale.mid
+```
+
+生成済みMIDIを比較しやすいイベント列へ変換するには`--dump-midi`を使います。
+
+```sh
+src/rust/target/debug/csakura --dump-midi scale.mid scale.txt
 ```
 
 引数を省略した使い方は `--help` で確認できます。
