@@ -105,13 +105,24 @@ pub fn to_mml(src: &str) -> String {
 
     'outer: while index < chars.len() {
         let ch = chars[index];
-        if ch == '"' {
-            in_string = !in_string;
+        if in_string {
             out.push(ch);
+            if ch == '"' {
+                in_string = false;
+            }
             index += 1;
             continue;
         }
-        if in_string || ch.is_ascii() {
+        // A string starts at `{"`, both characters at once; a bare `"` is the
+        // octave-down operator.
+        if ch == '{' && chars.get(index + 1) == Some(&'"') {
+            out.push('{');
+            out.push('"');
+            index += 2;
+            in_string = true;
+            continue;
+        }
+        if ch.is_ascii() {
             out.push(ch);
             index += 1;
             continue;

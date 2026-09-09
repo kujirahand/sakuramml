@@ -545,3 +545,57 @@ fn hexadecimal_literals() {
         compile("n120").unwrap().smf
     );
 }
+
+// --- one-shot octave shifts, and the Japanese symbol table ---
+
+/// `` ` `` and `"` shift the octave for the next note only, then it reverts.
+#[test]
+fn temporary_octave_shifts() {
+    assert_golden(
+        "c `c c",
+        "4d546864000000060001000100604d54726b0000001c00903c644b803c64159048644b80486415903c64\
+         4b803c6415ff2f00",
+    );
+    assert_golden(
+        "c \"c c",
+        "4d546864000000060001000100604d54726b0000001c00903c644b803c64159030644b80306415903c64\
+         4b803c6415ff2f00",
+    );
+}
+
+/// A bare `"` is that octave operator, so only `{"` may open a string —
+/// otherwise `q30 d"ad` would swallow the rest of the piece as text.
+#[test]
+fn a_bare_quote_does_not_start_a_string() {
+    assert_same_bytes("q30 d\"ad", "q30 d <a >d");
+    // A real string still works, and keeps its own punctuation.
+    let out = compile(r#"TrackName={"テスト１"} c"#).unwrap();
+    let needle = "テスト１".as_bytes();
+    let cp932: Vec<u8> = {
+        let (bytes, _) = sakuramml_core::encoding::encode_cp932("テスト１", 1);
+        bytes
+    };
+    assert!(out.smf.windows(cp932.len()).any(|w| w == cp932));
+    assert!(!out.smf.windows(needle.len()).any(|w| w == needle));
+}
+
+/// 【】 are brackets and ↑↓ are octave changes, so Japanese notation reaches
+/// the same MML as the ASCII form.
+#[test]
+fn japanese_symbols_convert() {
+    assert_same_bytes("【ドレミ】", "[cde]");
+    assert_same_bytes("↑ド↓レ", ">c<d");
+    assert_same_bytes("ド♯レ♭", "c#d-");
+    assert_same_bytes("音量一二三 ドレミ", "v123 cde");
+}
+
+#[track_caller]
+fn assert_same_bytes(actual: &str, expected: &str) {
+    let left = compile(actual).unwrap_or_else(|e| panic!("failed to compile {actual:?}: {e}"));
+    let right = compile(expected).unwrap_or_else(|e| panic!("failed to compile {expected:?}: {e}"));
+    assert_eq!(
+        hex_string(&left.smf),
+        hex_string(&right.smf),
+        "\n  {actual:?}\n  should equal {expected:?}"
+    );
+}

@@ -43,6 +43,8 @@ struct TrackState {
     events: Vec<Event>,
     /// Time at which the most recent note ended, so `^` can extend it.
     last_note: Option<LastNote>,
+    /// One-shot octave shift from `` ` `` or `"`, applied to the next note.
+    octave_once: i64,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -63,6 +65,7 @@ impl TrackState {
             gate_percent: 80,
             events: Vec::new(),
             last_note: None,
+            octave_once: 0,
         }
     }
 }
@@ -305,6 +308,17 @@ impl<'a> Compiler<'a> {
             '[' => {
                 cur.advance();
                 self.repeat(cur)
+            }
+            // `` ` `` and `"` shift the octave for the next note only.
+            '`' => {
+                cur.advance();
+                self.track().octave_once += 1;
+                Ok(())
+            }
+            '"' => {
+                cur.advance();
+                self.track().octave_once -= 1;
+                Ok(())
             }
             '>' => {
                 cur.advance();
@@ -1381,7 +1395,11 @@ impl<'a> Compiler<'a> {
         }
 
         let (length, options) = self.read_note_options(cur);
-        let note_no = self.track().octave * 12 + base + accidental + self.key_shift;
+        let octave = {
+            let track = self.track();
+            track.octave + std::mem::take(&mut track.octave_once)
+        };
+        let note_no = octave * 12 + base + accidental + self.key_shift;
         self.write_note(note_no, length, options, line)
     }
 
@@ -1734,9 +1752,14 @@ fn control_change_number(name: &str) -> Option<i64> {
 fn split_loop_break(body: &str) -> (&str, Option<&str>) {
     let mut depth = 0i32;
     let mut in_string = false;
+    let mut previous = ' ';
     for (index, ch) in body.char_indices() {
+        let was_string_start = previous == '{' && ch == '"';
+        previous = ch;
         match ch {
-            '"' => in_string = !in_string,
+            // Strings start at `{"`; a bare `"` is the octave-down operator.
+            '"' if was_string_start => in_string = true,
+            '"' if in_string => in_string = false,
             _ if in_string => {}
             '[' | '{' | '(' => depth += 1,
             ']' | '}' | ')' => depth -= 1,

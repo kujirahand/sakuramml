@@ -80,7 +80,11 @@ Implemented:
   call rather than the note F
 * `System.*` options — `KeyFlag`, `Keyshift`, `qMax`, `vMax`, `MeasureShift`,
   `TimeBase`; unimplemented ones are skipped with a warning rather than failing
-* the sutoton (Japanese) notation layer — `テンポ120 ドレミ` compiles
+* the sutoton (Japanese) notation layer — `テンポ120 ドレミ` compiles, along
+  with the symbol table behind it: 【】 are brackets, ↑↓ change octave, ♯♭ are
+  accidentals, and kanji numerals are digits (`音量一二三`)
+* `` ` `` and `"`, which shift the octave for one note. A bare `"` is that
+  operator, so only `{"` opens a string
 * `Include`, resolved through a caller-supplied [`IncludeResolver`].
   `stdmsg.h` is loaded automatically before every song — that is where the GM
   instrument names (`@(GrandPiano)`) and the reset macros come from — and a

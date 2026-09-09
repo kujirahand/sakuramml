@@ -174,9 +174,17 @@ impl Cursor {
                 continue;
             }
             match ch {
-                '"' => {
+                // A string starts at `{"`, both characters at once; a bare
+                // `"` lowers the octave for one note, so it must not swallow
+                // the rest of the block.
+                '{' if self.peek() == Some('"') => {
+                    self.advance();
                     in_string = true;
-                    body.push(ch);
+                    if open == '{' {
+                        depth += 1;
+                    }
+                    body.push('{');
+                    body.push('"');
                 }
                 c if c == open => {
                     depth += 1;
