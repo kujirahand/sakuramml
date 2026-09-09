@@ -263,41 +263,35 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
 
 ### 残作業（Rust版が実用に達するために必要）
 
-`sample/`の21ファイル中6ファイル（`4.mml` `40.mml` `47.mml` `scale.mml`
-`rythm-1.mml` `rythm-4.mml`）が完全にコンパイルできる。以下は残り15ファイルを
-ブロックしている項目を、実際のエラーから逆算して並べたもの。
+`sample/`の21ファイル中**10ファイル**がコンパイルできる（`4` `40` `47` `random`
+`scale` `EasyTest` `MidiDelayTest` `rythm-1` `rythm-2` `rythm-4`）。
+以下は残り11ファイルをブロックしている項目を、実際のエラーから逆算したもの。
 
 **完了済み**
-- `Function`定義と呼び出し / `SysEx`と`$`16進リテラル
-- リズムマクロ（`$`定義、`Rythm{}`）、`Sub`、ユーザー定義ストトン（`~`）
-  - 併せて前処理の順序をPascal版（記号変換→ストトン）に合わせた
-- `Div`（連符）、`Play`、`Key`、`#`文字列マクロ、和音`'...'`
-- 組み込み関数のうち `Random`/`RandomSelect`/`SizeOf`/`StrToLen`/`HEX`/`ASC`/
-  `CHR`/`Step`/`VERSION`/`#STR`
-- 資源制限とSMF範囲検証（`core/tests/limits.rs`）
-- `.onNote`（音符属性 `v`/`q`/`t`/`l`/`o` のみ）
+- `Function`、`SysEx`と`$`16進、リズムマクロ、`Sub`、ユーザー定義ストトン（`~`）
+- `Div`、`Play`、`Key`、`#`文字列マクロ、和音`'...'`、`DirectSMF`
+- **先行指定の全ファミリ**（`core/src/compiler/advance.rs`）:
+  `.onNote/.N`・`.onTime/.T`・`.onCycle/.C`・`.onNoteWave/.W`・`.onNoteWaveEx/.WE`・
+  `.onNoteWaveR/.WR`・`.Sine`・`.onNoteSine`・`.Delay`・`.Repeat`・`.Random`・
+  `.Range`・`.Frequency`・`.Max`
+- `q%`（ステップ指定）、`I++`/`I--`、`For`ヘッダ内の宣言
+- `NoteNo`/`MML`（引数をMMLテキストとして受け取る）、`!n`記法
+- 式で書く音長（`c*3`、`r*%(Delay)`）、式のループ回数（`[(I) ...]`）、
+  複数行にわたる引数リスト、`y0((v))`、`y256.Frequency(1)`
+- 定義がコマンド名を上書きする規則（`Str S` が `Sub` の別名 `S` に優先）
+- 資源制限とSMF範囲検証
 
-**未完了（Pascal版で挙動を実測済み。実装するだけの状態）**
-1. **`|`（小節線）を空白として読み飛ばす** — `mml_base.pas:1001`は
-   `[' ', #9, ';', '|']`を読み飛ばす。現状`|`でエラーになる（66.mml）。最小の修正。
-2. **関数の引数省略時は0** — Pascal版は`Function f(Len,Delay)`を`f(1)`で呼ぶと
-   `Delay=0`になる。現状はエラーにしている（seija.mml、`Include/bend.h`が該当）。
-3. ~~`q%n`（ゲートをステップ値で直接指定）~~ 完了
-4. ~~`I++` / `I--`、`For`ヘッダ内の変数宣言~~ 完了
-
-**未完了（挙動の調査が必要）**
-5. ~~先行指定~~ 完了。CC/ベンドへの `.onNote/.N`・`.onTime/.T`・`.onCycle/.C`・
-   `.onNoteWave/.W`・`.onNoteWaveEx/.WE`・`.onNoteWaveR/.WR`・`.Sine`・`.onNoteSine`、
-   および `.Delay`/`.Repeat`/`.Random`/`.Range`/`.Frequency`/`.Max` を実装
-   （`core/src/compiler/advance.rs`）。仕様の根拠はPascal版の`WriteCCWave`と
-   `TNoteInfo.GetValue`。引数中の`!n`記法も実装。
-   - 音符属性への推移系（`v.onTime`等）のみ未実装で、警告してスキップする。
-   - `.Random`の値は一致しない（乱数生成器が異なるため。spec/10に明記）。
-6. ~~`DirectSMF`~~ 完了（生のMIDIバイト列をそのままイベントとして書く）
-7. `PlayFrom`、`Stretch`、`r*%(n)`（bend.hが使う繰り返し記法）
-8. 組み込み関数の残り: `MID`/`POS`/`Replace`/`ArraySort*`等
-   （`NoteNo`/`MML`は完了。両者は引数を式ではなくMMLテキストとして受け取る）
-9. `#`によるコマンド名参照（リズムモード内の`#word`）
+**未完了**
+1. `Cresc`/`Decresc`（230.mml）。実測済み: `Cresc=4` は EP(CC11) を
+   現在値から127へ指定長で推移させる。`.onTime`の仕組みで実装できる。
+2. `PlayFrom`/`PlayTo`（sakura2.mml）— 演奏開始位置の指定。
+3. 音長の`-`記法（seija.mml、230.mml）。`r-2.` のような負値付き音長で、
+   Pascal版の挙動が特異（時刻が戻る）。要調査。
+4. `Stretch`、`Solo`/`Mute`/`TrackMute`、`DeleteCC`/`CCMute`
+5. 組み込み関数の残り: `MID`/`POS`/`Replace`/`ArraySort*`/`StrToNum`等
+6. 配列の動的な拡張（RndMake.mml が範囲外書き込みで落ちる）
+7. `#`マクロ本体内で失敗するケース（23.mml、test_01.mml、sutoton-9.mml）—
+   個別調査が必要。
 
 **方針**
 - 未実装のコマンド・修飾子は、**エラーで止めず警告してスキップ**する方針を継続する
