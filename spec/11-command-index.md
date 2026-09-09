@@ -1,7 +1,7 @@
 # コマンド索引
 
 この索引は現行 Rust で受理する主要コマンドを中心にしています。従来版の全コマンド名と旧 HTML ページ番号は
-`src/rust/SPEC.md` を参照してください。状態の意味は [互換性表](10-compatibility.md) に従います。
+[従来版の全コマンド表](12-legacy-command-table.md) を参照してください。状態の意味は [互換性表](10-compatibility.md) に従います。
 
 ## 音符と構造
 
@@ -28,9 +28,10 @@
 | `Track` / `TR` / `NowTrack` | `TR=n` | 実装済み | [03](03-tracks-and-time.md) |
 | `Channel` / `CH` | `CH=n` | 実装済み | [03](03-tracks-and-time.md) |
 | `TrackSync` | `TrackSync` | 実装済み | [03](03-tracks-and-time.md) |
+| `Play` | `Play({track0},{track1},...)` | 実装済み | [03](03-tracks-and-time.md) |
 | `TimeBase` | `TimeBase=n` | 実装済み | [03](03-tracks-and-time.md) |
 | `TimeSignature` | `TimeSignature=n,d` | 実装済み | [03](03-tracks-and-time.md) |
-| `Time` | `Time(tick)` / `Time(m:b:s)` | 実装済み | [03](03-tracks-and-time.md) |
+| `Time` | コマンドまたは式 `Time(tick)` / `Time(m:b:s)` | 実装済み | [03](03-tracks-and-time.md) |
 | `Tempo` | `Tempo=bpm` | 実装済み | [09](09-smf.md) |
 | `TempoChange` | `TempoChange=bpm` | 一部 | [10](10-compatibility.md) |
 

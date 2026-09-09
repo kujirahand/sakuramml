@@ -118,6 +118,7 @@ Int result=Arp(60)
 | `ASC(s)` | 先頭 Unicode 文字のコードポイント |
 | `CHR(n)` | Unicode コードポイントから文字列化 |
 | `VERSION()` | 互換用バージョン数 |
+| `Time(m:b:s)` | 小節・拍・stepを絶対tickへ変換 |
 
 乱数列は再現可能です。`System.RandomSeed=n` でシードを指定します。
 

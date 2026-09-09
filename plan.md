@@ -194,7 +194,7 @@ src/rust/
   wasm/                   # wasm-bindgenラッパー（ブラウザ向け、主ターゲット）
     src/lib.rs            #   compileMml(text) -> { midi: Uint8Array, warnings: string[] }
     pkg/                  #   wasm-pack出力（gitignore）
-  SPEC.md                 # doc/から抽出したコマンド仕様表（Phase 0の成果物）
+  README.md               # Rust実装の概要とビルド手順
   build-wasm.sh           # wasm-pack / cargo build --target wasm32-unknown-unknown
 ```
 
@@ -205,7 +205,8 @@ src/rust/
 2. `.gitignore` にビルド生成物（`*.dcu`, `*.o`, `*.ppu`, `*.exe`, `.DS_Store`, `target/`, `pkg/`等）を追加。
 3. `git mv` で既存Pascal実装一式を `src/pascal/` へ移動し、Pascal版がビルドできることを確認。
 4. `doc/command.txt` / `doc/command2.txt` / `doc/reference/*.htm` からコマンド一覧・構文・
-   デフォルト値を抽出し、`src/rust/SPEC.md` にコマンドごとの仕様表としてまとめる
+   デフォルト値を抽出し、コマンドごとの仕様表としてまとめる
+   （現在は `spec/12-legacy-command-table.md`）
    （150コマンドを一気に読むと破綻するので、後続フェーズのタスクリストを兼ねる）。
 5. `sample/*.mml` をゴールデンテスト用コーパスとして整理。
 
@@ -246,7 +247,7 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
 ## 進捗（2026-09-09時点）
 
 ### 完了
-- **Phase 0**: ディレクトリ再編（`src/pascal/`）、`.gitignore`整備、`SPEC.md`生成（doc/から約500行抽出）。
+- **Phase 0**: ディレクトリ再編（`src/pascal/`）、`.gitignore`整備、全コマンド表の生成（doc/から約500行抽出。現在は`spec/12-legacy-command-table.md`）。
 - **Phase 1**: ワークスペース（core/cli/wasm）、SMF書き出し、トークナイザ、基本コマンド。
 - **Phase 2**: 音色・CC・ピッチベンド・RPN/NRPN・リセット、ループ`[ ]`、変数と式評価、
   `If`/`For`/`While`/`Exit`/`Print`、`System.*`オプション、KeyFlag、拍子、Time、
@@ -261,33 +262,44 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
   - **ドキュメント**: ルート`ReadMe.md`、`src/rust/README.md`を更新。
 
 ### 残作業（Rust版が実用に達するために必要）
-`sample/*.mml`のうち`scale.mml`と`rythm-1.mml`が通るようになった。残るブロッカー：
+
+`sample/`の21ファイル中6ファイル（`4.mml` `40.mml` `47.mml` `scale.mml`
+`rythm-1.mml` `rythm-4.mml`）が完全にコンパイルできる。以下は残り15ファイルを
+ブロックしている項目を、実際のエラーから逆算して並べたもの。
 
 **完了済み**
-1. ~~`Function`定義と呼び出し~~ 完了
-2. ~~`SysEx`コマンドと`$`16進リテラル~~ 完了
-3. ~~リズムマクロ（`$`定義、`~`）~~ 完了（`Sub`、ユーザー定義ストトンも実装）
-   - 併せて前処理の順序をPascal版（記号変換→ストトン）に合わせた
+- `Function`定義と呼び出し / `SysEx`と`$`16進リテラル
+- リズムマクロ（`$`定義、`Rythm{}`）、`Sub`、ユーザー定義ストトン（`~`）
+  - 併せて前処理の順序をPascal版（記号変換→ストトン）に合わせた
+- `Div`（連符）、`Play`、`Key`、`#`文字列マクロ、和音`'...'`
+- 組み込み関数のうち `Random`/`RandomSelect`/`SizeOf`/`StrToLen`/`HEX`/`ASC`/
+  `CHR`/`Step`/`VERSION`/`#STR`
+- 資源制限とSMF範囲検証（`core/tests/limits.rs`）
+- `.onNote`（音符属性 `v`/`q`/`t`/`l`/`o` のみ）
 
-**未完了**
-4. `Div`（連符）、`Play`、`Stretch`（`Sub`は完了）
-5. 先行指定: `.onNote`は音符属性(`v`/`q`/`t`/`l`/`o`)のみ完了。残りは
-   `.onTime`/`.onCycle`/`.onNoteWave`系と、**CCへの`.onNote`**。
-   後者はPascal版が音符の1tick前に書き、さらに定義時にも1つ書くという
-   挙動をしており、規則が未特定。誤った出力を出さないよう現状は警告してスキップする。
-6. 組み込み関数: `Random`/`RandomSelect`/`SizeOf`/`StrToLen`/`HEX`/`ASC`/`CHR`/
-   `Step`/`VERSION`は完了。残りは`NoteNo`/`MML`/`MID`/`POS`/`Replace`等。
-8. その他のコマンド: `DirectSMF`、`Key`、`#`（コマンド名参照）、
-   RPNラッパー(`PitchBendSensitivity`等)
-7. ~~巨大入力・巨大な数値に対する資源制限とSMF範囲検証~~ 完了
-   （`core/tests/limits.rs`。イベント数予算100万、checked時刻演算、
-     SMFのdivision/デルタタイム範囲検証）
-   以下は当初の設計メモ:
-   - `[...]`、`For`、`While`、再帰を含むコンパイル全体で、生成イベント数または推定MIDIバイト数の
-     共通予算を設け、ブラウザのCPU枯渇・OOMを防ぐ。
-   - `Time`、音長、`TimeBase`などの時刻演算をchecked演算にし、SMFのdivision（15-bit）と
-     デルタタイムVLQ（最大`0x0fffffff`）を超える値はコンパイルエラーにする。
-   - CLIとWASMの双方で、境界値は成功し、上限超過はpanicせず診断を返すテストを追加する。
+**未完了（Pascal版で挙動を実測済み。実装するだけの状態）**
+1. **`|`（小節線）を空白として読み飛ばす** — `mml_base.pas:1001`は
+   `[' ', #9, ';', '|']`を読み飛ばす。現状`|`でエラーになる（66.mml）。最小の修正。
+2. **関数の引数省略時は0** — Pascal版は`Function f(Len,Delay)`を`f(1)`で呼ぶと
+   `Delay=0`になる。現状はエラーにしている（seija.mml、`Include/bend.h`が該当）。
+3. **`q%n`（ゲートをステップ値で直接指定）** — `q%10`はゲート10ステップ。
+   実測: `q%10 c` → ゲート9（=10-1）、残り87（EasyTest.mml）。
+4. **`I++` / `I--`（インクリメント演算子）** と、`For`ヘッダ内の変数宣言
+   （`For(Int J=0; ...)`）。後者はPascal版で動作する（RndMake.mml）。
+
+**未完了（挙動の調査が必要）**
+5. 先行指定の残り: `.onTime`/`.onCycle`/`.onNoteWave`系と、**CCへの`.onNote`**。
+   CCへの`.onNote`はPascal版が「定義時に1つ書き、以降は音符の1tick前に書く」
+   という挙動をしており、規則が未特定。誤った出力より警告を選び、現状はスキップしている。
+6. `DirectSMF`（生のMIDIバイト列を埋め込む。実測で挙動が不明瞭だった）
+7. `PlayFrom`、`Stretch`、`r*%(n)`（bend.hが使う繰り返し記法）
+8. 組み込み関数の残り: `NoteNo`/`MML`/`MID`/`POS`/`Replace`/`ArraySort*`等
+9. `#`によるコマンド名参照（リズムモード内の`#word`）
+
+**方針**
+- 未実装のコマンド・修飾子は、**エラーで止めず警告してスキップ**する方針を継続する
+  （曲全体がコンパイルできなくなるより、鳴らない部分を明示する方がよい）。
+  ただし音が変わる実装を推測で入れるのは避ける。
 
 テスト戦略は変更なし: 新コマンドは必ずPascal版の出力を実測し、
 `core/tests/golden.rs`にバイト列を固定してから実装する。

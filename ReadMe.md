@@ -22,14 +22,15 @@ tools/        Tools
 as it did before the reorganization. (On Windows, git needs `core.symlinks=true`
 for these to materialize as real links.)
 
-The Rust rewrite is planned in [plan.md](plan.md); its command spec is in
-[src/rust/SPEC.md](src/rust/SPEC.md). The Pascal implementation below remains
-the reference implementation.
+The Rust rewrite is planned in [plan.md](plan.md) and specified in
+[spec/](spec/). The Pascal implementation below remains the reference
+implementation.
 
 ## Rust / WebAssembly version
 
 A rewrite in Rust lives in [src/rust/](src/rust/) — see its
-[README](src/rust/README.md) and the migration plan in [plan.md](plan.md).
+[README](src/rust/README.md), the specification in [spec/](spec/), and the
+migration plan in [plan.md](plan.md).
 It runs as a CLI, under WASI, and in the browser via WebAssembly:
 
 ```sh

@@ -4,7 +4,8 @@ Rust rewrite of the SakuraMML compiler — MML text in, Standard MIDI File out.
 WebAssembly is the primary target; the CLI exists for development and testing.
 
 See [../../plan.md](../../plan.md) for the migration plan and
-[SPEC.md](SPEC.md) for the command reference extracted from `doc/`.
+[spec/](../../spec/) for the specification, whose
+[command index](../../spec/11-command-index.md) says what this build accepts.
 
 ## Layout
 
@@ -63,7 +64,7 @@ uses — the core now has no dependencies at all.
 ## Status
 
 Output is byte-identical to the Pascal build for everything covered by
-`core/tests/golden.rs` (42 cases).
+`core/tests/golden.rs` (68 cases).
 
 Implemented:
 
@@ -87,6 +88,8 @@ Implemented:
   operator, so only `{"` opens a string
 * rhythm mode — `$b{n36,}` binds a character, `Rythm{ brbr }` expands it —
   plus `Sub{...}`, and `~{name}={mml}` for user-defined Japanese macros
+* chords (`'ceg'4`), `Div` tuplets, `Play({track0},{track1},...)`, `Key`, and
+  `#name`/`Str` string macros
 * `.onNote` on the note attributes (`v`, `q`, `t`, `l`, `o`), cycling one
   value per note
 * resource limits: a compile-wide event budget and checked time arithmetic, so
@@ -102,8 +105,8 @@ Implemented:
   Randomness comes from a seeded generator in the crate (`System.RandomSeed`
   sets it), so compiles are reproducible and WASM needs no entropy source
 
-Still to port, in the order the sample songs need them: `Div` (tuplets),
-`Play`, `DirectSMF`, `Key`, the `#` command lookup, `NoteNo`/`MML`, and the
+Still to port, in the order the sample songs need them: `Stretch`,
+`DirectSMF`, the `#` command-name lookup, `NoteNo`/`MML`, and the
 rest of the 先行指定 family — the wave and cycle variants, and `.onNote` on
 control changes, which the Pascal build writes a tick ahead of the note by a
 rule this port has not pinned down yet. Unported modifiers warn and are

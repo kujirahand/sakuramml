@@ -28,7 +28,8 @@
 | `.onNote` | 一部 | `v q t l o`。CC/ベンドは現状警告 |
 | `.Random`, `.onTime`, `.onCycle`, Wave 系 | 警告 | 引数を読み飛ばし効果なし |
 | その他の `System.*` | 一部 | 08章に記載したもの以外は警告 |
-| `Play`, `PlayFrom`, `PlayTo` | 未実装 | ストトン展開後に未定義になる場合あり |
+| `Play` | 実装済み | 引数位置を0起点トラック番号として同時記述 |
+| `PlayFrom`, `PlayTo` | 未実装 | 演奏範囲の指定 |
 | `DirectSMF`, `NoteOn`, `NoteOff` | 未実装 | 低水準イベント命令 |
 | `TimeKey`, `TimeKeyFlag`, `TimeKey2` | 未実装 | 時間範囲つき移調・調号 |
 | `Stretch`, `Solo`, `Mute`, `TrackMute` | 未実装 | トラック編集系 |
@@ -61,7 +62,7 @@
 
 ## 仕様追加時の確認手順
 
-1. `src/rust/SPEC.md` と該当する `doc/command/*.htm` で書式を確認する。
+1. [従来版の全コマンド表](12-legacy-command-table.md) と該当する `doc/command/*.htm` で書式を確認する。
 2. Pascal のディスパッチ先と状態更新を確認する。
 3. 最小 MML を Pascal 版で変換し、MIDI バイトまたはイベント列を採取する。
 4. Rust に異常系を含む回帰テストを追加する。

@@ -38,10 +38,10 @@ Rust 版の利用可否については [互換性と実装状況](10-compatibili
 | 2 | `doc/command/*.htm`、`doc/reference/*.htm` | コマンドの意図、名称、利用例 |
 | 3 | `src/rust/core/tests/golden.rs` | MIDI バイト単位の移植確認 |
 | 4 | `src/rust/core/tests/script.rs`、`limits.rs` | スクリプトと異常系の現行動作 |
-| 5 | `src/rust/SPEC.md` | 旧 HTML から抽出した全コマンド一覧 |
+| 5 | [`12-legacy-command-table.md`](12-legacy-command-table.md) | 旧 HTML から抽出した全コマンド一覧 |
 
-`src/rust/SPEC.md` は網羅的な索引として残します。この `spec/` は、その表を置き換えるのではなく、
-各機能の状態遷移、MIDI への変換、エラー条件まで説明する詳細版です。
+[`12-legacy-command-table.md`](12-legacy-command-table.md) は網羅的な索引です。01〜11 の各章は、
+その表を置き換えるのではなく、各機能の状態遷移、MIDI への変換、エラー条件まで説明する詳細版です。
 
 ## 最小例
 
