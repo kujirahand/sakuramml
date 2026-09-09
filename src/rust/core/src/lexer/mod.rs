@@ -203,13 +203,19 @@ impl Cursor {
         }
     }
 
-    /// Read an identifier: a letter or `_` followed by letters, digits or `_`.
+    /// Read an identifier: a letter, `_` or a leading `#`, followed by
+    /// letters, digits or `_`.
     pub fn read_word(&mut self) -> Option<String> {
         let first = self.peek()?;
-        if !(first.is_ascii_alphabetic() || first == '_') {
+        if !(first.is_ascii_alphabetic() || first == '_' || first == '#') {
             return None;
         }
         let mut word = String::new();
+        // `#name` is a string macro, and the `#` is part of its name.
+        if first == '#' {
+            word.push('#');
+            self.advance();
+        }
         while let Some(c) = self.peek() {
             if c.is_ascii_alphanumeric() || c == '_' {
                 word.push(c);

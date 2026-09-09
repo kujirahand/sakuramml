@@ -325,7 +325,8 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
                 .ok_or_else(|| MmlError::new(line, "数値を読み取れません"))?;
             Ok(Value::Int(value))
         }
-        Some(c) if c.is_ascii_alphabetic() || c == '_' => {
+        // `#` leads a string macro's name, as in `#STR(n)` or `#Melody`.
+        Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '#' => {
             let name = cur
                 .read_word()
                 .ok_or_else(|| MmlError::new(line, "変数名を読み取れません"))?;

@@ -709,3 +709,57 @@ fn unported_modifiers_warn_instead_of_failing() {
         .iter()
         .any(|w| w.message.contains("コントロールチェンジ")));
 }
+
+// --- Div (tuplets) and string macros ---
+
+/// `Div{cde}4` fits three notes into one quarter note.
+#[test]
+fn div_shares_a_length_between_its_notes() {
+    assert_golden(
+        "Div{cde}4",
+        "4d546864000000060001000100604d54726b0000001c00903c6418803c6408903e6418803e6408904064\
+         1880406408ff2f00",
+    );
+    assert_golden(
+        "Div{cd}4",
+        "4d546864000000060001000100604d54726b0000001400903c6425803c640b903e6425803e640bff2f00",
+    );
+    // With no length given it uses the current default, so l8 halves it.
+    assert_same_bytes("l8 Div{cde}", "Div{cde}8");
+    // A rest counts as one of the shares.
+    assert_same_bytes("Div{crd}4", "l12 c r d");
+}
+
+/// The tuplet occupies exactly the length asked for, however much its body
+/// actually plays — a tie inside writes past the end without moving the
+/// pointer any further.
+#[test]
+fn div_leaves_the_pointer_after_the_stated_length() {
+    assert_golden(
+        "Div{c^d}4",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c6415903e6425803e6400ff2f00",
+    );
+    assert_same_bytes("Div{cde}4 e", "l12 cde l4 e");
+}
+
+/// `#name={mml}` defines a string macro; mentioning it plays its contents.
+#[test]
+fn string_macros_play_their_contents() {
+    assert_golden(
+        "#M={cde} #M",
+        "4d546864000000060001000100604d54726b0000001c00903c644b803c6415903e644b803e6415904064\
+         4b80406415ff2f00",
+    );
+    assert_same_bytes("#M={c} #M #M", "c c");
+    assert_same_bytes("#A={c} #B={d} #A #B", "c d");
+    // A plain Str variable behaves the same way.
+    assert_same_bytes(r#"Str s={"cde"} s"#, "cde");
+}
+
+#[test]
+fn string_macros_compose() {
+    // #STR turns a number into text, so macros can be built up.
+    let out = compile(r#"Int n=3; Print((#STR(n)+{"!"}))"#).unwrap();
+    assert_eq!(out.messages, vec!["3!".to_string()]);
+    assert_same_bytes(r#"#A={c} #B=(#A+{"d"}) #B"#, "c d");
+}

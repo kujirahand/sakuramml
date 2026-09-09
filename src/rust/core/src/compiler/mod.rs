@@ -302,7 +302,7 @@ impl<'a> Compiler<'a> {
         // so `Function f(){...}` makes a later `f` a call, not the note F.
         // The Pascal build behaves the same way: definitions overwrite the
         // command table.
-        if ch.is_ascii_alphabetic() || ch == '_' {
+        if ch.is_ascii_alphabetic() || ch == '_' || ch == '#' {
             let mut probe = cur.clone();
             if let Some(word) = probe.read_word() {
                 if self.functions.contains_key(&word) {
@@ -419,7 +419,7 @@ impl<'a> Compiler<'a> {
                 self.track().octave -= 1;
                 Ok(())
             }
-            c if c.is_ascii_alphabetic() || c == '_' => self.word_command(cur),
+            c if c.is_ascii_alphabetic() || c == '_' || c == '#' => self.word_command(cur),
             other => Err(MmlError::new(
                 line,
                 format!("解釈できない文字です: '{other}'"),
@@ -480,6 +480,7 @@ impl<'a> Compiler<'a> {
                 self.system_command(cur, &sub, line)
             }
             "Include" | "INCLUDE" => self.include(cur),
+            "Div" | "DIV" => self.div(cur),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
             "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
@@ -562,6 +563,23 @@ impl<'a> Compiler<'a> {
             "Marker" => self.meta_text(cur, event::META_MARKER, line),
             "CuePoint" => self.meta_text(cur, event::META_CUE_POINT, line),
             "InstrumentName" => self.meta_text(cur, event::META_INST_NAME, line),
+            // `#name` is a string macro: it defines itself on first mention,
+            // and a bare mention plays its contents.
+            other if other.starts_with('#') => {
+                let name = other.to_string();
+                self.variables
+                    .entry(name.clone())
+                    .or_insert_with(|| Value::Str(String::new()));
+                self.string_variable(cur, &name, line)
+            }
+            // A bare mention of a Str variable plays its contents too.
+            other
+                if matches!(self.variables.get(other), Some(Value::Str(_)))
+                    && !self.functions.contains_key(other) =>
+            {
+                let name = other.to_string();
+                self.string_variable(cur, &name, line)
+            }
             // A user-defined function, called as a command: `f` or `f(1,2)`.
             other if self.functions.contains_key(other) => {
                 let name = other.to_string();
@@ -710,6 +728,7 @@ impl<'a> Compiler<'a> {
                     .unwrap_or(0),
             ),
             "HEX" => Value::Str(format!("{:X}", int_arg(0)?)),
+            "#STR" => Value::Str(args.first().map(|v| v.as_str()).unwrap_or_default()),
             "ASC" => Value::Int(
                 args.first()
                     .map(|v| v.as_str())
@@ -877,6 +896,51 @@ impl<'a> Compiler<'a> {
         self.run_fragment(&expanded, line)
     }
 
+    /// A string variable in command position: assign to it, or play it.
+    ///
+    /// `#Melody={cde}` assigns; a later `#Melody` compiles those contents as
+    /// MML. Plain `Str` variables behave the same way.
+    fn string_variable(&mut self, cur: &mut Cursor, name: &str, line: usize) -> Result<()> {
+        cur.skip_spaces();
+        if cur.peek() == Some('=') {
+            return self.assign(cur, name);
+        }
+        let contents = match self.variables.get(name) {
+            Some(value) => value.as_str(),
+            None => return Ok(()),
+        };
+        if contents.is_empty() {
+            return Ok(());
+        }
+        let expanded = self.preprocess(&contents);
+        self.run_fragment(&expanded, line)
+    }
+
+    /// `Div{mml}(len)` — fit the block's notes into `len`, as a tuplet.
+    ///
+    /// The block's notes share the length equally, so `Div{cde}4` is a triplet
+    /// filling one quarter note.
+    fn div(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        let body = self.read_block(cur, line)?;
+        cur.skip_spaces();
+        let total = self.read_length(cur).unwrap_or_else(|| self.track().length);
+
+        let count = count_notes(&body).max(1);
+        let previous = self.track().length;
+        let start = self.track().time;
+        self.track().length = (total / count).max(1);
+        let outcome = self.run_fragment(&body, line);
+
+        // The tuplet occupies exactly `total`, however much the body played:
+        // `Div{c^d}4` writes past the end but the pointer still lands there.
+        let end = self.checked_time(start, total, line)?;
+        let track = self.track();
+        track.length = previous;
+        track.time = end;
+        outcome
+    }
+
     /// `Sub{ ... }` — play the block, then put the time pointer back.
     fn sub(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
@@ -926,6 +990,7 @@ impl<'a> Compiler<'a> {
         match name {
             "Include" | "INCLUDE" => self.include(cur),
             "KeyFlag" => self.key_flag(cur),
+            "Div" | "DIV" => self.div(cur),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
             "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
@@ -1958,6 +2023,33 @@ impl EvalContext for Compiler<'_> {
     }
 }
 
+/// Count the notes in a tuplet body, so they can share its length.
+///
+/// Note letters, `n` and `r` each count once; a tie adds length to the note
+/// before it rather than being a note of its own.
+fn count_notes(body: &str) -> i64 {
+    let chars: Vec<char> = body.chars().collect();
+    let mut count = 0;
+    let mut index = 0;
+    while index < chars.len() {
+        let ch = chars[index];
+        match ch {
+            'a'..='g' | 'n' | 'r' => {
+                count += 1;
+                index += 1;
+                // Skip the note's own suffixes so a length is not miscounted.
+                while matches!(chars.get(index), Some(c) if c.is_ascii_digit()
+                    || *c == '.' || *c == '+' || *c == '-' || *c == '#' || *c == '%')
+                {
+                    index += 1;
+                }
+            }
+            _ => index += 1,
+        }
+    }
+    count
+}
+
 /// What a `.onNote` list drives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OnNoteTarget {
@@ -2030,6 +2122,7 @@ fn is_builtin_function(name: &str) -> bool {
             | "SizeOf"
             | "StrToNum"
             | "HEX"
+            | "#STR"
             | "ASC"
             | "CHR"
             | "VERSION"
