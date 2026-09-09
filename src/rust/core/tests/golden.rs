@@ -492,6 +492,11 @@ fn key_flag_applies_accidentals_and_writes_key_signature() {
         "System.KeyFlag-(b) b",
         "4d546864000000060001000100604d54726b0000001200ff5902ff00009046644b80466415ff2f00",
     );
+    // Explicit accidentals add to KeyFlag; the flat cancels F sharp.
+    assert_golden(
+        "System.KeyFlag#(f) f-",
+        "4d546864000000060001000100604d54726b0000001200ff59020100009041644b80416415ff2f00",
+    );
 }
 
 #[test]

@@ -72,6 +72,11 @@ fn string_variables() {
 }
 
 #[test]
+fn meta_text_accepts_legacy_unquoted_braces() {
+    assert_same(r#"Lyric{A-melo} c"#, r#"Lyric={"A-melo"} c"#);
+}
+
+#[test]
 fn arrays_declare_and_index() {
     assert_same("Array a=(60,64,67); n(a(0)) n(a(1)) n(a(2))", "n60 n64 n67");
     assert_same("Array a=(1,2); n((a(0)+a(1)+57))", "n60");
@@ -185,6 +190,16 @@ fn while_loop_runs_its_body() {
 fn exit_leaves_the_enclosing_loop() {
     assert_same("Int i=0; While(i<3){c;Exit;i=(i+1)}", "c");
     assert_same("Int i; For(i=0;i<3;i=i+1){c;Exit}", "c");
+}
+
+#[test]
+fn exit_returns_from_a_function_without_stopping_the_song() {
+    assert_same("Function f(){c;Exit;d} f e", "c e");
+}
+
+#[test]
+fn exit_leaves_a_repeat_loop() {
+    assert_same("[4 c Exit d] e", "c e");
 }
 
 /// A runaway loop must fail rather than hang: a frozen browser tab is worse

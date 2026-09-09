@@ -172,7 +172,9 @@ impl<'a> Compiler<'a> {
             includes: &NoIncludes,
             timebase: DEFAULT_TIMEBASE,
             tracks: BTreeMap::new(),
-            current: 1,
+            // The Pascal compiler keeps global setup events in MTrk 0. An
+            // explicit `Track 1` must therefore start a separate track.
+            current: 0,
             warnings: Vec::new(),
             errors: Vec::new(),
             recover_errors: false,
@@ -1146,6 +1148,9 @@ impl<'a> Compiler<'a> {
         let previous_result = self.variables.remove(RESULT_VAR);
 
         let outcome = self.run_fragment(&function.body, function.line);
+        // EXIT at function scope returns from that function. Loops inside the
+        // function consume their own EXIT before control reaches here.
+        self.take_exit();
 
         // Restore what the call shadowed, whether or not the body succeeded.
         for (param_name, previous) in shadowed {
@@ -2243,6 +2248,9 @@ impl<'a> Compiler<'a> {
         let (body, tail) = split_loop_break(&body);
         for iteration in 0..count.max(0) {
             self.run_fragment(body, line)?;
+            if self.take_exit() {
+                break;
+            }
             let is_last = iteration == count - 1;
             if let Some(tail) = tail {
                 if !is_last {
@@ -2547,11 +2555,17 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         cur.eat('=');
         cur.skip_spaces();
-        let closing = match cur.peek() {
-            Some('{') => {
-                cur.advance();
-                '}'
+        if cur.eat('{') {
+            let body = cur
+                .read_balanced('{', '}')
+                .ok_or_else(|| MmlError::new(line, "文字列が } で閉じられていません"))?;
+            let trimmed = body.trim();
+            if trimmed.len() >= 2 && trimmed.starts_with('"') && trimmed.ends_with('"') {
+                return Ok(trimmed[1..trimmed.len() - 1].to_string());
             }
+            return Ok(body);
+        }
+        let closing = match cur.peek() {
             Some('(') => {
                 cur.advance();
                 ')'
@@ -2587,15 +2601,11 @@ impl<'a> Compiler<'a> {
             .ok_or_else(|| MmlError::new(line, format!("音名ではありません: {letter}")))?;
         let base = pitch_class_semitone(class);
 
-        let mut accidental = 0;
-        let mut explicit = false;
+        // Pascal adds a written accidental to the active KeyFlag. Thus, under
+        // KeyFlag#(f), `f-` cancels back to F rather than becoming E.
+        let mut accidental = self.key_flags[class];
         while let Some(sign) = cur.eat_any(&['+', '-', '#']) {
             accidental += if sign == '-' { -1 } else { 1 };
-            explicit = true;
-        }
-        // An explicit accidental overrides the key signature.
-        if !explicit {
-            accidental = self.key_flags[class];
         }
 
         let (length, options) = self.read_note_options(cur)?;
