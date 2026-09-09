@@ -37,11 +37,11 @@ uses
 
 procedure showHelp;
 begin
-  Writeln('=== MML Compiler sakuramml ===');
-  Writeln('version ' + VER_INFO + ' ' + DATE_INFO);
+  Writeln('=== MML Compiler sakuramml v' + VER_INFO + ' (' + DATE_INFO + ') ===');
   Writeln('[USAGE]');
-  Writeln('csakura mmlfile [midifile]');
-  Writeln('csakura -e mmlcode [midifile]');
+  Writeln('csakura mmlfile [midifile] ... Compile file');
+  Writeln('csakura -e code [midifile] ... Evaluate code');
+  Writeln('csakura -v                 ... Show version');
 end;
 
 var
@@ -58,6 +58,11 @@ begin
   while i <= ParamCount do
   begin
     // Check Parmeter options
+    if ParamStr(i) = '-v' then
+    begin
+      Writeln(VER_INFO);
+      Exit;
+    end;
     if ParamStr(i) = '-e' then
     begin
       Inc(i);
