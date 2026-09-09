@@ -607,3 +607,54 @@ fn assert_same_bytes(actual: &str, expected: &str) {
         "\n  {actual:?}\n  should equal {expected:?}"
     );
 }
+
+// --- rhythm mode, Sub, and user-defined Japanese macros ---
+
+/// `Sub{...}` plays the block and puts the time pointer back, so what follows
+/// starts where the Sub did.
+#[test]
+fn sub_restores_the_time_pointer() {
+    assert_golden(
+        "Sub{c} d",
+        "4d546864000000060001000100604d54726b0000001400903c6400903e644b803c6400803e6415ff2f00",
+    );
+    assert_golden(
+        "c Sub{e} d",
+        "4d546864000000060001000100604d54726b0000001c00903c644b803c641590406400903e644b804064\
+         00803e6415ff2f00",
+    );
+}
+
+/// In rhythm mode one character is one drum hit.
+#[test]
+fn rythm_macros_expand_per_character() {
+    assert_golden(
+        "$b{n36,} Rythm{ bb }",
+        "4d546864000000060001000100604d54726b00000014009024644b802464159024644b80246415ff2f00",
+    );
+    // `?` takes the number that follows: `x36` becomes `n36,`.
+    assert_golden(
+        "$x{n?,} Rythm{ x36 x38 }",
+        "4d546864000000060001000100604d54726b00000014009024644b802464159026644b80266415ff2f00",
+    );
+}
+
+/// Characters with no macro keep their ordinary meaning, so lengths, rests and
+/// loops work inside a rhythm block.
+#[test]
+fn rythm_mode_leaves_other_mml_alone() {
+    assert_same_bytes("$b{n36,} Rythm{ l8 brbr }", "l8 n36,r n36,r");
+    assert_same_bytes("$b{n36,} $s{n38,} Rythm{ [2 bs] }", "[2 n36,n38,]");
+}
+
+/// `~{name}={mml}` defines a Japanese macro; the definition writes nothing.
+#[test]
+fn user_defined_sutoton_macros() {
+    assert_same_bytes("~{ドン}={c} ドン", "c");
+    assert_same_bytes("~{ド}={n60} ド", "n60");
+    // A longer name wins over one that prefixes it.
+    assert_same_bytes(
+        "~{方向左}={P(0);}~{方向左前}={P(32);} 方向左前 方向左",
+        "P(32) P(0)",
+    );
+}

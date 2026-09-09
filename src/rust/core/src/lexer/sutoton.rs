@@ -93,11 +93,24 @@ pub const SUTOTON: &[(&str, &str)] = &[
     ("ろ", "n43,"),
 ];
 
+/// A user-defined entry from `~{name}={mml}`, kept longest-key-first so a
+/// longer name wins over a shorter one that prefixes it.
+pub type UserMacros = Vec<(String, String)>;
+
 /// Rewrite Japanese notation into plain MML.
+pub fn to_mml(src: &str) -> String {
+    let mut user = UserMacros::new();
+    to_mml_with(src, &mut user)
+}
+
+/// As [`to_mml`], also honouring (and collecting) `~{name}={mml}` definitions.
+///
+/// The table is threaded through the whole compile, so a macro defined in an
+/// include file is available to the song that included it.
 ///
 /// Text inside double quotes is left untouched: it is song titles and lyrics,
 /// not notation.
-pub fn to_mml(src: &str) -> String {
+pub fn to_mml_with(src: &str, user: &mut UserMacros) -> String {
     let chars: Vec<char> = src.chars().collect();
     let mut out = String::with_capacity(src.len());
     let mut index = 0;
@@ -122,6 +135,32 @@ pub fn to_mml(src: &str) -> String {
             in_string = true;
             continue;
         }
+        // `~{name}={mml}` defines a macro and produces nothing itself.
+        if ch == '~' {
+            if let Some((name, replacement, next)) = read_definition(&chars, index) {
+                user.push((name, replacement));
+                // Longest first, so `方向左前` wins over `方向左`.
+                user.sort_by(|a, b| b.0.chars().count().cmp(&a.0.chars().count()));
+                index = next;
+                continue;
+            }
+        }
+
+        // User definitions take precedence over the built-in table.
+        for (key, value) in user.iter() {
+            let key_len = key.chars().count();
+            if index + key_len <= chars.len()
+                && chars[index..index + key_len]
+                    .iter()
+                    .copied()
+                    .eq(key.chars())
+            {
+                out.push_str(value);
+                index += key_len;
+                continue 'outer;
+            }
+        }
+
         if ch.is_ascii() {
             out.push(ch);
             index += 1;
@@ -146,6 +185,57 @@ pub fn to_mml(src: &str) -> String {
     out
 }
 
+/// Parse `~{name}={mml}` at `index`, returning the pair and the position
+/// just past it.
+fn read_definition(chars: &[char], index: usize) -> Option<(String, String, usize)> {
+    let mut position = index + 1; // skip `~`
+    while matches!(chars.get(position), Some(c) if *c == ' ' || *c == '\t') {
+        position += 1;
+    }
+    let (name, position) = read_braced(chars, position)?;
+    let mut position = position;
+    while matches!(chars.get(position), Some(c) if *c == ' ' || *c == '\t') {
+        position += 1;
+    }
+    if chars.get(position) == Some(&'=') {
+        position += 1;
+    }
+    while matches!(chars.get(position), Some(c) if *c == ' ' || *c == '\t') {
+        position += 1;
+    }
+    let (replacement, position) = read_braced(chars, position)?;
+    if name.is_empty() {
+        return None;
+    }
+    Some((name, replacement, position))
+}
+
+/// Read a `{ ... }` group, returning its contents and the position past it.
+fn read_braced(chars: &[char], index: usize) -> Option<(String, usize)> {
+    if chars.get(index) != Some(&'{') {
+        return None;
+    }
+    let mut depth = 0usize;
+    let mut body = String::new();
+    let mut position = index;
+    while let Some(&ch) = chars.get(position) {
+        position += 1;
+        if ch == '{' {
+            depth += 1;
+            if depth == 1 {
+                continue;
+            }
+        } else if ch == '}' {
+            depth -= 1;
+            if depth == 0 {
+                return Some((body, position));
+            }
+        }
+        body.push(ch);
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -167,6 +257,25 @@ mod tests {
     #[test]
     fn ascii_passes_through() {
         assert_eq!(to_mml("cde Tempo=120"), "cde Tempo=120");
+    }
+
+    #[test]
+    fn user_macros_define_and_expand() {
+        // The definition itself disappears; later uses expand.
+        assert_eq!(to_mml("~{G調}={Key(-5);}G調"), "Key(-5);");
+        assert_eq!(to_mml("~{ドン}={c}ドン"), "c");
+    }
+
+    #[test]
+    fn a_longer_user_macro_wins() {
+        let src = "~{方向左}={P(0);}~{方向左前}={P(32);}方向左前 方向左";
+        assert_eq!(to_mml(src), "P(32); P(0);");
+    }
+
+    #[test]
+    fn user_macros_override_the_builtin_table() {
+        // ド is normally c.
+        assert_eq!(to_mml("~{ド}={n60}ド"), "n60");
     }
 
     #[test]

@@ -5,6 +5,7 @@
 //! so every position is a whole character and multi-byte text needs no special
 //! handling at all.
 
+pub mod rythm;
 pub mod sutoton;
 pub mod zenkaku;
 

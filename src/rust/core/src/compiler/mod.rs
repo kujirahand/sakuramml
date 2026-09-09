@@ -11,6 +11,7 @@ use crate::encoding::encode_cp932;
 use crate::error::{MmlError, Result, Warning};
 use crate::expr::{self, EvalContext, Value, Variables};
 use crate::include::{IncludeResolver, NoIncludes};
+use crate::lexer::rythm;
 use crate::lexer::Cursor;
 use crate::rng::Rng;
 use crate::smf::{event, Event, Song, Track};
@@ -117,6 +118,10 @@ pub struct Compiler<'a> {
     rng: Rng,
     /// Events written so far, against [`MAX_EVENTS`].
     event_count: usize,
+    /// Single-character drum macros, from `$c{...}`.
+    rythm_macros: rythm::Macros,
+    /// User-defined Japanese macros, from `~{name}={mml}`.
+    sutoton_macros: crate::lexer::sutoton::UserMacros,
 }
 
 impl Default for Compiler<'_> {
@@ -146,6 +151,8 @@ impl<'a> Compiler<'a> {
             exiting: false,
             rng: Rng::default(),
             event_count: 0,
+            rythm_macros: rythm::Macros::new(),
+            sutoton_macros: crate::lexer::sutoton::UserMacros::new(),
         }
     }
 
@@ -182,8 +189,7 @@ impl<'a> Compiler<'a> {
             return;
         };
         let (text, _) = crate::encoding::decode_auto(&bytes);
-        let converted = crate::lexer::sutoton::to_mml(&text);
-        let normalized = crate::lexer::zenkaku::normalize(&converted);
+        let normalized = self.preprocess(&text);
         if let Err(error) = self.run_fragment(&normalized, 1) {
             self.warnings.push(Warning::new(
                 0,
@@ -195,10 +201,7 @@ impl<'a> Compiler<'a> {
     /// Compile MML source into a [`Song`].
     pub fn compile(mut self, src: &str) -> Result<CompileResult> {
         self.load_standard_includes();
-        // Japanese notation first, then full-width symbol normalisation —
-        // the same order as the Pascal build's PreCompile.
-        let converted = crate::lexer::sutoton::to_mml(src);
-        let normalized = crate::lexer::zenkaku::normalize(&converted);
+        let normalized = self.preprocess(src);
         let mut cur = Cursor::new(&normalized);
         self.run(&mut cur)?;
 
@@ -244,6 +247,17 @@ impl<'a> Compiler<'a> {
             ));
         }
         Ok(total.max(0))
+    }
+
+    /// Turn source into plain ASCII MML: symbols first, then the Japanese
+    /// notation layer.
+    ///
+    /// That order is the Pascal build's (`PreCompile` calls `ConvToHalfSign`
+    /// then `SutotonToMml`) and it matters: `~` arrives as a full-width tilde,
+    /// and only becomes the macro-definition marker once symbols are folded.
+    fn preprocess(&mut self, src: &str) -> String {
+        let normalized = crate::lexer::zenkaku::normalize(src);
+        crate::lexer::sutoton::to_mml_with(&normalized, &mut self.sutoton_macros)
     }
 
     /// Run a cursor to exhaustion.
@@ -359,6 +373,10 @@ impl<'a> Compiler<'a> {
                 cur.advance();
                 self.repeat(cur)
             }
+            '$' => {
+                cur.advance();
+                self.define_rythm_macro(cur)
+            }
             // `` ` `` and `"` shift the octave for the next note only.
             '`' => {
                 cur.advance();
@@ -441,6 +459,8 @@ impl<'a> Compiler<'a> {
                 self.system_command(cur, &sub, line)
             }
             "Include" | "INCLUDE" => self.include(cur),
+            "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
+            "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
             "KeyFlag" => self.key_flag(cur),
             "Keyshift" | "KeyShift" => {
@@ -729,6 +749,52 @@ impl<'a> Compiler<'a> {
         Ok(result)
     }
 
+    /// `$c{mml}` — bind one character for use in rhythm mode.
+    fn define_rythm_macro(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        cur.skip_spaces();
+        let name = cur
+            .advance()
+            .ok_or_else(|| MmlError::new(line, "$の後にマクロ文字を指定してください"))?;
+        if !name.is_ascii() {
+            return Err(MmlError::new(
+                line,
+                "リズムマクロは半角で指定してください。",
+            ));
+        }
+        cur.skip_spaces();
+        cur.eat('=');
+        cur.skip_spaces();
+        if !cur.eat('{') {
+            return Err(MmlError::new(line, "リズムマクロは{ }で囲んでください"));
+        }
+        let body = cur
+            .read_balanced('{', '}')
+            .ok_or_else(|| MmlError::new(line, "リズムマクロが } で閉じられていません"))?;
+        self.rythm_macros.insert(name, body);
+        Ok(())
+    }
+
+    /// `Rythm{ ... }` — expand the drum macros, then compile the result.
+    fn rythm(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        let body = self.read_block(cur, line)?;
+        let expanded = rythm::expand(&body, &self.rythm_macros);
+        self.run_fragment(&expanded, line)
+    }
+
+    /// `Sub{ ... }` — play the block, then put the time pointer back.
+    fn sub(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        let body = self.read_block(cur, line)?;
+        let before = self.track().time;
+        self.run_fragment(&body, line)?;
+        let track = self.track();
+        track.time = before;
+        track.last_note = None;
+        Ok(())
+    }
+
     /// `Include(file)` — pull in a definition file through the resolver.
     fn include(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
@@ -755,8 +821,7 @@ impl<'a> Compiler<'a> {
             .ok_or_else(|| MmlError::new(line, format!("ファイル\"{name}\"が見つかりません")))?;
         let (text, _) = crate::encoding::decode_auto(&bytes);
         // Included files are ordinary MML, sutoton notation and all.
-        let converted = crate::lexer::sutoton::to_mml(&text);
-        let normalized = crate::lexer::zenkaku::normalize(&converted);
+        let normalized = self.preprocess(&text);
         self.run_fragment(&normalized, 1)
     }
 
@@ -767,6 +832,8 @@ impl<'a> Compiler<'a> {
         match name {
             "Include" | "INCLUDE" => self.include(cur),
             "KeyFlag" => self.key_flag(cur),
+            "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
+            "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
             "TimeBase" | "Timebase" => {
                 let value = self.expect_int_arg(cur, name)?;
