@@ -44,6 +44,7 @@ Rust CLI だけをビルドする場合、FPC と `wasm-pack` は不要です。
 | `just build-rust` | Rust ワークスペースをビルド |
 | `just build-cli` | Rust CLI のみをビルド |
 | `just buld-wasm` | ブラウザ向け WASM パッケージをビルド |
+| `just test-samples` | `sample/*.mml`を両実装で変換し、MIDIのバイト差異率を表示 |
 
 生成物の主な出力先は次のとおりです。
 

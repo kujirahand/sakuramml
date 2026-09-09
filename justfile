@@ -15,3 +15,7 @@ buld-wasm:
 
 _build-pascal:
     cd src/pascal && fpc -Mdelphi -g -gv -vewh csakura.dpr
+
+# Compare Pascal and Rust MIDI output for every top-level sample/*.mml file.
+test-samples: _build-pascal build-cli
+    ./tools/test-samples.sh
