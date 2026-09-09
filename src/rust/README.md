@@ -90,8 +90,11 @@ Implemented:
   plus `Sub{...}`, and `~{name}={mml}` for user-defined Japanese macros
 * chords (`'ceg'4`), `Div` tuplets, `Play({track0},{track1},...)`, `Key`, and
   `#name`/`Str` string macros
-* `.onNote` on the note attributes (`v`, `q`, `t`, `l`, `o`), cycling one
-  value per note
+* 先行指定 (advance specifications) on control changes and bends:
+  `.onNote/.N`, `.onTime/.T`, `.onCycle/.C`, `.onNoteWave/.W`,
+  `.onNoteWaveEx/.WE`, `.onNoteWaveR/.WR`, `.Sine`, `.onNoteSine`, plus
+  `.Delay`, `.Repeat`, `.Random`, `.Range`, `.Frequency` and `.Max`.
+  On note attributes (`v`, `q`, `t`, `l`, `o`), `.onNote` and `.Random`
 * resource limits: a compile-wide event budget and checked time arithmetic, so
   runaway input is a diagnostic rather than a hung or crashed browser tab
 * `Include`, resolved through a caller-supplied [`IncludeResolver`].

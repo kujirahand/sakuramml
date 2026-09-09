@@ -25,8 +25,10 @@
 | ストトン、利用者マクロ | 実装済み | 現在の変換表 |
 | リズムマクロ | 実装済み | `$x{...}` と `Rythm{...}` |
 | Include | 実装済み | resolver 経由、UTF-8/CP932 |
-| `.onNote` | 一部 | `v q t l o`。CC/ベンドは現状警告 |
-| `.Random`, `.onTime`, `.onCycle`, Wave 系 | 警告 | 引数を読み飛ばし効果なし |
+| 先行指定（CC/ベンド） | 実装済み | `.onNote/.N`, `.onTime/.T`, `.onCycle/.C`, `.onNoteWave/.W`, `.onNoteWaveEx/.WE`, `.onNoteWaveR/.WR`, `.Sine`, `.onNoteSine`, `.Delay`, `.Repeat`, `.Range`, `.Frequency` |
+| 先行指定（音符属性） | 一部 | `v q t l o` に `.onNote` と `.Random`。推移系は警告 |
+| `.C`（onCycle の別名） | 拡張 | 従来版は分岐の記述ミスで未接続。現行 Rust では動作する |
+| `.Random` の乱数値 | 非互換 | 生成器が異なるため値は一致しない（下記参照） |
 | その他の `System.*` | 一部 | 08章に記載したもの以外は警告 |
 | `Play` | 実装済み | 引数位置を0起点トラック番号として同時記述 |
 | `PlayFrom`, `PlayTo` | 未実装 | 演奏範囲の指定 |
@@ -35,6 +37,7 @@
 | `Stretch`, `Solo`, `Mute`, `TrackMute` | 未実装 | トラック編集系 |
 | `DeleteCC`, `CCMute`, `CCNoMute` | 未実装 | イベント削除・抑制 |
 | `MML(...)`, `NoteNo(...)` 等 | 未実装 | 状態参照・音名変換の従来関数 |
+| `.Max` | 実装済み | `q.Max` / `v.Max` |
 | `TempoChange` | 一部/非互換 | 単一 BPM だけなら即時 Tempo の別名。従来の推移引数は未実装 |
 | `Cresc`, `Decresc` | 未実装 | エクスプレッションの推移イベント |
 
@@ -67,3 +70,12 @@
 3. 最小 MML を Pascal 版で変換し、MIDI バイトまたはイベント列を採取する。
 4. Rust に異常系を含む回帰テストを追加する。
 5. 本表と該当する詳細章を同時に更新する。
+
+## 乱数について
+
+`Random()`、`.Random`、「曖昧さ」が返す値は、従来版と一致しません。従来版は処理系の乱数
+（FPC ビルドと Delphi ビルドでも異なる）を使うため、そもそも一意な基準が存在しないためです。
+
+現行 Rust は crate 内に持つシード付き生成器を使います。同じ入力からは常に同じ出力が得られ、
+`System.RandomSeed` で系列を選べます。WASM で追加の乱数源を必要としないのも同じ理由です。
+値の並びではなく、範囲と分布が仕様です。

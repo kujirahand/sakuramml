@@ -288,9 +288,13 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
    （`For(Int J=0; ...)`）。後者はPascal版で動作する（RndMake.mml）。
 
 **未完了（挙動の調査が必要）**
-5. 先行指定の残り: `.onTime`/`.onCycle`/`.onNoteWave`系と、**CCへの`.onNote`**。
-   CCへの`.onNote`はPascal版が「定義時に1つ書き、以降は音符の1tick前に書く」
-   という挙動をしており、規則が未特定。誤った出力より警告を選び、現状はスキップしている。
+5. ~~先行指定~~ 完了。CC/ベンドへの `.onNote/.N`・`.onTime/.T`・`.onCycle/.C`・
+   `.onNoteWave/.W`・`.onNoteWaveEx/.WE`・`.onNoteWaveR/.WR`・`.Sine`・`.onNoteSine`、
+   および `.Delay`/`.Repeat`/`.Random`/`.Range`/`.Frequency`/`.Max` を実装
+   （`core/src/compiler/advance.rs`）。仕様の根拠はPascal版の`WriteCCWave`と
+   `TNoteInfo.GetValue`。引数中の`!n`記法も実装。
+   - 音符属性への推移系（`v.onTime`等）のみ未実装で、警告してスキップする。
+   - `.Random`の値は一致しない（乱数生成器が異なるため。spec/10に明記）。
 6. `DirectSMF`（生のMIDIバイト列を埋め込む。実測で挙動が不明瞭だった）
 7. `PlayFrom`、`Stretch`、`r*%(n)`（bend.hが使う繰り返し記法）
 8. 組み込み関数の残り: `NoteNo`/`MML`/`MID`/`POS`/`Replace`/`ArraySort*`等

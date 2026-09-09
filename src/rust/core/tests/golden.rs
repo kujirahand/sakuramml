@@ -745,8 +745,8 @@ fn a_note_option_still_wins_over_on_note() {
     assert_same_bytes("v.onNote(120,50) c(4,80,64)", "c(4,80,64)");
 }
 
-/// The parts of 先行指定 that are not ported yet warn rather than failing, so
-/// a song still compiles — and says plainly that it will not sound as written.
+/// A ramp belongs on a control change; on a note attribute it warns rather
+/// than failing, so the song still compiles.
 #[test]
 fn unported_modifiers_warn_instead_of_failing() {
     let out = compile("v.onNoteWave(0,127,48) cd").unwrap();
@@ -757,11 +757,16 @@ fn unported_modifiers_warn_instead_of_failing() {
         "expected a warning, got {:?}",
         out.warnings
     );
+    // On a control change the same modifier is implemented: it writes, and
+    // says nothing about being unported. (The stdmsg.h hint is expected here,
+    // since this compile has no include resolver.)
     let out = compile("P.onNote(0,127) cd").unwrap();
-    assert!(out
-        .warnings
-        .iter()
-        .any(|w| w.message.contains("コントロールチェンジ")));
+    assert!(
+        !out.warnings.iter().any(|w| w.message.contains("未実装")),
+        "{:?}",
+        out.warnings
+    );
+    assert!(out.smf.windows(2).any(|w| w == [0xb0, 0x0a]));
 }
 
 // --- Div (tuplets) and string macros ---
@@ -855,4 +860,103 @@ fn key_transposes() {
 fn bar_lines_are_ignored() {
     assert_same_bytes("c|d|e", "cde");
     assert_same_bytes("[2 c|d]", "[2 cd]");
+}
+
+// --- 先行指定: the full family ---
+
+/// `.onNote` on a control change writes a value a tick ahead of each note.
+#[test]
+fn on_note_on_a_control_change() {
+    assert_golden(
+        "P.onNote(0,127) cd",
+        "4d546864000000060001000100604d54726b0000001c00b00a0000903c644b803c6414b00a7f01903e644\
+         b803e6415ff2f00",
+    );
+    // A rest drives the list too, as checkNoteOnCC does in the Pascal build.
+    assert_same_bytes("P.onNote(10,20) r c d", "P.onNote(10,20) r c d");
+    assert_same_bytes("P.N(0,127) cd", "P.onNote(0,127) cd");
+}
+
+/// `.onCycle(len,...)` steps to the next value every `len` ticks.
+#[test]
+fn on_cycle_steps_with_the_clock() {
+    assert_golden(
+        "P.onCycle(48,10,20) cd",
+        "4d546864000000060001000100604d54726b0000001c00b00a0a00903c644b803c6414b00a0a01903e644\
+         b803e6415ff2f00",
+    );
+}
+
+/// `.onTime` writes its whole ramp where it stands, rather than per note.
+#[test]
+fn on_time_writes_a_ramp_immediately() {
+    assert_golden(
+        "P.onTime(0,64,48) c",
+        "4d546864000000060001000100604d54726b0000006800b00a0000903c6401b00a0202b00a0502b00a080\
+         2b00a0a02b00a0d02b00a1002b00a1202b00a1502b00a1802b00a1a02b00a1d02b00a2002b00a2202b00a\
+         2502b00a2802b00a2a02b00a2d02b00a3002b00a3202b00a3502b00a3803b00a401f803c6415ff2f00",
+    );
+    assert_same_bytes("P.T(0,64,48) c", "P.onTime(0,64,48) c");
+}
+
+/// `.onNoteWaveEx` scales its shape to the length of each note.
+#[test]
+fn on_note_wave_ex_scales_to_the_note() {
+    assert_golden(
+        "P.onNoteWaveEx(0,127,48) c",
+        "4d546864000000060001000100604d54726b000000c800903c6400b00a0002b00a0202b00a0502b00a070\
+         2b00a0a02b00a0d02b00a0f02b00a1202b00a1502b00a1702b00a1a02b00a1d02b00a1f02b00a2202b00a\
+         2502b00a2702b00a2a02b00a2c02b00a2f02b00a3202b00a3402b00a3702b00a3a02b00a3c02b00a3f02b\
+         00a4202b00a4402b00a4702b00a4a02b00a4c02b00a4f02b00a5202b00a5402b00a5702b00a5902b00a5c\
+         02b00a5f02b00a6101803c6401b00a6402b00a6702b00a6902b00a6c02b00a6f02b00a7102b00a7402b00\
+         a7702b00a7f04ff2f00",
+    );
+}
+
+/// Every documented alias reaches the same implementation.
+#[test]
+fn modifier_aliases() {
+    assert_same_bytes("P.W(0,127,96) c", "P.onNoteWave(0,127,96) c");
+    assert_same_bytes("P.WE(0,127,48) c", "P.onNoteWaveEx(0,127,48) c");
+    assert_same_bytes("P.WR(0,127,48) c", "P.onNoteWaveR(0,127,48) c");
+    // `.C` is defined and documented upstream, but its dispatch there tests
+    // the same constant twice, so the alias never matched. It works here.
+    assert_same_bytes("P.C(48,10,20) cd", "P.onCycle(48,10,20) cd");
+}
+
+#[test]
+fn range_clamps_and_repeat_stops_the_cycle() {
+    // Range holds the values inside (10,100).
+    let out = compile("P.Range(10,100) P.onNote(0,127) cd").unwrap();
+    let values: Vec<u8> = out
+        .smf
+        .windows(3)
+        .filter(|w| w[0] == 0xb0 && w[1] == 0x0a)
+        .map(|w| w[2])
+        .collect();
+    assert!(values.iter().all(|v| (10..=100).contains(v)), "{values:?}");
+
+    // Repeat(0) stops after the list is used up, so four notes get two values.
+    let out = compile("P.Repeat(0) P.onNote(10,20) cdef").unwrap();
+    let count = out
+        .smf
+        .windows(2)
+        .filter(|w| w[0] == 0xb0 && w[1] == 0x0a)
+        .count();
+    assert_eq!(count, 2);
+}
+
+/// `.Frequency` changes how often a ramp writes, so a coarser one writes less.
+#[test]
+fn frequency_controls_how_often_a_ramp_writes() {
+    let fine = compile("P.onTime(0,127,96) c").unwrap();
+    let coarse = compile("P.Frequency(8) P.onTime(0,127,96) c").unwrap();
+    assert!(coarse.smf.len() < fine.smf.len());
+}
+
+/// `.Max` changes what a full value means for `q` and `v`.
+#[test]
+fn max_rescales_gate_and_velocity() {
+    assert_same_bytes("q.Max(8) q8 c", "System.qMax=8 q8 c");
+    assert_same_bytes("v.Max(15) v15 c", "System.vMax=15 v15 c");
 }

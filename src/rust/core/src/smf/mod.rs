@@ -81,15 +81,21 @@ impl Song {
 fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     let mut events = track.events.clone();
     // Stable sort keeps same-time events in the order they were written,
-    // matching the Pascal implementation's insertion order.
-    events.sort_by_key(|e| e.time);
+    // matching the Pascal implementation's insertion order — except that a
+    // note-off comes last among events sharing its time, because the Pascal
+    // build holds notes back (for ties and chords) and flushes them after the
+    // control changes an advance specification wrote.
+    events.sort_by_key(|e| (e.time, is_note_off(e) as u8));
 
     let mut body = Vec::new();
     let mut last_time = 0i64;
     for event in &events {
-        write_delta(&mut body, event.time - last_time)?;
+        // A value written a tick ahead of a note at time 0 has a negative
+        // time: it sorts before the note, but lands at 0 in the file.
+        let time = event.time.max(0);
+        write_delta(&mut body, time - last_time)?;
         body.extend_from_slice(&event.data);
-        last_time = event.time;
+        last_time = time;
     }
     // End of track
     write_delta(&mut body, track.end_time - last_time)?;
@@ -103,6 +109,10 @@ fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     chunk.extend_from_slice(&(body.len() as u32).to_be_bytes());
     chunk.extend_from_slice(&body);
     Ok(chunk)
+}
+
+fn is_note_off(event: &Event) -> bool {
+    matches!(event.data.first(), Some(status) if status & 0xf0 == 0x80)
 }
 
 /// Write a delta time, refusing one the format cannot represent.

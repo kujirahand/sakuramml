@@ -5,8 +5,11 @@
 //! Everything here mirrors byte-for-byte behaviour measured from the Pascal
 //! build (see `tests/golden.rs`).
 
+pub mod advance;
+
 use std::collections::BTreeMap;
 
+use crate::compiler::advance::{self as advance_spec, CcModifier, Kind};
 use crate::encoding::encode_cp932;
 use crate::error::{MmlError, Result, Warning};
 use crate::expr::{self, EvalContext, Value, Variables};
@@ -61,6 +64,10 @@ struct TrackState {
     octave_once: i64,
     /// Values queued by `.onNote`, cycled one per note.
     on_note: Vec<(OnNoteTarget, OnNote)>,
+    /// Advance specifications attached to control changes and bends.
+    cc_modifiers: Vec<CcModifier>,
+    /// `.Random` spread per note attribute.
+    random: Vec<(OnNoteTarget, i64)>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -84,6 +91,8 @@ impl TrackState {
             last_note: None,
             octave_once: 0,
             on_note: Vec::new(),
+            cc_modifiers: Vec::new(),
+            random: Vec::new(),
         }
     }
 }
@@ -123,6 +132,8 @@ pub struct Compiler<'a> {
     event_count: usize,
     /// While writing a chord, the time every note in it starts at.
     chord_start: Option<i64>,
+    /// `.Frequency` — how often a ramp writes, in ticks.
+    cc_frequency: i64,
     /// Single-character drum macros, from `$c{...}`.
     rythm_macros: rythm::Macros,
     /// User-defined Japanese macros, from `~{name}={mml}`.
@@ -157,6 +168,7 @@ impl<'a> Compiler<'a> {
             rng: Rng::default(),
             event_count: 0,
             chord_start: None,
+            cc_frequency: advance_spec::DEFAULT_FREQUENCY,
             rythm_macros: rythm::Macros::new(),
             sutoton_macros: crate::lexer::sutoton::UserMacros::new(),
         }
@@ -812,7 +824,8 @@ impl<'a> Compiler<'a> {
         Ok(result)
     }
 
-    /// A `.modifier` after a command, such as `v.onNote(120,50)`.
+    /// A `.modifier` after a command, such as `v.onNote(120,50)` or
+    /// `P.onTime(0,127,96)` — the 先行指定 family.
     ///
     /// Returns `Some(())` when one was there and handled, `None` when the
     /// command carries an ordinary argument instead.
@@ -828,42 +841,230 @@ impl<'a> Compiler<'a> {
         };
         *cur = probe;
 
-        match name.as_str() {
-            // A value per note, cycling when the list runs out.
-            "onNote" | "N" => {
-                let values = self.read_args(cur, usize::MAX)?;
-                // Control changes and bends are held back deliberately: the
-                // Pascal build writes those a tick ahead of the note and emits
-                // one at the point of definition too, and the exact rule is
-                // not pinned down yet. Emitting them on the wrong tick would
-                // be a subtly wrong song, which is worse than an honest
-                // warning that this part is not ported.
-                if matches!(
-                    target,
-                    OnNoteTarget::ControlChange(_) | OnNoteTarget::PitchBend
-                ) {
+        // `.Frequency` is a song-wide setting rather than a per-command one.
+        if name == "Frequency" {
+            let value = self.expect_int_arg(cur, &name)?;
+            self.cc_frequency = value.max(1);
+            return Ok(Some(()));
+        }
+        // `q.Max` / `v.Max` change what a full value means.
+        if name == "Max" {
+            let value = self.expect_int_arg(cur, &name)?;
+            match target {
+                OnNoteTarget::Gate => self.q_max = value.max(1),
+                OnNoteTarget::Velocity => self.v_max = value.max(1),
+                _ => {
                     self.warnings.push(Warning::new(
                         line,
-                        "コントロールチェンジへの.onNoteは未実装のため無視しました",
+                        ".Max はこのコマンドでは無視しました",
                     ));
-                    return Ok(Some(()));
                 }
-                let track = self.track();
-                track.on_note.retain(|(existing, _)| *existing != target);
-                track.on_note.push((target, OnNote { values, next: 0 }));
-                Ok(Some(()))
             }
-            // Not ported yet. Skipping the argument keeps the song compiling,
-            // and the warning says plainly that it will not sound as written.
+            return Ok(Some(()));
+        }
+
+        let controller = cc_number_of(target);
+        match controller {
+            Some(no) => self.cc_modifier(cur, no, &name, line),
+            None => self.note_modifier(cur, target, &name, line),
+        }
+    }
+
+    /// A modifier on a control change or bend.
+    fn cc_modifier(
+        &mut self,
+        cur: &mut Cursor,
+        no: i64,
+        name: &str,
+        line: usize,
+    ) -> Result<Option<()>> {
+        let kind = match name {
+            "onNote" | "N" => Some(Kind::OnNote),
+            "onTime" | "T" => Some(Kind::OnTime),
+            "Sine" => Some(Kind::CcSine),
+            "onNoteSine" => Some(Kind::OnSine),
+            "onCycle" | "C" => Some(Kind::OnCycle),
+            "onNoteWave" | "W" => Some(Kind::OnWave),
+            "onNoteWaveEx" | "WE" => Some(Kind::OnWaveEx),
+            "onNoteWaveR" | "WR" => Some(Kind::OnWaveR),
+            _ => None,
+        };
+
+        if let Some(kind) = kind {
+            let values = self.read_args(cur, usize::MAX)?;
+            let time = self.track().time;
+            let modifier = self.cc_modifier_entry(no);
+            modifier.kind = kind;
+            modifier.reserve = values;
+            modifier.index = 0;
+            modifier.time = time;
+
+            // `.onTime` and `.Sine` write themselves out where they stand and
+            // are then finished; the rest wait for the notes they apply to.
+            if matches!(kind, Kind::OnTime | Kind::CcSine) {
+                self.delete_cc_after(no, time);
+                self.write_cc_modifier(no, time, 0)?;
+                self.cc_modifier_entry(no).kind = Kind::Off;
+            }
+            return Ok(Some(()));
+        }
+
+        match name {
+            "Delay" => {
+                let value = self.expect_int_arg(cur, name)?;
+                self.cc_modifier_entry(no).delay = value;
+            }
+            "Repeat" => {
+                let value = self.expect_int_arg(cur, name)?;
+                let modifier = self.cc_modifier_entry(no);
+                modifier.repeat = value != 0;
+                modifier.index = 0;
+            }
+            "Random" => {
+                let value = self.expect_int_arg(cur, name)?;
+                self.cc_modifier_entry(no).random = value;
+            }
+            "Range" => {
+                let args = self.read_args(cur, 2)?;
+                if args.len() < 2 {
+                    return Err(MmlError::new(line, ".Rangeは(low,high)で指定してください"));
+                }
+                self.cc_modifier_entry(no).range = Some((args[0], args[1]));
+            }
             other => {
                 let _ = self.read_args(cur, 16)?;
                 self.warnings.push(Warning::new(
                     line,
                     format!(".{other} は未実装のため無視しました"),
                 ));
+            }
+        }
+        Ok(Some(()))
+    }
+
+    /// A modifier on a note attribute (`v`, `q`, `t`, `l`, `o`).
+    fn note_modifier(
+        &mut self,
+        cur: &mut Cursor,
+        target: OnNoteTarget,
+        name: &str,
+        line: usize,
+    ) -> Result<Option<()>> {
+        match name {
+            "onNote" | "N" => {
+                let values = self.read_args(cur, usize::MAX)?;
+                let track = self.track();
+                track.on_note.retain(|(existing, _)| *existing != target);
+                track.on_note.push((target, OnNote { values, next: 0 }));
+                Ok(Some(()))
+            }
+            "Random" => {
+                let value = self.expect_int_arg(cur, name)?;
+                let track = self.track();
+                track.random.retain(|(existing, _)| *existing != target);
+                track.random.push((target, value));
+                Ok(Some(()))
+            }
+            other => {
+                // Note attributes have no meaningful ramp over time here yet.
+                let _ = self.read_args(cur, 16)?;
+                self.warnings.push(Warning::new(
+                    line,
+                    format!(".{other} は音符属性では未実装のため無視しました"),
+                ));
                 Ok(Some(()))
             }
         }
+    }
+
+    /// The modifier state for a controller, created on first use.
+    fn cc_modifier_entry(&mut self, no: i64) -> &mut CcModifier {
+        let track = self.track();
+        if let Some(position) = track.cc_modifiers.iter().position(|m| m.no == no) {
+            return &mut track.cc_modifiers[position];
+        }
+        track.cc_modifiers.push(CcModifier::new(no));
+        track.cc_modifiers.last_mut().expect("just pushed")
+    }
+
+    /// Write out one controller's advance specification for a note.
+    fn write_cc_modifier(&mut self, no: i64, track_time: i64, note_len: i64) -> Result<()> {
+        let frequency = self.cc_frequency;
+        let mut rng = std::mem::take(&mut self.rng);
+        let events = {
+            let track = self.track();
+            match track.cc_modifiers.iter_mut().find(|m| m.no == no) {
+                Some(modifier) => modifier.events(track_time, note_len, frequency, &mut rng),
+                None => Vec::new(),
+            }
+        };
+        self.rng = rng;
+
+        let channel = self.track().channel;
+        for (time, value) in events {
+            let value = advance_spec::clamp_for(no, value);
+            let event = match no {
+                advance_spec::BEND_FULL | advance_spec::BEND_EASY => {
+                    let raw = (value + 8192).clamp(0, 16383);
+                    Event::new(
+                        time,
+                        vec![
+                            0xe0 | (channel & 0x0f),
+                            (raw & 0x7f) as u8,
+                            ((raw >> 7) & 0x7f) as u8,
+                        ],
+                    )
+                }
+                _ => Event::control_change(time, channel, no as u8, value as u8),
+            };
+            self.push_event(event)?;
+        }
+        Ok(())
+    }
+
+    /// Run every advance specification on this track for one note or rest.
+    fn write_cc_modifiers(&mut self, track_time: i64, note_len: i64) -> Result<()> {
+        let numbers: Vec<i64> = self
+            .track()
+            .cc_modifiers
+            .iter()
+            .filter(|m| m.kind != Kind::Off)
+            .map(|m| m.no)
+            .collect();
+        for no in numbers {
+            self.write_cc_modifier(no, track_time, note_len)?;
+        }
+        Ok(())
+    }
+
+    /// Drop control-change events for `no` at or after `time`, as the Pascal
+    /// build does before writing a fresh ramp over the same ground.
+    fn delete_cc_after(&mut self, no: i64, time: i64) {
+        if !(0..=127).contains(&no) {
+            return;
+        }
+        let channel = self.track().channel;
+        let status = 0xb0 | (channel & 0x0f);
+        self.track().events.retain(|event| {
+            !(event.time >= time
+                && event.data.first() == Some(&status)
+                && event.data.get(1) == Some(&(no as u8)))
+        });
+    }
+
+    /// Apply the `.Random` spread for a target, if one was set.
+    fn spread(&mut self, target: OnNoteTarget, value: i64) -> i64 {
+        let amount = self
+            .track()
+            .random
+            .iter()
+            .find(|(existing, _)| *existing == target)
+            .map(|(_, amount)| *amount)
+            .unwrap_or(0);
+        if amount <= 0 {
+            return value;
+        }
+        value - amount / 2 + self.rng.range(0, amount - 1)
     }
 
     /// Take the next `.onNote` value for `target`, if a list is running.
@@ -1713,6 +1914,8 @@ impl<'a> Compiler<'a> {
                     }
                     _ => None,
                 }
+            } else if parenthesised && cur.peek() == Some('!') {
+                self.read_number(cur)?
             } else if parenthesised {
                 // Inside parentheses each argument may be an expression.
                 match cur.peek() {
@@ -1848,6 +2051,9 @@ impl<'a> Compiler<'a> {
         let (length, _) = self.read_note_options(cur)?;
         let length = length.unwrap_or_else(|| self.track().length);
         let time = self.track().time;
+        // A rest advances the specifications as a note does — the Pascal
+        // build calls checkNoteOnCC for both.
+        self.write_cc_modifiers(time, length)?;
         let next = self.checked_time(time, length, line)?;
         let track = self.track();
         track.time = next;
@@ -1897,26 +2103,6 @@ impl<'a> Compiler<'a> {
         let on_gate = self.next_on_note(OnNoteTarget::Gate);
         let on_timing = self.next_on_note(OnNoteTarget::Timing);
         let on_length = self.next_on_note(OnNoteTarget::Length);
-        let on_bend = self.next_on_note(OnNoteTarget::PitchBend);
-        let on_ccs: Vec<(u8, i64)> = {
-            let controllers: Vec<u8> = self
-                .track()
-                .on_note
-                .iter()
-                .filter_map(|(target, _)| match target {
-                    OnNoteTarget::ControlChange(cc) => Some(*cc),
-                    _ => None,
-                })
-                .collect();
-            controllers
-                .into_iter()
-                .filter_map(|cc| {
-                    self.next_on_note(OnNoteTarget::ControlChange(cc))
-                        .map(|value| (cc, value))
-                })
-                .collect()
-        };
-
         let track = self.track();
         let length = on_length.or(length).unwrap_or(track.length);
         let raw_velocity = options.velocity.or(on_velocity).unwrap_or(track.velocity);
@@ -1924,6 +2110,9 @@ impl<'a> Compiler<'a> {
             .gate_percent
             .or(on_gate)
             .unwrap_or(track.gate_percent);
+        // `.Random` spreads a value either side of what was asked for.
+        let raw_velocity = self.spread(OnNoteTarget::Velocity, raw_velocity);
+        let gate_value = self.spread(OnNoteTarget::Gate, gate_value);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
         let gate = gate_ticks_scaled(length, gate_value, q_max);
@@ -1941,24 +2130,13 @@ impl<'a> Compiler<'a> {
         let end = self.checked_time(start, gate, line)?;
         let next = self.checked_time(time, length, line)?;
 
-        // A `.onNote` control change or bend is written just before the note
-        // it belongs to.
-        for (controller, value) in on_ccs {
-            self.push_event(Event::control_change(
-                start,
-                channel,
-                controller,
-                value.clamp(0, 127) as u8,
-            ))?;
-        }
-        if let Some(value) = on_bend {
-            self.push_event(Event::new(
-                start,
-                vec![0xe0 | (channel & 0x0f), 0, value.clamp(0, 127) as u8],
-            ))?;
-        }
         self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
         self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
+        // Advance specifications run after the note, which is the only point
+        // at which its length is known — the Pascal build calls
+        // checkNoteOnCC here for the same reason. Values meant to arrive
+        // before the note carry an earlier time and sort ahead of it.
+        self.write_cc_modifiers(time, length)?;
 
         let track = self.track();
         track.last_note = Some(LastNote {
@@ -2123,6 +2301,15 @@ impl<'a> Compiler<'a> {
     fn read_number(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
         let line = cur.line();
         cur.skip_spaces();
+        // `!8` is a length in n-th notes, given where a tick count is wanted:
+        // the same thing `Step(8)` and `StrToLen(8)` produce.
+        if cur.peek() == Some('!') {
+            cur.advance();
+            let divisor = self
+                .read_number(cur)?
+                .ok_or_else(|| MmlError::new(line, "!の後には音長を指定してください"))?;
+            return Ok(Some(self.timebase * 4 / divisor.max(1)));
+        }
         if cur.peek() == Some('(') {
             let value = expr::eval(cur, self)?;
             return Ok(Some(value.as_int(line)?));
@@ -2153,6 +2340,16 @@ impl EvalContext for Compiler<'_> {
 
     fn has_function(&self, name: &str) -> bool {
         self.functions.contains_key(name) || is_builtin_function(name)
+    }
+}
+
+/// The controller number an advance specification would write to, when the
+/// target is a control change or a bend rather than a note attribute.
+fn cc_number_of(target: OnNoteTarget) -> Option<i64> {
+    match target {
+        OnNoteTarget::ControlChange(no) => Some(no as i64),
+        OnNoteTarget::PitchBend => Some(advance_spec::BEND_EASY),
+        _ => None,
     }
 }
 
