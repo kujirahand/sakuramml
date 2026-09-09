@@ -79,11 +79,15 @@ impl Cursor {
         }
     }
 
-    /// Skip whitespace, line breaks, `;`, and `//` / `/* */` comments.
+    /// Skip whitespace, line breaks, `;`, `|`, and `//` / `/* */` comments.
+    ///
+    /// `|` is a bar line: songs use it to mark measures, and it carries no
+    /// meaning of its own. The Pascal build skips the same set
+    /// (`[' ', #9, ';', '|']` in `mml_base.pas`).
     pub fn skip_trivia(&mut self) {
         loop {
             match self.peek() {
-                Some(c) if c.is_whitespace() || c == ';' => {
+                Some(c) if c.is_whitespace() || c == ';' || c == '|' => {
                     self.advance();
                 }
                 Some('/') if self.peek_at(1) == Some('/') => {
@@ -244,6 +248,13 @@ mod tests {
     #[test]
     fn skips_comments_and_separators() {
         let mut cur = Cursor::new("  // comment\n /* block */ ; c");
+        cur.skip_trivia();
+        assert_eq!(cur.peek(), Some('c'));
+    }
+
+    #[test]
+    fn skips_bar_lines() {
+        let mut cur = Cursor::new("| c");
         cur.skip_trivia();
         assert_eq!(cur.peek(), Some('c'));
     }

@@ -240,9 +240,15 @@ fn function_argument_defaults() {
     assert_same("Function f(Int a,Int b=64){n(a) n(b)} f(60)", "n60 n64");
 }
 
+/// An argument the caller leaves out is 0, not an error — the Pascal build
+/// accepts `f(1)` for a two-parameter function, and `Include/bend.h` calls
+/// its own helpers that way.
 #[test]
-fn missing_argument_without_default_is_an_error() {
-    assert_error_contains("Function f(Int x){n(x)} f", "引数");
+fn a_missing_argument_defaults_to_zero() {
+    assert_same("Function f(A,B){n((60+B))} f(1)", "n60");
+    assert_same("Function f(A,B){n((60+A))} f()", "n60");
+    // A declared default still wins over the zero.
+    assert_same("Function f(A,B=5){n((60+B))} f(1)", "n65");
 }
 
 #[test]
@@ -438,6 +444,16 @@ fn str_to_len_converts_note_lengths_to_ticks() {
 }
 
 #[test]
+fn time_function_returns_ticks_without_moving_the_pointer() {
+    assert_same("Int start=Time(2:1:0); Time(start); c", "Time(384) c");
+    assert_same(
+        "TimeSignature=3,4; Int start=Time(2:1:0); Time(start); c",
+        "TimeSignature=3,4; Time(288) c",
+    );
+    assert_same("Int start=Time(96); n((start-36))", "n60");
+}
+
+#[test]
 fn a_user_function_overrides_a_built_in_one() {
     assert_same(
         "Function Random(Int a,Int b){Result=60} n(Random(1,2))",
@@ -467,6 +483,19 @@ fn standard_include_is_loaded_automatically() {
     // Its functions are available too.
     let out = compile_with("Middle", &includes).unwrap();
     assert_eq!(out.smf, compile("n60").unwrap().smf);
+}
+
+#[test]
+fn standard_include_rpn_wrappers_accept_a_parenthesised_parameter() {
+    use sakuramml_core::compile_with;
+
+    let includes = MemoryIncludes::new().with(
+        "stdmsg.h",
+        "Function BR(mm){RPN=0,0,(mm)}".as_bytes().to_vec(),
+    );
+
+    let out = compile_with("BR(12)", &includes).unwrap();
+    assert_eq!(out.smf, compile("RPN(0,0,12)").unwrap().smf);
 }
 
 /// A missing standard include is a warning, not a failure — the Pascal build

@@ -337,6 +337,19 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             }
             cur.skip_spaces();
 
+            // `Time(measure:beat:step)` uses colons rather than ordinary
+            // comma-separated function arguments. Preserve its body as text
+            // so the compiler can evaluate it using the same rules as the
+            // Time command.
+            if name == "Time" && ctx.has_function(&name) && cur.eat('(') {
+                let body = cur
+                    .read_balanced('(', ')')
+                    .ok_or_else(|| MmlError::new(line, "Timeの括弧が閉じられていません"))?;
+                return ctx
+                    .call(&name, vec![Value::Str(body)], line)?
+                    .ok_or_else(|| MmlError::new(line, "Timeは値を返しません"));
+            }
+
             // `name(index)` indexes an array; `name(args)` calls a function.
             if let Some(Value::Array(items)) = ctx.lookup(&name) {
                 if cur.eat('(') {

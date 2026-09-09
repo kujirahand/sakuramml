@@ -121,6 +121,8 @@ pub struct Compiler<'a> {
     rng: Rng,
     /// Events written so far, against [`MAX_EVENTS`].
     event_count: usize,
+    /// While writing a chord, the time every note in it starts at.
+    chord_start: Option<i64>,
     /// Single-character drum macros, from `$c{...}`.
     rythm_macros: rythm::Macros,
     /// User-defined Japanese macros, from `~{name}={mml}`.
@@ -154,6 +156,7 @@ impl<'a> Compiler<'a> {
             exiting: false,
             rng: Rng::default(),
             event_count: 0,
+            chord_start: None,
             rythm_macros: rythm::Macros::new(),
             sutoton_macros: crate::lexer::sutoton::UserMacros::new(),
         }
@@ -390,6 +393,10 @@ impl<'a> Compiler<'a> {
                 }
                 self.simple_pitch_bend(cur)
             }
+            '\'' => {
+                cur.advance();
+                self.chord(cur)
+            }
             '[' => {
                 cur.advance();
                 self.repeat(cur)
@@ -481,11 +488,16 @@ impl<'a> Compiler<'a> {
             }
             "Include" | "INCLUDE" => self.include(cur),
             "Div" | "DIV" => self.div(cur),
+            "Play" | "PLAY" => self.play(cur),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
             "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
             "KeyFlag" => self.key_flag(cur),
             "Keyshift" | "KeyShift" => {
+                self.key_shift = self.expect_int_arg(cur, &word)?;
+                Ok(())
+            }
+            "Key" | "KEY" => {
                 self.key_shift = self.expect_int_arg(cur, &word)?;
                 Ok(())
             }
@@ -742,6 +754,10 @@ impl<'a> Compiler<'a> {
                     .unwrap_or_default(),
             ),
             "VERSION" => Value::Int(VERSION_NUMBER),
+            "Time" => {
+                let source = args.first().map(Value::as_str).unwrap_or_default();
+                Value::Int(self.time_value(&source, line)?)
+            }
             _ => return Err(MmlError::new(line, format!("関数\"{name}\"は未定義です"))),
         };
         Ok(Some(value))
@@ -766,15 +782,13 @@ impl<'a> Compiler<'a> {
 
         let mut shadowed: Vec<(String, Option<Value>)> = Vec::new();
         for (index, param) in function.params.iter().enumerate() {
+            // An argument the caller left out falls back to the parameter's
+            // default, or to 0 — the Pascal build accepts `f(1)` for a
+            // two-parameter function, and Include/bend.h relies on it.
             let value = match (args.get(index), &param.default) {
                 (Some(value), _) => value.clone(),
                 (None, Some(default)) => default.clone(),
-                (None, None) => {
-                    return Err(MmlError::new(
-                        line,
-                        format!("関数\"{name}\"の引数\"{}\"が指定されていません", param.name),
-                    ))
-                }
+                (None, None) => Value::Int(0),
             };
             shadowed.push((param.name.clone(), self.variables.get(&param.name).cloned()));
             self.variables.insert(param.name.clone(), value);
@@ -916,6 +930,41 @@ impl<'a> Compiler<'a> {
         self.run_fragment(&expanded, line)
     }
 
+    /// `'ceg'4` — a chord: every note starts together and shares one length.
+    fn chord(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        let mut body = String::new();
+        loop {
+            match cur.advance() {
+                Some('\'') => break,
+                Some(c) => body.push(c),
+                None => return Err(MmlError::new(line, "和音が ' で閉じられていません")),
+            }
+        }
+        cur.skip_spaces();
+        let length = self.read_length(cur);
+
+        let start = self.track().time;
+        let previous_length = self.track().length;
+        if let Some(length) = length {
+            self.track().length = length;
+        }
+
+        // Every note in the body starts at `start`; the pointer moves once,
+        // afterwards, by the chord's own length.
+        let outer = self.chord_start.replace(start);
+        let outcome = self.run_fragment(&body, line);
+        self.chord_start = outer;
+
+        let length = length.unwrap_or(previous_length);
+        let end = self.checked_time(start, length, line)?;
+        let track = self.track();
+        track.length = previous_length;
+        track.time = end;
+        track.last_note = None;
+        outcome
+    }
+
     /// `Div{mml}(len)` — fit the block's notes into `len`, as a tuplet.
     ///
     /// The block's notes share the length equally, so `Div{cde}4` is a triplet
@@ -950,6 +999,73 @@ impl<'a> Compiler<'a> {
         let track = self.track();
         track.time = before;
         track.last_note = None;
+        Ok(())
+    }
+
+    /// `Play({track 0},{track 1},...)` — compile several tracks in parallel.
+    ///
+    /// Each non-empty string argument is compiled on the track identified by
+    /// its zero-based argument position. All target time pointers start at the
+    /// caller's current time, and the caller's current track is restored when
+    /// the command finishes. This follows `scriptPlay` in the Pascal build.
+    fn play(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        cur.skip_spaces();
+        cur.eat('=');
+        cur.skip_spaces();
+        if !cur.eat('(') {
+            return Err(MmlError::new(
+                line,
+                "Playには(トラック...)を指定してください",
+            ));
+        }
+        let body = cur
+            .read_balanced('(', ')')
+            .ok_or_else(|| MmlError::new(line, "Playの括弧が閉じていません"))?;
+
+        let original_track = self.current;
+        let start_time = self.track().time;
+
+        for (track_no, source) in split_play_args(&body).into_iter().enumerate() {
+            let source = source.trim();
+            if source.is_empty() {
+                continue;
+            }
+            let value = match self.eval_source(source, line) {
+                Ok(value) => value,
+                Err(error) => {
+                    self.current = original_track;
+                    return Err(MmlError::new(
+                        error.line,
+                        format!("Playのトラック{track_no}: {}", error.message),
+                    ));
+                }
+            };
+            let Value::Str(source) = value else {
+                // The Pascal implementation ignores non-string arguments.
+                continue;
+            };
+
+            self.current = track_no as i64;
+            let timebase = self.timebase;
+            let track = self
+                .tracks
+                .entry(self.current)
+                .or_insert_with(|| TrackState::new(track_no as i64, timebase));
+            track.time = start_time;
+            track.last_note = None;
+
+            let normalized = self.preprocess(&source);
+            if let Err(error) = self.run_fragment(&normalized, line) {
+                self.current = original_track;
+                return Err(MmlError::new(
+                    error.line,
+                    format!("Playのトラック{track_no}: {}", error.message),
+                ));
+            }
+        }
+
+        self.current = original_track;
         Ok(())
     }
 
@@ -1123,6 +1239,16 @@ impl<'a> Compiler<'a> {
             .read_balanced('(', ')')
             .ok_or_else(|| MmlError::new(line, "Timeの括弧が閉じていません"))?;
 
+        let time = self.time_value(&body, line)?;
+        let track = self.track();
+        track.time = time;
+        track.last_note = None;
+        Ok(())
+    }
+
+    /// Convert `totalTicks` or `measure:beat:step` into an absolute time.
+    /// Used by both the Time command and the readable `Time(...)` function.
+    fn time_value(&mut self, body: &str, line: usize) -> Result<i64> {
         let parts: Vec<i64> = body
             .split(':')
             .map(|part| {
@@ -1157,11 +1283,7 @@ impl<'a> Compiler<'a> {
             [measure, beat, step, ..] => position(*measure, *beat, *step)?,
             [] => return Err(MmlError::new(line, "Timeの引数が空です")),
         };
-        let time = self.checked_time(time.max(0), 0, line)?;
-        let track = self.track();
-        track.time = time;
-        track.last_note = None;
-        Ok(())
+        self.checked_time(time.max(0), 0, line)
     }
 
     /// A GM/GS/XG reset, written as a SysEx message.
@@ -1580,7 +1702,13 @@ impl<'a> Compiler<'a> {
                 // `Voice=Vo` — a bare term, which may be a variable or a call.
                 let line = cur.line();
                 match cur.peek() {
-                    Some(c) if c.is_ascii_alphanumeric() || c == '_' || c == '$' || c == '-' => {
+                    Some(c)
+                        if c.is_ascii_alphanumeric()
+                            || c == '_'
+                            || c == '$'
+                            || c == '-'
+                            || c == '(' =>
+                    {
                         Some(expr::eval_term(cur, self)?.as_int(line)?)
                     }
                     _ => None,
@@ -1807,6 +1935,8 @@ impl<'a> Compiler<'a> {
                 track.channel,
             )
         };
+        // Inside a chord every note starts together.
+        let time = self.chord_start.unwrap_or(time);
         let start = self.checked_time(time, timing, line)?;
         let end = self.checked_time(start, gate, line)?;
         let next = self.checked_time(time, length, line)?;
@@ -1835,7 +1965,10 @@ impl<'a> Compiler<'a> {
             off_index: track.events.len() - 1,
             start,
         });
-        track.time = next;
+        // A chord moves the pointer once, when it closes.
+        if self.chord_start.is_none() {
+            self.track().time = next;
+        }
         Ok(())
     }
 
@@ -2050,6 +2183,47 @@ fn count_notes(body: &str) -> i64 {
     count
 }
 
+/// Split a `Play(...)` body on top-level commas or semicolons.
+///
+/// Separators inside a track's MML or an expression belong to that argument.
+/// Empty fields are retained because their positions are track numbers.
+fn split_play_args(source: &str) -> Vec<&str> {
+    let mut args = Vec::new();
+    let mut start = 0usize;
+    let mut round = 0usize;
+    let mut curly = 0usize;
+    let mut square = 0usize;
+    let mut in_string = false;
+
+    for (index, ch) in source.char_indices() {
+        // A quote inside `{mml}` may be Sakura's one-note octave-down
+        // operator. Curly braces already protect their separators, so only a
+        // top-level quote needs string tracking here.
+        if ch == '"' && curly == 0 {
+            in_string = !in_string;
+            continue;
+        }
+        if in_string {
+            continue;
+        }
+        match ch {
+            '(' => round += 1,
+            ')' => round = round.saturating_sub(1),
+            '{' => curly += 1,
+            '}' => curly = curly.saturating_sub(1),
+            '[' => square += 1,
+            ']' => square = square.saturating_sub(1),
+            ',' | ';' if round == 0 && curly == 0 && square == 0 => {
+                args.push(&source[start..index]);
+                start = index + ch.len_utf8();
+            }
+            _ => {}
+        }
+    }
+    args.push(&source[start..]);
+    args
+}
+
 /// What a `.onNote` list drives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OnNoteTarget {
@@ -2126,6 +2300,7 @@ fn is_builtin_function(name: &str) -> bool {
             | "ASC"
             | "CHR"
             | "VERSION"
+            | "Time"
     )
 }
 

@@ -104,6 +104,21 @@ fn octave_and_accidentals() {
 }
 
 #[test]
+fn chord_notes_start_together_and_advance_once() {
+    assert_golden(
+        "'ceg'4 d",
+        "4d546864000000060001000100604d54726b0000002400903c6400904064009043644b803c640080406400\
+         80436415903e644b803e6415ff2f00",
+    );
+}
+
+#[test]
+fn an_unclosed_chord_is_an_error() {
+    let error = compile("'ceg").unwrap_err();
+    assert!(error.message.contains("和音"), "{}", error.message);
+}
+
+#[test]
 fn note_number() {
     assert_golden(
         "n60",
@@ -183,6 +198,44 @@ fn two_tracks_produce_two_chunks() {
         "4d546864000000060001000200604d54726b0000000c00903c644b803c6415ff2f004d54726b0000000c\
          009140644b81406415ff2f00",
     );
+}
+
+#[test]
+fn play_writes_parallel_tracks_like_pascal() {
+    assert_golden(
+        "Play({c},{e},{g})",
+        "4d546864000000060001000300604d54726b0000000c00903c644b803c6415ff2f004d54726b0000000c\
+         009040644b80406415ff2f004d54726b0000000c009143644b81436415ff2f00",
+    );
+}
+
+#[test]
+fn play_accepts_string_macros_and_restores_the_callers_track() {
+    assert_golden(
+        "#A={cdef} #B={eg} Play(#A,#B)",
+        "4d546864000000060001000200604d54726b0000002400903c644b803c6415903e644b803e64159040644b\
+         804064159041644b80416415ff2f004d54726b00000014009040644b804064159043644b80436415ff2f00",
+    );
+    assert_same_bytes(
+        "TR=3 r4 Play({c},{e}) g",
+        "TR=0 Time(96) c TR=1 Time(96) e TR=3 Time(96) g",
+    );
+}
+
+#[test]
+fn play_keeps_empty_argument_positions_as_track_numbers() {
+    assert_same_bytes("Play(,{e})", "TR=1 e");
+    assert_same_bytes("Play({c};{e})", "Play({c},{e})");
+    assert_same_bytes("PLAY({c},{e})", "Play({c},{e})");
+    assert_same_bytes("Play({d\"ad},{c})", "TR=0 d\"ad TR=1 c");
+    assert_same_bytes("Play({c4,50,40},{n(64)})", "TR=0 c4,50,40 TR=1 n64");
+}
+
+#[test]
+fn play_reports_the_failing_track() {
+    let error = compile("Play({c},{NotACommand})").unwrap_err();
+    assert!(error.message.contains("Playのトラック1"), "{error}");
+    assert!(error.message.contains("未定義"), "{error}");
 }
 
 #[test]
@@ -447,6 +500,7 @@ fn key_shift_transposes() {
         "System.Keyshift=2 c",
         "4d546864000000060001000100604d54726b0000000c00903e644b803e6415ff2f00",
     );
+    assert_same_bytes("Key=2 c", "d");
 }
 
 #[test]
@@ -762,4 +816,43 @@ fn string_macros_compose() {
     let out = compile(r#"Int n=3; Print((#STR(n)+{"!"}))"#).unwrap();
     assert_eq!(out.messages, vec!["3!".to_string()]);
     assert_same_bytes(r#"#A={c} #B=(#A+{"d"}) #B"#, "c d");
+}
+
+// --- chords and Key ---
+
+/// `'ceg'` sounds its notes together: one start, one shared length.
+#[test]
+fn chords_sound_their_notes_together() {
+    assert_golden(
+        "'ceg'",
+        "4d546864000000060001000100604d54726b0000001c00903c64009040640090436\
+         44b803c64008040640080436415ff2f00",
+    );
+    // A length after the closing quote applies to the whole chord.
+    assert_golden(
+        "'ceg'2",
+        "4d546864000000060001000100604d54726b0000001d00903c64009040640090436\
+         48118803c64008040640080436428ff2f00",
+    );
+}
+
+/// The pointer moves once for the chord, not once per note in it.
+#[test]
+fn a_chord_advances_the_pointer_once() {
+    assert_same_bytes("'ce'4 'df'8", "'ce' l8 'df'");
+    assert_same_bytes("'ceg' d", "'ceg' l4 d");
+}
+
+#[test]
+fn key_transposes() {
+    assert_same_bytes("Key(2) c", "n62");
+    assert_same_bytes("Key(2) 'ceg'", "'df+a'");
+}
+
+/// `|` is a bar line: songs use it to mark measures and it carries no meaning,
+/// so it is skipped like whitespace, as `mml_base.pas` does.
+#[test]
+fn bar_lines_are_ignored() {
+    assert_same_bytes("c|d|e", "cde");
+    assert_same_bytes("[2 c|d]", "[2 cd]");
 }
