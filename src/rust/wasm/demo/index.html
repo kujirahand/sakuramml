@@ -146,12 +146,17 @@ compileButton.addEventListener("click", () => {
   midi = result.midi;
   downloadButton.disabled = false;
 
-  const lines = [`<span class="ok">コンパイル成功: ${midi.length} バイト</span>`];
+  const lines = result.errors.length === 0
+    ? [`<span class="ok">コンパイル成功: ${midi.length} バイト</span>`]
+    : [`<span class="err">${result.errors.length}件のエラーがあります。不完全なMIDI: ${midi.length} バイト</span>`];
   for (const message of result.messages) {
     lines.push(`[表示] ${escapeHtml(message)}`);
   }
   for (const warning of result.warnings) {
     lines.push(`<span class="warn">${escapeHtml(warning)}</span>`);
+  }
+  for (const error of result.errors) {
+    lines.push(`<span class="err">${escapeHtml(error)}</span>`);
   }
   show(lines.join("\n"));
 });

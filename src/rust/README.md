@@ -24,6 +24,14 @@ cargo run -p sakuramml-cli -- -e "cde" out.mid
 ./build-wasm.sh nodejs     # Node package (for the smoke test below)
 ```
 
+The CLI recovers from source errors where possible. It prints every distinct
+error, writes a partial MIDI file containing the events that could be compiled
+safely, and exits with a non-zero status so automated callers can still detect
+the incomplete result. The Rust library keeps `compile` as the strict API and
+also exposes `compile_recovering` / `compile_with_recovery`. In WASM,
+`compileMml` returns recoverable diagnostics through `result.errors` together
+with `result.midi`; only failures that prevent MIDI serialisation are thrown.
+
 ### Demo page
 
 After `./build-wasm.sh`, serve this directory and open `wasm/demo/index.html`
@@ -38,7 +46,7 @@ From JavaScript:
 
 ```js
 const { compileMml, addInclude } = require('./wasm/pkg/sakuramml_wasm.js');
-const { midi, warnings } = compileMml('cde');   // midi: Uint8Array
+const { midi, errors, warnings } = compileMml('cde'); // midi: Uint8Array
 
 // stdmsg.h is embedded; hand over any other Include/ file you need.
 addInclude('chord2.h', await fetch('Include/chord2.h').then(r => r.arrayBuffer()));

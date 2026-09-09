@@ -39,9 +39,15 @@ pub const MAX_TIME: i64 = crate::smf::MAX_VAR_LEN;
 /// WASM stack out of trouble.
 pub const MAX_NEST: usize = 128;
 
+/// Stop recovery after this many diagnostics. This keeps a badly malformed
+/// file from producing an unbounded error list in a browser tab.
+pub const MAX_ERRORS: usize = 1_000;
+
 /// What a compile produced, before serialisation.
 pub struct CompileResult {
     pub song: Song,
+    /// Recoverable errors encountered while producing a partial song.
+    pub errors: Vec<MmlError>,
     pub warnings: Vec<Warning>,
     /// Output of `Print(...)` statements, in order.
     pub messages: Vec<String>,
@@ -118,6 +124,9 @@ pub struct Compiler<'a> {
     tracks: BTreeMap<i64, TrackState>,
     current: i64,
     warnings: Vec<Warning>,
+    errors: Vec<MmlError>,
+    recover_errors: bool,
+    stop_requested: bool,
     depth: usize,
     variables: Variables,
     functions: BTreeMap<String, FunctionDef>,
@@ -165,6 +174,9 @@ impl<'a> Compiler<'a> {
             tracks: BTreeMap::new(),
             current: 1,
             warnings: Vec::new(),
+            errors: Vec::new(),
+            recover_errors: false,
+            stop_requested: false,
             depth: 0,
             variables: builtin_variables(),
             functions: BTreeMap::new(),
@@ -189,6 +201,12 @@ impl<'a> Compiler<'a> {
     /// Supply the resolver used for `#Include`.
     pub fn with_includes(mut self, resolver: &'a dyn IncludeResolver) -> Self {
         self.includes = resolver;
+        self
+    }
+
+    /// Continue after recoverable source errors and return a partial song.
+    pub fn with_error_recovery(mut self) -> Self {
+        self.recover_errors = true;
         self
     }
 
@@ -251,6 +269,7 @@ impl<'a> Compiler<'a> {
         }
         Ok(CompileResult {
             song,
+            errors: self.errors,
             warnings: self.warnings,
             messages: self.messages,
         })
@@ -396,10 +415,14 @@ impl<'a> Compiler<'a> {
     fn push_event(&mut self, event: Event) -> Result<()> {
         self.event_count += 1;
         if self.event_count > MAX_EVENTS {
-            return Err(MmlError::new(
-                0,
-                format!("生成イベント数が上限({MAX_EVENTS})を超えました"),
-            ));
+            self.stop_requested = true;
+            let error = MmlError::new(0, format!("生成イベント数が上限({MAX_EVENTS})を超えました"));
+            // Some legacy event helpers cannot propagate a Result. Preserve
+            // the diagnostic here as well as returning it to callers that can.
+            if self.recover_errors && !self.errors.contains(&error) {
+                self.errors.push(error.clone());
+            }
+            return Err(error);
         }
         let track = self.track();
         track.used = true;
@@ -441,12 +464,63 @@ impl<'a> Compiler<'a> {
     fn run(&mut self, cur: &mut Cursor) -> Result<()> {
         loop {
             cur.skip_trivia();
-            if cur.is_eof() || self.exiting {
+            if cur.is_eof() || self.exiting || self.stop_requested {
                 break;
             }
-            self.step(cur)?;
+            let start = cur.position();
+            if let Err(error) = self.step(cur) {
+                if !self.recover_errors {
+                    return Err(error);
+                }
+                // Loops and reused fragments can encounter the same defect
+                // many times. Report each distinct diagnostic once so a
+                // partial compile remains useful instead of flooding callers.
+                if !self.errors.contains(&error) {
+                    self.errors.push(error);
+                }
+                if self.errors.len() >= MAX_ERRORS {
+                    self.errors.push(MmlError::new(
+                        cur.line(),
+                        format!("エラー数が上限({MAX_ERRORS})に達したため解析を打ち切りました"),
+                    ));
+                    self.stop_requested = true;
+                }
+                if self.stop_requested {
+                    break;
+                }
+                Self::recover_cursor(cur, start);
+            }
         }
         Ok(())
+    }
+
+    /// Move past the construct that caused an error. Most command parsers
+    /// have already consumed their name and bad argument, so in that case we
+    /// retain the current position and let the next token run. A completely
+    /// unknown opening delimiter is skipped as a unit to avoid cascades.
+    fn recover_cursor(cur: &mut Cursor, start: usize) {
+        if cur.position() == start {
+            match cur.peek() {
+                Some('(') => {
+                    cur.advance();
+                    let _ = cur.read_balanced('(', ')');
+                }
+                Some('{') => {
+                    cur.advance();
+                    let _ = cur.read_balanced('{', '}');
+                }
+                Some('[') => {
+                    cur.advance();
+                    let _ = cur.read_balanced('[', ']');
+                }
+                Some(_) => {
+                    cur.advance();
+                }
+                None => {}
+            }
+        } else if matches!(cur.peek(), Some(')') | Some(']') | Some('}') | Some(',')) {
+            cur.advance();
+        }
     }
 
     /// Compile a fragment of source (a loop body) as if it appeared inline.

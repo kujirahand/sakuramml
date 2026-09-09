@@ -1,10 +1,10 @@
-//! Browser bindings: `compileMml(text)` returns the MIDI bytes and warnings.
+//! Browser bindings: `compileMml(text)` returns MIDI bytes and diagnostics.
 //!
 //! Nothing here can panic on bad input — a panic would poison the WASM
-//! instance for the rest of the page — so compile errors come back as thrown
-//! JS errors and everything else is returned as data.
+//! instance for the rest of the page. Recoverable source errors are returned
+//! with partial MIDI data; only failures that prevent serialisation are thrown.
 
-use sakuramml_core::{compile_with, MemoryIncludes};
+use sakuramml_core::{compile_with_recovery, MemoryIncludes};
 use wasm_bindgen::prelude::*;
 
 include!(concat!(env!("OUT_DIR"), "/embedded_includes.rs"));
@@ -50,10 +50,11 @@ pub fn clear_includes() {
     EXTRA_INCLUDES.with(|extra| extra.borrow_mut().clear());
 }
 
-/// Result of a successful compile, as seen from JavaScript.
+/// Result of a compile attempt, including partial MIDI when errors were recovered.
 #[wasm_bindgen]
 pub struct CompileResult {
     midi: Vec<u8>,
+    errors: Vec<String>,
     warnings: Vec<String>,
     messages: Vec<String>,
 }
@@ -64,6 +65,13 @@ impl CompileResult {
     #[wasm_bindgen(getter)]
     pub fn midi(&self) -> Vec<u8> {
         self.midi.clone()
+    }
+
+    /// Recoverable source errors. MIDI still contains every event that could
+    /// be compiled safely.
+    #[wasm_bindgen(getter)]
+    pub fn errors(&self) -> Vec<JsValue> {
+        self.errors.iter().map(|e| JsValue::from_str(e)).collect()
     }
 
     /// Non-fatal diagnostics, one message per entry.
@@ -81,13 +89,14 @@ impl CompileResult {
 
 /// Compile MML text into a Standard MIDI File.
 ///
-/// Throws a JS `Error` carrying the compiler message when the source does not
-/// compile.
+/// Recoverable source errors are available through [`CompileResult::errors`].
+/// Throws only when even a partial Standard MIDI File cannot be serialised.
 #[wasm_bindgen(js_name = compileMml)]
 pub fn compile_mml(source: &str) -> Result<CompileResult, JsError> {
-    match compile_with(source, &includes()) {
+    match compile_with_recovery(source, &includes()) {
         Ok(output) => Ok(CompileResult {
             midi: output.smf,
+            errors: output.errors.iter().map(|e| e.to_string()).collect(),
             warnings: output.warnings.iter().map(|w| w.to_string()).collect(),
             messages: output.messages,
         }),
@@ -113,5 +122,16 @@ mod tests {
         };
         assert_eq!(&result.midi[..4], b"MThd");
         assert_eq!(result.messages, vec!["1"]);
+    }
+
+    #[test]
+    fn wrapper_returns_partial_midi_and_errors() {
+        let result = match compile_mml("c NotACommand d") {
+            Ok(result) => result,
+            Err(_) => panic!("recoverable source errors must not be thrown"),
+        };
+        assert_eq!(&result.midi[..4], b"MThd");
+        assert_eq!(result.errors.len(), 1);
+        assert!(result.errors[0].contains("NotACommand"));
     }
 }

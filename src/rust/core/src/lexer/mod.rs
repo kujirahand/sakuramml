@@ -37,6 +37,12 @@ impl Cursor {
         self.line
     }
 
+    /// Character offset, used by the compiler's error recovery to guarantee
+    /// that a malformed token can never leave the parser spinning in place.
+    pub fn position(&self) -> usize {
+        self.pos
+    }
+
     pub fn is_eof(&self) -> bool {
         self.pos >= self.chars.len()
     }

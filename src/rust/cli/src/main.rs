@@ -60,14 +60,17 @@ fn run(args: &[String]) -> Result<(), Failure> {
     });
 
     let resolver = FileIncludes::new(origin.as_deref());
-    let result =
-        sakuramml_core::compile_with(&source, &resolver).map_err(|e| format!("Failed...{e}"))?;
+    let result = sakuramml_core::compile_with_recovery(&source, &resolver)
+        .map_err(|e| format!("Failed...{e}"))?;
 
     for message in &result.messages {
         println!("[表示] {message}");
     }
     for warning in &result.warnings {
         eprintln!("{warning}");
+    }
+    for error in &result.errors {
+        eprintln!("{error}");
     }
 
     std::fs::write(&output_path, &result.smf).map_err(|e| {
@@ -76,6 +79,15 @@ fn run(args: &[String]) -> Result<(), Failure> {
             output_path.display()
         )
     })?;
+
+    if !result.errors.is_empty() {
+        return Err(format!(
+            "Failed...{}件のエラーがあります。不完全なMIDIを{}に出力しました",
+            result.errors.len(),
+            output_path.display()
+        )
+        .into());
+    }
 
     println!("Success!");
 
@@ -244,5 +256,29 @@ mod tests {
     fn missing_inline_source_is_an_error() {
         let args = vec!["-e".into()];
         assert!(matches!(parse_args(&args), Err(Failure::Error(_))));
+    }
+
+    #[test]
+    fn writes_partial_midi_before_reporting_compile_errors() {
+        let output = std::env::temp_dir().join(format!(
+            "sakuramml-recovery-{}-{}.mid",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("system clock should follow the epoch")
+                .as_nanos()
+        ));
+        let args = vec![
+            "-e".into(),
+            "c NotACommand d".into(),
+            output.clone().into_os_string().into_string().unwrap(),
+        ];
+
+        assert!(matches!(run(&args), Err(Failure::Error(_))));
+        let midi = std::fs::read(&output).expect("partial MIDI should be written");
+        assert_eq!(&midi[..4], b"MThd");
+        assert!(midi.windows(3).any(|event| event == [0x90, 60, 100]));
+        assert!(midi.windows(3).any(|event| event == [0x90, 62, 100]));
+        std::fs::remove_file(output).expect("temporary MIDI should be removable");
     }
 }
