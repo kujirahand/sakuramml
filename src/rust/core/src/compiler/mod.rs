@@ -528,6 +528,8 @@ impl<'a> Compiler<'a> {
             "Include" | "INCLUDE" => self.include(cur),
             "Div" | "DIV" => self.div(cur),
             "Play" | "PLAY" => self.play(cur),
+            "Cresc" | "CRESC" => self.cresc(cur, 40, 127, line),
+            "Decresc" | "DECRESC" => self.cresc(cur, 127, 40, line),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
             "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
@@ -1271,6 +1273,100 @@ impl<'a> Compiler<'a> {
         outcome
     }
 
+    /// `Cresc`/`Decresc` — ramp Expression (CC 11) from `def1` to `def2` over
+    /// a length, written where the pointer stands without advancing it.
+    ///
+    /// The Pascal build (`cresc_sub` in `mml_base.pas`) has a real quirk here
+    /// worth reproducing rather than fixing: written as `Cresc(len,v1,v2)`,
+    /// only the length is read — the parenthesised value list is silently
+    /// dropped and the defaults are used instead. Only the `Cresc=len,v1,v2`
+    /// form reads its values; the sutoton aliases (大きく／小さく) always use
+    /// that form, so real songs are unaffected.
+    fn cresc(&mut self, cur: &mut Cursor, def1: i64, def2: i64, line: usize) -> Result<()> {
+        cur.skip_spaces();
+        cur.eat('=');
+        cur.skip_spaces();
+
+        let (len, t1, t2) = if cur.peek() == Some('(') {
+            cur.advance();
+            let raw = cur
+                .read_balanced('(', ')')
+                .ok_or_else(|| MmlError::new(line, "Crescの括弧が閉じられていません"))?;
+            let mut sub = Cursor::with_line(&raw, line);
+            let len = self.read_length(&mut sub).filter(|v| *v > 0);
+            (len, def1, def2)
+        } else {
+            let len = self.read_length(cur).filter(|v| *v > 0);
+            cur.skip_spaces();
+            if cur.eat(',') {
+                let mut values = Vec::new();
+                loop {
+                    cur.skip_spaces();
+                    match self.read_number(cur)? {
+                        Some(v) => values.push(v),
+                        None => break,
+                    }
+                    cur.skip_spaces();
+                    if !cur.eat(',') {
+                        break;
+                    }
+                }
+                match values.as_slice() {
+                    [] => (len, def1, def2),
+                    [v2] => (len, self.expression_last_value(), *v2),
+                    [v1, v2, ..] => (len, *v1, *v2),
+                }
+            } else {
+                (len, def1, def2)
+            }
+        };
+        let len = len.unwrap_or(self.timebase * 4);
+
+        let tstep = self.cc_frequency.max(1);
+        let cnt = len / tstep;
+        let slope = if cnt != 0 {
+            (t2 - t1) as f64 / cnt as f64
+        } else {
+            0.0
+        };
+        let tm = self.track().time;
+        let channel = self.track().channel;
+
+        let mut previous: Option<i64> = None;
+        for i in 0..(cnt - 1).max(0) {
+            let value = ((i as f64) * slope + t1 as f64).trunc() as i64;
+            let value = value.clamp(0, 127);
+            if previous != Some(value) {
+                self.push_event(Event::control_change(
+                    tm + i * tstep,
+                    channel,
+                    11,
+                    value as u8,
+                ))?;
+            }
+            previous = Some(value);
+        }
+        // The final value is always written, even if it repeats the last one.
+        self.push_event(Event::control_change(
+            tm + len,
+            channel,
+            11,
+            t2.clamp(0, 127) as u8,
+        ))?;
+        self.cc_modifier_entry(11).last_value = t2;
+        Ok(())
+    }
+
+    /// The last value written to Expression (CC 11), or 0 if none has been.
+    fn expression_last_value(&mut self) -> i64 {
+        let value = self.cc_modifier_entry(11).last_value;
+        if value == i64::MIN {
+            0
+        } else {
+            value
+        }
+    }
+
     /// `Div{mml}(len)` — fit the block's notes into `len`, as a tuplet.
     ///
     /// The block's notes share the length equally, so `Div{cde}4` is a triplet
@@ -1413,6 +1509,8 @@ impl<'a> Compiler<'a> {
             "Include" | "INCLUDE" => self.include(cur),
             "KeyFlag" => self.key_flag(cur),
             "Div" | "DIV" => self.div(cur),
+            "Cresc" | "CRESC" => self.cresc(cur, 40, 127, line),
+            "Decresc" | "DECRESC" => self.cresc(cur, 127, 40, line),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
             "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
@@ -2062,6 +2160,10 @@ impl<'a> Compiler<'a> {
         let controller = controller.clamp(0, 127) as u8;
         let value = value.clamp(0, 127) as u8;
         let _ = self.push_event(Event::control_change(time, channel, controller, value));
+        // Cresc/Decresc's 1-argument form reads a controller's last value, so
+        // a plain write must be visible to it too, the way the Pascal build's
+        // single TNoteCC.LastValue field is shared by every path that writes.
+        self.cc_modifier_entry(controller as i64).last_value = value as i64;
     }
 
     /// Read up to `max` comma-separated integers, with or without parentheses:
@@ -2436,7 +2538,7 @@ impl<'a> Compiler<'a> {
             if starred {
                 cur.advance();
             }
-            let part = if cur.peek() == Some('%') {
+            let part = if cur.peek() == Some('%') || cur.peek() == Some('!') {
                 cur.advance();
                 self.read_number(cur).ok().flatten()
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {

@@ -1055,3 +1055,90 @@ fn a_numbered_control_change_takes_modifiers() {
     // Frequency only changes how often ramps write, so on its own it is silent.
     assert_same_bytes("y256.Frequency(1) c", "c");
 }
+
+// --- Cresc / Decresc ---
+
+/// `Cresc(len,v1,v2)` — the parenthesised form only reads the length: the
+/// value list is silently dropped in the Pascal build and the defaults
+/// (40, 127) are used regardless. Reproduced rather than fixed, since real
+/// songs never hit it — the sutoton aliases always use the `=` form below.
+#[test]
+fn cresc_paren_form_ignores_its_value_list() {
+    assert_golden(
+        "Cresc(4,100) cd",
+        "4d546864000000060001000100604d54726b000000d400b00b2800903c6402b00b2902b00b2b02b00b2d0\
+         2b00b2f02b00b3102b00b3202b00b3402b00b3602b00b3802b00b3a02b00b3b02b00b3d02b00b3f02b00b4\
+         102b00b4302b00b4502b00b4602b00b4802b00b4a02b00b4c02b00b4e02b00b4f02b00b5102b00b5302b00\
+         b5502b00b5702b00b5802b00b5a02b00b5c02b00b5e02b00b6002b00b6202b00b6302b00b6502b00b6702b\
+         00b6902b00b6b01803c6401b00b6c02b00b6e02b00b7002b00b7202b00b7402b00b7502b00b7702b00b790\
+         2b00b7b04b00b7f00903e644b803e6415ff2f00",
+    );
+    assert_same_bytes("Cresc(4,0,100) cd", "Cresc(4,100) cd");
+    assert_same_bytes("Cresc(4) cd", "Cresc(4,100) cd");
+}
+
+/// `Decresc` ramps the other way (127 down to 40 by default).
+#[test]
+fn decresc_ramps_downward() {
+    assert_golden(
+        "Decresc(4,20) cd",
+        "4d546864000000060001000100604d54726b000000d400b00b7f00903c6402b00b7d02b00b7b02b00b790\
+         2b00b7702b00b7502b00b7402b00b7202b00b7002b00b6e02b00b6c02b00b6b02b00b6902b00b6702b00b6\
+         502b00b6302b00b6202b00b6002b00b5e02b00b5c02b00b5a02b00b5802b00b5702b00b5502b00b5302b00\
+         b5102b00b4f02b00b4e02b00b4c02b00b4a02b00b4802b00b4602b00b4502b00b4302b00b4102b00b3f02b\
+         00b3d02b00b3b01803c6401b00b3a02b00b3802b00b3602b00b3402b00b3202b00b3102b00b2f02b00b2d0\
+         2b00b2b04b00b2800903e644b803e6415ff2f00",
+    );
+}
+
+/// The `=` form reads its values correctly, which is the form the sutoton
+/// aliases 大きく／小さく always expand to.
+#[test]
+fn cresc_equals_form_reads_its_values() {
+    assert_golden(
+        "Cresc=4,10,20 cd",
+        "4d546864000000060001000100604d54726b0000004000b00b0a00903c640ab00b0b0ab00b0c0ab00b0d0\
+         ab00b0e08b00b0f0ab00b100ab00b1107803c6403b00b120ab00b1308b00b1400903e644b803e6415ff2f00",
+    );
+    // A missing length defaults to a whole note (timebase * 4 ticks, written
+    // as a raw tick count rather than the note-value "384").
+    assert_same_bytes("Cresc=,10,20 cd", "Cresc=%384,10,20 cd");
+    // `!4` in length position is raw ticks (same as `%4`), not a quarter note
+    // in ticks — that StrToLen reading is specific to numeric arguments like
+    // Random(!4,...), not to the length grammar.
+    assert_same_bytes("Cresc=!4,10,20 cd", "Cresc=%4,10,20 cd");
+    // A parenthesised value list after `=` hits the same quirk as the plain
+    // paren form.
+    assert_same_bytes("Cresc=(4,10,20) cd", "Cresc(4,100) cd");
+}
+
+/// With a single value, the starting point is whatever Expression (CC 11)
+/// was last set to — by any command, not only a previous Cresc.
+#[test]
+fn cresc_single_value_starts_from_the_last_expression_value() {
+    assert_golden(
+        "EP(60); Cresc=4,100 cd",
+        "4d546864000000060001000100604d54726b000000b800b00b3c00b00b3c00903c6404b00b3d02b00b3e0\
+         2b00b3f02b00b4002b00b4104b00b4202b00b4302b00b4402b00b4502b00b4604b00b4702b00b4802b00b4\
+         902b00b4a02b00b4b04b00b4c02b00b4d02b00b4e02b00b4f02b00b5004b00b5102b00b5202b00b5302b00\
+         b5402b00b5504b00b5602b00b5702b00b5802b00b5902b00b5a03803c6401b00b5b02b00b5c02b00b5d02b\
+         00b5e02b00b5f04b00b6002b00b6102b00b6204b00b6400903e644b803e6415ff2f00",
+    );
+}
+
+/// Cresc/Decresc write ahead without moving the track's time pointer, so the
+/// following note starts immediately rather than after the ramp finishes.
+#[test]
+fn cresc_does_not_advance_the_time_pointer() {
+    let with_cresc = compile("Cresc(4,100) c").unwrap();
+    let without = compile("c").unwrap();
+    // Same note-on/off timing either way; Cresc only adds CC events around it.
+    let note_bytes = |smf: &[u8]| -> Vec<u8> {
+        smf.windows(3)
+            .filter(|w| w[0] & 0xf0 == 0x80 || w[0] & 0xf0 == 0x90)
+            .flatten()
+            .copied()
+            .collect()
+    };
+    assert_eq!(note_bytes(&with_cresc.smf), note_bytes(&without.smf));
+}
