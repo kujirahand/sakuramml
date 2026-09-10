@@ -60,6 +60,17 @@ fn assignment_updates_a_variable() {
 }
 
 #[test]
+fn assignment_to_a_variable_wins_over_a_builtin_with_the_same_name() {
+    assert_same("Int KEY=2; KEY=3; n((60+KEY))", "n63");
+}
+
+#[test]
+fn comment_after_an_assignment_is_not_parsed_as_division() {
+    assert_same("#KEY_C={KEY=0;} // comment\n#KEY_C c", "Key=0; c");
+    assert_same("Int I=8; I=I / 2; n((60+I))", "n64");
+}
+
+#[test]
 fn string_variables() {
     assert_same(
         r#"Str s={"タイトル"}; TrackName=s; c"#,
@@ -68,6 +79,22 @@ fn string_variables() {
     assert_same(
         r#"Str a={"あ"}; Str b=(a+"い"); TrackName=b; c"#,
         r#"TrackName={"あい"} c"#,
+    );
+}
+
+#[test]
+fn string_replace_method_updates_an_mml_template() {
+    assert_same(
+        "Str COMMAND={cLEN}; Str LENGTH={4}; COMMAND.s({LEN},LENGTH); COMMAND",
+        "c4",
+    );
+}
+
+#[test]
+fn string_assignment_concatenates_a_bare_expression() {
+    assert_same(
+        "Str I={!1}; I=I+{^1}; TrackName=I; c",
+        "TrackName={!1^1}; c",
     );
 }
 
@@ -248,6 +275,11 @@ fn string_parameter_accepts_raw_mml() {
     assert_same("Function f(Str S){S} f(ドレミ)", "cde");
     assert_same("Function f(Str S){S} f(c4,80,100)", "c4,80,100");
     assert_same("Function f(Str S, Int N){S n(N)} f(c,62)", "c n62");
+}
+
+#[test]
+fn numeric_function_parameter_accepts_a_joined_length() {
+    assert_same("Function F(L){r%(L)c} F(!1^1)", "r%768 c");
 }
 
 #[test]

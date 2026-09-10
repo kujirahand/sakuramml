@@ -130,6 +130,11 @@ fn octave_and_accidentals() {
 }
 
 #[test]
+fn note_length_may_be_separated_by_spaces() {
+    assert_same_bytes("c 4 d 8.", "c4 d8.");
+}
+
+#[test]
 fn chord_notes_start_together_and_advance_once() {
     assert_golden(
         "'ceg'4 d",
@@ -523,6 +528,11 @@ fn key_flag_applies_accidentals_and_writes_key_signature() {
         "System.KeyFlag#(f) f-",
         "4d546864000000060001000100604d54726b0000001200ff59020100009041644b80416415ff2f00",
     );
+}
+
+#[test]
+fn note_star_suppresses_key_flag_before_an_accidental() {
+    assert_same_bytes("System.KeyFlag#(c) c c* c*+", "System.KeyFlag#(c) c c- c");
 }
 
 #[test]

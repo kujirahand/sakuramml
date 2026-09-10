@@ -227,7 +227,7 @@ fn parse_multiplicative(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<V
         cur.skip_spaces();
         let op = match cur.peek() {
             Some('*') => '*',
-            Some('/') => '/',
+            Some('/') if !matches!(cur.peek_at(1), Some('/') | Some('*')) => '/',
             Some('%') => '%',
             _ => return Ok(left),
         };

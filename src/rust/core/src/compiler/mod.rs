@@ -725,6 +725,16 @@ impl<'a> Compiler<'a> {
             let name = word.clone();
             return self.string_variable(cur, &name, line);
         }
+        if self.variables.contains_key(&word) {
+            let mut probe = cur.clone();
+            probe.skip_spaces();
+            let is_assignment = probe.peek() == Some('=')
+                || matches!(probe.peek(), Some('+') | Some('-'))
+                    && probe.peek() == probe.peek_at(1);
+            if is_assignment {
+                return self.assign(cur, &word);
+            }
+        }
 
         match word.as_str() {
             "Tempo" | "TEMPO" | "TempoChange" => {
@@ -1009,6 +1019,16 @@ impl<'a> Compiler<'a> {
                 if !is_string_value {
                     args.push(Value::Str(raw.to_string()));
                     continue;
+                }
+            }
+            if matches!(raw.chars().next(), Some('!') | Some('%')) {
+                let mut length_cur = Cursor::with_line(raw, line);
+                if let Some(length) = self.read_joined_argument_length(&mut length_cur)? {
+                    length_cur.skip_trivia();
+                    if length_cur.is_eof() {
+                        args.push(Value::Int(length));
+                        continue;
+                    }
                 }
             }
             args.push(self.eval_source(raw, line)?);
@@ -1508,6 +1528,41 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         if cur.peek() == Some('=') {
             return self.assign(cur, name);
+        }
+        if cur.eat('.') {
+            let method = cur
+                .read_word()
+                .ok_or_else(|| MmlError::new(line, "文字列メソッド名を指定してください"))?;
+            if method != "s" {
+                return Err(MmlError::new(
+                    line,
+                    format!("文字列メソッド.{method}は未実装です"),
+                ));
+            }
+            cur.skip_spaces();
+            if !cur.eat('(') {
+                return Err(MmlError::new(
+                    line,
+                    ".sには(検索文字列,置換文字列)が必要です",
+                ));
+            }
+            let source = cur
+                .read_balanced('(', ')')
+                .ok_or_else(|| MmlError::new(line, ".sの括弧が閉じられていません"))?;
+            let parts = split_function_args(&source);
+            if parts.len() != 2 {
+                return Err(MmlError::new(line, ".sには2つの引数が必要です"));
+            }
+            let from = self.eval_source(parts[0].trim(), line)?.as_str();
+            let to = self.eval_source(parts[1].trim(), line)?.as_str();
+            let current = self
+                .variables
+                .get(name)
+                .map(Value::as_str)
+                .unwrap_or_default();
+            self.variables
+                .insert(name.to_string(), Value::Str(current.replace(&from, &to)));
+            return Ok(());
         }
         let contents = match self.variables.get(name) {
             Some(value) => value.as_str(),
@@ -2696,13 +2751,20 @@ impl<'a> Compiler<'a> {
             .ok_or_else(|| MmlError::new(line, format!("音名ではありません: {letter}")))?;
         let base = pitch_class_semitone(class);
 
-        // Pascal adds a written accidental to the active KeyFlag. Thus, under
-        // KeyFlag#(f), `f-` cancels back to F rather than becoming E.
-        let mut accidental = self.key_flags[class];
+        // A `*` immediately after the note suppresses KeyFlag for that note.
+        // Legacy chord helpers rely on the accidental following it (`a*+`).
+        // A second `*`, after the accidental, has the same suppressing effect.
+        let mut suppress_key_flag = cur.eat('*');
+        let mut accidental = 0;
         while let Some(sign) = cur.eat_any(&['+', '-', '#']) {
             accidental += if sign == '-' { -1 } else { 1 };
         }
+        suppress_key_flag |= cur.eat('*');
+        if !suppress_key_flag {
+            accidental += self.key_flags[class];
+        }
 
+        cur.skip_spaces();
         let (length, options) = self.read_note_options(cur)?;
         let octave = {
             let track = self.track();
