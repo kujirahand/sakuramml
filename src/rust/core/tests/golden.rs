@@ -80,6 +80,32 @@ fn velocity() {
 }
 
 #[test]
+fn note_info_commands_accept_legacy_relative_values() {
+    assert_same_bytes("v100 v+10 c", "v110 c");
+    assert_same_bytes("v100 v-- c", "v84 c");
+    assert_same_bytes("System.vAdd(10) v100 v++ c", "v120 c");
+    assert_same_bytes("System.qAdd(7) q80 q++ c", "q94 c");
+    assert_same_bytes("System.q2Add(3) q%20 q%++ c", "q%26 c");
+    assert_same_bytes("o5 o-1 c", "o4 c");
+    assert_same_bytes("t5 t+2 c", "t7 c");
+}
+
+#[test]
+fn note_options_accept_relative_arithmetic() {
+    assert_same_bytes("v100 c4,,+20", "v100 c4,,120");
+    assert_same_bytes("q80 c4,-20", "q80 c4,60");
+    assert_same_bytes("t5 c4,,,-2", "t5 c4,,,3");
+    assert_same_bytes("o5 c4,,,,-1", "o5 c4,,,,4");
+    assert_same_bytes("v30 c4,,*2", "v30 c4,,60");
+    assert_same_bytes("v30 c4,,/0", "v30 c4,,0");
+}
+
+#[test]
+fn full_pitch_bend_accepts_the_equals_form() {
+    assert_same_bytes("p%=0 c", "p%0 c");
+}
+
+#[test]
 fn note_arguments_follow_lqvto_order() {
     assert_same_bytes("c4,50,40", "l4 q50 v40 c");
     assert_same_bytes("c4,,,48,6", "t48 o6 c");
@@ -850,6 +876,12 @@ fn chords_sound_their_notes_together() {
         "4d546864000000060001000100604d54726b0000001d00903c64009040640090436\
          48118803c64008040640080436428ff2f00",
     );
+}
+
+#[test]
+fn chord_length_accepts_a_parenthesized_variable() {
+    assert_same_bytes("Function f(len){'ceg'(len)} f(4)", "'ceg'4");
+    assert_same_bytes("l%24 Function f(len){'ceg'(len)} f(48)", "'ceg'%48");
 }
 
 /// The pointer moves once for the chord, not once per note in it.

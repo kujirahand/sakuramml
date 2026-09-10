@@ -60,6 +60,7 @@ struct TrackState {
     time: i64,
     octave: i64,
     length: i64,
+    length_in_steps: bool,
     velocity: i64,
     gate_percent: i64,
     timing: i64,
@@ -97,6 +98,7 @@ impl TrackState {
             time: 0,
             octave: 5,
             length: timebase, // l4 at the default timebase
+            length_in_steps: false,
             velocity: 100,
             gate_percent: 80,
             timing: 0,
@@ -138,6 +140,10 @@ pub struct Compiler<'a> {
     q_max: i64,
     /// Value of `v` that means full velocity (`System.vMax`).
     v_max: i64,
+    /// Steps used by `q++` / `v++` (and `q%++`) in legacy MML.
+    q_add: i64,
+    q2_add: i64,
+    v_add: i64,
     /// Offset applied to measure numbers in `Time` (`System.MeasureShift`).
     measure_shift: i64,
     /// Time signature, used to turn `Time(m:b:t)` into ticks.
@@ -186,6 +192,9 @@ impl<'a> Compiler<'a> {
             key_shift: 0,
             q_max: 100,
             v_max: 127,
+            q_add: 10,
+            q2_add: 8,
+            v_add: 8,
             measure_shift: 0,
             time_signature: (4, 4),
             messages: Vec::new(),
@@ -583,7 +592,8 @@ impl<'a> Compiler<'a> {
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Octave)? {
                     return Ok(handled);
                 }
-                let value = self.expect_int(cur, "o")?;
+                let current = self.track().octave;
+                let value = self.expect_note_info_value(cur, "o", current, 1)?;
                 self.track().octave = value;
                 Ok(())
             }
@@ -592,10 +602,13 @@ impl<'a> Compiler<'a> {
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Length)? {
                     return Ok(handled);
                 }
+                let in_steps = cur.peek() == Some('%');
                 let value = self
                     .read_length(cur)
                     .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
-                self.track().length = value;
+                let track = self.track();
+                track.length = value;
+                track.length_in_steps = in_steps;
                 Ok(())
             }
             'q' => {
@@ -609,7 +622,9 @@ impl<'a> Compiler<'a> {
                 if in_steps {
                     cur.advance();
                 }
-                let value = self.expect_int(cur, "q")?;
+                let current = self.track().gate_percent;
+                let increment = if in_steps { self.q2_add } else { self.q_add };
+                let value = self.expect_note_info_value(cur, "q", current, increment)?;
                 let track = self.track();
                 track.gate_in_steps = in_steps;
                 track.gate_percent = value;
@@ -620,7 +635,8 @@ impl<'a> Compiler<'a> {
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Velocity)? {
                     return Ok(handled);
                 }
-                let value = self.expect_int(cur, "v")?;
+                let current = self.track().velocity;
+                let value = self.expect_note_info_value(cur, "v", current, self.v_add)?;
                 self.track().velocity = value;
                 Ok(())
             }
@@ -629,7 +645,8 @@ impl<'a> Compiler<'a> {
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Timing)? {
                     return Ok(handled);
                 }
-                let value = self.expect_int(cur, "t")?;
+                let current = self.track().timing;
+                let value = self.expect_note_info_value(cur, "t", current, 1)?;
                 self.track().timing = value;
                 Ok(())
             }
@@ -1484,7 +1501,16 @@ impl<'a> Compiler<'a> {
             }
         }
         cur.skip_spaces();
-        let length = self.read_length(cur);
+        let length = if cur.peek() == Some('(') {
+            let value = self.expect_int(cur, "和音の音長")?;
+            if self.track().length_in_steps {
+                Some(value)
+            } else {
+                Some(self.timebase * 4 / value.max(1))
+            }
+        } else {
+            self.read_length(cur)
+        };
 
         let start = self.track().time;
         let previous_length = self.track().length;
@@ -1817,6 +1843,18 @@ impl<'a> Compiler<'a> {
             "vMax" => {
                 let value = self.expect_int_arg(cur, name)?;
                 self.v_max = value.max(1);
+                Ok(())
+            }
+            "vAdd" => {
+                self.v_add = self.expect_int_arg(cur, name)?;
+                Ok(())
+            }
+            "qAdd" => {
+                self.q_add = self.expect_int_arg(cur, name)?;
+                Ok(())
+            }
+            "q2Add" => {
+                self.q2_add = self.expect_int_arg(cur, name)?;
                 Ok(())
             }
             "RandomSeed" => {
@@ -2407,7 +2445,7 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         cur.skip_spaces();
         if cur.eat('%') {
-            let value = self.expect_int(cur, "p%")?;
+            let value = self.expect_int_arg(cur, "p%")?;
             self.write_pitch_bend(value);
             return Ok(());
         }
@@ -2819,7 +2857,14 @@ impl<'a> Compiler<'a> {
         } else if matches!(cur.peek(), Some(',') | Some(')') | None) {
             None
         } else {
-            self.read_number(cur)?
+            let base = match index {
+                1 => self.track().gate_percent,
+                2 => self.track().velocity,
+                3 => self.track().timing,
+                4 => self.track().octave,
+                _ => 0,
+            };
+            self.read_adjusted_number(cur, base)?
         };
         if in_steps {
             options.gate_in_steps = true;
@@ -2913,6 +2958,58 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         self.read_number(cur)?
             .ok_or_else(|| MmlError::new(line, format!("{name}には数値を指定してください")))
+    }
+
+    /// Set or adjust an `o/q/v/t` track value. Repeated bare signs use the
+    /// command's configured increment (`v++` is `2 * System.vAdd`), while a
+    /// following number is the amount itself (`v+10`).
+    fn expect_note_info_value(
+        &mut self,
+        cur: &mut Cursor,
+        name: &str,
+        current: i64,
+        increment: i64,
+    ) -> Result<i64> {
+        let line = cur.line();
+        cur.skip_spaces();
+        if cur.eat('=') {
+            return self.expect_int(cur, name);
+        }
+        let mut signs = 0i64;
+        let mut had_sign = false;
+        while let Some(sign) = cur.eat_any(&['+', '-']) {
+            had_sign = true;
+            signs += if sign == '+' { 1 } else { -1 };
+        }
+        if !had_sign {
+            return self.expect_int(cur, name);
+        }
+        let amount = self.read_number(cur)?.unwrap_or(increment);
+        let delta = signs
+            .checked_mul(amount)
+            .and_then(|delta| current.checked_add(delta))
+            .ok_or_else(|| MmlError::new(line, format!("{name}の相対値が範囲を超えました")))?;
+        Ok(delta)
+    }
+
+    /// Note comma options use their current track value as the base for
+    /// `+`, `-`, `*`, and `/`, matching Pascal's `NoteOn.getNoteArg`.
+    fn read_adjusted_number(&mut self, cur: &mut Cursor, base: i64) -> Result<Option<i64>> {
+        let line = cur.line();
+        cur.skip_spaces();
+        let operator = cur.eat_any(&['+', '-', '*', '/']);
+        let Some(value) = self.read_number(cur)? else {
+            return Ok(None);
+        };
+        let adjusted = match operator {
+            Some('+') => base.checked_add(value),
+            Some('-') => base.checked_sub(value),
+            Some('*') => base.checked_mul(value),
+            Some('/') => Some(if value == 0 { 0 } else { base / value }),
+            _ => Some(value),
+        }
+        .ok_or_else(|| MmlError::new(line, "音符引数の相対値が範囲を超えました"))?;
+        Ok(Some(adjusted))
     }
 
     /// A named command's argument, which may be written `Cmd=value`.
