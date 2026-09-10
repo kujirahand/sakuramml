@@ -55,6 +55,7 @@
 | `Str`仮引数へ括弧内の生MMLを渡す従来形式 | 未実装 | `seija.mml`、`sutoton-9.mml`の`MidiDelayS(...)`で構文エラー |
 | `System.vAdd`、`System.qAdd`、`System.q2Add` | 実装済み | `v++`、`q++`、`q%++`の増分を設定 |
 | `v/q/t/l/o.onTime`等の音符属性の推移指定 | 一部（警告） | `66.mml`の`v.onTime`等を警告して無視 |
+| 先行指定の期間における`!1^1`等の結合音長 | 未実装 | `230.mml`の`EP.onTime`、`P.onTime`で引数終端エラー |
 | 関数内の`Exit` | 実装済み | 関数だけを終了するよう修正。`random.mml`の後続音符も出力する |
 | `KeyFlag`と明示的な臨時記号 | 実装済み | Pascal版と同様に両方を加算する |
 | 明示的な`Track 1`より前のイベント | 実装済み | Pascal版と同様にMTrk 0へ保持する |
