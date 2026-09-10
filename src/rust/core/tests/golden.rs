@@ -184,6 +184,12 @@ fn lengths() {
 }
 
 #[test]
+fn step_mode_applies_to_explicit_lengths_and_length_arithmetic() {
+    assert_same_bytes("l%48 c96 r100-4 d", "l%48 c%96 r%96 d");
+    assert_same_bytes("l4 c4+8 d", "c4^8 d");
+}
+
+#[test]
 fn rest_advances_time() {
     assert_golden(
         "r c",
@@ -312,6 +318,11 @@ fn control_change_by_number() {
 }
 
 #[test]
+fn direct_control_change_accepts_the_equals_form() {
+    assert_same_bytes("y11=127", "y11,127");
+}
+
+#[test]
 fn named_control_changes() {
     let cases = [
         ("M(10) c", "b0010a"),
@@ -350,6 +361,20 @@ fn full_range_pitch_bend_centres_at_zero() {
         "PitchBend(0) c",
         "4d546864000000060001000100604d54726b0000001000e0004000903c644b803c6415ff2f00",
     );
+}
+
+#[test]
+fn full_range_pitch_bend_accepts_advance_modifiers() {
+    assert_same_bytes(
+        "p%.onTime(0,8191,!4); r4",
+        "PitchBend.onTime(0,8191,!4); r4",
+    );
+}
+
+#[test]
+fn rest_accepts_a_parenthesized_length_expression() {
+    assert_same_bytes("l%48 Int N=48; r(N-6)c", "l%48 r%42 c");
+    assert_same_bytes("l4 Int N=4; r(N)c", "r4 c");
 }
 
 #[test]

@@ -663,6 +663,14 @@ impl<'a> Compiler<'a> {
             }
             'p' => {
                 cur.advance();
+                if cur.eat('%') {
+                    if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
+                        return Ok(handled);
+                    }
+                    let value = self.expect_int_arg(cur, "p%")?;
+                    self.write_pitch_bend(value);
+                    return Ok(());
+                }
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
                     return Ok(handled);
                 }
@@ -2532,6 +2540,19 @@ impl<'a> Compiler<'a> {
     /// `y(n),(value)` — write a control change by number.
     fn control_change_direct(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        {
+            let mut probe = cur.clone();
+            probe.skip_spaces();
+            if let Some(no) = probe.read_int() {
+                probe.skip_spaces();
+                if probe.eat('=') {
+                    let value = self.expect_int_arg(&mut probe, "y")?;
+                    *cur = probe;
+                    self.write_cc(no, value);
+                    return Ok(());
+                }
+            }
+        }
         // `y256.Frequency(1)` — the number may be followed by a modifier
         // rather than a value. 256 and 257 are the bend pseudo-controllers.
         {
@@ -2813,8 +2834,24 @@ impl<'a> Compiler<'a> {
         if !rewind {
             cur.eat('+');
         }
-        let (length, _) = self.read_note_options(cur)?;
-        let length = length.unwrap_or_else(|| self.track().length);
+        let expression_length = if cur.peek() == Some('(') {
+            let value = self.read_number(cur)?.unwrap_or(0);
+            Some(if self.track().length_in_steps {
+                value
+            } else {
+                self.timebase * 4 / value.max(1)
+            })
+        } else {
+            None
+        };
+        let (length, _) = if expression_length.is_some() {
+            (None, NoteOptions::default())
+        } else {
+            self.read_note_options(cur)?
+        };
+        let length = expression_length
+            .or(length)
+            .unwrap_or_else(|| self.track().length);
         let signed = if rewind { -length } else { length };
         let time = self.track().time;
         // A rest advances the specifications as a note does — the Pascal
@@ -3023,6 +3060,7 @@ impl<'a> Compiler<'a> {
     /// A length spec: `4`, `8.`, `%48` (raw ticks), or a `^`-joined sum.
     fn read_length(&mut self, cur: &mut Cursor) -> Option<i64> {
         let mut total: Option<i64> = None;
+        let mut subtract = false;
         loop {
             // `*` introduces a length that may be an expression: `r*%(Delay)`
             // is a rest of `Delay` ticks, `c*3` a third note. Only there does
@@ -3036,7 +3074,9 @@ impl<'a> Compiler<'a> {
                 self.read_number(cur).ok().flatten()
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
                 let n = cur.read_int()?;
-                if n <= 0 {
+                if self.track().length_in_steps {
+                    Some(n)
+                } else if n <= 0 {
                     Some(0)
                 } else {
                     Some(self.timebase * 4 / n)
@@ -3076,11 +3116,24 @@ impl<'a> Compiler<'a> {
             }
             part = dotted;
 
-            total = Some(total.unwrap_or(0) + part);
+            total = Some(if subtract {
+                total.unwrap_or(0) - part
+            } else {
+                total.unwrap_or(0) + part
+            });
 
-            if cur.peek() == Some('^') {
-                cur.advance();
-                continue;
+            match cur.peek() {
+                Some('^') | Some('+') => {
+                    subtract = false;
+                    cur.advance();
+                    continue;
+                }
+                Some('-') => {
+                    subtract = true;
+                    cur.advance();
+                    continue;
+                }
+                _ => {}
             }
             break;
         }
