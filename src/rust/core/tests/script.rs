@@ -243,6 +243,14 @@ fn function_arguments() {
 }
 
 #[test]
+fn string_parameter_accepts_raw_mml() {
+    assert_same("Function f(Str S){S} f(cde)", "cde");
+    assert_same("Function f(Str S){S} f(ドレミ)", "cde");
+    assert_same("Function f(Str S){S} f(c4,80,100)", "c4,80,100");
+    assert_same("Function f(Str S, Int N){S n(N)} f(c,62)", "c n62");
+}
+
+#[test]
 fn function_argument_defaults() {
     let expected = from_hex("4d546864000000060001000100604d54726b0000000c00903e644b803e6415ff2f00");
     assert_eq!(

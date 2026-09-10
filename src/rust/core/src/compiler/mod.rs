@@ -566,7 +566,7 @@ impl<'a> Compiler<'a> {
             if let Some(word) = probe.read_word() {
                 if self.functions.contains_key(&word) {
                     *cur = probe;
-                    let args = self.read_call_args(cur)?;
+                    let args = self.read_call_args(cur, &word)?;
                     self.call_function(&word, args, line)?;
                     return Ok(());
                 }
@@ -717,7 +717,7 @@ impl<'a> Compiler<'a> {
         // same way it does for note letters: `Str S={"c"}` makes a later `S`
         // the variable, not the `Sub` alias.
         if self.functions.contains_key(&word) {
-            let args = self.read_call_args(cur)?;
+            let args = self.read_call_args(cur, &word)?;
             self.call_function(&word, args, line)?;
             return Ok(());
         }
@@ -885,7 +885,7 @@ impl<'a> Compiler<'a> {
             // A user-defined function, called as a command: `f` or `f(1,2)`.
             other if self.functions.contains_key(other) => {
                 let name = other.to_string();
-                let args = self.read_call_args(cur)?;
+                let args = self.read_call_args(cur, &name)?;
                 self.call_function(&name, args, line)?;
                 Ok(())
             }
@@ -940,10 +940,16 @@ impl<'a> Compiler<'a> {
             let mut name = cur
                 .read_word()
                 .ok_or_else(|| MmlError::new(line, format!("引数宣言を読み取れません: {part}")))?;
+            let mut kind = VarKind::Int;
 
             cur.skip_spaces();
             // "Int x" — the first word was the type, so the next is the name.
             if let Some(second) = cur.read_word() {
+                kind = match name.as_str() {
+                    "Str" | "STR" => VarKind::Str,
+                    "Array" | "ARRAY" => VarKind::Array,
+                    _ => VarKind::Int,
+                };
                 name = second;
                 cur.skip_spaces();
             }
@@ -953,36 +959,61 @@ impl<'a> Compiler<'a> {
             } else {
                 None
             };
-            params.push(Param { name, default });
+            params.push(Param {
+                name,
+                kind,
+                default,
+            });
         }
         Ok(params)
     }
 
     /// Read the arguments of a call in statement position: `f`, `f()`, `f(1,2)`.
-    fn read_call_args(&mut self, cur: &mut Cursor) -> Result<Vec<Value>> {
+    fn read_call_args(&mut self, cur: &mut Cursor, name: &str) -> Result<Vec<Value>> {
         cur.skip_spaces();
         if !cur.eat('(') {
             return Ok(Vec::new());
         }
-        let mut args = Vec::new();
-        cur.skip_spaces();
-        if cur.eat(')') {
-            return Ok(args);
+        let line = cur.line();
+        let source = cur
+            .read_balanced('(', ')')
+            .ok_or_else(|| MmlError::new(line, "関数呼び出しの括弧が閉じられていません"))?;
+        let params = self
+            .functions
+            .get(name)
+            .map(|function| function.params.clone())
+            .unwrap_or_default();
+        if source.trim().is_empty() {
+            return Ok(Vec::new());
         }
-        loop {
-            args.push(expr::eval(cur, self)?);
-            cur.skip_spaces();
-            if cur.eat(',') {
+        let raw_args = if params.len() == 1 && params[0].kind == VarKind::Str {
+            vec![source.as_str()]
+        } else {
+            split_function_args(&source)
+        };
+        let mut args = Vec::new();
+        for (index, raw) in raw_args.into_iter().enumerate() {
+            let raw = raw.trim();
+            if raw.is_empty() {
+                args.push(Value::Int(0));
                 continue;
             }
-            if !cur.eat(')') {
-                return Err(MmlError::new(
-                    cur.line(),
-                    "関数呼び出しの括弧が閉じられていません",
-                ));
+            if matches!(
+                params.get(index).map(|param| param.kind),
+                Some(VarKind::Str)
+            ) {
+                let is_string_value = raw.starts_with('{')
+                    || raw.starts_with('"')
+                    || raw.starts_with('(')
+                    || matches!(self.variables.get(raw), Some(Value::Str(_)));
+                if !is_string_value {
+                    args.push(Value::Str(raw.to_string()));
+                    continue;
+                }
             }
-            return Ok(args);
+            args.push(self.eval_source(raw, line)?);
         }
+        Ok(args)
     }
 
     /// The built-in functions (`Random`, `SizeOf`, …).
@@ -2314,31 +2345,7 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         let parenthesised = cur.eat('(');
 
-        let mut values: Vec<i64> = Vec::new();
-        loop {
-            cur.skip_spaces();
-            let value = if hex_mode {
-                // Even in hex mode a parenthesised value is an ordinary
-                // expression, as in stdmsg.h's
-                // `SysEx$=F0,41,(DeviceNumber),42,...`.
-                if cur.peek() == Some('(') {
-                    let line = cur.line();
-                    Some(expr::eval(cur, self)?.as_int(line)?)
-                } else {
-                    // A `$` prefix is allowed here but redundant.
-                    cur.eat('$');
-                    cur.read_hex()
-                }
-            } else {
-                self.read_number(cur)?
-            };
-            let Some(value) = value else { break };
-            values.push(value);
-            cur.skip_spaces();
-            if !cur.eat(',') {
-                break;
-            }
-        }
+        let values = self.read_sysex_values(cur, hex_mode)?;
         if parenthesised {
             cur.skip_spaces();
             if !cur.eat(')') {
@@ -2360,6 +2367,56 @@ impl<'a> Compiler<'a> {
 
         let time = self.track().time;
         self.push_event(Event::new(time, data))
+    }
+
+    /// Read a SysEx value list. A `{...}` group writes its values and then a
+    /// Roland-style checksum, reproducing Pascal's `128 - (sum mod 128)`
+    /// calculation (including 128 when the remainder is zero).
+    fn read_sysex_values(&mut self, cur: &mut Cursor, hex_mode: bool) -> Result<Vec<i64>> {
+        let mut values = Vec::new();
+        loop {
+            cur.skip_spaces();
+            if cur.eat('{') {
+                let line = cur.line();
+                let source = cur
+                    .read_balanced('{', '}')
+                    .ok_or_else(|| MmlError::new(line, "SysExチェックサム範囲が閉じていません"))?;
+                let mut group_cur = Cursor::with_line(&source, line);
+                let group = self.read_sysex_values(&mut group_cur, hex_mode)?;
+                group_cur.skip_trivia();
+                if !group_cur.is_eof() {
+                    return Err(MmlError::new(line, "SysExチェックサム範囲を解釈できません"));
+                }
+                let sum = group.iter().try_fold(0i64, |sum, value| {
+                    sum.checked_add(*value).ok_or_else(|| {
+                        MmlError::new(line, "SysExチェックサムの計算が範囲を超えました")
+                    })
+                })?;
+                values.extend(group);
+                values.push(128 - sum.rem_euclid(128));
+            } else {
+                let value = if hex_mode {
+                    // Even in hex mode a parenthesised value is an ordinary
+                    // expression. A `$` prefix is allowed but redundant.
+                    if cur.peek() == Some('(') {
+                        let line = cur.line();
+                        Some(expr::eval(cur, self)?.as_int(line)?)
+                    } else {
+                        cur.eat('$');
+                        cur.read_hex()
+                    }
+                } else {
+                    self.read_number(cur)?
+                };
+                let Some(value) = value else { break };
+                values.push(value);
+            }
+            cur.skip_spaces();
+            if !cur.eat(',') {
+                break;
+            }
+        }
+        Ok(values)
     }
 
     /// `DirectSMF(b1,b2,...)` — put raw bytes into the track as one event.
@@ -2523,8 +2580,8 @@ impl<'a> Compiler<'a> {
                     }
                     _ => None,
                 }
-            } else if parenthesised && cur.peek() == Some('!') {
-                self.read_number(cur)?
+            } else if parenthesised && matches!(cur.peek(), Some('!') | Some('%')) {
+                self.read_joined_argument_length(cur)?
             } else if parenthesised {
                 // Inside parentheses each argument may be an expression.
                 match cur.peek() {
@@ -2947,6 +3004,40 @@ impl<'a> Compiler<'a> {
         total
     }
 
+    /// Length-valued numeric arguments use `!n` for an n-th note, and may
+    /// join another ordinary note length with `^`: `!1^1` is two whole notes.
+    /// This differs from the note-length grammar, where `!4` historically
+    /// behaves like the raw-tick spelling `%4`.
+    fn read_joined_argument_length(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
+        let mut total = 0i64;
+        let mut found = false;
+        loop {
+            let mut part = if cur.eat('%') || cur.peek() == Some('!') {
+                self.read_number(cur)?
+            } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
+                cur.read_int().map(|n| self.timebase * 4 / n.max(1))
+            } else {
+                None
+            };
+            let Some(mut part_value) = part.take() else {
+                break;
+            };
+            let mut half = part_value;
+            while cur.eat('.') {
+                half /= 2;
+                part_value += half;
+            }
+            total = total
+                .checked_add(part_value)
+                .ok_or_else(|| MmlError::new(cur.line(), "結合音長が範囲を超えました"))?;
+            found = true;
+            if !cur.eat('^') {
+                break;
+            }
+        }
+        Ok(found.then_some(total))
+    }
+
     /// A note-attribute argument: a literal, or a parenthesised expression.
     ///
     /// The single-letter attributes (`o`, `l`, `q`, `v`, `p`) take no `=`
@@ -3162,6 +3253,34 @@ fn split_play_args(source: &str) -> Vec<&str> {
     args
 }
 
+/// Split a function call on top-level commas. Unlike `Play`, semicolons are
+/// part of an MML string argument and never delimit function parameters.
+fn split_function_args(source: &str) -> Vec<&str> {
+    let mut args = Vec::new();
+    let mut start = 0usize;
+    let mut round = 0usize;
+    let mut curly = 0usize;
+    let mut square = 0usize;
+
+    for (index, ch) in source.char_indices() {
+        match ch {
+            '(' => round += 1,
+            ')' => round = round.saturating_sub(1),
+            '{' => curly += 1,
+            '}' => curly = curly.saturating_sub(1),
+            '[' => square += 1,
+            ']' => square = square.saturating_sub(1),
+            ',' if round == 0 && curly == 0 && square == 0 => {
+                args.push(&source[start..index]);
+                start = index + ch.len_utf8();
+            }
+            _ => {}
+        }
+    }
+    args.push(&source[start..]);
+    args
+}
+
 /// What a `.onNote` list drives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OnNoteTarget {
@@ -3299,6 +3418,7 @@ struct FunctionDef {
 #[derive(Debug, Clone)]
 struct Param {
     name: String,
+    kind: VarKind,
     default: Option<Value>,
 }
 

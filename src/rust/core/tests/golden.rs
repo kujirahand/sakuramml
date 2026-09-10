@@ -605,6 +605,26 @@ fn sysex_hex_mode() {
 }
 
 #[test]
+fn sysex_checksum_group_matches_pascal() {
+    assert_golden(
+        "SysEx$=F0,41,10,42,12,{40,01,30,05},F7",
+        "4d546864000000060001000100604d54726b0000001100f00a41104212400130050af700ff2f00",
+    );
+}
+
+#[test]
+fn joined_lengths_work_in_advance_arguments() {
+    assert_same_bytes(
+        "P.Frequency(96); P.onTime(0,127,!1^1); c1^1",
+        "P.Frequency(96); P.onTime(0,127,%768); c1^1",
+    );
+    assert_same_bytes(
+        "P.Frequency(96); EP.onTime(127,0,!1^1); c1^1",
+        "P.Frequency(96); EP.onTime(127,0,%768); c1^1",
+    );
+}
+
+#[test]
 fn sysex_decimal_and_dollar_prefixed_forms() {
     let expected =
         "4d546864000000060001000100604d54726b0000001400f0057e7f0901f700903c644b803c6415ff2f00";
