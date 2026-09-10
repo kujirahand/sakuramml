@@ -114,6 +114,12 @@ fn note_arguments_follow_lqvto_order() {
 }
 
 #[test]
+fn gate_in_steps_accepts_a_dotted_length_value() {
+    assert_same_bytes("c8,%!4.", "c8,%144");
+    assert_same_bytes("c8,!4.", "c8,144");
+}
+
+#[test]
 fn octave_and_accidentals() {
     assert_golden(
         "o4 c",
@@ -752,6 +758,11 @@ fn rythm_macros_expand_per_character() {
         "$x{n?,} Rythm{ x36 x38 }",
         "4d546864000000060001000100604d54726b00000014009024644b802464159026644b80266415ff2f00",
     );
+}
+
+#[test]
+fn string_macros_expand_inside_rythm_mode() {
+    assert_same_bytes("$b{n36,}; $h{n42,}; #F={b8h8}; Rythm{#F}", "n36,8 n42,8");
 }
 
 /// Characters with no macro keep their ordinary meaning, so lengths, rests and

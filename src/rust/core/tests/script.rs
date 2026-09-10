@@ -617,6 +617,7 @@ fn mml_reports_the_current_setting() {
     assert_same("@5 Int x=MML(@); n((x+55))", "@5 n60");
     // A length comes back in ticks, so l8 is 48 at the default timebase.
     assert_same("l8 Int x=MML(l); n((x+12))", "l8 n60");
+    assert_same("y11,42 Int x=MML(y11); n((x+18))", "y11,42 n60");
 }
 
 #[test]

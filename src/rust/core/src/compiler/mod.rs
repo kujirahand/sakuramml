@@ -162,6 +162,8 @@ pub struct Compiler<'a> {
     cc_frequency: i64,
     /// Single-character drum macros, from `$c{...}`.
     rythm_macros: rythm::Macros,
+    /// Nested `Rythm{...}` depth, retained while string macros are expanded.
+    rythm_depth: usize,
     /// User-defined Japanese macros, from `~{name}={mml}`.
     sutoton_macros: crate::lexer::sutoton::UserMacros,
 }
@@ -205,6 +207,7 @@ impl<'a> Compiler<'a> {
             chord_start: None,
             cc_frequency: advance_spec::DEFAULT_FREQUENCY,
             rythm_macros: rythm::Macros::new(),
+            rythm_depth: 0,
             sutoton_macros: crate::lexer::sutoton::UserMacros::new(),
         }
     }
@@ -1169,9 +1172,17 @@ impl<'a> Compiler<'a> {
 
     /// What a command is currently set to, for `MML(...)`.
     fn command_value(&mut self, name: &str, line: usize) -> Result<i64> {
+        let name = name.trim();
+        let controller = name
+            .strip_prefix('y')
+            .and_then(|digits| digits.parse::<i64>().ok())
+            .or_else(|| control_change_number(name));
+        if let Some(controller) = controller {
+            return Ok(self.cc_modifier_entry(controller).last_value);
+        }
         let key_shift = self.key_shift;
         let track = self.track();
-        Ok(match name.trim() {
+        Ok(match name {
             "l" => track.length,
             "v" => track.velocity,
             "o" => track.octave,
@@ -1517,7 +1528,10 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         let body = self.read_block(cur, line)?;
         let expanded = rythm::expand(&body, &self.rythm_macros);
-        self.run_fragment(&expanded, line)
+        self.rythm_depth += 1;
+        let result = self.run_fragment(&expanded, line);
+        self.rythm_depth -= 1;
+        result
     }
 
     /// A string variable in command position: assign to it, or play it.
@@ -1572,6 +1586,11 @@ impl<'a> Compiler<'a> {
             return Ok(());
         }
         let expanded = self.preprocess(&contents);
+        let expanded = if self.rythm_depth > 0 {
+            rythm::expand(&expanded, &self.rythm_macros)
+        } else {
+            expanded
+        };
         self.run_fragment(&expanded, line)
     }
 
@@ -2973,6 +2992,8 @@ impl<'a> Compiler<'a> {
         }
         let value = if index == 0 {
             self.read_length(cur)
+        } else if index == 1 && cur.peek() == Some('!') {
+            self.read_joined_argument_length(cur)?
         } else if matches!(cur.peek(), Some(',') | Some(')') | None) {
             None
         } else {
