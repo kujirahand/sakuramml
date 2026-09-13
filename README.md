@@ -44,6 +44,8 @@ Rust CLI だけをビルドする場合、FPC と `wasm-pack` は不要です。
 | `just build-rust` | Rust ワークスペースをビルド |
 | `just build-cli` | Rust CLI のみをビルド |
 | `just buld-wasm` | ブラウザ向け WASM パッケージをビルド |
+| `just build-npm` | npm公開用の `sakuramml-v2` パッケージをビルド |
+| `just check-npm` | npm公開用パッケージをビルドし、動作と同梱内容を検査 |
 | `just test-samples` | `sample/*.mml`を両実装で変換し、MIDIのバイト差異率とイベント差異率を表示 |
 
 生成物の主な出力先は次のとおりです。
@@ -91,6 +93,27 @@ python3 -m http.server 8000
 
 ブラウザで <http://localhost:8000/demo/> を開くと、MMLのコンパイルとMIDIファイルの
 ダウンロードを試せます。
+
+## npmパッケージ
+
+公開後は、Pascal版との互換性を重視したnpmの `sakuramml-v2` パッケージを
+ブラウザアプリから利用できます。既存の `sakuramml` とは別パッケージです。
+
+```sh
+npm install sakuramml-v2
+```
+
+```js
+import init, { compileMml } from "sakuramml-v2";
+
+await init();
+const { midi, errors, warnings } = compileMml("Tempo=120 o5 l4 cdefgab>c");
+```
+
+公開前には `just check-npm` を実行します。検査に成功したら `npm whoami` で
+`sakuramml-v2` を公開するアカウントにログインしていることを確認し、生成された
+`src/rust/wasm/pkg/` で `npm publish` を実行します。`npm publish` は自動では
+実行されません。
 
 ## MMLの例
 

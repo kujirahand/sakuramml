@@ -13,6 +13,14 @@ build-cli:
 buld-wasm:
     cd src/rust && ./build-wasm.sh
 
+# Build the browser package that will be uploaded as `sakuramml-v2` on npm.
+build-npm:
+    cd src/rust && ./build-npm.sh
+
+# Build, smoke-test, and inspect the npm package without publishing it.
+check-npm:
+    cd src/rust && ./check-npm.sh
+
 _build-pascal:
     cd src/pascal && fpc -Mdelphi -g -gv -vewh csakura.dpr
 

@@ -21,7 +21,9 @@ See [../../plan.md](../../plan.md) for the migration plan and
 cargo test --workspace     # unit tests + golden tests against the Pascal output
 cargo run -p sakuramml-cli -- -e "cde" out.mid
 ./build-wasm.sh            # browser package into wasm/pkg/
-./build-wasm.sh nodejs     # Node package (for the smoke test below)
+./build-wasm.sh nodejs     # Node.js-specific local package
+./build-npm.sh             # public sakuramml npm package into wasm/pkg/
+./check-npm.sh             # npm package smoke test and dry-run contents
 ```
 
 The CLI recovers from source errors where possible. It prints every distinct
@@ -45,7 +47,9 @@ cd wasm && python3 -m http.server 8000
 From JavaScript:
 
 ```js
-const { compileMml, addInclude } = require('./wasm/pkg/sakuramml_wasm.js');
+import init, { compileMml, addInclude } from './wasm/pkg/sakuramml_wasm.js';
+
+await init();
 const { midi, errors, warnings } = compileMml('cde'); // midi: Uint8Array
 
 // stdmsg.h is embedded; hand over any other Include/ file you need.
