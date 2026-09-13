@@ -667,6 +667,75 @@ fn key_shift_transposes() {
 }
 
 #[test]
+fn time_key_ranges_match_pascal_at_boundaries_and_when_overlapping() {
+    // An omitted start uses the current time, and an omitted end stays open.
+    assert_golden(
+        "Time(1:2:0) TimeKey(,,2)c",
+        "4d546864000000060001000100604d54726b0000000c60903e644b803e6415ff2f00",
+    );
+    // Later matching declarations win. When their half-open range ends, the
+    // still-active earlier declaration becomes visible again.
+    assert_golden(
+        "TimeKey((1:1:0),(1:4:0),2) TimeKey((1:2:0),(1:3:0),4) \
+         Time(1:1:0)c Time(1:2:0)c Time(1:3:0)c",
+        "4d546864000000060001000100604d54726b0000001c00903e644b803e64159040644b80406415903e\
+         644b803e6415ff2f00",
+    );
+}
+
+#[test]
+fn time_key_flag_ranges_override_key_flag_like_pascal() {
+    // TimeKeyFlag uses the legacy a,b,c,d,e,f,g argument order. A matching
+    // rule replaces (rather than adds to) the ordinary KeyFlag array.
+    assert_golden(
+        "KeyFlag+(c) TimeKeyFlag((1:2:0),(1:3:0),(0,0,0,1,0,0,0)) \
+         Time(1:1:0)cd Time(1:2:0)cd Time(1:3:0)cd",
+        "4d546864000000060001000100604d54726b0000003a00ff5902010000903d644b803d6415903f6400\
+         903c644b803f6400803c6415903e6400903d644b803e6400803d6415903e644b803e6415ff2f00",
+    );
+    assert_golden(
+        "TimeKeyFlag((1:1:0),(1:4:0),(0,0,1,0,0,0,0)) \
+         TimeKeyFlag((1:2:0),(1:3:0),(0,0,0,1,0,0,0)) \
+         Time(1:1:0)cd Time(1:2:0)cd Time(1:3:0)cd",
+        "4d546864000000060001000100604d54726b0000003400903d644b803d6415903f6400903c644b803f\
+         6400803c6415903e6400903d644b803e6400803d6415903e644b803e6415ff2f00",
+    );
+}
+
+#[test]
+fn track_key_is_kept_per_track() {
+    assert_golden(
+        "Track=1 TrackKey(2)c Track=2 c TrackKey(-1)c Track=1 c",
+        "4d546864000000060001000200604d54726b0000001400903e644b803e6415903e644b803e6415ff2f\
+         004d54726b0000001400913c644b813c6415913b644b813b6415ff2f00",
+    );
+}
+
+#[test]
+fn use_key_shift_disables_only_transposition() {
+    assert_golden(
+        "Key(2) TrackKey(3) TimeKey(,,4) TimeKey2(,,5) KeyFlag+(c) \
+         c UseKeyShift(off)c UseKeyShift(on)c",
+        "4d546864000000060001000100604d54726b0000002200ff5902010000904b644b804b6415903d644b\
+         803d6415904b644b804b6415ff2f00",
+    );
+    // TimeKeyFlag, like KeyFlag, remains effective while transposition is off.
+    assert_golden(
+        "TimeKeyFlag((1:1:0),(2:1:0),(0,0,1,0,0,0,0)) UseKeyShift(off)c",
+        "4d546864000000060001000100604d54726b0000000c00903d644b803d6415ff2f00",
+    );
+}
+
+#[test]
+fn chords_apply_time_track_and_flag_rules_to_each_note() {
+    assert_golden(
+        "TimeKey(,,2) TrackKey(3) TimeKeyFlag(,,(0,0,1,0,0,0,0)) 'ceg'",
+        "4d546864000000060001000100604d54726b0000001c0090426400904564009048644b80426400804564\
+         0080486415ff2f00",
+    );
+}
+
+#[test]
 fn legacy_system_note_settings_match_pascal() {
     assert_golden(
         "System.X68mode(on);o5>c<c",

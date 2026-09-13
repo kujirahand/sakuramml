@@ -71,6 +71,9 @@
 | `Port` | `Port(n)` | 実装済み | [05](05-meta-and-encoding.md) |
 | `Key` / `KeyShift` | `Key=n` | 実装済み | [02](02-notes.md) |
 | `TimeKey` / `TimeKey2` | `TimeKey((from),(to),value)` | 実装済み | [02](02-notes.md) |
+| `TimeKeyFlag` | `TimeKeyFlag((from),(to),(a,b,c,d,e,f,g))` | 実装済み | [02](02-notes.md) |
+| `TrackKey` | `TrackKey(value)` | 実装済み | [02](02-notes.md) |
+| `UseKeyShift` | `UseKeyShift(on/off)` | 実装済み | [02](02-notes.md) |
 | `KeyFlag` | `KeyFlag+(notes)` / `=(...)` | 実装済み | [02](02-notes.md) |
 | `Include` | `Include(file)` | 実装済み | [07](07-macros-and-includes.md) |
 
