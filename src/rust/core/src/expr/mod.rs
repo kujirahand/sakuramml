@@ -327,9 +327,19 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
         }
         // `#` leads a string macro's name, as in `#STR(n)` or `#Melody`.
         Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '#' => {
-            let name = cur
+            let mut name = cur
                 .read_word()
                 .ok_or_else(|| MmlError::new(line, "変数名を読み取れません"))?;
+            // The legacy API exposes one value-returning System member:
+            // `Array a=System.GetKeyFlag`. Keep the dotted name intact so the
+            // compiler can implement it like the other built-in functions.
+            if name == "System" && cur.eat('.') {
+                let member = cur
+                    .read_word()
+                    .ok_or_else(|| MmlError::new(line, "System.の後に名前が必要です"))?;
+                name.push('.');
+                name.push_str(&member);
+            }
             match name.as_str() {
                 "on" | "ON" => return Ok(Value::Int(1)),
                 "off" | "OFF" => return Ok(Value::Int(0)),

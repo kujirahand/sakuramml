@@ -12,8 +12,42 @@
 | `System.vMax=n` | 127 | v の最大相当値。最低 1 |
 | `System.MeasureShift=n` | 0 | `Time(小節:拍:step)` の小節オフセット |
 | `System.RandomSeed=n` | 固定初期値 | 再現可能な乱数列のシード |
+| `System.X68mode(on/off)` | off | `<` と `>` の上下方向を入れ替える |
+| `System.Stepmode(on/off)` | off | 以後に作るトラックの音長を tick 指定として初期化する |
+| `System.VoiceNoShift=n` | 0 | `@` の音色番号へ加えるオフセット |
+| `System.OctaveRangeShift=n` | 0 | 音名のオクターブへ加えるオフセット |
+| `System.ControllerShift=n` | 1 | CC とピッチベンドを現在位置より先行させる tick 数 |
+| `System.GetKeyFlag` | - | 現在の `c,d,e,f,g,a,b` の KeyFlag を配列として返す |
 
 `System.Include`、`System.Div`、`System.Rythm`、`System.Sub` は対応する通常コマンドへ委譲します。
+
+`Stepmode` は既存トラックを書き換えず、設定後に初めて選択・生成したトラックだけが値を継承します。
+起動時に存在するトラック0も既定の音長モードのままです。`%` / `!` を付けた個別音長は、その音長に
+限ってモードを反転します。
+
+`VoiceNoShift` はMMLの1起点音色番号をMIDIの0起点番号へ直す際に加算します。変換結果が0〜127を
+外れればエラーです。`OctaveRangeShift` は `a`〜`g` と `NoteNo(...)` に適用し、絶対音高を指定する
+`n` には適用しません。
+
+`ControllerShift` は通常のCCとピッチベンドへ適用します。音色変更自体は従来どおり常に1 tick前です。
+Bank Selectを伴う音色変更では、CC0、CC32、音色をこの順に `ControllerShift` tickずつ離します。
+先行時刻が負になるイベントは並び順を保ったままSMF上の時刻0へ置きます。
+
+`System.GetKeyFlag` は値を返すため、`Array (flags)=System.GetKeyFlag` の形で使います。配列の順番は
+`c,d,e,f,g,a,b` です。
+
+## 関連する構文設定
+
+| 設定 | 既定値 | 適用範囲 |
+|---|---:|---|
+| `ArgOrder(lqvto)` | `lqvto` | 現在のトラック。音符のカンマ引数の順番 |
+| `AllowMultiLine(on/off)` | on | 曲全体。offなら改行を含む `'...'` 和音をエラーにする |
+| `MetaTextEOL(n)` | 0 | 曲全体。0=CRLF、1=LF、2=CR |
+
+これらはPascal版と同じ裸のコマンド名に加え、移植期に既に受理していた
+`System.ArgOrder`、`System.AllowMultiLine`、`System.MetaTextEOL` も同じ動作の別名として扱います。
+`ArgOrder` に指定できる文字は `l`（音長）、`q`（ゲート）、`v`（ベロシティ）、`t`（タイミング）、
+`o`（オクターブ）です。部分集合や順序変更が可能です。
 
 ## 未実装 System 設定
 
@@ -21,7 +55,8 @@
 これは既存曲を途中まで変換できるための移行動作であり、その設定が適用されたことを意味しません。
 音響上重要な警告を無視して生成 MIDI を正式成果物にしてはいけません。
 
-代表例は `ArgOrder`、`UseKeyShift`、`MetaTextEOL`、`AllowMultiLine`、`TimeKey` などです。
+代表例は `UseKeyShift`、`TimeKey`、`TimeKeyFlag`、`TimeKey2` などです。
+`System.LoadSMF` はPascal側にも処理本体がなく、ファイルI/Oにも依存するため未対応のままです。
 最新の区分は [互換性表](10-compatibility.md) を参照してください。
 
 ## エラーと警告

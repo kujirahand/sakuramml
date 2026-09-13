@@ -61,6 +61,10 @@ struct TrackState {
     octave: i64,
     length: i64,
     length_in_steps: bool,
+    /// Effective step mode inherited from `System.Stepmode` or selected by `l%`.
+    system_step_mode: bool,
+    /// Order of the comma-separated note arguments (`ArgOrder`).
+    arg_order: String,
     velocity: i64,
     gate_percent: i64,
     timing: i64,
@@ -109,13 +113,15 @@ struct PendingNote {
 }
 
 impl TrackState {
-    fn new(track_no: i64, timebase: i64) -> Self {
+    fn new(track_no: i64, timebase: i64, step_mode: bool) -> Self {
         Self {
             channel: default_channel(track_no),
             time: 0,
             octave: 5,
             length: timebase, // l4 at the default timebase
             length_in_steps: false,
+            system_step_mode: step_mode,
+            arg_order: "lqvto".to_string(),
             velocity: 100,
             gate_percent: 80,
             timing: 0,
@@ -157,6 +163,10 @@ pub struct Compiler<'a> {
     key_flags: [i64; 7],
     /// Global transpose, in semitones (`System.Keyshift`).
     key_shift: i64,
+    x68_mode: bool,
+    step_mode: bool,
+    voice_no_shift: i64,
+    octave_range_shift: i64,
     /// Value of `q` that means 100% gate (`System.qMax`).
     q_max: i64,
     /// Value of `v` that means full velocity (`System.vMax`).
@@ -170,6 +180,8 @@ pub struct Compiler<'a> {
     /// How many ticks ordinary CC and pitch-bend events precede the cursor.
     /// Program changes always precede it by one tick in the Pascal build.
     controller_shift: i64,
+    allow_multi_line: bool,
+    meta_text_eol: i64,
     /// Time signature, used to turn `Time(m:b:t)` into ticks.
     time_signature: (i64, i64),
     /// Output of `Print(...)`, handed back to the caller instead of printed.
@@ -209,7 +221,7 @@ impl<'a> Compiler<'a> {
         Self {
             includes: &NoIncludes,
             timebase: DEFAULT_TIMEBASE,
-            tracks: BTreeMap::new(),
+            tracks: BTreeMap::from([(0, TrackState::new(0, DEFAULT_TIMEBASE, false))]),
             // The Pascal compiler keeps global setup events in MTrk 0. An
             // explicit `Track 1` must therefore start a separate track.
             current: 0,
@@ -222,6 +234,10 @@ impl<'a> Compiler<'a> {
             functions: BTreeMap::new(),
             key_flags: [0; 7],
             key_shift: 0,
+            x68_mode: false,
+            step_mode: false,
+            voice_no_shift: 0,
+            octave_range_shift: 0,
             q_max: 100,
             v_max: 127,
             q_add: 10,
@@ -229,6 +245,8 @@ impl<'a> Compiler<'a> {
             v_add: 8,
             measure_shift: 0,
             controller_shift: 1,
+            allow_multi_line: true,
+            meta_text_eol: 0,
             time_signature: (4, 4),
             messages: Vec::new(),
             exiting: false,
@@ -264,10 +282,11 @@ impl<'a> Compiler<'a> {
 
     fn track(&mut self) -> &mut TrackState {
         let timebase = self.timebase;
+        let step_mode = self.step_mode;
         let no = self.current;
         self.tracks
             .entry(no)
-            .or_insert_with(|| TrackState::new(no, timebase))
+            .or_insert_with(|| TrackState::new(no, timebase, step_mode))
     }
 
     /// The standard definition file, loaded before the song itself.
@@ -651,9 +670,15 @@ impl<'a> Compiler<'a> {
                 let value = self
                     .read_length(cur)
                     .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
+                let step_mode = if in_steps {
+                    !self.step_mode
+                } else {
+                    self.step_mode
+                };
                 let track = self.track();
                 track.length = value;
                 track.length_in_steps = in_steps;
+                track.system_step_mode = step_mode;
                 Ok(())
             }
             'q' => {
@@ -743,12 +768,12 @@ impl<'a> Compiler<'a> {
             }
             '>' => {
                 cur.advance();
-                self.track().octave += 1;
+                self.track().octave += if self.x68_mode { -1 } else { 1 };
                 Ok(())
             }
             '<' => {
                 cur.advance();
-                self.track().octave -= 1;
+                self.track().octave += if self.x68_mode { 1 } else { -1 };
                 Ok(())
             }
             c if c.is_ascii_alphabetic() || c == '_' || c == '#' => self.word_command(cur),
@@ -803,9 +828,10 @@ impl<'a> Compiler<'a> {
                 let no = self.expect_int_arg(cur, &word)?;
                 self.current = no;
                 let timebase = self.timebase;
+                let step_mode = self.step_mode;
                 self.tracks
                     .entry(no)
-                    .or_insert_with(|| TrackState::new(no, timebase));
+                    .or_insert_with(|| TrackState::new(no, timebase, step_mode));
                 Ok(())
             }
             "Channel" | "CHANNEL" | "CH" => {
@@ -900,6 +926,15 @@ impl<'a> Compiler<'a> {
             "Sub" | "SUB" | "S" => self.sub(cur),
             "TimeSignature" => self.time_signature(cur),
             "KeyFlag" => self.key_flag(cur),
+            "ArgOrder" => self.arg_order(cur, line),
+            "AllowMultiLine" => {
+                self.allow_multi_line = self.expect_int_arg(cur, &word)? != 0;
+                Ok(())
+            }
+            "MetaTextEOL" => {
+                self.meta_text_eol = self.expect_int_arg(cur, &word)?;
+                Ok(())
+            }
             "Keyshift" | "KeyShift" => {
                 self.key_shift = self.expect_int_arg(cur, &word)?;
                 Ok(())
@@ -1306,6 +1341,9 @@ impl<'a> Compiler<'a> {
                 let source = args.first().map(Value::as_str).unwrap_or_default();
                 Value::Int(self.time_value(&source, line)?)
             }
+            "System.GetKeyFlag" => {
+                Value::Array(self.key_flags.iter().copied().map(Value::Int).collect())
+            }
             _ => return Err(MmlError::new(line, format!("関数\"{name}\"は未定義です"))),
         };
         Ok(Some(value))
@@ -1335,8 +1373,8 @@ impl<'a> Compiler<'a> {
                         octave = value;
                     }
                 }
-                '>' => octave += 1,
-                '<' => octave -= 1,
+                '>' => octave += if self.x68_mode { -1 } else { 1 },
+                '<' => octave += if self.x68_mode { 1 } else { -1 },
                 '+' | '#' if note.is_some() => accidental += 1,
                 '-' if note.is_some() => accidental -= 1,
                 'n' => {
@@ -1360,7 +1398,7 @@ impl<'a> Compiler<'a> {
                 }
             }
         }
-        octave * 12 + note.unwrap_or(0) + accidental
+        (octave + self.octave_range_shift) * 12 + note.unwrap_or(0) + accidental
     }
 
     /// What a command is currently set to, for `MML(...)`.
@@ -1810,10 +1848,13 @@ impl<'a> Compiler<'a> {
                 None => return Err(MmlError::new(line, "和音が ' で閉じられていません")),
             }
         }
+        if !self.allow_multi_line && (body.contains('\n') || body.contains('\r')) {
+            return Err(MmlError::new(line, "和音内に改行があります"));
+        }
         cur.skip_spaces();
         let length = if cur.peek() == Some('(') {
             let value = self.expect_int(cur, "和音の音長")?;
-            if self.track().length_in_steps {
+            if self.track().system_step_mode {
                 Some(value)
             } else {
                 Some(self.timebase * 4 / value.max(1))
@@ -2033,7 +2074,7 @@ impl<'a> Compiler<'a> {
             None => (false, source),
         };
         let value = self.eval_source(source, line)?.as_int(line)?;
-        if raw_ticks || self.track().length_in_steps {
+        if raw_ticks || self.track().system_step_mode {
             Ok(Some(value))
         } else if value <= 0 {
             Ok(Some(0))
@@ -2077,6 +2118,7 @@ impl<'a> Compiler<'a> {
 
         let original_track = self.current;
         let start_time = self.track().time;
+        let step_mode = self.step_mode;
 
         for (track_no, source) in split_play_args(&body).into_iter().enumerate() {
             let source = source.trim();
@@ -2103,7 +2145,7 @@ impl<'a> Compiler<'a> {
             let track = self
                 .tracks
                 .entry(self.current)
-                .or_insert_with(|| TrackState::new(track_no as i64, timebase));
+                .or_insert_with(|| TrackState::new(track_no as i64, timebase, step_mode));
             track.time = start_time;
             track.last_note = None;
 
@@ -2256,8 +2298,33 @@ impl<'a> Compiler<'a> {
                 self.measure_shift = self.expect_int_arg(cur, name)?;
                 Ok(())
             }
+            "X68mode" | "X68Mode" => {
+                self.x68_mode = self.expect_int_arg(cur, name)? != 0;
+                Ok(())
+            }
+            "Stepmode" | "StepMode" => {
+                self.step_mode = self.expect_int_arg(cur, name)? != 0;
+                Ok(())
+            }
+            "VoiceNoShift" => {
+                self.voice_no_shift = self.expect_system_i32(cur, name, line)?;
+                Ok(())
+            }
+            "OctaveRangeShift" => {
+                self.octave_range_shift = self.expect_system_i32(cur, name, line)?;
+                Ok(())
+            }
             "ControllerShift" => {
-                self.controller_shift = self.expect_int_arg(cur, name)?;
+                self.controller_shift = self.expect_system_i32(cur, name, line)?;
+                Ok(())
+            }
+            "ArgOrder" => self.arg_order(cur, line),
+            "AllowMultiLine" => {
+                self.allow_multi_line = self.expect_int_arg(cur, name)? != 0;
+                Ok(())
+            }
+            "MetaTextEOL" => {
+                self.meta_text_eol = self.expect_int_arg(cur, name)?;
                 Ok(())
             }
             other => {
@@ -2283,6 +2350,41 @@ impl<'a> Compiler<'a> {
                 Ok(())
             }
         }
+    }
+
+    fn arg_order(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        cur.skip_spaces();
+        cur.eat('=');
+        cur.skip_spaces();
+        if !cur.eat('(') {
+            return Err(MmlError::new(line, "ArgOrderには(...)が必要です"));
+        }
+        let order = cur
+            .read_balanced('(', ')')
+            .ok_or_else(|| MmlError::new(line, "ArgOrderの括弧が閉じられていません"))?;
+        let order = order.trim();
+        if order
+            .chars()
+            .any(|ch| !matches!(ch, 'l' | 'q' | 'v' | 't' | 'o'))
+        {
+            return Err(MmlError::new(
+                line,
+                format!("ArgOrderに指定できない項目があります: {order}"),
+            ));
+        }
+        self.track().arg_order = order.to_string();
+        Ok(())
+    }
+
+    fn expect_system_i32(&mut self, cur: &mut Cursor, name: &str, line: usize) -> Result<i64> {
+        let value = self.expect_int_arg(cur, name)?;
+        if !(i32::MIN as i64..=i32::MAX as i64).contains(&value) {
+            return Err(MmlError::new(
+                line,
+                format!("System.{name}は32bit整数の範囲で指定してください: {value}"),
+            ));
+        }
+        Ok(value)
     }
 
     /// `TimeSignature=n,d` — also recorded, since `Time` is measured in bars.
@@ -2427,9 +2529,17 @@ impl<'a> Compiler<'a> {
     fn declare(&mut self, cur: &mut Cursor, kind: VarKind) -> Result<()> {
         let line = cur.line();
         cur.skip_spaces();
+        let parenthesised_name = cur.eat('(');
+        cur.skip_spaces();
         let name = cur
             .read_word()
             .ok_or_else(|| MmlError::new(line, "変数名を指定してください"))?;
+        if parenthesised_name {
+            cur.skip_spaces();
+            if !cur.eat(')') {
+                return Err(MmlError::new(line, "変数名の括弧が閉じられていません"));
+            }
+        }
 
         let initial = match kind {
             VarKind::Int => Value::Int(0),
@@ -2443,19 +2553,24 @@ impl<'a> Compiler<'a> {
             if kind == VarKind::Array {
                 cur.advance();
                 cur.skip_spaces();
-                if !cur.eat('(') {
-                    return Err(MmlError::new(line, "配列の初期値には(...)が必要です"));
-                }
-                let source = cur
-                    .read_balanced('(', ')')
-                    .ok_or_else(|| MmlError::new(line, "配列の初期値が閉じていません"))?;
-                let mut items = Vec::new();
-                for raw in split_function_args(&source) {
-                    if !raw.trim().is_empty() {
-                        items.push(self.eval_source(raw.trim(), line)?);
+                if cur.eat('(') {
+                    let source = cur
+                        .read_balanced('(', ')')
+                        .ok_or_else(|| MmlError::new(line, "配列の初期値が閉じていません"))?;
+                    let mut items = Vec::new();
+                    for raw in split_function_args(&source) {
+                        if !raw.trim().is_empty() {
+                            items.push(self.eval_source(raw.trim(), line)?);
+                        }
                     }
+                    self.variables.insert(name, Value::Array(items));
+                    return Ok(());
                 }
-                self.variables.insert(name, Value::Array(items));
+                let value = expr::eval(cur, self)?;
+                if !matches!(value, Value::Array(_)) {
+                    return Err(MmlError::new(line, "配列には配列値を代入してください"));
+                }
+                self.variables.insert(name, value);
                 return Ok(());
             }
             self.assign(cur, &name)?;
@@ -2816,7 +2931,17 @@ impl<'a> Compiler<'a> {
             return Err(MmlError::new(line, "@には音色番号を指定してください"));
         };
         self.track().voice = voice;
-        let program = (voice - 1).clamp(0, 127) as u8;
+        let shifted = voice
+            .checked_sub(1)
+            .and_then(|value| value.checked_add(self.voice_no_shift))
+            .ok_or_else(|| MmlError::new(line, "音色番号の計算が範囲を超えました"))?;
+        if !(0..=127).contains(&shifted) {
+            return Err(MmlError::new(
+                line,
+                format!("音色番号が範囲外です(0〜127): {shifted}"),
+            ));
+        }
+        let program = shifted as u8;
         let (time, channel, muted, cc_muted) = {
             let track = self.track();
             (
@@ -3049,6 +3174,12 @@ impl<'a> Compiler<'a> {
         if text.is_empty() {
             text.push(' ');
         }
+        let logical = text.replace("\r\n", "\n").replace('\r', "\n");
+        let text = match self.meta_text_eol {
+            1 => logical,
+            2 => logical.replace('\n', "\r"),
+            _ => logical.replace('\n', "\r\n"),
+        };
         let (bytes, warnings) = encode_cp932(&text, line);
         self.warnings.extend(warnings);
         let time = self.track().time;
@@ -3137,7 +3268,7 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             options.octave.unwrap_or(track.octave) + std::mem::take(&mut track.octave_once)
         };
-        let note_no = octave * 12 + base + accidental + self.key_shift;
+        let note_no = (octave + self.octave_range_shift) * 12 + base + accidental + self.key_shift;
         self.write_note(note_no, length, options, line)
     }
 
@@ -3163,7 +3294,7 @@ impl<'a> Compiler<'a> {
         }
         let expression_length = if cur.peek() == Some('(') {
             let value = self.read_number(cur)?.unwrap_or(0);
-            Some(if self.track().length_in_steps {
+            Some(if self.track().system_step_mode {
                 value
             } else {
                 self.timebase * 4 / value.max(1)
@@ -3377,11 +3508,11 @@ impl<'a> Compiler<'a> {
     /// Note suffixes: a length spec and/or `(l,q,v,t,o)` options.
     fn read_note_options(&mut self, cur: &mut Cursor) -> Result<(Option<i64>, NoteOptions)> {
         let mut options = NoteOptions::default();
-        let mut length = self.read_length(cur);
+        let mut length = None;
 
         // The two forms differ, as they do in the Pascal build: `c(4,...)`
         // sets only the length and ignores the rest, while `c4,80,100,0,5`
-        // sets length, gate, velocity, timing and octave in turn.
+        // follows the current track's ArgOrder.
         if cur.peek() == Some('(') {
             let line = cur.line();
             cur.advance();
@@ -3411,11 +3542,22 @@ impl<'a> Compiler<'a> {
                 index += 1;
             }
         } else {
-            let mut index = 1;
-            while index <= 4 && cur.eat(',') {
-                cur.skip_spaces();
+            let order = self.track().arg_order.clone();
+            for (position, field) in order.chars().enumerate() {
+                let index = match field {
+                    'l' => 0,
+                    'q' => 1,
+                    'v' => 2,
+                    't' => 3,
+                    'o' => 4,
+                    _ => continue,
+                };
                 self.read_note_option(cur, index, &mut length, &mut options)?;
-                index += 1;
+                cur.skip_spaces();
+                if position + 1 >= order.len() || !cur.eat(',') {
+                    break;
+                }
+                cur.skip_spaces();
             }
         }
         Ok((length, options))
@@ -3479,10 +3621,20 @@ impl<'a> Compiler<'a> {
             }
             let part = if cur.peek() == Some('%') || cur.peek() == Some('!') {
                 cur.advance();
-                self.read_number(cur).ok().flatten()
+                self.read_number(cur).ok().flatten().map(|n| {
+                    if self.track().system_step_mode {
+                        if n <= 0 {
+                            0
+                        } else {
+                            self.timebase * 4 / n
+                        }
+                    } else {
+                        n
+                    }
+                })
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
                 let n = cur.read_int()?;
-                if self.track().length_in_steps {
+                if self.track().system_step_mode {
                     Some(n)
                 } else if n <= 0 {
                     Some(0)
@@ -3911,6 +4063,7 @@ fn is_builtin_function(name: &str) -> bool {
             | "CHR"
             | "VERSION"
             | "Time"
+            | "System.GetKeyFlag"
     )
 }
 

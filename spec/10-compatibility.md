@@ -29,6 +29,7 @@
 | 先行指定（音符属性） | 一部 | `v q t l o` に `.onNote` と `.Random`。推移系は警告 |
 | `.C`（onCycle の別名） | 拡張 | 従来版は分岐の記述ミスで未接続。現行 Rust では動作する |
 | `.Random` の乱数値 | 非互換 | 生成器が異なるため値は一致しない（下記参照） |
+| 従来のSystem/構文設定 | 実装済み | `X68mode`, `Stepmode`, `VoiceNoShift`, `OctaveRangeShift`, `GetKeyFlag`, `ControllerShift`, `ArgOrder`, `AllowMultiLine`, `MetaTextEOL` |
 | その他の `System.*` | 一部 | 08章に記載したもの以外は警告 |
 | `Play` | 実装済み | 引数位置を0起点トラック番号として同時記述 |
 | `PlayFrom`, `PlayTo` | 実装済み（一部簡略化） | 下記参照 |
@@ -59,6 +60,10 @@
 | 文字列変数の`.s(検索,置換)` | 実装済み | `fadeio.h`の音長プレースホルダー置換に対応 |
 | `System.vAdd`、`System.qAdd`、`System.q2Add` | 実装済み | `v++`、`q++`、`q%++`の増分を設定 |
 | `System.ControllerShift` | 実装済み | CCとピッチベンドの先行tick数を設定。音色は常に1 tick前 |
+| `System.X68mode`、`Stepmode` | 実装済み | オクターブ記号の反転と、新規トラックのtick音長モード |
+| `System.VoiceNoShift`、`OctaveRangeShift` | 実装済み | 音色番号と音名オクターブのシフト |
+| `System.GetKeyFlag` | 実装済み | `c,d,e,f,g,a,b` 順の配列を返す |
+| `ArgOrder`、`AllowMultiLine`、`MetaTextEOL` | 実装済み | 音符引数順、複数行和音、メタテキスト改行を設定 |
 | `v/q/t/l/o.onTime`等の音符属性の推移指定 | 一部（警告） | `66.mml`の`v.onTime`等を警告して無視 |
 | 先行指定の期間における`!1^1`等の結合音長 | 実装済み | `230.mml`の`EP.onTime`、`P.onTime`に対応 |
 | 関数の数値引数における`!1^1`等の結合音長 | 実装済み | `23.mml`の`chord3.h`呼び出しに対応 |

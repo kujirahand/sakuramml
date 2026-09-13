@@ -69,6 +69,21 @@
 | `KeyFlag` | `KeyFlag+(notes)` / `=(...)` | 実装済み | [02](02-notes.md) |
 | `Include` | `Include(file)` | 実装済み | [07](07-macros-and-includes.md) |
 
+## System・構文設定
+
+| コマンド | 書式 | 状態 | 詳細 |
+|---|---|---|---|
+| `X68mode` | `System.X68mode(on/off)` | 実装済み | [08](08-system-and-limits.md) |
+| `Stepmode` | `System.Stepmode(on/off)` | 実装済み | [08](08-system-and-limits.md) |
+| `VoiceNoShift` | `System.VoiceNoShift=n` | 実装済み | [08](08-system-and-limits.md) |
+| `OctaveRangeShift` | `System.OctaveRangeShift=n` | 実装済み | [08](08-system-and-limits.md) |
+| `GetKeyFlag` | `Array (name)=System.GetKeyFlag` | 実装済み | [08](08-system-and-limits.md) |
+| `ControllerShift` | `System.ControllerShift=n` | 実装済み | [08](08-system-and-limits.md) |
+| `ArgOrder` | `ArgOrder(lqvto)` | 実装済み | [08](08-system-and-limits.md) |
+| `AllowMultiLine` | `AllowMultiLine(on/off)` | 実装済み | [08](08-system-and-limits.md) |
+| `MetaTextEOL` | `MetaTextEOL(0/1/2)` | 実装済み | [05](05-meta-and-encoding.md) |
+| `LoadSMF` | `System.LoadSMF(file)` | 未実装 | [08](08-system-and-limits.md) |
+
 ## スクリプトとマクロ
 
 | コマンド | 書式 | 状態 | 詳細 |
