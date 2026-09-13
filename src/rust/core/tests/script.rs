@@ -5,7 +5,7 @@
 //! byte string. A few cases are pinned to bytes captured from the Pascal
 //! build, and the semantics of every case here was checked against it.
 
-use sakuramml_core::{compile, MemoryIncludes};
+use sakuramml_core::{compile, compiler::MAX_ARRAY_ELEMENTS, MemoryIncludes};
 
 /// Compiling `script` must produce exactly what `equivalent` produces.
 #[track_caller]
@@ -138,6 +138,20 @@ fn array_element_assignment_rejects_invalid_growth() {
     assert_error_contains("Array A=(1); A(-1)=9", "負の値");
     assert_error_contains("Array A=(1); A(1000000)=9", "上限");
     assert_error_contains("Array A=(1); A(0=9", "閉じられていません");
+}
+
+#[test]
+fn array_initializer_rejects_more_than_the_element_limit() {
+    let mut source = String::from("Array A=(");
+    for index in 0..=MAX_ARRAY_ELEMENTS {
+        if index > 0 {
+            source.push(',');
+        }
+        source.push('0');
+    }
+    source.push(')');
+
+    assert_error_contains(&source, "上限");
 }
 
 #[test]

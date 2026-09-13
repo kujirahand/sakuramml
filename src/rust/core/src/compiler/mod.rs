@@ -2827,11 +2827,10 @@ impl<'a> Compiler<'a> {
                     let source = cur
                         .read_balanced('(', ')')
                         .ok_or_else(|| MmlError::new(line, "配列の初期値が閉じていません"))?;
-                    let mut items = Vec::new();
-                    for raw in split_function_args(&source) {
-                        if !raw.trim().is_empty() {
-                            items.push(self.eval_source(raw.trim(), line)?);
-                        }
+                    let raw_items = split_array_initializer(&source, line, MAX_ARRAY_ELEMENTS)?;
+                    let mut items = Vec::with_capacity(raw_items.len());
+                    for raw in raw_items {
+                        items.push(self.eval_source(raw.trim(), line)?);
                     }
                     self.variables.insert(name, Value::Array(items));
                     return Ok(());
@@ -4320,6 +4319,54 @@ fn split_function_args(source: &str) -> Vec<&str> {
     args
 }
 
+/// Split a parenthesised array initializer without collecting more entries
+/// than the array can hold. Empty positions are ignored, matching the legacy
+/// initializer, and nested commas stay inside their expression or string.
+fn split_array_initializer(source: &str, line: usize, max: usize) -> Result<Vec<&str>> {
+    let mut args = Vec::new();
+    let mut start = 0usize;
+    let mut round = 0usize;
+    let mut curly = 0usize;
+    let mut square = 0usize;
+
+    for (index, ch) in source.char_indices() {
+        match ch {
+            '(' => round += 1,
+            ')' => round = round.saturating_sub(1),
+            '{' => curly += 1,
+            '}' => curly = curly.saturating_sub(1),
+            '[' => square += 1,
+            ']' => square = square.saturating_sub(1),
+            ',' if round == 0 && curly == 0 && square == 0 => {
+                let raw = &source[start..index];
+                if !raw.trim().is_empty() {
+                    if args.len() >= max {
+                        return Err(MmlError::new(
+                            line,
+                            format!("配列の要素数が上限({max})を超えます"),
+                        ));
+                    }
+                    args.push(raw);
+                }
+                start = index + ch.len_utf8();
+            }
+            _ => {}
+        }
+    }
+
+    let raw = &source[start..];
+    if !raw.trim().is_empty() {
+        if args.len() >= max {
+            return Err(MmlError::new(
+                line,
+                format!("配列の要素数が上限({max})を超えます"),
+            ));
+        }
+        args.push(raw);
+    }
+    Ok(args)
+}
+
 /// What a `.onNote` list drives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OnNoteTarget {
@@ -4620,5 +4667,14 @@ mod tests {
         assert_eq!(default_channel(2), 1);
         assert_eq!(default_channel(16), 15);
         assert_eq!(default_channel(99), 15);
+    }
+
+    #[test]
+    fn array_initializer_limit_accepts_the_boundary_and_rejects_one_more() {
+        let items = split_array_initializer("0,(1+2),,{a,b}", 1, 3).unwrap();
+        assert_eq!(items, ["0", "(1+2)", "{a,b}"]);
+
+        let error = split_array_initializer("0,(1+2),,{a,b},4", 1, 3).unwrap_err();
+        assert!(error.message.contains("上限(3)"));
     }
 }
