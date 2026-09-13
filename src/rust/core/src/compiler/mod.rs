@@ -667,14 +667,17 @@ impl<'a> Compiler<'a> {
                     return Ok(handled);
                 }
                 let in_steps = cur.peek() == Some('%');
-                let value = self
-                    .read_length(cur)
-                    .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
+                if in_steps {
+                    cur.advance();
+                }
                 let step_mode = if in_steps {
                     !self.step_mode
                 } else {
                     self.step_mode
                 };
+                let value = self
+                    .read_length_in_mode(cur, step_mode)
+                    .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
                 let track = self.track();
                 track.length = value;
                 track.length_in_steps = in_steps;
@@ -3263,7 +3266,7 @@ impl<'a> Compiler<'a> {
         }
 
         cur.skip_spaces();
-        let (length, options) = self.read_note_options(cur)?;
+        let (length, options) = self.read_note_options(cur, true)?;
         let octave = {
             let track = self.track();
             options.octave.unwrap_or(track.octave) + std::mem::take(&mut track.octave_once)
@@ -3279,7 +3282,7 @@ impl<'a> Compiler<'a> {
         let note_no = self.expect_int_arg(cur, "nコマンドのノート番号")?;
         // `n60,` — the Pascal syntax allows a comma before the options.
         cur.eat(',');
-        let (length, options) = self.read_note_options(cur)?;
+        let (length, options) = self.read_note_options(cur, true)?;
         self.write_note(note_no + self.key_shift, length, options, line)
     }
 
@@ -3305,7 +3308,7 @@ impl<'a> Compiler<'a> {
         let (length, _) = if expression_length.is_some() {
             (None, NoteOptions::default())
         } else {
-            self.read_note_options(cur)?
+            self.read_note_options(cur, false)?
         };
         let explicit = expression_length.or(length);
         // Pascal's funcNoteR scales the default rest length, but an explicit
@@ -3340,7 +3343,7 @@ impl<'a> Compiler<'a> {
         if rewind || (no_previous_note && cur.peek() == Some('+')) {
             cur.advance();
         }
-        let (length, _) = self.read_note_options(cur)?;
+        let (length, _) = self.read_note_options(cur, false)?;
         let length = match length {
             Some(length) => length,
             None => {
@@ -3506,7 +3509,11 @@ impl<'a> Compiler<'a> {
     }
 
     /// Note suffixes: a length spec and/or `(l,q,v,t,o)` options.
-    fn read_note_options(&mut self, cur: &mut Cursor) -> Result<(Option<i64>, NoteOptions)> {
+    fn read_note_options(
+        &mut self,
+        cur: &mut Cursor,
+        use_arg_order: bool,
+    ) -> Result<(Option<i64>, NoteOptions)> {
         let mut options = NoteOptions::default();
         let mut length = None;
 
@@ -3541,7 +3548,7 @@ impl<'a> Compiler<'a> {
                 }
                 index += 1;
             }
-        } else {
+        } else if use_arg_order {
             let order = self.track().arg_order.clone();
             for (position, field) in order.chars().enumerate() {
                 let index = match field {
@@ -3559,6 +3566,8 @@ impl<'a> Compiler<'a> {
                 }
                 cur.skip_spaces();
             }
+        } else {
+            self.read_note_option(cur, 0, &mut length, &mut options)?;
         }
         Ok((length, options))
     }
@@ -3609,6 +3618,11 @@ impl<'a> Compiler<'a> {
 
     /// A length spec: `4`, `8.`, `%48` (raw ticks), or a `^`-joined sum.
     fn read_length(&mut self, cur: &mut Cursor) -> Option<i64> {
+        let step_mode = self.track().system_step_mode;
+        self.read_length_in_mode(cur, step_mode)
+    }
+
+    fn read_length_in_mode(&mut self, cur: &mut Cursor, step_mode: bool) -> Option<i64> {
         let mut total: Option<i64> = None;
         let mut subtract = false;
         loop {
@@ -3622,7 +3636,7 @@ impl<'a> Compiler<'a> {
             let part = if cur.peek() == Some('%') || cur.peek() == Some('!') {
                 cur.advance();
                 self.read_number(cur).ok().flatten().map(|n| {
-                    if self.track().system_step_mode {
+                    if step_mode {
                         if n <= 0 {
                             0
                         } else {
@@ -3634,7 +3648,7 @@ impl<'a> Compiler<'a> {
                 })
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
                 let n = cur.read_int()?;
-                if self.track().system_step_mode {
+                if step_mode {
                     Some(n)
                 } else if n <= 0 {
                     Some(0)

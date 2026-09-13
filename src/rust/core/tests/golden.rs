@@ -186,6 +186,10 @@ fn lengths() {
 #[test]
 fn step_mode_applies_to_explicit_lengths_and_length_arithmetic() {
     assert_golden(
+        "l%48 l4 c",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+    assert_golden(
         "l%48 c96 r100-4 d",
         "4d546864000000060001000100604d54726b0000001400903c644b803c6475903e6425803e640bff2f00",
     );
@@ -672,6 +676,11 @@ fn arg_order_is_track_local() {
         "4d546864000000060001000100604d54726b0000000c009030644b80306415ff2f00",
     );
     assert_same_bytes("ArgOrder(lvqto);c4,120", "l4 v120 c");
+    assert_golden(
+        "ArgOrder(v);r8c",
+        "4d546864000000060001000100604d54726b0000000c30903c644b803c6415ff2f00",
+    );
+    assert_same_bytes("ArgOrder(v);c^8", "c^8");
 }
 
 #[test]
