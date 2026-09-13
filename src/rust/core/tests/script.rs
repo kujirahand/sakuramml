@@ -5,7 +5,7 @@
 //! byte string. A few cases are pinned to bytes captured from the Pascal
 //! build, and the semantics of every case here was checked against it.
 
-use sakuramml_core::{compile, MemoryIncludes};
+use sakuramml_core::{compile, compiler::MAX_ARRAY_ELEMENTS, MemoryIncludes};
 
 /// Compiling `script` must produce exactly what `equivalent` produces.
 #[track_caller]
@@ -107,6 +107,51 @@ fn meta_text_accepts_legacy_unquoted_braces() {
 fn arrays_declare_and_index() {
     assert_same("Array a=(60,64,67); n(a(0)) n(a(1)) n(a(2))", "n60 n64 n67");
     assert_same("Array a=(1,2); n((a(0)+a(1)+57))", "n60");
+}
+
+#[test]
+fn array_element_assignment_updates_and_grows_like_pascal() {
+    let out = compile(
+        r#"Array Numbers=(1,2); Numbers(0)=7; Numbers(3)=9
+           Array Strings=({first}); Strings(0)={changed}; Strings(2)={last}
+           Print(SizeOf(Numbers)) Print(Numbers(0)) Print(Numbers(1))
+           Print(Numbers(2)) Print(Numbers(3))
+           Print(SizeOf(Strings)) Print(Strings(0)) Print(Strings(1)) Print(Strings(2))"#,
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        ["4", "7", "2", "0", "9", "3", "changed", "0", "last"]
+    );
+}
+
+#[test]
+fn array_element_assignment_accepts_an_expression_index() {
+    assert_same(
+        "Array A=(60); A((1+1))=64; n(A(0)) n((A(1)+60)) n(A(2))",
+        "n60 n60 n64",
+    );
+}
+
+#[test]
+fn array_element_assignment_rejects_invalid_growth() {
+    assert_error_contains("Array A=(1); A(-1)=9", "負の値");
+    assert_error_contains("Array A=(1); A(1000000)=9", "上限");
+    assert_error_contains("Array A=(1); A(0=9", "閉じられていません");
+}
+
+#[test]
+fn array_initializer_rejects_more_than_the_element_limit() {
+    let mut source = String::from("Array A=(");
+    for index in 0..=MAX_ARRAY_ELEMENTS {
+        if index > 0 {
+            source.push(',');
+        }
+        source.push('0');
+    }
+    source.push(')');
+
+    assert_error_contains(&source, "上限");
 }
 
 #[test]

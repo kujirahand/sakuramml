@@ -30,6 +30,12 @@ pub const DEFAULT_TIMEBASE: i64 = 96;
 /// far more than any real song — the largest sample here writes a few thousand.
 pub const MAX_EVENTS: usize = 1_000_000;
 
+/// Maximum number of elements held by one dynamically grown array.
+///
+/// An MML source can choose an arbitrary index, so resizing must be bounded
+/// before allocating memory (especially in the WASM build).
+pub const MAX_ARRAY_ELEMENTS: usize = 1_000_000;
+
 /// Ceiling on a track's time pointer, so time arithmetic cannot run away
 /// before the SMF writer would reject the delta anyway.
 pub const MAX_TIME: i64 = crate::smf::MAX_VAR_LEN;
@@ -835,7 +841,9 @@ impl<'a> Compiler<'a> {
             probe.skip_spaces();
             let is_assignment = probe.peek() == Some('=')
                 || matches!(probe.peek(), Some('+') | Some('-'))
-                    && probe.peek() == probe.peek_at(1);
+                    && probe.peek() == probe.peek_at(1)
+                || matches!(self.variables.get(&word), Some(Value::Array(_)))
+                    && probe.peek() == Some('(');
             if is_assignment {
                 return self.assign(cur, &word);
             }
@@ -2819,11 +2827,10 @@ impl<'a> Compiler<'a> {
                     let source = cur
                         .read_balanced('(', ')')
                         .ok_or_else(|| MmlError::new(line, "配列の初期値が閉じていません"))?;
-                    let mut items = Vec::new();
-                    for raw in split_function_args(&source) {
-                        if !raw.trim().is_empty() {
-                            items.push(self.eval_source(raw.trim(), line)?);
-                        }
+                    let raw_items = split_array_initializer(&source, line, MAX_ARRAY_ELEMENTS)?;
+                    let mut items = Vec::with_capacity(raw_items.len());
+                    for raw in raw_items {
+                        items.push(self.eval_source(raw.trim(), line)?);
                     }
                     self.variables.insert(name, Value::Array(items));
                     return Ok(());
@@ -2840,15 +2847,47 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    /// `name = <value>` where the value is a literal, a `{"string"}` or a
-    /// parenthesised expression; also `name++` and `name--`.
+    /// `name = <value>` or `name(index) = <value>`, where the value is a
+    /// literal, a `{"string"}` or a parenthesised expression; also `name++`
+    /// and `name--`.
     fn assign(&mut self, cur: &mut Cursor, name: &str) -> Result<()> {
         let line = cur.line();
         cur.skip_spaces();
 
+        let array_index =
+            if matches!(self.variables.get(name), Some(Value::Array(_))) && cur.eat('(') {
+                let index = expr::eval(cur, self)?.as_int(line)?;
+                cur.skip_spaces();
+                if !cur.eat(')') {
+                    return Err(MmlError::new(line, "配列の添字が ) で閉じられていません"));
+                }
+                if index < 0 {
+                    return Err(MmlError::new(
+                        line,
+                        format!("配列\"{name}\"の添字に負の値は指定できません: {index}"),
+                    ));
+                }
+                let index = usize::try_from(index).map_err(|_| {
+                    MmlError::new(line, format!("配列\"{name}\"の添字が大きすぎます: {index}"))
+                })?;
+                if index >= MAX_ARRAY_ELEMENTS {
+                    return Err(MmlError::new(
+                        line,
+                        format!("配列\"{name}\"の要素数が上限({MAX_ARRAY_ELEMENTS})を超えます"),
+                    ));
+                }
+                cur.skip_spaces();
+                Some(index)
+            } else {
+                None
+            };
+
         // `I++` and `I--` step a variable by one.
-        for (sign, step) in [('+', 1), ('-', -1)] {
-            if cur.peek() == Some(sign) && cur.peek_at(1) == Some(sign) {
+        if array_index.is_none() {
+            for (sign, step) in [('+', 1), ('-', -1)] {
+                if cur.peek() != Some(sign) || cur.peek_at(1) != Some(sign) {
+                    continue;
+                }
                 cur.advance();
                 cur.advance();
                 let current = self
@@ -2864,10 +2903,26 @@ impl<'a> Compiler<'a> {
         }
 
         if !cur.eat('=') {
+            if array_index.is_some() {
+                return Err(MmlError::new(line, "配列要素の代入には = が必要です"));
+            }
             return Ok(()); // a bare mention of a variable does nothing
         }
         let value = self.read_value(cur)?;
-        self.variables.insert(name.to_string(), value);
+        if let Some(index) = array_index {
+            let Some(Value::Array(items)) = self.variables.get_mut(name) else {
+                return Err(MmlError::new(
+                    line,
+                    format!("\"{name}\"は配列ではありません"),
+                ));
+            };
+            if items.len() <= index {
+                items.resize(index + 1, Value::Int(0));
+            }
+            items[index] = value;
+        } else {
+            self.variables.insert(name.to_string(), value);
+        }
         Ok(())
     }
 
@@ -4264,6 +4319,54 @@ fn split_function_args(source: &str) -> Vec<&str> {
     args
 }
 
+/// Split a parenthesised array initializer without collecting more entries
+/// than the array can hold. Empty positions are ignored, matching the legacy
+/// initializer, and nested commas stay inside their expression or string.
+fn split_array_initializer(source: &str, line: usize, max: usize) -> Result<Vec<&str>> {
+    let mut args = Vec::new();
+    let mut start = 0usize;
+    let mut round = 0usize;
+    let mut curly = 0usize;
+    let mut square = 0usize;
+
+    for (index, ch) in source.char_indices() {
+        match ch {
+            '(' => round += 1,
+            ')' => round = round.saturating_sub(1),
+            '{' => curly += 1,
+            '}' => curly = curly.saturating_sub(1),
+            '[' => square += 1,
+            ']' => square = square.saturating_sub(1),
+            ',' if round == 0 && curly == 0 && square == 0 => {
+                let raw = &source[start..index];
+                if !raw.trim().is_empty() {
+                    if args.len() >= max {
+                        return Err(MmlError::new(
+                            line,
+                            format!("配列の要素数が上限({max})を超えます"),
+                        ));
+                    }
+                    args.push(raw);
+                }
+                start = index + ch.len_utf8();
+            }
+            _ => {}
+        }
+    }
+
+    let raw = &source[start..];
+    if !raw.trim().is_empty() {
+        if args.len() >= max {
+            return Err(MmlError::new(
+                line,
+                format!("配列の要素数が上限({max})を超えます"),
+            ));
+        }
+        args.push(raw);
+    }
+    Ok(args)
+}
+
 /// What a `.onNote` list drives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OnNoteTarget {
@@ -4564,5 +4667,14 @@ mod tests {
         assert_eq!(default_channel(2), 1);
         assert_eq!(default_channel(16), 15);
         assert_eq!(default_channel(99), 15);
+    }
+
+    #[test]
+    fn array_initializer_limit_accepts_the_boundary_and_rejects_one_more() {
+        let items = split_array_initializer("0,(1+2),,{a,b}", 1, 3).unwrap();
+        assert_eq!(items, ["0", "(1+2)", "{a,b}"]);
+
+        let error = split_array_initializer("0,(1+2),,{a,b},4", 1, 3).unwrap_err();
+        assert!(error.message.contains("上限(3)"));
     }
 }
