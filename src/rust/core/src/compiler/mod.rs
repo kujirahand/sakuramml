@@ -172,6 +172,8 @@ fn default_channel(track_no: i64) -> u8 {
 pub struct Compiler<'a> {
     includes: &'a dyn IncludeResolver,
     timebase: i64,
+    /// Last tempo selected by `Tempo` or `TempoChange` (BPM).
+    tempo: i64,
     tracks: BTreeMap<i64, TrackState>,
     current: i64,
     warnings: Vec<Warning>,
@@ -248,6 +250,7 @@ impl<'a> Compiler<'a> {
         Self {
             includes: &NoIncludes,
             timebase: DEFAULT_TIMEBASE,
+            tempo: 120,
             tracks: BTreeMap::from([(0, TrackState::new(0, DEFAULT_TIMEBASE, false))]),
             // The Pascal compiler keeps global setup events in MTrk 0. An
             // explicit `Track 1` must therefore start a separate track.
@@ -518,6 +521,14 @@ impl<'a> Compiler<'a> {
 
     /// Record an event on the current track, against the compile's budget.
     fn push_event(&mut self, event: Event) -> Result<()> {
+        self.push_event_to_track(self.current, event)
+    }
+
+    /// Record an event on a specific track, against the compile's budget.
+    ///
+    /// Global meta events such as tempo are always kept in MTrk 0 by the
+    /// Pascal implementation, even when a musical track is selected.
+    fn push_event_to_track(&mut self, track_no: i64, event: Event) -> Result<()> {
         self.event_count += 1;
         if self.event_count > MAX_EVENTS {
             self.stop_requested = true;
@@ -529,9 +540,30 @@ impl<'a> Compiler<'a> {
             }
             return Err(error);
         }
-        let track = self.track();
+        let timebase = self.timebase;
+        let step_mode = self.step_mode;
+        let track = self
+            .tracks
+            .entry(track_no)
+            .or_insert_with(|| TrackState::new(track_no, timebase, step_mode));
         track.used = true;
         track.events.push(event);
+        Ok(())
+    }
+
+    /// Refuse a bulk event operation before it starts allocating or looping.
+    fn ensure_event_capacity(&mut self, additional: usize, line: usize) -> Result<()> {
+        if additional > MAX_EVENTS.saturating_sub(self.event_count) {
+            self.stop_requested = true;
+            let error = MmlError::new(
+                line,
+                format!("生成イベント数が上限({MAX_EVENTS})を超えました"),
+            );
+            if self.recover_errors && !self.errors.contains(&error) {
+                self.errors.push(error.clone());
+            }
+            return Err(error);
+        }
         Ok(())
     }
 
@@ -850,15 +882,14 @@ impl<'a> Compiler<'a> {
         }
 
         match word.as_str() {
-            "Tempo" | "TEMPO" | "TempoChange" => {
+            "Tempo" | "TEMPO" => {
                 let bpm = self.expect_int_arg(cur, &word)?;
-                if bpm <= 0 {
-                    return Err(MmlError::new(line, "テンポには正の値を指定してください"));
-                }
-                let usec = (60_000_000 / bpm) as u32;
+                let usec = Self::tempo_usec(bpm, line)?;
+                self.tempo = bpm;
                 let time = self.track().time;
-                self.push_event(Event::tempo(time, usec))
+                self.push_event_to_track(0, Event::tempo(time, usec))
             }
+            "TempoChange" => self.tempo_change(cur, line),
             "Track" | "TRACK" | "TR" | "NowTrack" => {
                 let no = self.expect_int_arg(cur, &word)?;
                 self.current = no;
@@ -1983,6 +2014,80 @@ impl<'a> Compiler<'a> {
         track.time = end;
         track.last_note = None;
         outcome
+    }
+
+    /// Convert BPM to the 24-bit tempo payload value.
+    fn tempo_usec(bpm: i64, line: usize) -> Result<u32> {
+        if bpm <= 0 || bpm > 60_000_000 {
+            return Err(MmlError::new(
+                line,
+                format!("テンポには1〜60000000の値を指定してください: {bpm}"),
+            ));
+        }
+        Ok((60_000_000 / bpm) as u32)
+    }
+
+    /// `TempoChange(t1,t2,len)`, `(t2,len)`, or `=t2` — write a tempo ramp
+    /// in sixteenth-note intervals without advancing the time pointer.
+    fn tempo_change(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let args = self.read_args(cur, 3)?;
+        let (t1, t2, len) = match args.as_slice() {
+            [t2] => (self.tempo, *t2, self.timebase * 4),
+            [t2, len] => (self.tempo, *t2, *len),
+            [t1, t2, len] => (*t1, *t2, *len),
+            _ => {
+                return Err(MmlError::new(
+                    line,
+                    "TempoChangeには1〜3個の引数を指定してください",
+                ));
+            }
+        };
+
+        Self::tempo_usec(t1, line)?;
+        Self::tempo_usec(t2, line)?;
+        if len <= 0 {
+            return Err(MmlError::new(
+                line,
+                format!("TempoChangeの期間には正の値を指定してください: {len}"),
+            ));
+        }
+        let tstep = self.timebase / 4;
+        if tstep <= 0 {
+            return Err(MmlError::new(
+                line,
+                "TempoChangeには4以上のTimeBaseが必要です",
+            ));
+        }
+        let count = len / tstep;
+        if count == 0 {
+            return Err(MmlError::new(
+                line,
+                format!("TempoChangeの期間は{tstep}tick以上にしてください: {len}"),
+            ));
+        }
+        let event_count = usize::try_from(count).map_err(|_| {
+            MmlError::new(
+                line,
+                format!("生成イベント数が上限({MAX_EVENTS})を超えました"),
+            )
+        })?;
+        self.ensure_event_capacity(event_count, line)?;
+
+        let start = self.track().time;
+        let end = self.checked_time(start, len, line)?;
+        let slope = (t2 as f64 - t1 as f64) / count as f64;
+        for i in 0..count.saturating_sub(1) {
+            let offset = i
+                .checked_mul(tstep)
+                .ok_or_else(|| MmlError::new(line, "TempoChangeの時刻計算があふれました"))?;
+            let time = self.checked_time(start, offset, line)?;
+            let bpm = (i as f64 * slope + t1 as f64).trunc() as i64;
+            let usec = Self::tempo_usec(bpm, line)?;
+            self.push_event_to_track(0, Event::tempo(time, usec))?;
+        }
+        self.push_event_to_track(0, Event::tempo(end, Self::tempo_usec(t2, line)?))?;
+        self.tempo = t2;
+        Ok(())
     }
 
     /// `Cresc`/`Decresc` — ramp Expression (CC 11) from `def1` to `def2` over
