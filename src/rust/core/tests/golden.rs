@@ -185,7 +185,14 @@ fn lengths() {
 
 #[test]
 fn step_mode_applies_to_explicit_lengths_and_length_arithmetic() {
-    assert_same_bytes("l%48 c96 r100-4 d", "l%48 c%96 r%96 d");
+    assert_golden(
+        "l%48 c96 r100-4 d",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c6475903e6425803e640bff2f00",
+    );
+    assert_golden(
+        "l%48 c%96 r%96 d",
+        "4d546864000000060001000100604d54726b0000001400903c6402803c6406903e6425803e640bff2f00",
+    );
     assert_same_bytes("l4 c4+8 d", "c4^8 d");
 }
 
@@ -413,7 +420,14 @@ fn full_range_pitch_bend_accepts_advance_modifiers() {
 
 #[test]
 fn rest_accepts_a_parenthesized_length_expression() {
-    assert_same_bytes("l%48 Int N=48; r(N-6)c", "l%48 r%42 c");
+    assert_golden(
+        "l%48 Int N=48; r(N-6)c",
+        "4d546864000000060001000100604d54726b0000000c2a903c6425803c640bff2f00",
+    );
+    assert_golden(
+        "l%48 r%42 c",
+        "4d546864000000060001000100604d54726b0000000c09903c6425803c640bff2f00",
+    );
     assert_same_bytes("l4 Int N=4; r(N)c", "r4 c");
 }
 
@@ -613,6 +627,95 @@ fn key_shift_transposes() {
         "4d546864000000060001000100604d54726b0000000c00903e644b803e6415ff2f00",
     );
     assert_same_bytes("Key=2 c", "d");
+}
+
+#[test]
+fn legacy_system_note_settings_match_pascal() {
+    assert_golden(
+        "System.X68mode(on);o5>c<c",
+        "4d546864000000060001000100604d54726b00000014009030644b80306415903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "System.Stepmode(on);Track=1;c48",
+        "4d546864000000060001000100604d54726b0000000c00903c6425803c640bff2f00",
+    );
+    assert_same_bytes(
+        "System.Stepmode(on);Track=1;c%48",
+        "System.Stepmode(off);Track=1;c48",
+    );
+    assert_golden(
+        "System.Stepmode(on);c48",
+        "4d546864000000060001000100604d54726b0000000c00903c6405803c6403ff2f00",
+    );
+    assert_golden(
+        "System.VoiceNoShift=-1;@2c",
+        "4d546864000000060001000100604d54726b0000000f00c00000903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "System.OctaveRangeShift=1;o4c",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn controller_shift_matches_pascal() {
+    assert_golden(
+        "r4 System.ControllerShift=2 @2 y7=100 p64 c",
+        "4d546864000000060001000100604d54726b000000175eb0076400e0004001c00101903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn arg_order_is_track_local() {
+    assert_golden(
+        "ArgOrder(o);c4",
+        "4d546864000000060001000100604d54726b0000000c009030644b80306415ff2f00",
+    );
+    assert_same_bytes("ArgOrder(lvqto);c4,120", "l4 v120 c");
+}
+
+#[test]
+fn get_key_flag_returns_the_pitch_class_array() {
+    let out = compile(
+        "System.KeyFlag=(1,0,-1,0,1,0,-1);Array (flags)=System.GetKeyFlag;Print(flags(0));Print(flags(2));Print(flags(6))",
+    )
+    .unwrap();
+    assert_eq!(out.messages, ["1", "-1", "-1"]);
+    assert!(!out.warnings.iter().any(|w| w.message.contains("未実装")));
+}
+
+#[test]
+fn allow_multi_line_controls_chords() {
+    assert!(compile("AllowMultiLine(1);'c\ne'").is_ok());
+    let err = compile("AllowMultiLine(0);'c\ne'").unwrap_err();
+    assert!(err.message.contains("和音内に改行"));
+}
+
+#[test]
+fn meta_text_eol_selects_the_output_bytes() {
+    assert_golden(
+        "System.MetaTextEOL(1);MetaText={\"a\r\nb\"}",
+        "4d546864000000060001000100604d54726b0000000b00ff0103610a6200ff2f00",
+    );
+    assert_golden(
+        "MetaTextEOL(2);MetaText={\"a\r\nb\"}",
+        "4d546864000000060001000100604d54726b0000000b00ff0103610d6200ff2f00",
+    );
+}
+
+#[test]
+fn migrated_system_settings_no_longer_warn_as_unimplemented() {
+    let out = compile(
+        "System.X68mode(off);System.Stepmode(off);System.VoiceNoShift=0;System.OctaveRangeShift=0;System.ControllerShift=1;System.ArgOrder(lqvto);System.AllowMultiLine(1);System.MetaTextEOL(0);c",
+    )
+    .unwrap();
+    assert!(!out.warnings.iter().any(|w| w.message.contains("未実装")));
+    let out = compile("System.LoadSMF(dummy.mid);c").unwrap();
+    assert!(out
+        .warnings
+        .iter()
+        .any(|w| w.message.contains("System.LoadSMF") && w.message.contains("未実装")));
+    assert!(compile("System.ControllerShift=2147483648;c").is_err());
 }
 
 #[test]
