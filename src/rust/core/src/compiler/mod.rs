@@ -1500,9 +1500,19 @@ impl<'a> Compiler<'a> {
             .unwrap_or(0)
     }
 
-    fn current_transposition(&mut self) -> i64 {
+    fn current_transposition(&mut self, line: usize) -> Result<i64> {
         let time = self.track().time;
-        self.key_shift + self.active_time_key(false, time) + self.active_time_key(true, time)
+        self.key_shift
+            .checked_add(self.active_time_key(false, time))
+            .and_then(|value| value.checked_add(self.active_time_key(true, time)))
+            .ok_or_else(|| Self::note_number_overflow(line))
+    }
+
+    fn note_number_overflow(line: usize) -> MmlError {
+        MmlError::new(
+            line,
+            "ノート番号が範囲外です(0〜127): 計算結果が整数範囲を超えました",
+        )
     }
 
     /// Run a function body with its parameters bound.
@@ -3523,8 +3533,14 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             options.octave.unwrap_or(track.octave) + std::mem::take(&mut track.octave_once)
         };
-        let transposition = self.current_transposition();
-        let note_no = (octave + self.octave_range_shift) * 12 + base + accidental + transposition;
+        let transposition = self.current_transposition(line)?;
+        let note_no = octave
+            .checked_add(self.octave_range_shift)
+            .and_then(|value| value.checked_mul(12))
+            .and_then(|value| value.checked_add(base))
+            .and_then(|value| value.checked_add(accidental))
+            .and_then(|value| value.checked_add(transposition))
+            .ok_or_else(|| Self::note_number_overflow(line))?;
         self.write_note(note_no, length, options, line)
     }
 
@@ -3536,8 +3552,11 @@ impl<'a> Compiler<'a> {
         // `n60,` — the Pascal syntax allows a comma before the options.
         cur.eat(',');
         let (length, options) = self.read_note_options(cur, true)?;
-        let transposition = self.current_transposition();
-        self.write_note(note_no + transposition, length, options, line)
+        let transposition = self.current_transposition(line)?;
+        let note_no = note_no
+            .checked_add(transposition)
+            .ok_or_else(|| Self::note_number_overflow(line))?;
+        self.write_note(note_no, length, options, line)
     }
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {

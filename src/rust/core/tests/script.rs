@@ -737,6 +737,15 @@ fn numeric_notes_apply_time_key_transposition() {
 }
 
 #[test]
+fn overflowing_note_transposition_is_an_error_not_a_panic() {
+    assert_error_contains("TimeKey(,,1) n(9223372036854775807)", "ノート番号が範囲外");
+    assert_error_contains(
+        "TimeKey(,,9223372036854775807) TimeKey2(,,1) n60",
+        "ノート番号が範囲外",
+    );
+}
+
+#[test]
 fn print_time_and_track_return_pascal_style_messages() {
     let out = compile("Track=1 c4 Track=2 l8 d PrintTime(1) PrintTime PrintTrack(1)").unwrap();
     assert_eq!(
