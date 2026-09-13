@@ -341,6 +341,52 @@ fn empty_meta_text_is_written_as_a_space() {
     );
 }
 
+#[test]
+fn low_level_note_on_uses_the_current_channel_without_advancing_time() {
+    // Both direct events and the following ordinary note start at tick 0.
+    // The repeated 0x91 bytes also lock in Pascal's no-running-status output.
+    assert_golden(
+        "Channel(2) NoteOn(60,100) NoteOn(61,99) c",
+        "4d546864000000060001000100604d54726b0000001400913c6400913d6300913c644b813c6415ff2f00",
+    );
+}
+
+#[test]
+fn low_level_note_off_retains_same_time_insertion_order() {
+    assert_golden(
+        "NoteOff(60,64) NoteOn(60,100)",
+        "4d546864000000060001000100604d54726b0000000c00803c4000903c6400ff2f00",
+    );
+}
+
+#[test]
+fn play_from_preserves_packed_note_off_ordering() {
+    assert_golden(
+        "q100 c Time(95) NoteOn(61,100) PlayFrom(48)",
+        "4d546864000000060001000100604d54726b0000000d816f903d6400803c6400ff2f00",
+    );
+}
+
+#[test]
+fn channel_prefix_is_a_one_based_legacy_meta_command() {
+    assert_golden(
+        "ChannelPrefix(1)",
+        "4d546864000000060001000100604d54726b0000000900ff20010000ff2f00",
+    );
+    assert_golden(
+        "ChannelPrefix(128)",
+        "4d546864000000060001000100604d54726b0000000900ff20017f00ff2f00",
+    );
+}
+
+#[test]
+fn port_and_uppercase_alias_emit_midi_port_meta_events() {
+    assert_golden(
+        "Port(0) PORT(127) Port(255)",
+        "4d546864000000060001000100604d54726b0000001300ff21010000ff21017f00ff2101ff00ff2f00",
+    );
+}
+
 // --- Phase 2: voices, control changes, pitch bend, loops ---
 
 #[test]

@@ -482,16 +482,16 @@ impl<'a> Compiler<'a> {
                 if event.time < from_pos {
                     let status = event.data.first().copied();
                     if status == Some(0xf0) && sysex {
-                        rebuilt.push(Event::new(pre_effect, event.data));
+                        rebuilt.push(event.at_time(pre_effect));
                         pre_effect += 1;
                     } else if status == Some(0xff) && event.data.get(1) != Some(&0x51) {
-                        rebuilt.push(Event::new(0, event.data));
+                        rebuilt.push(event.at_time(0));
                     }
                     // Anything else before the cut is dropped: ordinary
                     // events, and the tempo meta (reconstructed below).
                 } else {
                     let shifted = (event.time - from_pos + wait_time).max(0);
-                    rebuilt.push(Event::new(shifted, event.data));
+                    rebuilt.push(event.at_time(shifted));
                 }
             }
 
@@ -1039,6 +1039,9 @@ impl<'a> Compiler<'a> {
                 self.use_key_shift = self.expect_int_arg(cur, &word)? != 0;
                 Ok(())
             }
+            "NoteOn" => self.direct_note(cur, true, line),
+            "NoteOff" => self.direct_note(cur, false, line),
+            "ChannelPrefix" => self.channel_prefix(cur, line),
             "Port" | "PORT" => self.port(cur, line),
             "Time" | "TIME" => self.time_command(cur),
             "TrackSync" => {
@@ -2880,6 +2883,53 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
+    /// Write a low-level Note On/Off event without advancing the time pointer.
+    fn direct_note(&mut self, cur: &mut Cursor, on: bool, line: usize) -> Result<()> {
+        let command = if on { "NoteOn" } else { "NoteOff" };
+        let args = self.read_args(cur, 3)?;
+        if args.len() != 2 {
+            return Err(MmlError::new(
+                line,
+                format!("{command}にはノート番号とvelocityを指定してください"),
+            ));
+        }
+        let note = args[0];
+        let velocity = args[1];
+        if !(0..=127).contains(&note) {
+            return Err(MmlError::new(
+                line,
+                format!("{command}のノート番号は0〜127の範囲で指定してください: {note}"),
+            ));
+        }
+        if !(0..=127).contains(&velocity) {
+            return Err(MmlError::new(
+                line,
+                format!("{command}のvelocityは0〜127の範囲で指定してください: {velocity}"),
+            ));
+        }
+        let time = self.track().time;
+        let channel = self.track().channel;
+        let status = if on { 0x90 } else { 0x80 } | (channel & 0x0f);
+        self.push_event(Event::new(time, vec![status, note as u8, velocity as u8]))
+    }
+
+    /// Pascal accepts ChannelPrefix as a one-based value and stores `n - 1`.
+    fn channel_prefix(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let value = self.expect_int_arg(cur, "ChannelPrefix")?;
+        if !(1..=128).contains(&value) {
+            return Err(MmlError::new(
+                line,
+                format!("ChannelPrefixは1〜128の範囲で指定してください: {value}"),
+            ));
+        }
+        let time = self.track().time;
+        self.push_event(Event::meta(
+            time,
+            event::META_CHANNEL_PREFIX,
+            &[(value - 1) as u8],
+        ))
+    }
+
     /// `Port(n)` stores the current port and emits the SMF port meta event.
     fn port(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
         let value = self.expect_int_arg(cur, "Port")?;
@@ -2957,7 +3007,7 @@ impl<'a> Compiler<'a> {
         let event_count = track
             .events
             .iter()
-            .filter(|event| !matches!(event.data.first(), Some(status) if status & 0xf0 == 0x80))
+            .filter(|event| !event.deferred_at_same_time)
             .count();
         let mute = if track.muted { "on" } else { "off" };
         self.messages.extend([

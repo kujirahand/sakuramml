@@ -56,6 +56,7 @@
 | `CCNoMute` | `CCNoMute(no,on/off)` | 実装済み | [04](04-midi-control.md) |
 | `SysEx` | `SysEx(...)` / `SysEx$=...;` | 実装済み | [04](04-midi-control.md) |
 | `ResetGM/GS/XG` | `ResetGM` | 実装済み | [04](04-midi-control.md) |
+| `NoteOn` / `NoteOff` | `NoteOn(note,velocity)` | 実装済み | [04](04-midi-control.md) |
 
 ## メタ、キー、外部定義
 
@@ -68,6 +69,7 @@
 | `Marker` | `Marker={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
 | `CuePoint` | `CuePoint={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
 | `InstrumentName` | `InstrumentName={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `ChannelPrefix` | `ChannelPrefix(n)` | 実装済み | [05](05-meta-and-encoding.md) |
 | `Port` | `Port(n)` | 実装済み | [05](05-meta-and-encoding.md) |
 | `Key` / `KeyShift` | `Key=n` | 実装済み | [02](02-notes.md) |
 | `TimeKey` / `TimeKey2` | `TimeKey((from),(to),value)` | 実装済み | [02](02-notes.md) |

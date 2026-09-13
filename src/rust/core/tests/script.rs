@@ -878,6 +878,28 @@ fn track_information_rejects_invalid_tracks_without_panicking() {
 }
 
 #[test]
+fn low_level_midi_commands_validate_their_arguments() {
+    assert_error_contains("NoteOn(-1,100)", "ノート番号は0〜127");
+    assert_error_contains("NoteOn(128,100)", "ノート番号は0〜127");
+    assert_error_contains("NoteOff(60,-1)", "velocityは0〜127");
+    assert_error_contains("NoteOff(60,128)", "velocityは0〜127");
+    assert_error_contains("NoteOn(60)", "ノート番号とvelocity");
+    assert_error_contains("NoteOff(60,100,1)", "ノート番号とvelocity");
+    assert_error_contains("ChannelPrefix(0)", "1〜128");
+    assert_error_contains("ChannelPrefix(129)", "1〜128");
+    assert_error_contains("Port(256)", "0〜255");
+}
+
+#[test]
+fn print_track_counts_a_direct_note_off_as_an_event() {
+    let out = compile("NoteOff(60,64) PrintTrack").unwrap();
+    assert_eq!(
+        out.messages.last().map(String::as_str),
+        Some("イベント数=1 TrackMute(off) ")
+    );
+}
+
+#[test]
 fn an_unknown_mml_query_is_an_error() {
     assert_error_contains("Int x=MML(nope); c", "取得できません");
 }

@@ -65,6 +65,22 @@ p%.onTime(0,8191,!4)
 フルレンジ形式は `raw = clamp(value + 8192, 0, 16383)` とし、下位 7 bit、上位 7 bit の順に書きます。
 `p%`にも他のベンド命令と同じ先行指定を続けられます。
 
+## 低水準ノートイベント
+
+`NoteOn(noteno,velocity)` と `NoteOff(noteno,velocity)` は、現在トラックの現在チャンネルへ
+MIDI Note On (`9n`) / Note Off (`8n`) を直接書き込みます。ノート番号とvelocityはいずれも
+0〜127です。通常音符とは異なり、ゲートや音長を設定せず、タイムポインタも進めません。
+
+```mml
+CH=2
+Time(1:1:0) NoteOn(64,127)
+Time(3:1:0) NoteOff(64,0)
+```
+
+同時刻の直接イベントは記述順を保ち、各イベントにstatus byteを出力します（running statusは
+使用しません）。通常音符から生成されるNote Offだけは、Pascal版と同様に同時刻の他イベントより
+後に配置されます。
+
 ## SysEx
 
 SysEx は 10 進の引数形式と、`$` を用いた 16 進形式を受理します。
