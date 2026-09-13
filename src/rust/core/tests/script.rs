@@ -481,6 +481,21 @@ fn equals_form_accepts_a_variable_but_not_an_expression() {
     assert_same("v100 <c", "v100 o4 c");
 }
 
+#[test]
+fn tempo_change_rejects_invalid_values_without_panicking() {
+    assert_error_contains("Tempo=1", "4〜60000000");
+    assert_error_contains("TempoChange()", "1〜3個");
+    assert_error_contains("TempoChange(0,120,!1)", "テンポ");
+    assert_error_contains("TempoChange(3,120,!1)", "4〜60000000");
+    assert_error_contains("TempoChange(120,0,!1)", "テンポ");
+    assert_error_contains("TempoChange(120,60000001,!1)", "テンポ");
+    assert_error_contains("TempoChange(120,80,0)", "正の値");
+    assert_error_contains("TempoChange(120,80,%1)", "24tick以上");
+    assert_error_contains("TimeBase=3 TempoChange=100", "4以上のTimeBase");
+    assert_error_contains("TempoChange(120,80,%24000024)", "イベント数が上限");
+    assert_error_contains("TempoChange(120,80,!1,60)", "括弧");
+}
+
 // --- built-in functions ---
 
 #[test]

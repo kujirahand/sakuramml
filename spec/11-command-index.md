@@ -38,7 +38,7 @@
 | `PrintTime` | `PrintTime([track])` | 実装済み | [06](06-scripting.md) |
 | `PrintTrack` | `PrintTrack([track])` | 実装済み | [06](06-scripting.md) |
 | `Tempo` | `Tempo=bpm` | 実装済み | [09](09-smf.md) |
-| `TempoChange` | `TempoChange=bpm` | 一部 | [10](10-compatibility.md) |
+| `TempoChange` | `TempoChange(t1,t2,len)` / `(t2,len)` / `=t2` | 実装済み | [09](09-smf.md) |
 
 ## MIDI イベント
 
