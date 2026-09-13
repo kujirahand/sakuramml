@@ -1189,6 +1189,38 @@ fn note_modifiers_and_slur_reject_invalid_arguments() {
     }
 }
 
+#[test]
+fn slur_notes_survive_intervening_event_deletion() {
+    let out = compile("P.onTime(0,127,!1) c& DeleteCC(10) d").unwrap();
+    let note_ons: Vec<u8> = out
+        .smf
+        .windows(3)
+        .filter(|event| event[0] == 0x90 && event[2] != 0)
+        .map(|event| event[1])
+        .collect();
+    assert_eq!(note_ons, vec![62]);
+}
+
+#[test]
+fn slur_respects_cc_mute_and_wide_fallback() {
+    assert_golden(
+        "CCMute(on) Slur(1,0) c&d",
+        "4d546864000000060001000100604d54726b0000000d00903e64812c803e6414ff2f00",
+    );
+    assert_golden(
+        "Slur(1,0)c&o7c",
+        "4d546864000000060001000100604d54726b0000001400903c645f803c64019054644c80546414ff2f00",
+    );
+}
+
+#[test]
+fn nonrepeating_note_list_holds_its_final_value() {
+    assert_golden(
+        "v.Repeat(0) v.onNote(40,50) cccc",
+        "4d546864000000060001000100604d54726b0000002400903c284b803c2815903c324b803c3215903c324b803c3215903c324b803c3215ff2f00",
+    );
+}
+
 // --- Div (tuplets) and string macros ---
 
 /// `Div{cde}4` fits three notes into one quarter note.

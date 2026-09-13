@@ -128,8 +128,6 @@ struct PendingNote {
 
 #[derive(Debug, Clone, Copy)]
 struct SlurNote {
-    on_index: usize,
-    off_index: usize,
     start: i64,
     off: i64,
     note: u8,
@@ -4166,8 +4164,9 @@ impl<'a> Compiler<'a> {
         let next = self.checked_time(time, length, line)?;
 
         let muted = self.track().muted;
+        let slur_participates = slur.is_some() || !self.track().slur_notes.is_empty();
         let mut wrote_note = false;
-        let mut written_pair = None;
+        let mut slur_note = None;
         if length == 0 {
             if !muted {
                 self.track().pending_zero_length_notes.push(PendingNote {
@@ -4177,17 +4176,27 @@ impl<'a> Compiler<'a> {
                     velocity,
                 });
             }
+        } else if slur_participates {
+            // Keep slurred notes out of the mutable event list until the
+            // chain closes. DeleteCC and immediate CC ramps may retain-filter
+            // that list between `c&` and the following note.
+            if !muted {
+                slur_note = Some(SlurNote {
+                    start,
+                    off: end,
+                    note: note_no as u8,
+                    velocity,
+                    transition: slur.flatten(),
+                });
+            }
         } else {
             let pending = std::mem::take(&mut self.track().pending_zero_length_notes);
             // Taking the pending notes terminates the legacy chord even when
             // muted, so it cannot leak past Mute/TrackMute.
             if !muted && pending.is_empty() {
-                let on_index = self.track().events.len();
                 self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
-                let off_index = self.track().events.len();
                 self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
                 wrote_note = true;
-                written_pair = Some((on_index, off_index));
             } else if !muted {
                 // Pascal's WaonStack bypasses the ordinary packed-note
                 // one-tick shortening for every member, including the final
@@ -4220,24 +4229,8 @@ impl<'a> Compiler<'a> {
         // before the note carry an earlier time and sort ahead of it.
         self.write_cc_modifiers(time, length)?;
 
-        let had_slur_chain = !self.track().slur_notes.is_empty();
-        if let Some((on_index, off_index)) = written_pair {
-            self.handle_slur_note(
-                SlurNote {
-                    on_index,
-                    off_index,
-                    start,
-                    off: end,
-                    note: note_no as u8,
-                    velocity,
-                    transition: slur.flatten(),
-                },
-                slur.is_some(),
-                channel,
-            )?;
-            if had_slur_chain || slur.is_some() {
-                wrote_note = false;
-            }
+        if let Some(slur_note) = slur_note {
+            self.handle_slur_note(slur_note, slur.is_some(), channel)?;
         } else if slur.is_none() {
             self.track().slur_notes.clear();
         }
@@ -4272,7 +4265,6 @@ impl<'a> Compiler<'a> {
         let configured = self.track().slur_value;
 
         if mode == 2 {
-            let mut removed = BTreeSet::new();
             let mut anchor = 0usize;
             let mut anchor_off = notes[0].off;
             let mut anchor_merged = false;
@@ -4287,11 +4279,6 @@ impl<'a> Compiler<'a> {
                         .saturating_add(previous_gate)
                         .saturating_add(current_gate)
                         .saturating_sub(1);
-                    if let Some(event) = self.track().events.get_mut(previous.off_index) {
-                        event.time = anchor_off;
-                    }
-                    removed.insert(current.on_index);
-                    removed.insert(current.off_index);
                     anchor_merged = true;
                     continue;
                 }
@@ -4302,44 +4289,72 @@ impl<'a> Compiler<'a> {
                 } else {
                     span.saturating_mul(percent) / 100
                 };
-                if let Some(event) = self.track().events.get_mut(previous.off_index) {
-                    event.time = previous
-                        .start
-                        .saturating_add(gate)
-                        .saturating_sub(1)
-                        .max(previous.start);
-                }
+                let off = previous
+                    .start
+                    .saturating_add(gate)
+                    .saturating_sub(1)
+                    .max(previous.start);
+                self.push_event(Event::note_on(
+                    previous.start,
+                    channel,
+                    previous.note,
+                    previous.velocity,
+                ))?;
+                self.push_event(Event::note_off(
+                    off,
+                    channel,
+                    previous.note,
+                    previous.velocity,
+                ))?;
                 anchor = index;
                 anchor_off = current.off;
                 anchor_merged = false;
             }
             let last = notes[anchor];
-            if !anchor_merged {
-                if let Some(event) = self.track().events.get_mut(last.off_index) {
-                    event.time = event.time.saturating_add(1);
-                }
-            }
-            if !removed.is_empty() {
-                let mut event_index = 0usize;
-                self.track().events.retain(|_| {
-                    let keep = !removed.contains(&event_index);
-                    event_index += 1;
-                    keep
-                });
-            }
+            let off = if anchor_merged {
+                anchor_off
+            } else {
+                last.off.saturating_add(1)
+            };
+            self.push_event(Event::note_on(
+                last.start,
+                channel,
+                last.note,
+                last.velocity,
+            ))?;
+            self.push_event(Event::note_off(off, channel, last.note, last.velocity))?;
             return Ok(());
         }
 
         if mode == 3 {
             let maximum = configured.saturating_sub(1).max(0) as usize;
             if maximum == 0 {
+                for note in &notes {
+                    self.push_event(Event::note_on(
+                        note.start,
+                        channel,
+                        note.note,
+                        note.velocity,
+                    ))?;
+                    self.push_event(Event::note_off(note.off, channel, note.note, note.velocity))?;
+                }
                 return Ok(());
             }
             for index in 0..notes.len() {
                 let end_note = notes[(index + maximum).min(notes.len() - 1)];
-                if let Some(event) = self.track().events.get_mut(notes[index].off_index) {
-                    event.time = end_note.off.saturating_add(1);
-                }
+                let note = notes[index];
+                self.push_event(Event::note_on(
+                    note.start,
+                    channel,
+                    note.note,
+                    note.velocity,
+                ))?;
+                self.push_event(Event::note_off(
+                    end_note.off.saturating_add(1),
+                    channel,
+                    note.note,
+                    note.velocity,
+                ))?;
             }
             return Ok(());
         }
@@ -4354,30 +4369,25 @@ impl<'a> Compiler<'a> {
         let mut range = self.bend_ranges[range_index].max(1);
         if max_distance > 12 {
             let old_mode = self.track().slur_mode;
+            let old_value = self.track().slur_value;
             self.track().slur_mode = 2;
+            self.track().slur_value = 100;
             self.track().slur_notes = notes[..notes.len() - 1].to_vec();
             let result = self.handle_slur_note(final_note, false, channel);
             self.track().slur_mode = old_mode;
+            self.track().slur_value = old_value;
             return result;
         }
         if max_distance > range {
             range = 12;
             self.bend_ranges[range_index] = range;
             let at = notes[0].start.saturating_sub(2);
-            self.push_event(Event::control_change(at, channel, 101, 0))?;
-            self.push_event(Event::control_change(at, channel, 100, 0))?;
-            self.push_event(Event::control_change(at, channel, 6, range as u8))?;
+            if !self.track().cc_muted {
+                self.push_event(Event::control_change(at, channel, 101, 0))?;
+                self.push_event(Event::control_change(at, channel, 100, 0))?;
+                self.push_event(Event::control_change(at, channel, 6, range as u8))?;
+            }
         }
-        let removed: BTreeSet<usize> = notes
-            .iter()
-            .flat_map(|item| [item.on_index, item.off_index])
-            .collect();
-        let mut index = 0usize;
-        self.track().events.retain(|_| {
-            let keep = !removed.contains(&index);
-            index += 1;
-            keep
-        });
         self.push_event(Event::note_on(
             notes[0].start,
             channel,
@@ -4427,6 +4437,9 @@ impl<'a> Compiler<'a> {
     }
 
     fn push_slur_bend(&mut self, time: i64, value: i64, channel: u8) -> Result<()> {
+        if self.track().cc_muted {
+            return Ok(());
+        }
         let raw = (value + 8192).clamp(0, 16383);
         self.push_event(Event::new(
             time,
@@ -4994,6 +5007,7 @@ enum OnNoteTarget {
 enum NoteModifierKind {
     #[default]
     Normal,
+    Holding,
     OnNote,
     OnTime,
     OnCycle,
@@ -5033,11 +5047,12 @@ impl NoteModifier {
         let start = self.origin.saturating_add(self.delay);
         let mut value = match self.kind {
             NoteModifierKind::Normal => base,
+            NoteModifierKind::Holding => self.last,
             NoteModifierKind::OnNote => {
                 if self.values.is_empty() {
                     base
                 } else if self.next >= self.values.len() && !self.repeat {
-                    self.kind = NoteModifierKind::Normal;
+                    self.kind = NoteModifierKind::Holding;
                     self.last
                 } else {
                     let value = self.values[self.next % self.values.len()];
@@ -5072,7 +5087,7 @@ impl NoteModifier {
         if time < start || self.values.is_empty() {
             return base;
         }
-        let total: i64 = self.values.chunks_exact(3).map(|part| part[2]).sum();
+        let total: i64 = self.values.chunks(3).map(|part| part[2]).sum();
         if total <= 0 {
             return self.values.last().copied().unwrap_or(base);
         }
@@ -5092,7 +5107,7 @@ impl NoteModifier {
             elapsed
         };
         let mut segment_start = 0;
-        for part in self.values.chunks_exact(3) {
+        for part in self.values.chunks(3) {
             let (low, high, len) = (part[0], part[1], part[2]);
             let segment_end = segment_start + len;
             if position <= segment_end {
