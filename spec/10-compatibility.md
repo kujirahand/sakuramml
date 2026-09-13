@@ -17,6 +17,7 @@
 | `Track`、`Channel`、`TrackSync` | 実装済み | トラック別状態、1〜16ch |
 | `TimeBase`、`TimeSignature`、`Time` | 実装済み | 総tick、小節:拍:step |
 | `KeyFlag`、`Key`/`KeyShift` | 実装済み | 音高変換、臨時記号との加算、Key Signature |
+| `TrackKey`、`UseKeyShift` | 実装済み | トラック別移調と、臨時記号を除く移調の一時無効化 |
 | 音色、CC、ベンド、RPN/NRPN | 実装済み | 基本値と Bank Select |
 | `SysEx`、GM/GS/XG Reset | 実装済み | 10進、16進形式 |
 | テキストメタイベント | 実装済み | CP932 出力、置換警告 |
@@ -35,15 +36,15 @@
 | `PlayFrom`, `PlayTo` | 実装済み（一部簡略化） | 下記参照 |
 | `DirectSMF` | 実装済み | 生バイト列をイベントとして書く |
 | `NoteOn`, `NoteOff` | 未実装 | 低水準イベント命令 |
-| `TimeKey`, `TimeKey2` | 実装済み | 時間範囲つき移調と現在位置の`MML(...)`参照 |
-| `TimeKeyFlag` | 未実装 | 時間範囲つき調号 |
+| `TimeKey`, `TimeKey2` | 実装済み | 半開時間範囲、後勝ちの移調と現在位置の`MML(...)`参照 |
+| `TimeKeyFlag` | 実装済み | 時間範囲つき臨時記号。通常のKeyFlagを範囲内で置換 |
 | `Stretch` | 実装済み | 二重実行、tick切り捨て、明示休符の従来挙動を含む |
 | `Solo`, `Mute`, `TrackMute` | 実装済み | トラック選択・発音抑制 |
 | `DeleteCC`, `CCMute`, `CCNoMute` | 実装済み | イベント削除・抑制 |
 | `MML(...)` | 実装済み | 文書化された基本状態、BR、ベンド、キー、Port、CCの現在値を参照可能 |
 | `PrintTime`, `PrintTrack` | 実装済み | 表示内容は標準出力せず`CompileOutput.messages`へ格納 |
 | `SoundType` | 実装済み | 初期値GM(0)。代入・参照してGM/GS/XGを分岐可能 |
-| `NoteNo(...)` | 実装済み | 音名からMIDIノート番号への変換 |
+| `NoteNo(...)` | 実装済み | キー移調を除外し、KeyFlag/TimeKeyFlagを含めて音名を変換 |
 | 文字列・配列組み込み関数 | 実装済み | `MID`, `POS/X`, `Replace`, `VarType`, `ArraySort*`, `StrToNum`, `HEX`, `SizeOf` |
 | `.Max` | 実装済み | `q.Max` / `v.Max` |
 | `TempoChange` | 実装済み | 1〜3引数、音長指定、16分音符間隔のテンポ推移 |

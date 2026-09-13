@@ -63,6 +63,8 @@ pub struct CompileResult {
 #[derive(Debug, Clone)]
 struct TrackState {
     channel: u8,
+    /// Transposition applied only to this track (`TrackKey`).
+    key: i64,
     /// MIDI port selected by `Port`.
     port: i64,
     time: i64,
@@ -127,6 +129,7 @@ impl TrackState {
     fn new(track_no: i64, timebase: i64, step_mode: bool) -> Self {
         Self {
             channel: default_channel(track_no),
+            key: 0,
             port: 0,
             time: 0,
             octave: 5,
@@ -164,6 +167,14 @@ struct TimeKeyRule {
     key: i64,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct TimeKeyFlagRule {
+    from: i64,
+    to: Option<i64>,
+    /// Stored in the compiler's c,d,e,f,g,a,b order.
+    key_flags: [i64; 7],
+}
+
 /// Track number `n` defaults to MIDI channel `n - 1`.
 fn default_channel(track_no: i64) -> u8 {
     (track_no - 1).clamp(0, 15) as u8
@@ -187,6 +198,8 @@ pub struct Compiler<'a> {
     key_flags: [i64; 7],
     /// Global transpose, in semitones (`System.Keyshift`).
     key_shift: i64,
+    /// Whether Key/TimeKey/TimeKey2/TrackKey affect subsequently read notes.
+    use_key_shift: bool,
     x68_mode: bool,
     step_mode: bool,
     voice_no_shift: i64,
@@ -194,6 +207,7 @@ pub struct Compiler<'a> {
     /// Time-scoped transpositions. Later matching declarations win.
     time_keys: Vec<TimeKeyRule>,
     time_keys2: Vec<TimeKeyRule>,
+    time_key_flags: Vec<TimeKeyFlagRule>,
     /// Bend range per MIDI channel; GM defaults to two semitones.
     bend_ranges: [i64; 16],
     /// Value of `q` that means 100% gate (`System.qMax`).
@@ -264,12 +278,14 @@ impl<'a> Compiler<'a> {
             functions: BTreeMap::new(),
             key_flags: [0; 7],
             key_shift: 0,
+            use_key_shift: true,
             x68_mode: false,
             step_mode: false,
             voice_no_shift: 0,
             octave_range_shift: 0,
             time_keys: Vec::new(),
             time_keys2: Vec::new(),
+            time_key_flags: Vec::new(),
             bend_ranges: [2; 16],
             q_max: 100,
             v_max: 127,
@@ -1013,6 +1029,16 @@ impl<'a> Compiler<'a> {
             }
             "TimeKey" => self.time_key(cur, false, line),
             "TimeKey2" => self.time_key(cur, true, line),
+            "TimeKeyFlag" => self.time_key_flag(cur, line),
+            "TrackKey" => {
+                let value = self.expect_int_arg(cur, &word)?;
+                self.track().key = value;
+                Ok(())
+            }
+            "UseKeyShift" => {
+                self.use_key_shift = self.expect_int_arg(cur, &word)? != 0;
+                Ok(())
+            }
             "Port" | "PORT" => self.port(cur, line),
             "Time" | "TIME" => self.time_command(cur),
             "TrackSync" => {
@@ -1414,7 +1440,7 @@ impl<'a> Compiler<'a> {
             // back its MIDI number, without playing it.
             "NoteNo" => {
                 let text = args.first().map(|v| v.as_str()).unwrap_or_default();
-                Value::Int(self.note_number_of(&text))
+                Value::Int(self.note_number_of(&text, line)?)
             }
             // `MML(v)` reports what a command is currently set to.
             "MML" => {
@@ -1435,11 +1461,12 @@ impl<'a> Compiler<'a> {
 
     /// The MIDI note number a fragment of MML would play, starting from the
     /// track's current octave. Used by `NoteNo(...)`.
-    fn note_number_of(&mut self, text: &str) -> i64 {
+    fn note_number_of(&mut self, text: &str, line: usize) -> Result<i64> {
         let mut octave = self.track().octave;
         let mut chars = text.chars().peekable();
-        let mut note: Option<i64> = None;
-        let mut accidental = 0;
+        let mut class: Option<usize> = None;
+        let mut accidental: i64 = 0;
+        let mut suppress_key_flag = false;
 
         while let Some(ch) = chars.next() {
             match ch {
@@ -1459,8 +1486,9 @@ impl<'a> Compiler<'a> {
                 }
                 '>' => octave += if self.x68_mode { -1 } else { 1 },
                 '<' => octave += if self.x68_mode { 1 } else { -1 },
-                '+' | '#' if note.is_some() => accidental += 1,
-                '-' if note.is_some() => accidental -= 1,
+                '+' | '#' if class.is_some() => accidental += 1,
+                '-' if class.is_some() => accidental -= 1,
+                '*' if class.is_some() => suppress_key_flag = true,
                 'n' => {
                     let mut digits = String::new();
                     while let Some(c) = chars.peek() {
@@ -1472,17 +1500,36 @@ impl<'a> Compiler<'a> {
                         }
                     }
                     if let Ok(value) = digits.parse::<i64>() {
-                        return value;
+                        return Ok(value);
                     }
                 }
                 c => {
-                    if let Some(class) = pitch_class_index(c) {
-                        note = Some(pitch_class_semitone(class));
+                    if let Some(index) = pitch_class_index(c) {
+                        class = Some(index);
+                        accidental = 0;
+                        suppress_key_flag = false;
                     }
                 }
             }
         }
-        (octave + self.octave_range_shift) * 12 + note.unwrap_or(0) + accidental
+        let note = if let Some(class) = class {
+            if !suppress_key_flag {
+                let time = self.track().time;
+                let flags = self.active_key_flags(time);
+                accidental = accidental
+                    .checked_add(flags[class])
+                    .ok_or_else(|| Self::note_number_overflow(line))?;
+            }
+            pitch_class_semitone(class)
+        } else {
+            0
+        };
+        octave
+            .checked_add(self.octave_range_shift)
+            .and_then(|value| value.checked_mul(12))
+            .and_then(|value| value.checked_add(note))
+            .and_then(|value| value.checked_add(accidental))
+            .ok_or_else(|| Self::note_number_overflow(line))
     }
 
     /// What a command is currently set to, for `MML(...)`.
@@ -1539,11 +1586,25 @@ impl<'a> Compiler<'a> {
             .unwrap_or(0)
     }
 
+    fn active_key_flags(&self, time: i64) -> [i64; 7] {
+        self.time_key_flags
+            .iter()
+            .rev()
+            .find(|rule| rule.from <= time && rule.to.is_none_or(|to| time < to))
+            .map(|rule| rule.key_flags)
+            .unwrap_or(self.key_flags)
+    }
+
     fn current_transposition(&mut self, line: usize) -> Result<i64> {
+        if !self.use_key_shift {
+            return Ok(0);
+        }
         let time = self.track().time;
+        let track_key = self.track().key;
         self.key_shift
             .checked_add(self.active_time_key(false, time))
             .and_then(|value| value.checked_add(self.active_time_key(true, time)))
+            .and_then(|value| value.checked_add(track_key))
             .ok_or_else(|| Self::note_number_overflow(line))
     }
 
@@ -2745,6 +2806,80 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
+    /// `TimeKeyFlag((from),(to),(a,b,c,d,e,f,g))` records time-scoped
+    /// accidentals. Empty bounds follow the same rules as `TimeKey`.
+    fn time_key_flag(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        cur.skip_spaces();
+        if !cur.eat('(') {
+            return Err(MmlError::new(
+                line,
+                "TimeKeyFlagには(開始,終了,(a,b,c,d,e,f,g))を指定してください",
+            ));
+        }
+        let body = cur
+            .read_balanced('(', ')')
+            .ok_or_else(|| MmlError::new(line, "TimeKeyFlagの括弧が閉じていません"))?;
+        let args = split_function_args(&body);
+        if args.len() != 3 || args[2].trim().is_empty() {
+            return Err(MmlError::new(
+                line,
+                "TimeKeyFlagには(開始,終了,(a,b,c,d,e,f,g))を指定してください",
+            ));
+        }
+
+        let now = self.track().time;
+        let parse_time = |compiler: &mut Self, text: &str| -> Result<i64> {
+            let text = text.trim();
+            if text.is_empty() {
+                return Ok(now);
+            }
+            let text = text
+                .strip_prefix('(')
+                .and_then(|s| s.strip_suffix(')'))
+                .unwrap_or(text);
+            compiler.time_value(text, line)
+        };
+        let from = parse_time(self, args[0])?;
+        let to = if args[1].trim().is_empty() {
+            None
+        } else {
+            Some(parse_time(self, args[1])?)
+        };
+        if to.is_some_and(|to| to <= from) {
+            return Err(MmlError::new(
+                line,
+                "TimeKeyFlagの終了位置は開始位置より後にしてください",
+            ));
+        }
+
+        let values = args[2]
+            .trim()
+            .strip_prefix('(')
+            .and_then(|text| text.strip_suffix(')'))
+            .ok_or_else(|| {
+                MmlError::new(line, "TimeKeyFlagのKeyFlag値は括弧で囲んで指定してください")
+            })?;
+        let values = split_function_args(values);
+        if values.len() != 7 || values.iter().any(|value| value.trim().is_empty()) {
+            return Err(MmlError::new(
+                line,
+                "TimeKeyFlagにはa,b,c,d,e,f,gの7値を指定してください",
+            ));
+        }
+        let mut key_flags = [0; 7];
+        for (offset, source) in values.iter().enumerate() {
+            let note = (b'a' + offset as u8) as char;
+            let index = pitch_class_index(note).expect("a through g are note names");
+            key_flags[index] = self.eval_source(source.trim(), line)?.as_int(line)?;
+        }
+        self.time_key_flags.push(TimeKeyFlagRule {
+            from,
+            to,
+            key_flags,
+        });
+        Ok(())
+    }
+
     /// `Port(n)` stores the current port and emits the SMF port meta event.
     fn port(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
         let value = self.expect_int_arg(cur, "Port")?;
@@ -3678,13 +3813,17 @@ impl<'a> Compiler<'a> {
         // Legacy chord helpers rely on the accidental following it (`a*+`).
         // A second `*`, after the accidental, has the same suppressing effect.
         let mut suppress_key_flag = cur.eat('*');
-        let mut accidental = 0;
+        let mut accidental: i64 = 0;
         while let Some(sign) = cur.eat_any(&['+', '-', '#']) {
             accidental += if sign == '-' { -1 } else { 1 };
         }
         suppress_key_flag |= cur.eat('*');
         if !suppress_key_flag {
-            accidental += self.key_flags[class];
+            let time = self.track().time;
+            let flags = self.active_key_flags(time);
+            accidental = accidental
+                .checked_add(flags[class])
+                .ok_or_else(|| Self::note_number_overflow(line))?;
         }
 
         cur.skip_spaces();

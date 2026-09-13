@@ -739,6 +739,40 @@ fn note_no_reads_a_note_without_playing_it() {
     assert_same("Int x=NoteNo(n70); n(x)", "n70");
 }
 
+#[test]
+fn note_no_uses_key_flags_but_not_key_transposition() {
+    assert_same(
+        "Key(2) TrackKey(3) TimeKey(,,4) TimeKey2(,,5) KeyFlag+(c) \
+         Int x=NoteNo(c) UseKeyShift(off) n(x)",
+        "KeyFlag+(c) UseKeyShift(off) n61",
+    );
+    assert_same(
+        "TimeKeyFlag((1:1:0),(2:1:0),(0,0,1,0,0,0,0)) \
+         Int x=NoteNo(c) UseKeyShift(off) n(x)",
+        "UseKeyShift(off) n61",
+    );
+    assert_same(
+        "KeyFlag+(c) TimeKeyFlag((1:1:0),(2:1:0),(0,0,0,1,0,0,0)) \
+         Int x=NoteNo(c) UseKeyShift(off) n(x)",
+        "KeyFlag+(c) UseKeyShift(off) n60",
+    );
+    assert_same(
+        "KeyFlag+(c) Int x=NoteNo(c*) UseKeyShift(off) n(x)",
+        "KeyFlag+(c) UseKeyShift(off) n60",
+    );
+}
+
+#[test]
+fn time_key_flag_rejects_invalid_ranges_and_arrays() {
+    assert_error_contains(
+        "TimeKeyFlag((2:1:0),(1:1:0),(0,0,0,0,0,0,0))c",
+        "終了位置は開始位置より後",
+    );
+    assert_error_contains("TimeKeyFlag(,,(0,0,0))c", "7値");
+    assert_error_contains("TimeKeyFlag(,,0,0,0,0,0,0,0)c", "開始,終了");
+    assert_error_contains("TimeKeyFlag(,,(0,0,0,0,0,0,0),12)c", "開始,終了");
+}
+
 /// `MML(...)` reports what a command is currently set to.
 #[test]
 fn mml_reports_the_current_setting() {

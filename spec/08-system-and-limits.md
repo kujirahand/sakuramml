@@ -43,6 +43,7 @@ Bank Selectを伴う音色変更では、CC0、CC32、音色をこの順に `Con
 | `ArgOrder(lqvto)` | `lqvto` | 現在のトラック。音符のカンマ引数の順番 |
 | `AllowMultiLine(on/off)` | on | 曲全体。offなら改行を含む `'...'` 和音をエラーにする |
 | `MetaTextEOL(n)` | 0 | 曲全体。0=CRLF、1=LF、2=CR |
+| `UseKeyShift(on/off)` | on | 曲全体。Key/TimeKey/TimeKey2/TrackKeyの適用を切り替える |
 
 これらはPascal版と同じ裸のコマンド名に加え、移植期に既に受理していた
 `System.ArgOrder`、`System.AllowMultiLine`、`System.MetaTextEOL` も同じ動作の別名として扱います。
@@ -55,7 +56,6 @@ Bank Selectを伴う音色変更では、CC0、CC32、音色をこの順に `Con
 これは既存曲を途中まで変換できるための移行動作であり、その設定が適用されたことを意味しません。
 音響上重要な警告を無視して生成 MIDI を正式成果物にしてはいけません。
 
-代表例は `UseKeyShift`、`TimeKey`、`TimeKeyFlag`、`TimeKey2` などです。
 `System.LoadSMF` はPascal側にも処理本体がなく、ファイルI/Oにも依存するため未対応のままです。
 最新の区分は [互換性表](10-compatibility.md) を参照してください。
 
