@@ -88,6 +88,9 @@ struct TrackState {
     cc_muted: bool,
     /// Controllers individually suppressed by `CCNoMute`.
     cc_no_mute: [bool; 128],
+    /// Legacy `n(...),0` chord notes, held until a positive-length note ends
+    /// the chord and supplies their common gate.
+    pending_zero_length_notes: Vec<PendingNote>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -95,6 +98,14 @@ struct LastNote {
     /// Index into `events` of the note-off to move when a tie extends it.
     off_index: usize,
     start: i64,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct PendingNote {
+    start: i64,
+    channel: u8,
+    note: u8,
+    velocity: u8,
 }
 
 impl TrackState {
@@ -119,6 +130,7 @@ impl TrackState {
             muted: false,
             cc_muted: false,
             cc_no_mute: [false; 128],
+            pending_zero_length_notes: Vec::new(),
             used: false,
         }
     }
@@ -155,6 +167,9 @@ pub struct Compiler<'a> {
     v_add: i64,
     /// Offset applied to measure numbers in `Time` (`System.MeasureShift`).
     measure_shift: i64,
+    /// How many ticks ordinary CC and pitch-bend events precede the cursor.
+    /// Program changes always precede it by one tick in the Pascal build.
+    controller_shift: i64,
     /// Time signature, used to turn `Time(m:b:t)` into ticks.
     time_signature: (i64, i64),
     /// Output of `Print(...)`, handed back to the caller instead of printed.
@@ -213,6 +228,7 @@ impl<'a> Compiler<'a> {
             q2_add: 8,
             v_add: 8,
             measure_shift: 0,
+            controller_shift: 1,
             time_signature: (4, 4),
             messages: Vec::new(),
             exiting: false,
@@ -849,7 +865,16 @@ impl<'a> Compiler<'a> {
                         "DeleteCCには0以上の番号を指定してください",
                     ));
                 }
-                let time = self.track().time;
+                // Plain CC/bend writes are stored ControllerShift ticks ahead
+                // of the cursor. Advance specifications already account for
+                // their own leading event, which Pascal preserves here.
+                let has_modifier = self.track().cc_modifiers.iter().any(|item| item.no == no);
+                let time = self.track().time
+                    - if has_modifier {
+                        0
+                    } else {
+                        self.controller_shift
+                    };
                 self.delete_cc_after(no, time);
                 Ok(())
             }
@@ -2231,6 +2256,10 @@ impl<'a> Compiler<'a> {
                 self.measure_shift = self.expect_int_arg(cur, name)?;
                 Ok(())
             }
+            "ControllerShift" => {
+                self.controller_shift = self.expect_int_arg(cur, name)?;
+                Ok(())
+            }
             other => {
                 // Skip the argument as raw text: it may be a file name or a
                 // symbol, which must not be evaluated as an expression.
@@ -2786,18 +2815,40 @@ impl<'a> Compiler<'a> {
         let Some(&voice) = args.first() else {
             return Err(MmlError::new(line, "@には音色番号を指定してください"));
         };
-        if let Some(&msb) = args.get(1) {
-            self.write_cc(0, msb);
-        }
-        if let Some(&lsb) = args.get(2) {
-            self.write_cc(32, lsb);
-        }
         self.track().voice = voice;
         let program = (voice - 1).clamp(0, 127) as u8;
-        let (time, channel) = {
+        let (time, channel, muted, cc_muted) = {
             let track = self.track();
-            (track.time, track.channel)
+            (
+                track.time - 1,
+                track.channel,
+                track.cc_muted,
+                track.cc_no_mute,
+            )
         };
+        // Pascal stores bank select inside the program-change node and expands
+        // it at save time. Supplying either bank value emits both CC0 and CC32
+        // (the omitted value defaults to zero), spaced by ControllerShift.
+        if args.len() > 1 && !muted {
+            let msb = args.get(1).copied().unwrap_or(0).clamp(0, 127) as u8;
+            let lsb = args.get(2).copied().unwrap_or(0).clamp(0, 127) as u8;
+            if !cc_muted[0] {
+                self.push_event(Event::control_change(
+                    time - self.controller_shift * 2,
+                    channel,
+                    0,
+                    msb,
+                ))?;
+            }
+            if !cc_muted[32] {
+                self.push_event(Event::control_change(
+                    time - self.controller_shift,
+                    channel,
+                    32,
+                    lsb,
+                ))?;
+            }
+        }
         self.push_event(Event::program_change(time, channel, program))
     }
 
@@ -2888,9 +2939,10 @@ impl<'a> Compiler<'a> {
     }
 
     fn write_pitch_bend_raw(&mut self, lsb: u8, msb: u8) {
+        let controller_shift = self.controller_shift;
         let (time, channel, muted) = {
             let track = self.track();
-            (track.time, track.channel, track.cc_muted)
+            (track.time - controller_shift, track.channel, track.cc_muted)
         };
         if muted {
             return;
@@ -2901,10 +2953,11 @@ impl<'a> Compiler<'a> {
     fn write_cc(&mut self, controller: i64, value: i64) {
         let controller = controller.clamp(0, 127) as u8;
         let value = value.clamp(0, 127) as u8;
+        let controller_shift = self.controller_shift;
         let (time, channel, muted) = {
             let track = self.track();
             (
-                track.time,
+                track.time - controller_shift,
                 track.channel,
                 track.cc_muted || track.cc_no_mute[controller as usize],
             )
@@ -2991,14 +3044,15 @@ impl<'a> Compiler<'a> {
     }
 
     fn meta_text(&mut self, cur: &mut Cursor, meta_type: u8, line: usize) -> Result<()> {
-        let text = self.read_text_value(cur, line)?;
+        let mut text = self.read_text_value(cur, line)?;
+        // Pascal writes a single space for an empty meta-text payload.
+        if text.is_empty() {
+            text.push(' ');
+        }
         let (bytes, warnings) = encode_cp932(&text, line);
         self.warnings.extend(warnings);
         let time = self.track().time;
-        self.track()
-            .events
-            .push(Event::meta(time, meta_type, &bytes));
-        Ok(())
+        self.push_event(Event::meta(time, meta_type, &bytes))
     }
 
     /// Read the text for a meta event: a literal `{"..."}`, or an expression
@@ -3246,9 +3300,49 @@ impl<'a> Compiler<'a> {
         let next = self.checked_time(time, length, line)?;
 
         let muted = self.track().muted;
-        if !muted {
-            self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
-            self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
+        let mut wrote_note = false;
+        if length == 0 {
+            if !muted {
+                self.track().pending_zero_length_notes.push(PendingNote {
+                    start,
+                    channel,
+                    note: note_no as u8,
+                    velocity,
+                });
+            }
+        } else {
+            let pending = std::mem::take(&mut self.track().pending_zero_length_notes);
+            // Taking the pending notes terminates the legacy chord even when
+            // muted, so it cannot leak past Mute/TrackMute.
+            if !muted && pending.is_empty() {
+                self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
+                self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
+                wrote_note = true;
+            } else if !muted {
+                // Pascal's WaonStack bypasses the ordinary packed-note
+                // one-tick shortening for every member, including the final
+                // positive-length note.
+                let chord_gate = gate.saturating_add(1);
+                for note in pending {
+                    let note_end = self.checked_time(note.start, chord_gate, line)?;
+                    self.push_event(Event::note_on(
+                        note.start,
+                        note.channel,
+                        note.note,
+                        note.velocity,
+                    ))?;
+                    self.push_event(Event::note_off(
+                        note_end,
+                        note.channel,
+                        note.note,
+                        note.velocity,
+                    ))?;
+                }
+                let chord_end = self.checked_time(start, chord_gate, line)?;
+                self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
+                self.push_event(Event::note_off(chord_end, channel, note_no as u8, velocity))?;
+                wrote_note = true;
+            }
         }
         // Advance specifications run after the note, which is the only point
         // at which its length is known — the Pascal build calls
@@ -3257,7 +3351,7 @@ impl<'a> Compiler<'a> {
         self.write_cc_modifiers(time, length)?;
 
         let track = self.track();
-        track.last_note = if muted {
+        track.last_note = if !wrote_note {
             None
         } else {
             Some(LastNote {
