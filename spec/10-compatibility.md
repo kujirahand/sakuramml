@@ -35,8 +35,9 @@
 | `DirectSMF` | 実装済み | 生バイト列をイベントとして書く |
 | `NoteOn`, `NoteOff` | 未実装 | 低水準イベント命令 |
 | `TimeKey`, `TimeKeyFlag`, `TimeKey2` | 未実装 | 時間範囲つき移調・調号 |
-| `Stretch`, `Solo`, `Mute`, `TrackMute` | 未実装 | トラック編集系 |
-| `DeleteCC`, `CCMute`, `CCNoMute` | 未実装 | イベント削除・抑制 |
+| `Stretch` | 実装済み | 二重実行、tick切り捨て、明示休符の従来挙動を含む |
+| `Solo`, `Mute`, `TrackMute` | 実装済み | トラック選択・発音抑制 |
+| `DeleteCC`, `CCMute`, `CCNoMute` | 実装済み | イベント削除・抑制 |
 | `MML(...)` | 一部 | 基本状態とコントロールチェンジの現在値は実装済み。その他の状態参照は未実装 |
 | `NoteNo(...)` | 実装済み | 音名からMIDIノート番号への変換 |
 | `.Max` | 実装済み | `q.Max` / `v.Max` |

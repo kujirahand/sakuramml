@@ -7,7 +7,7 @@
 
 pub mod advance;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::compiler::advance::{self as advance_spec, CcModifier, Kind};
 use crate::encoding::encode_cp932;
@@ -82,6 +82,12 @@ struct TrackState {
     used: bool,
     /// `.Random` spread per note attribute.
     random: Vec<(OnNoteTarget, i64)>,
+    /// Suppress note events while still advancing the time pointer.
+    muted: bool,
+    /// Suppress every control-change and pitch-bend write on this track.
+    cc_muted: bool,
+    /// Controllers individually suppressed by `CCNoMute`.
+    cc_no_mute: [bool; 128],
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -110,6 +116,9 @@ impl TrackState {
             on_note: Vec::new(),
             cc_modifiers: Vec::new(),
             random: Vec::new(),
+            muted: false,
+            cc_muted: false,
+            cc_no_mute: [false; 128],
             used: false,
         }
     }
@@ -156,6 +165,12 @@ pub struct Compiler<'a> {
     /// Events written so far, against [`MAX_EVENTS`].
     event_count: usize,
     play_from: PlayFromSpec,
+    /// Current `Stretch` multiplier. Pascal uses an Extended value and
+    /// truncates every affected note/gate independently.
+    stretch_rate: f64,
+    /// Positive means Solo, negative means Mute, zero means no track filter.
+    solo_or_mute: i8,
+    selected_tracks: BTreeSet<i64>,
     /// While writing a chord, the time every note in it starts at.
     chord_start: Option<i64>,
     /// `.Frequency` — how often a ramp writes, in ticks.
@@ -204,6 +219,9 @@ impl<'a> Compiler<'a> {
             rng: Rng::default(),
             event_count: 0,
             play_from: PlayFromSpec::default(),
+            stretch_rate: 1.0,
+            solo_or_mute: 0,
+            selected_tracks: BTreeSet::new(),
             chord_start: None,
             cc_frequency: advance_spec::DEFAULT_FREQUENCY,
             rythm_macros: rythm::Macros::new(),
@@ -269,12 +287,20 @@ impl<'a> Compiler<'a> {
         self.apply_play_from();
 
         let mut song = Song::new(self.timebase as u16);
-        for state in self.tracks.into_values() {
+        for (track_no, state) in self.tracks {
             // A track PlayFrom trimmed to nothing is still written out (an
             // empty MTrk), the same way the Pascal build does: it was used,
             // even though nothing survived the cut.
             if !state.used {
                 continue;
+            }
+            // The Pascal writer always preserves track 0. For the musical
+            // tracks, Solo keeps the listed tracks and Mute drops them.
+            if track_no != 0 {
+                let selected = self.selected_tracks.contains(&track_no);
+                if (self.solo_or_mute > 0 && !selected) || (self.solo_or_mute < 0 && selected) {
+                    continue;
+                }
             }
             song.tracks.push(Track {
                 events: state.events,
@@ -795,8 +821,54 @@ impl<'a> Compiler<'a> {
             "Include" | "INCLUDE" => self.include(cur),
             "Div" | "DIV" => self.div(cur),
             "Play" | "PLAY" => self.play(cur),
+            "Stretch" => self.stretch(cur),
             "PlayFrom" => self.play_from_command(cur, line),
             "PlayTo" => self.play_to_command(cur, line),
+            "TrackMute" => {
+                let value = self.expect_int_arg(cur, &word)?;
+                self.track().muted = value != 0;
+                Ok(())
+            }
+            "Solo" | "Mute" => {
+                let tracks = self.read_args(cur, usize::MAX)?;
+                if tracks.is_empty() {
+                    return Err(MmlError::new(
+                        line,
+                        format!("{word}にはトラック番号を指定してください"),
+                    ));
+                }
+                self.solo_or_mute = if word == "Solo" { 1 } else { -1 };
+                self.selected_tracks.extend(tracks);
+                Ok(())
+            }
+            "DeleteCC" => {
+                let no = self.expect_int_arg(cur, &word)?;
+                if no < 0 {
+                    return Err(MmlError::new(
+                        line,
+                        "DeleteCCには0以上の番号を指定してください",
+                    ));
+                }
+                let time = self.track().time;
+                self.delete_cc_after(no, time);
+                Ok(())
+            }
+            "CCMute" => {
+                let value = self.expect_int_arg(cur, &word)?;
+                self.track().cc_muted = value != 0;
+                Ok(())
+            }
+            "CCNoMute" => {
+                let args = self.read_args(cur, 2)?;
+                if args.len() < 2 || !(0..=127).contains(&args[0]) {
+                    return Err(MmlError::new(
+                        line,
+                        "CCNoMuteにはCC番号(0〜127)とon/offを指定してください",
+                    ));
+                }
+                self.track().cc_no_mute[args[0] as usize] = args[1] != 0;
+                Ok(())
+            }
             "Cresc" | "CRESC" => self.cresc(cur, 40, 127, line),
             "Decresc" | "DECRESC" => self.cresc(cur, 127, 40, line),
             "Rythm" | "RYTHM" | "Rhythm" | "RHYTHM" => self.rythm(cur),
@@ -1428,6 +1500,14 @@ impl<'a> Compiler<'a> {
         };
         self.rng = rng;
 
+        let suppressed = {
+            let track = self.track();
+            track.cc_muted || (0..=127).contains(&no) && track.cc_no_mute[no as usize]
+        };
+        if suppressed {
+            return Ok(());
+        }
+
         let channel = self.track().channel;
         for (time, value) in events {
             let value = advance_spec::clamp_for(no, value);
@@ -1468,15 +1548,19 @@ impl<'a> Compiler<'a> {
     /// Drop control-change events for `no` at or after `time`, as the Pascal
     /// build does before writing a fresh ramp over the same ground.
     fn delete_cc_after(&mut self, no: i64, time: i64) {
-        if !(0..=127).contains(&no) {
-            return;
-        }
         let channel = self.track().channel;
-        let status = 0xb0 | (channel & 0x0f);
+        let status = if matches!(no, advance_spec::BEND_FULL | advance_spec::BEND_EASY) {
+            0xe0 | (channel & 0x0f)
+        } else {
+            0xb0 | (channel & 0x0f)
+        };
         self.track().events.retain(|event| {
-            !(event.time >= time
-                && event.data.first() == Some(&status)
-                && event.data.get(1) == Some(&(no as u8)))
+            if event.time < time || event.data.first() != Some(&status) {
+                return true;
+            }
+            // Pascal treats the bend pseudo controllers 256/257 as the same
+            // MIDI event class. Values 128..255 likewise select all CCs.
+            (0..=127).contains(&no) && event.data.get(1) != Some(&(no as u8))
         });
     }
 
@@ -1638,6 +1722,7 @@ impl<'a> Compiler<'a> {
         self.chord_start = outer;
 
         let length = length.unwrap_or(previous_length);
+        let length = self.scale_stretch(length, line)?;
         let end = self.checked_time(start, length, line)?;
         let track = self.track();
         track.length = previous_length;
@@ -1763,6 +1848,85 @@ impl<'a> Compiler<'a> {
         track.length = previous;
         track.time = end;
         outcome
+    }
+
+    /// `Stretch{mml}len` — measure a phrase, then replay it scaled to `len`.
+    ///
+    /// The first pass deliberately runs on the real compiler state with note
+    /// output muted. That reproduces the Pascal implementation: variables and
+    /// non-note events in the phrase are evaluated in both passes, while the
+    /// first pass exists primarily to advance the clock and measure the body.
+    fn stretch(&mut self, cur: &mut Cursor) -> Result<()> {
+        let line = cur.line();
+        let body = self.read_block(cur, line)?;
+        let target = self
+            .read_stretch_length(cur)?
+            .unwrap_or_else(|| self.track().length);
+        if target < 0 {
+            return Err(MmlError::new(
+                line,
+                "Stretchの長さには0以上を指定してください",
+            ));
+        }
+
+        let original_track = self.current;
+        let start = self.track().time;
+        let previous_mute = self.track().muted;
+        let previous_rate = self.stretch_rate;
+
+        self.track().muted = true;
+        let measured = self.run_fragment(&body, line);
+        self.current = original_track;
+        self.track().muted = previous_mute;
+        if let Err(error) = measured {
+            self.stretch_rate = previous_rate;
+            self.track().time = start;
+            return Err(MmlError::new(
+                error.line,
+                format!("Stretch: {}", error.message),
+            ));
+        }
+
+        let duration = self.track().time - start;
+        if duration <= 0 {
+            self.track().time = start;
+            return Err(MmlError::new(line, "Stretchの対象フレーズの長さが0です"));
+        }
+        self.stretch_rate = target as f64 / duration as f64;
+        self.track().time = start;
+        self.track().last_note = None;
+
+        let result = self.run_fragment(&body, line);
+        self.current = original_track;
+        self.stretch_rate = previous_rate;
+        self.track().muted = previous_mute;
+        self.track().time = self.checked_time(start, target, line)?;
+        self.track().last_note = None;
+        result.map_err(|error| MmlError::new(error.line, format!("Stretch: {}", error.message)))
+    }
+
+    /// Read Stretch's target length. Parentheses are an expression wrapper,
+    /// while `%` inside them retains the legacy raw-tick meaning.
+    fn read_stretch_length(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
+        cur.skip_spaces();
+        if cur.peek() != Some('(') {
+            return Ok(self.read_length(cur));
+        }
+        let line = cur.line();
+        let source = self.read_paren_source(cur, line)?;
+        let source = source.trim();
+        let (raw_ticks, source) = match source.strip_prefix('%') {
+            Some(rest) => (true, rest.trim()),
+            None => (false, source),
+        };
+        let value = self.eval_source(source, line)?.as_int(line)?;
+        if raw_ticks || self.track().length_in_steps {
+            Ok(Some(value))
+        } else if value <= 0 {
+            Ok(Some(0))
+        } else {
+            Ok(Some(self.timebase * 4 / value))
+        }
     }
 
     /// `Sub{ ... }` — play the block, then put the time pointer back.
@@ -2624,21 +2788,30 @@ impl<'a> Compiler<'a> {
     }
 
     fn write_pitch_bend_raw(&mut self, lsb: u8, msb: u8) {
-        let (time, channel) = {
+        let (time, channel, muted) = {
             let track = self.track();
-            (track.time, track.channel)
+            (track.time, track.channel, track.cc_muted)
         };
+        if muted {
+            return;
+        }
         let _ = self.push_event(Event::new(time, vec![0xe0 | (channel & 0x0f), lsb, msb]));
     }
 
     fn write_cc(&mut self, controller: i64, value: i64) {
-        let (time, channel) = {
-            let track = self.track();
-            (track.time, track.channel)
-        };
         let controller = controller.clamp(0, 127) as u8;
         let value = value.clamp(0, 127) as u8;
-        let _ = self.push_event(Event::control_change(time, channel, controller, value));
+        let (time, channel, muted) = {
+            let track = self.track();
+            (
+                track.time,
+                track.channel,
+                track.cc_muted || track.cc_no_mute[controller as usize],
+            )
+        };
+        if !muted {
+            let _ = self.push_event(Event::control_change(time, channel, controller, value));
+        }
         // Cresc/Decresc's 1-argument form reads a controller's last value, so
         // a plain write must be visible to it too, the way the Pascal build's
         // single TNoteCC.LastValue field is shared by every path that writes.
@@ -2849,9 +3022,16 @@ impl<'a> Compiler<'a> {
         } else {
             self.read_note_options(cur)?
         };
-        let length = expression_length
-            .or(length)
-            .unwrap_or_else(|| self.track().length);
+        let explicit = expression_length.or(length);
+        // Pascal's funcNoteR scales the default rest length, but an explicit
+        // rest length is read after that default and therefore stays literal.
+        let length = match explicit {
+            Some(length) => length,
+            None => {
+                let default_length = self.track().length;
+                self.scale_stretch(default_length, line)?
+            }
+        };
         let signed = if rewind { -length } else { length };
         let time = self.track().time;
         // A rest advances the specifications as a note does — the Pascal
@@ -2876,7 +3056,13 @@ impl<'a> Compiler<'a> {
             cur.advance();
         }
         let (length, _) = self.read_note_options(cur)?;
-        let length = length.unwrap_or_else(|| self.track().length);
+        let length = match length {
+            Some(length) => length,
+            None => {
+                let default_length = self.track().length;
+                self.scale_stretch(default_length, line)?
+            }
+        };
         let signed = if rewind { -length } else { length };
         let gate_percent = self.track().gate_percent;
         let q_max = self.q_max;
@@ -2927,10 +3113,23 @@ impl<'a> Compiler<'a> {
         let gate_value = self.spread(OnNoteTarget::Gate, gate_value);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
-        let gate = if options.gate_in_steps || self.track().gate_in_steps {
-            (gate_value - 1).max(1)
+        let gate_in_steps = options.gate_in_steps || self.track().gate_in_steps;
+        let (length, gate) = if self.stretch_rate != 1.0 {
+            // Pascal scales the duration and the pre-NoteOff gate separately,
+            // then applies the one-tick packed-note adjustment.
+            let raw_gate = if gate_in_steps {
+                gate_value
+            } else {
+                length.saturating_mul(gate_value) / q_max.max(1)
+            };
+            (
+                self.scale_stretch(length, line)?,
+                (self.scale_stretch(raw_gate, line)? - 1).max(1),
+            )
+        } else if gate_in_steps {
+            (length, (gate_value - 1).max(1))
         } else {
-            gate_ticks_scaled(length, gate_value, q_max)
+            (length, gate_ticks_scaled(length, gate_value, q_max))
         };
         let (time, timing, channel) = {
             let track = self.track();
@@ -2946,8 +3145,11 @@ impl<'a> Compiler<'a> {
         let end = self.checked_time(start, gate, line)?;
         let next = self.checked_time(time, length, line)?;
 
-        self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
-        self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
+        let muted = self.track().muted;
+        if !muted {
+            self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
+            self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
+        }
         // Advance specifications run after the note, which is the only point
         // at which its length is known — the Pascal build calls
         // checkNoteOnCC here for the same reason. Values meant to arrive
@@ -2955,15 +3157,27 @@ impl<'a> Compiler<'a> {
         self.write_cc_modifiers(time, length)?;
 
         let track = self.track();
-        track.last_note = Some(LastNote {
-            off_index: track.events.len() - 1,
-            start,
-        });
+        track.last_note = if muted {
+            None
+        } else {
+            Some(LastNote {
+                off_index: track.events.len() - 1,
+                start,
+            })
+        };
         // A chord moves the pointer once, when it closes.
         if self.chord_start.is_none() {
             self.track().time = next;
         }
         Ok(())
+    }
+
+    fn scale_stretch(&self, value: i64, line: usize) -> Result<i64> {
+        let scaled = (value as f64 * self.stretch_rate).trunc();
+        if !scaled.is_finite() || scaled < i64::MIN as f64 || scaled > i64::MAX as f64 {
+            return Err(MmlError::new(line, "Stretchの時間計算が範囲を超えました"));
+        }
+        Ok(scaled as i64)
     }
 
     /// Note suffixes: a length spec and/or `(l,q,v,t,o)` options.

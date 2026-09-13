@@ -643,3 +643,9 @@ fn a_definition_shadows_a_command_name() {
     // Without a definition in the way, the commands still work.
     assert_same("Sub{c} d", "Sub{c} d");
 }
+
+#[test]
+fn stretch_rejects_a_zero_length_phrase() {
+    assert_error_contains("Stretch{}4", "長さが0");
+    assert_error_contains("Stretch{TrackName={\"x\"}}4", "長さが0");
+}

@@ -29,6 +29,9 @@
 | `Channel` / `CH` | `CH=n` | 実装済み | [03](03-tracks-and-time.md) |
 | `TrackSync` | `TrackSync` | 実装済み | [03](03-tracks-and-time.md) |
 | `Play` | `Play({track0},{track1},...)` | 実装済み | [03](03-tracks-and-time.md) |
+| `TrackMute` | `TrackMute(on/off)` | 実装済み | [03](03-tracks-and-time.md) |
+| `Solo` / `Mute` | `Solo(n1,n2,...)` | 実装済み | [03](03-tracks-and-time.md) |
+| `Stretch` | `Stretch{mml}length` | 実装済み | [03](03-tracks-and-time.md) |
 | `TimeBase` | `TimeBase=n` | 実装済み | [03](03-tracks-and-time.md) |
 | `TimeSignature` | `TimeSignature=n,d` | 実装済み | [03](03-tracks-and-time.md) |
 | `Time` | コマンドまたは式 `Time(tick)` / `Time(m:b:s)` | 実装済み | [03](03-tracks-and-time.md) |
@@ -45,6 +48,9 @@
 | `p` | `p(value)` / `p%(value)` | 実装済み | [04](04-midi-control.md) |
 | `PitchBend` | `PitchBend(value)` | 実装済み | [04](04-midi-control.md) |
 | `RPN` / `NRPN` | `RPN(msb,lsb,data)` | 実装済み | [04](04-midi-control.md) |
+| `DeleteCC` | `DeleteCC(no)` | 実装済み | [04](04-midi-control.md) |
+| `CCMute` | `CCMute(on/off)` | 実装済み | [04](04-midi-control.md) |
+| `CCNoMute` | `CCNoMute(no,on/off)` | 実装済み | [04](04-midi-control.md) |
 | `SysEx` | `SysEx(...)` / `SysEx$=...;` | 実装済み | [04](04-midi-control.md) |
 | `ResetGM/GS/XG` | `ResetGM` | 実装済み | [04](04-midi-control.md) |
 

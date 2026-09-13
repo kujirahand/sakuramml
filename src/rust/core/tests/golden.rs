@@ -1368,3 +1368,118 @@ fn a_tie_with_no_preceding_note_accepts_a_sign_too() {
 fn the_rewind_then_advance_idiom() {
     assert_same_bytes("cd r-1 c r*1 e", "cd r-1 c r+1 e");
 }
+
+// --- track and controller muting/editing ---
+
+#[test]
+fn track_mute_suppresses_notes_but_advances_time() {
+    assert_golden(
+        "c TrackMute(on) d TrackMute(off) e",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c64759040644b80406415ff2f00",
+    );
+}
+
+#[test]
+fn solo_and_mute_filter_complete_tracks() {
+    assert_golden(
+        "Track 1 c Track 2 e Solo(2)",
+        "4d546864000000060001000100604d54726b0000000c009140644b81406415ff2f00",
+    );
+    assert_golden(
+        "Track 1 c Track 2 e Mute(2)",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "Track 1 c Track 2 e Track 3 g Solo(1,3)",
+        "4d546864000000060001000200604d54726b0000000c00903c644b803c6415ff2f004d54726b0000000c009243644b82436415ff2f00",
+    );
+}
+
+#[test]
+fn cc_mute_suppresses_controller_writes_only() {
+    assert_golden(
+        "CCMute(on) y11,10 CCMute(off) y11,20 c",
+        "4d546864000000060001000100604d54726b0000001000b00b1400903c644b803c6415ff2f00",
+    );
+    assert_same_bytes("CCMute(on) p%=100 CCMute(off) p%=200 c", "p%=200 c");
+}
+
+#[test]
+fn cc_no_mute_suppresses_one_controller() {
+    assert_golden(
+        "CCNoMute(11,on) y11,10 y10,30 CCNoMute(11,off) y11,20 c",
+        "4d546864000000060001000100604d54726b0000001400b00a1e00b00b1400903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn delete_cc_removes_reserved_events_from_the_current_time() {
+    assert_golden(
+        "EP.onTime(96,0,127) DeleteCC=11 c",
+        "4d546864000000060001000100604d54726b0000001000b00b6000903c644b803c6415ff2f00",
+    );
+    assert_same_bytes("p%=100 DeleteCC=256 p%=200 c", "p%=200 c");
+    assert_same_bytes("p65 DeleteCC=257 p66 c", "p66 c");
+}
+
+// --- Stretch ---
+
+#[test]
+fn stretch_scales_a_phrase_to_the_requested_length() {
+    assert_golden(
+        "Stretch{cdef}2",
+        "4d546864000000060001000100604d54726b0000002400903c6425803c640b903e6425803e640b904064258040640b904164258041640bff2f00",
+    );
+    assert_golden(
+        "q100 Stretch{c8d4}2",
+        "4d546864000000060001000100604d54726b0000001400903c643f803c6401903e647f803e6401ff2f00",
+    );
+}
+
+#[test]
+fn stretch_preserves_the_legacy_explicit_rest_quirk() {
+    assert_golden(
+        "q100 Stretch{c r4 d}1",
+        "4d546864000000060001000100604d54726b0000001400903c647f803c6461903e647f803e6421ff2f00",
+    );
+}
+
+#[test]
+fn stretch_accepts_a_parenthesized_raw_tick_length() {
+    assert_golden(
+        "q100 Stretch{c}(%48) d",
+        "4d546864000000060001000100604d54726b0000001400903c642f803c6401903e645f803e6401ff2f00",
+    );
+}
+
+#[test]
+fn stretch_leaves_the_pointer_at_the_requested_end() {
+    assert_golden(
+        "q100 Stretch{cde}4 c",
+        "4d546864000000060001000100604d54726b0000002400903c641f803c6401903e641f803e64019040641f80406401903c645f803c6401ff2f00",
+    );
+}
+
+#[test]
+fn stretch_uses_state_changes_from_its_measurement_pass() {
+    assert_golden(
+        "o4 q100 Stretch{o5 c}2 c",
+        "4d546864000000060001000100604d54726b0000001500903c64813f803c6401903c645f803c6401ff2f00",
+    );
+}
+
+#[test]
+fn nested_stretch_matches_pascal_rounding() {
+    assert_golden(
+        "q100 Stretch{Stretch{cd}4 ef}2",
+        "4d546864000000060001000100604d54726b0000002400903c6447803c6401903e64189040642f803e6410804064019041643f80416400ff2f00",
+    );
+    assert_golden(
+        "q100 Stretch{c^c}1",
+        "4d546864000000060001000100604d54726b0000001500903c64817f803c6401903c647f803c6401ff2f00",
+    );
+    assert_golden(
+        "q100 Stretch{'ceg'4 c}4",
+        "4d546864000000060001000100604d54726b0000002400903c6400904064009043642f803c64008040640080436401903c642f803c6401ff2f00",
+    );
+}
