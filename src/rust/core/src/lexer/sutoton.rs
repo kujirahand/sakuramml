@@ -140,7 +140,7 @@ pub fn to_mml_with(src: &str, user: &mut UserMacros) -> String {
             if let Some((name, replacement, next)) = read_definition(&chars, index) {
                 user.push((name, replacement));
                 // Longest first, so `方向左前` wins over `方向左`.
-                user.sort_by(|a, b| b.0.chars().count().cmp(&a.0.chars().count()));
+                user.sort_by_key(|a| std::cmp::Reverse(a.0.chars().count()));
                 index = next;
                 continue;
             }
