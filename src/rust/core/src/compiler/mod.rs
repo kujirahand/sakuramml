@@ -1500,6 +1500,11 @@ impl<'a> Compiler<'a> {
             .unwrap_or(0)
     }
 
+    fn current_transposition(&mut self) -> i64 {
+        let time = self.track().time;
+        self.key_shift + self.active_time_key(false, time) + self.active_time_key(true, time)
+    }
+
     /// Run a function body with its parameters bound.
     ///
     /// Variables are global in MML, so a call saves the names it shadows and
@@ -2471,7 +2476,23 @@ impl<'a> Compiler<'a> {
         if args.len() < 2 {
             return Err(MmlError::new(line, "拍子は 分子,分母 で指定してください"));
         }
-        let (numerator, denominator) = (args[0].max(1), args[1].max(1));
+        let (numerator, denominator) = (args[0], args[1]);
+        if numerator <= 0 || denominator <= 0 {
+            return Err(MmlError::new(
+                line,
+                "拍子の分子と分母は正の整数で指定してください",
+            ));
+        }
+        let beat_ticks = self.timebase * 4 / denominator;
+        if beat_ticks <= 0 || numerator.checked_mul(beat_ticks).is_none() {
+            return Err(MmlError::new(
+                line,
+                format!(
+                    "現在のTimeBase({})では拍子 {numerator}/{denominator} を表現できません",
+                    self.timebase
+                ),
+            ));
+        }
         self.time_signature = (numerator, denominator);
 
         // ff 58 04 nn dd cc bb, with cc/bb derived from the timebase — the
@@ -2627,19 +2648,32 @@ impl<'a> Compiler<'a> {
         Ok(no)
     }
 
-    fn time_parts(&self, time: i64) -> (i64, i64, i64) {
+    fn time_parts(&self, time: i64, line: usize) -> Result<(i64, i64, i64)> {
         let (numerator, denominator) = self.time_signature;
         let beat_ticks = self.timebase * 4 / denominator.max(1);
-        let bar_ticks = numerator.max(1) * beat_ticks;
-        let measure = time / bar_ticks + 1;
+        let bar_ticks = numerator.max(1).checked_mul(beat_ticks).unwrap_or(0);
+        if beat_ticks <= 0 || bar_ticks <= 0 {
+            return Err(MmlError::new(
+                line,
+                format!(
+                    "現在のTimeBase({})では拍子 {numerator}/{denominator} を表現できません",
+                    self.timebase
+                ),
+            ));
+        }
+        let measure = time
+            .checked_div(bar_ticks)
+            .and_then(|measure| measure.checked_add(1))
+            .and_then(|measure| measure.checked_sub(self.measure_shift))
+            .ok_or_else(|| MmlError::new(line, "時刻表示の計算があふれました"))?;
         let rest = time % bar_ticks;
-        (measure, rest / beat_ticks + 1, rest % beat_ticks)
+        Ok((measure, rest / beat_ticks + 1, rest % beat_ticks))
     }
 
     fn print_time(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
         let no = self.requested_track(cur, "PrintTime", line)?;
         let track = &self.tracks[&no];
-        let (measure, beat, tick) = self.time_parts(track.time);
+        let (measure, beat, tick) = self.time_parts(track.time, line)?;
         self.messages.push(format!(
             "Track({no});Time({measure}:{beat}:{tick});//={}(PrintTime)",
             track.time
@@ -2650,7 +2684,7 @@ impl<'a> Compiler<'a> {
     fn print_track(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
         let no = self.requested_track(cur, "PrintTrack", line)?;
         let track = &self.tracks[&no];
-        let (measure, beat, tick) = self.time_parts(track.time);
+        let (measure, beat, tick) = self.time_parts(track.time, line)?;
         let length_mode = if track.length_in_steps {
             "ステップモード"
         } else {
@@ -3489,13 +3523,8 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             options.octave.unwrap_or(track.octave) + std::mem::take(&mut track.octave_once)
         };
-        let time = self.track().time;
-        let timed_key = self.active_time_key(false, time) + self.active_time_key(true, time);
-        let note_no = (octave + self.octave_range_shift) * 12
-            + base
-            + accidental
-            + self.key_shift
-            + timed_key;
+        let transposition = self.current_transposition();
+        let note_no = (octave + self.octave_range_shift) * 12 + base + accidental + transposition;
         self.write_note(note_no, length, options, line)
     }
 
@@ -3507,7 +3536,8 @@ impl<'a> Compiler<'a> {
         // `n60,` — the Pascal syntax allows a comma before the options.
         cur.eat(',');
         let (length, options) = self.read_note_options(cur, true)?;
-        self.write_note(note_no + self.key_shift, length, options, line)
+        let transposition = self.current_transposition();
+        self.write_note(note_no + transposition, length, options, line)
     }
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {

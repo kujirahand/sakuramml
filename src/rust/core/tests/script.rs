@@ -732,6 +732,11 @@ fn time_key_queries_follow_the_current_track_time() {
 }
 
 #[test]
+fn numeric_notes_apply_time_key_transposition() {
+    assert_same("TimeKey(,,3) TimeKey2(,,2) n60", "n65");
+}
+
+#[test]
 fn print_time_and_track_return_pascal_style_messages() {
     let out = compile("Track=1 c4 Track=2 l8 d PrintTime(1) PrintTime PrintTrack(1)").unwrap();
     assert_eq!(
@@ -744,6 +749,21 @@ fn print_time_and_track_return_pascal_style_messages() {
             "Slur(0,12) BR(2) PitchBend(-1)",
             "イベント数=1 TrackMute(off) ",
         ]
+    );
+}
+
+#[test]
+fn print_time_accounts_for_measure_shift() {
+    let out = compile("System.MeasureShift(1) Time(1:1:0) PrintTime").unwrap();
+    assert_eq!(out.messages, ["Track(0);Time(1:1:0);//=384(PrintTime)"]);
+}
+
+#[test]
+fn track_diagnostics_reject_unrepresentable_time_signatures_without_panicking() {
+    assert_error_contains("TimeSignature=4,1024 PrintTime", "表現できません");
+    assert_error_contains(
+        "TimeSignature=4,16 System.TimeBase=1 PrintTime",
+        "表現できません",
     );
 }
 
