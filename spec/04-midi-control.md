@@ -136,7 +136,10 @@ SysEx$=F0,41,10,42,12,{40,01,30,05},F7;
 | `.Range` | `.Range(low,high)` | 書き込む値を範囲内に丸める |
 | `.Frequency` | `.Frequency(v)` | 推移の書き込み間隔（既定 2 tick）。曲全体の設定 |
 
-音符属性（`v` `q` `t` `l` `o`）には `.onNote` と `.Random` が使えます。
+音符属性（`v` `q` `t` `l` `o`）には `.onNote/.N`、`.onTime/.T`、
+`.onCycle/.C`、`.Delay`、`.Repeat`、`.Random`、`.Range` が使えます。
+これらはCCイベントを出力せず、各音符の開始時刻で属性値をサンプリングします。
+波形系（`.onNoteWave` 等）は音符属性には使えません。
 `q.Max(v)` / `v.Max(v)` は `System.qMax` / `System.vMax` と同じです。
 
 引数中の `!n` は「n分音符の長さ」を tick 値として書く記法です（`!4` は四分音符）。

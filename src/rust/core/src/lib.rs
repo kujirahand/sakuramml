@@ -162,6 +162,14 @@ mod tests {
     }
 
     #[test]
+    fn recovering_compile_reports_and_discards_a_dangling_slur() {
+        let out = compile_recovering("c&").unwrap();
+        assert_eq!(out.errors.len(), 1);
+        assert!(out.errors[0].message.contains("&の後に音符がありません"));
+        assert!(!out.smf.windows(3).any(|event| event == [0x90, 60, 100]));
+    }
+
+    #[test]
     fn compiles_cp932_source_bytes() {
         // TrackName={"テスト"} c   in CP932
         let mut bytes = b"TrackName={\"".to_vec();

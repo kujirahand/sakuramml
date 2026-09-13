@@ -90,15 +90,13 @@ struct TrackState {
     /// Last full/easy pitch-bend values, for `MML(p%)` and `MML(p)`.
     pitch_bend_full: i64,
     pitch_bend_easy: i64,
-    /// Values queued by `.onNote`, cycled one per note.
-    on_note: Vec<(OnNoteTarget, OnNote)>,
+    /// Advance specifications attached to note attributes.
+    note_modifiers: Vec<(OnNoteTarget, NoteModifier)>,
     /// Advance specifications attached to control changes and bends.
     cc_modifiers: Vec<CcModifier>,
     /// Set once any event is recorded, so a track PlayFrom trims to empty is
     /// still written out (an empty MTrk), matching the Pascal build.
     used: bool,
-    /// `.Random` spread per note attribute.
-    random: Vec<(OnNoteTarget, i64)>,
     /// Suppress note events while still advancing the time pointer.
     muted: bool,
     /// Suppress every control-change and pitch-bend write on this track.
@@ -108,6 +106,9 @@ struct TrackState {
     /// Legacy `n(...),0` chord notes, held until a positive-length note ends
     /// the chord and supplies their common gate.
     pending_zero_length_notes: Vec<PendingNote>,
+    slur_mode: i64,
+    slur_value: i64,
+    slur_notes: Vec<SlurNote>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -123,6 +124,15 @@ struct PendingNote {
     channel: u8,
     note: u8,
     velocity: u8,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct SlurNote {
+    start: i64,
+    off: i64,
+    note: u8,
+    velocity: u8,
+    transition: Option<i64>,
 }
 
 impl TrackState {
@@ -148,13 +158,15 @@ impl TrackState {
             voice: 0,
             pitch_bend_full: -1,
             pitch_bend_easy: -1,
-            on_note: Vec::new(),
+            note_modifiers: Vec::new(),
             cc_modifiers: Vec::new(),
-            random: Vec::new(),
             muted: false,
             cc_muted: false,
             cc_no_mute: [false; 128],
             pending_zero_length_notes: Vec::new(),
+            slur_mode: 0,
+            slur_value: 12,
+            slur_notes: Vec::new(),
             used: false,
         }
     }
@@ -234,6 +246,8 @@ pub struct Compiler<'a> {
     rng: Rng,
     /// Events written so far, against [`MAX_EVENTS`].
     event_count: usize,
+    /// Event slots reserved by notes buffered in unfinished Slur chains.
+    buffered_slur_events: usize,
     play_from: PlayFromSpec,
     /// Current `Stretch` multiplier. Pascal uses an Extended value and
     /// truncates every affected note/gate independently.
@@ -301,6 +315,7 @@ impl<'a> Compiler<'a> {
             exiting: false,
             rng: Rng::default(),
             event_count: 0,
+            buffered_slur_events: 0,
             play_from: PlayFromSpec::default(),
             stretch_rate: 1.0,
             solo_or_mute: 0,
@@ -368,6 +383,23 @@ impl<'a> Compiler<'a> {
         let normalized = self.preprocess(src);
         let mut cur = Cursor::new(&normalized);
         self.run(&mut cur)?;
+        if self
+            .tracks
+            .values()
+            .any(|track| !track.slur_notes.is_empty())
+        {
+            let error = MmlError::new(cur.line(), "&の後に音符がありません");
+            if !self.recover_errors {
+                return Err(error);
+            }
+            if !self.errors.contains(&error) {
+                self.errors.push(error);
+            }
+            for track in self.tracks.values_mut() {
+                track.slur_notes.clear();
+            }
+            self.buffered_slur_events = 0;
+        }
         self.apply_play_from();
 
         let mut song = Song::new(self.timebase as u16);
@@ -545,8 +577,7 @@ impl<'a> Compiler<'a> {
     /// Global meta events such as tempo are always kept in MTrk 0 by the
     /// Pascal implementation, even when a musical track is selected.
     fn push_event_to_track(&mut self, track_no: i64, event: Event) -> Result<()> {
-        self.event_count += 1;
-        if self.event_count > MAX_EVENTS {
+        if self.event_count >= MAX_EVENTS.saturating_sub(self.buffered_slur_events) {
             self.stop_requested = true;
             let error = MmlError::new(0, format!("生成イベント数が上限({MAX_EVENTS})を超えました"));
             // Some legacy event helpers cannot propagate a Result. Preserve
@@ -556,6 +587,7 @@ impl<'a> Compiler<'a> {
             }
             return Err(error);
         }
+        self.event_count += 1;
         let timebase = self.timebase;
         let step_mode = self.step_mode;
         let track = self
@@ -569,7 +601,10 @@ impl<'a> Compiler<'a> {
 
     /// Refuse a bulk event operation before it starts allocating or looping.
     fn ensure_event_capacity(&mut self, additional: usize, line: usize) -> Result<()> {
-        if additional > MAX_EVENTS.saturating_sub(self.event_count) {
+        let available = MAX_EVENTS
+            .saturating_sub(self.event_count)
+            .saturating_sub(self.buffered_slur_events);
+        if additional > available {
             self.stop_requested = true;
             let error = MmlError::new(
                 line,
@@ -581,6 +616,19 @@ impl<'a> Compiler<'a> {
             return Err(error);
         }
         Ok(())
+    }
+
+    /// Reserve the two MIDI event slots an unfinished Slur note may emit.
+    fn reserve_slur_note(&mut self, line: usize) -> Result<()> {
+        self.ensure_event_capacity(2, line)?;
+        self.buffered_slur_events += 2;
+        Ok(())
+    }
+
+    fn clear_current_slur_notes(&mut self) {
+        let released = self.track().slur_notes.len().saturating_mul(2);
+        self.track().slur_notes.clear();
+        self.buffered_slur_events = self.buffered_slur_events.saturating_sub(released);
     }
 
     /// Add to a time value, refusing a result the SMF format cannot express.
@@ -737,10 +785,15 @@ impl<'a> Compiler<'a> {
                 let current = self.track().octave;
                 let value = self.expect_note_info_value(cur, "o", current, 1)?;
                 self.track().octave = value;
+                self.reset_note_modifier(OnNoteTarget::Octave);
                 Ok(())
             }
             'l' => {
                 cur.advance();
+                let modifier_in_steps = cur.peek() == Some('%') && cur.peek_at(1) == Some('.');
+                if modifier_in_steps {
+                    cur.advance();
+                }
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Length)? {
                     return Ok(handled);
                 }
@@ -760,11 +813,24 @@ impl<'a> Compiler<'a> {
                 track.length = value;
                 track.length_in_steps = in_steps;
                 track.system_step_mode = step_mode;
+                self.reset_note_modifier(OnNoteTarget::Length);
                 Ok(())
             }
             'q' => {
                 cur.advance();
+                let modifier_in_steps = cur.peek() == Some('%') && cur.peek_at(1) == Some('.');
+                if modifier_in_steps {
+                    cur.advance();
+                }
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Gate)? {
+                    if let Some((_, modifier)) = self
+                        .track()
+                        .note_modifiers
+                        .iter_mut()
+                        .find(|(target, _)| *target == OnNoteTarget::Gate)
+                    {
+                        modifier.in_steps = modifier_in_steps;
+                    }
                     return Ok(handled);
                 }
                 // `q%n` gives the gate in ticks; a later plain `q` goes back
@@ -779,6 +845,7 @@ impl<'a> Compiler<'a> {
                 let track = self.track();
                 track.gate_in_steps = in_steps;
                 track.gate_percent = value;
+                self.reset_note_modifier(OnNoteTarget::Gate);
                 Ok(())
             }
             'v' => {
@@ -789,6 +856,7 @@ impl<'a> Compiler<'a> {
                 let current = self.track().velocity;
                 let value = self.expect_note_info_value(cur, "v", current, self.v_add)?;
                 self.track().velocity = value;
+                self.reset_note_modifier(OnNoteTarget::Velocity);
                 Ok(())
             }
             't' => {
@@ -799,6 +867,7 @@ impl<'a> Compiler<'a> {
                 let current = self.track().timing;
                 let value = self.expect_note_info_value(cur, "t", current, 1)?;
                 self.track().timing = value;
+                self.reset_note_modifier(OnNoteTarget::Timing);
                 Ok(())
             }
             '@' => {
@@ -1080,6 +1149,31 @@ impl<'a> Compiler<'a> {
             "SysEx" | "SYSEX" => self.sysex(cur),
             "DirectSMF" => self.direct_smf(cur),
             "Voice" => self.voice(cur),
+            "Slur" => {
+                let args = self.read_args(cur, 3)?;
+                let Some(&mode) = args.first() else {
+                    return Err(MmlError::new(line, "Slurにはtypeを指定してください"));
+                };
+                if !(0..=3).contains(&mode) {
+                    return Err(MmlError::new(line, "Slurのtypeは0〜3で指定してください"));
+                }
+                if args.get(1) == Some(&i64::MIN) {
+                    return Err(MmlError::new(line, "Slurのvalueが範囲外です"));
+                }
+                let track = self.track();
+                track.slur_mode = mode;
+                if let Some(&value) = args.get(1) {
+                    track.slur_value = value;
+                }
+                if let Some(&range) = args.get(2) {
+                    if !(1..=12).contains(&range) {
+                        return Err(MmlError::new(line, "Slurのrangeは1〜12で指定してください"));
+                    }
+                    let channel = track.channel as usize;
+                    self.bend_ranges[channel] = range;
+                }
+                Ok(())
+            }
             "BR" => {
                 let value = self.expect_int_arg(cur, "BR")?;
                 let channel = self.track().channel as usize;
@@ -1697,8 +1791,16 @@ impl<'a> Compiler<'a> {
         if name == "Max" {
             let value = self.expect_int_arg(cur, &name)?;
             match target {
-                OnNoteTarget::Gate => self.q_max = value.max(1),
-                OnNoteTarget::Velocity => self.v_max = value.max(1),
+                OnNoteTarget::Gate => {
+                    self.q_max = value.max(1);
+                    self.track().gate_percent = self.q_max;
+                    self.reset_note_modifier(target);
+                }
+                OnNoteTarget::Velocity => {
+                    self.v_max = value.max(1);
+                    self.track().velocity = self.v_max;
+                    self.reset_note_modifier(target);
+                }
                 _ => {
                     self.warnings
                         .push(Warning::new(line, ".Max はこのコマンドでは無視しました"));
@@ -1755,17 +1857,17 @@ impl<'a> Compiler<'a> {
 
         match name {
             "Delay" => {
-                let value = self.expect_int_arg(cur, name)?;
+                let value = self.expect_single_modifier_arg(cur, name)?;
                 self.cc_modifier_entry(no).delay = value;
             }
             "Repeat" => {
-                let value = self.expect_int_arg(cur, name)?;
+                let value = self.expect_single_modifier_arg(cur, name)?;
                 let modifier = self.cc_modifier_entry(no);
                 modifier.repeat = value != 0;
                 modifier.index = 0;
             }
             "Random" => {
-                let value = self.expect_int_arg(cur, name)?;
+                let value = self.expect_single_modifier_arg(cur, name)?;
                 self.cc_modifier_entry(no).random = value;
             }
             "Range" => {
@@ -1795,30 +1897,96 @@ impl<'a> Compiler<'a> {
         line: usize,
     ) -> Result<Option<()>> {
         match name {
-            "onNote" | "N" => {
+            "onNote" | "N" | "onTime" | "T" | "onCycle" | "C" => {
                 let values = self.read_args(cur, usize::MAX)?;
-                let track = self.track();
-                track.on_note.retain(|(existing, _)| *existing != target);
-                track.on_note.push((target, OnNote { values, next: 0 }));
+                let kind = match name {
+                    "onNote" | "N" => NoteModifierKind::OnNote,
+                    "onTime" | "T" => NoteModifierKind::OnTime,
+                    _ => NoteModifierKind::OnCycle,
+                };
+                if kind == NoteModifierKind::OnTime && values.len() % 3 != 0 {
+                    return Err(MmlError::new(
+                        line,
+                        ".onTimeの引数は3個単位で指定してください",
+                    ));
+                }
+                if kind == NoteModifierKind::OnCycle && values.is_empty() {
+                    return Err(MmlError::new(line, ".onCycleには引数を指定してください"));
+                }
+                let time = self.track().time;
+                let modifier = self.note_modifier_entry(target);
+                modifier.kind = kind;
+                modifier.values = values;
+                modifier.next = 0;
+                modifier.origin = time;
+                Ok(Some(()))
+            }
+            "Delay" => {
+                let value = self.expect_single_modifier_arg(cur, name)?;
+                self.note_modifier_entry(target).delay = value;
+                Ok(Some(()))
+            }
+            "Repeat" => {
+                let value = self.expect_single_modifier_arg(cur, name)?;
+                let modifier = self.note_modifier_entry(target);
+                modifier.repeat = value != 0;
+                modifier.next = 0;
                 Ok(Some(()))
             }
             "Random" => {
-                let value = self.expect_int_arg(cur, name)?;
-                let track = self.track();
-                track.random.retain(|(existing, _)| *existing != target);
-                track.random.push((target, value));
+                let value = self.expect_single_modifier_arg(cur, name)?;
+                self.note_modifier_entry(target).random = value;
+                Ok(Some(()))
+            }
+            "Range" => {
+                let values = self.read_args(cur, 2)?;
+                if values.len() != 2 {
+                    return Err(MmlError::new(line, ".Rangeは(low,high)で指定してください"));
+                }
+                self.note_modifier_entry(target).range = Some((values[0], values[1]));
                 Ok(Some(()))
             }
             other => {
-                // Note attributes have no meaningful ramp over time here yet.
                 let _ = self.read_args(cur, 16)?;
-                self.warnings.push(Warning::new(
+                Err(MmlError::new(
                     line,
-                    format!(".{other} は音符属性では未実装のため無視しました"),
-                ));
-                Ok(Some(()))
+                    format!("音符属性では未定義のオプションです: .{other}"),
+                ))
             }
         }
+    }
+
+    fn note_modifier_entry(&mut self, target: OnNoteTarget) -> &mut NoteModifier {
+        let track = self.track();
+        if let Some(index) = track
+            .note_modifiers
+            .iter()
+            .position(|(existing, _)| *existing == target)
+        {
+            return &mut track.note_modifiers[index].1;
+        }
+        track.note_modifiers.push((target, NoteModifier::default()));
+        &mut track.note_modifiers.last_mut().expect("just pushed").1
+    }
+
+    fn reset_note_modifier(&mut self, target: OnNoteTarget) {
+        if let Some((_, modifier)) = self
+            .track()
+            .note_modifiers
+            .iter_mut()
+            .find(|(existing, _)| *existing == target)
+        {
+            modifier.kind = NoteModifierKind::Normal;
+        }
+    }
+
+    fn expect_single_modifier_arg(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
+        let line = cur.line();
+        let values = self.read_args(cur, 1)?;
+        values
+            .first()
+            .copied()
+            .ok_or_else(|| MmlError::new(line, format!(".{name}には数値を指定してください")))
     }
 
     /// The modifier state for a controller, created on first use.
@@ -1910,29 +2078,27 @@ impl<'a> Compiler<'a> {
         });
     }
 
-    /// Apply the `.Random` spread for a target, if one was set.
-    fn spread(&mut self, target: OnNoteTarget, value: i64) -> i64 {
-        let amount = self
+    fn note_value(&mut self, target: OnNoteTarget, base: i64, time: i64) -> i64 {
+        let mut rng = std::mem::take(&mut self.rng);
+        let value = self
             .track()
-            .random
-            .iter()
-            .find(|(existing, _)| *existing == target)
-            .map(|(_, amount)| *amount)
-            .unwrap_or(0);
-        if amount <= 0 {
-            return value;
-        }
-        value - amount / 2 + self.rng.range(0, amount - 1)
-    }
-
-    /// Take the next `.onNote` value for `target`, if a list is running.
-    fn next_on_note(&mut self, target: OnNoteTarget) -> Option<i64> {
-        let track = self.track();
-        track
-            .on_note
+            .note_modifiers
             .iter_mut()
             .find(|(existing, _)| *existing == target)
-            .and_then(|(_, list)| list.take())
+            .map(|(_, modifier)| modifier.value(time, base, &mut rng))
+            .unwrap_or(base);
+        self.rng = rng;
+        value
+    }
+
+    fn note_modifier_step_mode(&mut self, target: OnNoteTarget) -> Option<bool> {
+        self.track()
+            .note_modifiers
+            .iter()
+            .find(|(existing, modifier)| {
+                *existing == target && modifier.kind != NoteModifierKind::Normal
+            })
+            .map(|(_, modifier)| modifier.in_steps)
     }
 
     /// `$c{mml}` — bind one character for use in rhythm mode.
@@ -3004,6 +3170,8 @@ impl<'a> Compiler<'a> {
             format!("q{}(％指定モード)", track.gate_percent)
         };
         let bend = track.pitch_bend_full;
+        let slur_mode = track.slur_mode;
+        let slur_value = track.slur_value;
         let event_count = track
             .events
             .iter()
@@ -3022,7 +3190,7 @@ impl<'a> Compiler<'a> {
                 track.length, track.velocity, track.timing, track.octave
             ),
             format!(
-                "Slur(0,12) BR({}) PitchBend({bend})",
+                "Slur({slur_mode},{slur_value}) BR({}) PitchBend({bend})",
                 self.bend_ranges[track.channel as usize]
             ),
             format!("イベント数={event_count} TrackMute({mute}) "),
@@ -3878,9 +4046,13 @@ impl<'a> Compiler<'a> {
 
         cur.skip_spaces();
         let (length, options) = self.read_note_options(cur, true)?;
+        let slur = self.read_slur_marker(cur)?;
+        let time = self.track().time;
+        let base_octave = self.track().octave;
+        let advanced_octave = self.note_value(OnNoteTarget::Octave, base_octave, time);
         let octave = {
             let track = self.track();
-            options.octave.unwrap_or(track.octave) + std::mem::take(&mut track.octave_once)
+            options.octave.unwrap_or(advanced_octave) + std::mem::take(&mut track.octave_once)
         };
         let transposition = self.current_transposition(line)?;
         let note_no = octave
@@ -3890,7 +4062,7 @@ impl<'a> Compiler<'a> {
             .and_then(|value| value.checked_add(accidental))
             .and_then(|value| value.checked_add(transposition))
             .ok_or_else(|| Self::note_number_overflow(line))?;
-        self.write_note(note_no, length, options, line)
+        self.write_note(note_no, length, options, slur, line)
     }
 
     fn note_number(&mut self, cur: &mut Cursor) -> Result<()> {
@@ -3901,11 +4073,15 @@ impl<'a> Compiler<'a> {
         // `n60,` — the Pascal syntax allows a comma before the options.
         cur.eat(',');
         let (length, options) = self.read_note_options(cur, true)?;
+        let slur = self.read_slur_marker(cur)?;
+        let time = self.track().time;
+        let octave = self.track().octave;
+        let _ = self.note_value(OnNoteTarget::Octave, octave, time);
         let transposition = self.current_transposition(line)?;
         let note_no = note_no
             .checked_add(transposition)
             .ok_or_else(|| Self::note_number_overflow(line))?;
-        self.write_note(note_no, length, options, line)
+        self.write_note(note_no, length, options, slur, line)
     }
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {
@@ -3992,11 +4168,49 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
+    fn read_slur_marker(&mut self, cur: &mut Cursor) -> Result<Option<Option<i64>>> {
+        cur.skip_spaces();
+        if !cur.eat('&') {
+            return Ok(None);
+        }
+        if cur.eat('&') {
+            let mode = self.track().slur_mode;
+            let value = if matches!(mode, 0 | 1) {
+                self.track().length
+            } else if mode == 2 {
+                200
+            } else {
+                self.track().slur_value.saturating_mul(2)
+            };
+            let magnitude = value
+                .checked_abs()
+                .ok_or_else(|| MmlError::new(cur.line(), "Slurの時間が範囲外です"))?;
+            let value = if self.track().slur_value < 0 {
+                -magnitude
+            } else {
+                magnitude
+            };
+            return Ok(Some(Some(value)));
+        }
+        cur.skip_spaces();
+        let has_value = matches!(
+            cur.peek(),
+            Some('!') | Some('%') | Some('$') | Some('0'..='9')
+        );
+        let value = if has_value {
+            self.read_number(cur)?
+        } else {
+            None
+        };
+        Ok(Some(value))
+    }
+
     fn write_note(
         &mut self,
         note_no: i64,
         length: Option<i64>,
         options: NoteOptions,
+        slur: Option<Option<i64>>,
         line: usize,
     ) -> Result<()> {
         if !(0..=127).contains(&note_no) {
@@ -4005,25 +4219,31 @@ impl<'a> Compiler<'a> {
                 format!("ノート番号が範囲外です(0〜127): {note_no}"),
             ));
         }
-        // `.onNote` values are consumed one per note, before the track's own
-        // settings are consulted.
-        let on_velocity = self.next_on_note(OnNoteTarget::Velocity);
-        let on_gate = self.next_on_note(OnNoteTarget::Gate);
-        let on_timing = self.next_on_note(OnNoteTarget::Timing);
-        let on_length = self.next_on_note(OnNoteTarget::Length);
-        let track = self.track();
-        let length = on_length.or(length).unwrap_or(track.length);
-        let raw_velocity = options.velocity.or(on_velocity).unwrap_or(track.velocity);
-        let gate_value = options
-            .gate_percent
-            .or(on_gate)
-            .unwrap_or(track.gate_percent);
-        // `.Random` spreads a value either side of what was asked for.
-        let raw_velocity = self.spread(OnNoteTarget::Velocity, raw_velocity);
-        let gate_value = self.spread(OnNoteTarget::Gate, gate_value);
+        let time = self.track().time;
+        let (base_length, base_velocity, base_gate, base_timing) = {
+            let track = self.track();
+            (
+                track.length,
+                track.velocity,
+                track.gate_percent,
+                track.timing,
+            )
+        };
+        let advanced_length = self.note_value(OnNoteTarget::Length, base_length, time);
+        let advanced_velocity = self.note_value(OnNoteTarget::Velocity, base_velocity, time);
+        let gate_modifier_in_steps = self.note_modifier_step_mode(OnNoteTarget::Gate);
+        let advanced_gate = self.note_value(OnNoteTarget::Gate, base_gate, time);
+        let advanced_timing = self.note_value(OnNoteTarget::Timing, base_timing, time);
+        let length = length.unwrap_or(advanced_length);
+        let raw_velocity = options.velocity.unwrap_or(advanced_velocity);
+        let gate_value = options.gate_percent.unwrap_or(advanced_gate);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
-        let gate_in_steps = options.gate_in_steps || self.track().gate_in_steps;
+        let gate_in_steps = if options.gate_percent.is_some() {
+            options.gate_in_steps
+        } else {
+            gate_modifier_in_steps.unwrap_or(self.track().gate_in_steps)
+        };
         let (length, gate) = if self.stretch_rate != 1.0 {
             // Pascal scales the duration and the pre-NoteOff gate separately,
             // then applies the one-tick packed-note adjustment.
@@ -4041,13 +4261,9 @@ impl<'a> Compiler<'a> {
         } else {
             (length, gate_ticks_scaled(length, gate_value, q_max))
         };
-        let (time, timing, channel) = {
+        let (timing, channel) = {
             let track = self.track();
-            (
-                track.time,
-                options.timing.or(on_timing).unwrap_or(track.timing),
-                track.channel,
-            )
+            (options.timing.unwrap_or(advanced_timing), track.channel)
         };
         // Inside a chord every note starts together.
         let time = self.chord_start.unwrap_or(time);
@@ -4056,7 +4272,9 @@ impl<'a> Compiler<'a> {
         let next = self.checked_time(time, length, line)?;
 
         let muted = self.track().muted;
+        let slur_participates = slur.is_some() || !self.track().slur_notes.is_empty();
         let mut wrote_note = false;
+        let mut slur_note = None;
         if length == 0 {
             if !muted {
                 self.track().pending_zero_length_notes.push(PendingNote {
@@ -4064,6 +4282,19 @@ impl<'a> Compiler<'a> {
                     channel,
                     note: note_no as u8,
                     velocity,
+                });
+            }
+        } else if slur_participates {
+            // Keep slurred notes out of the mutable event list until the
+            // chain closes. DeleteCC and immediate CC ramps may retain-filter
+            // that list between `c&` and the following note.
+            if !muted {
+                slur_note = Some(SlurNote {
+                    start,
+                    off: end,
+                    note: note_no as u8,
+                    velocity,
+                    transition: slur.flatten(),
                 });
             }
         } else {
@@ -4106,6 +4337,15 @@ impl<'a> Compiler<'a> {
         // before the note carry an earlier time and sort ahead of it.
         self.write_cc_modifiers(time, length)?;
 
+        if let Some(slur_note) = slur_note {
+            if slur.is_some() {
+                self.reserve_slur_note(line)?;
+            }
+            self.handle_slur_note(slur_note, slur.is_some(), channel)?;
+        } else if slur.is_none() {
+            self.clear_current_slur_notes();
+        }
+
         let track = self.track();
         track.last_note = if !wrote_note {
             None
@@ -4120,6 +4360,234 @@ impl<'a> Compiler<'a> {
             self.track().time = next;
         }
         Ok(())
+    }
+
+    fn handle_slur_note(&mut self, note: SlurNote, continues: bool, channel: u8) -> Result<()> {
+        if continues {
+            self.track().slur_notes.push(note);
+            return Ok(());
+        }
+        if self.track().slur_notes.is_empty() {
+            return Ok(());
+        }
+        let mut notes = std::mem::take(&mut self.track().slur_notes);
+        let reserved = notes.len().saturating_mul(2);
+        notes.push(note);
+        let mut mode = self.track().slur_mode;
+        let mut configured = self.track().slur_value;
+        let final_note = *notes.last().expect("slur has at least two notes");
+        let max_distance = notes
+            .iter()
+            .map(|item| (item.note as i64 - final_note.note as i64).abs())
+            .max()
+            .unwrap_or(0);
+        if matches!(mode, 0 | 1) && max_distance > 12 {
+            mode = 2;
+            configured = 100;
+        }
+
+        if mode == 2 {
+            let note_runs = 1 + notes
+                .windows(2)
+                .filter(|pair| pair[0].note != pair[1].note)
+                .count();
+            self.buffered_slur_events = self.buffered_slur_events.saturating_sub(reserved);
+            self.ensure_event_capacity(note_runs.saturating_mul(2), 0)?;
+            let mut anchor = 0usize;
+            let mut anchor_off = notes[0].off;
+            let mut anchor_merged = false;
+            for index in 1..notes.len() {
+                let previous = notes[anchor];
+                let current = notes[index];
+                if previous.note == current.note {
+                    let previous_gate = anchor_off - previous.start + 1;
+                    let current_gate = current.off - current.start + 1;
+                    anchor_off = previous
+                        .start
+                        .saturating_add(previous_gate)
+                        .saturating_add(current_gate)
+                        .saturating_sub(1);
+                    anchor_merged = true;
+                    continue;
+                }
+                let percent = previous.transition.unwrap_or(configured);
+                let span = current.start.saturating_sub(previous.start);
+                let gate = if percent < 0 {
+                    span.saturating_add(span.saturating_mul(percent) / 100)
+                } else {
+                    span.saturating_mul(percent) / 100
+                };
+                let off = previous
+                    .start
+                    .saturating_add(gate)
+                    .saturating_sub(1)
+                    .max(previous.start);
+                self.push_event(Event::note_on(
+                    previous.start,
+                    channel,
+                    previous.note,
+                    previous.velocity,
+                ))?;
+                self.push_event(Event::note_off(
+                    off,
+                    channel,
+                    previous.note,
+                    previous.velocity,
+                ))?;
+                anchor = index;
+                anchor_off = current.off;
+                anchor_merged = false;
+            }
+            let last = notes[anchor];
+            let off = if anchor_merged {
+                anchor_off
+            } else {
+                last.off.saturating_add(1)
+            };
+            self.push_event(Event::note_on(
+                last.start,
+                channel,
+                last.note,
+                last.velocity,
+            ))?;
+            self.push_event(Event::note_off(off, channel, last.note, last.velocity))?;
+            return Ok(());
+        }
+
+        if mode == 3 {
+            self.buffered_slur_events = self.buffered_slur_events.saturating_sub(reserved);
+            self.ensure_event_capacity(notes.len().saturating_mul(2), 0)?;
+            let maximum = configured.saturating_sub(1).max(0) as usize;
+            if maximum == 0 {
+                for note in &notes {
+                    self.push_event(Event::note_on(
+                        note.start,
+                        channel,
+                        note.note,
+                        note.velocity,
+                    ))?;
+                    self.push_event(Event::note_off(note.off, channel, note.note, note.velocity))?;
+                }
+                return Ok(());
+            }
+            for index in 0..notes.len() {
+                let end_note = notes[(index + maximum).min(notes.len() - 1)];
+                let note = notes[index];
+                self.push_event(Event::note_on(
+                    note.start,
+                    channel,
+                    note.note,
+                    note.velocity,
+                ))?;
+                self.push_event(Event::note_off(
+                    end_note.off.saturating_add(1),
+                    channel,
+                    note.note,
+                    note.velocity,
+                ))?;
+            }
+            return Ok(());
+        }
+
+        let range_index = channel as usize;
+        let mut range = self.bend_ranges[range_index].max(1);
+        let needs_range_change = max_distance > range;
+        if max_distance > range {
+            range = 12;
+        }
+        let cc_muted = self.track().cc_muted;
+        let bend_value = |pitch: u8| -> i64 {
+            (pitch as i64 - final_note.note as i64).saturating_mul(8192) / range
+        };
+        let mut ramp_events = Vec::new();
+        if !cc_muted && mode == 0 {
+            for (note_index, item) in notes.iter().enumerate().skip(1) {
+                let target = bend_value(item.note);
+                let previous_note = notes[note_index - 1];
+                let previous = bend_value(previous_note.note);
+                let duration = previous_note.transition.unwrap_or(configured);
+                let length = duration
+                    .checked_abs()
+                    .ok_or_else(|| MmlError::new(0, "Slurの時間が範囲外です"))?
+                    .max(1);
+                let from = if duration < 0 {
+                    item.start
+                } else {
+                    item.start - length
+                };
+                let mut modifier = CcModifier::new(advance_spec::BEND_FULL);
+                modifier.kind = Kind::OnTime;
+                modifier.reserve = vec![previous, target, length];
+                let mut rng = std::mem::take(&mut self.rng);
+                ramp_events.extend(modifier.events(from, 0, self.cc_frequency, &mut rng));
+                self.rng = rng;
+            }
+        }
+        let bend_events = if cc_muted {
+            0
+        } else if mode == 1 {
+            notes.len()
+        } else {
+            1usize.saturating_add(ramp_events.len())
+        };
+        let rpn_events = usize::from(!cc_muted && needs_range_change).saturating_mul(3);
+        let required = 2usize
+            .saturating_add(bend_events)
+            .saturating_add(rpn_events);
+        self.buffered_slur_events = self.buffered_slur_events.saturating_sub(reserved);
+        self.ensure_event_capacity(required, 0)?;
+        if needs_range_change {
+            self.bend_ranges[range_index] = range;
+            let at = notes[0].start.saturating_sub(2);
+            if !cc_muted {
+                self.push_event(Event::control_change(at, channel, 101, 0))?;
+                self.push_event(Event::control_change(at, channel, 100, 0))?;
+                self.push_event(Event::control_change(at, channel, 6, range as u8))?;
+            }
+        }
+        self.push_event(Event::note_on(
+            notes[0].start,
+            channel,
+            final_note.note,
+            final_note.velocity,
+        ))?;
+        self.push_event(Event::note_off(
+            final_note.off.saturating_add(1),
+            channel,
+            final_note.note,
+            final_note.velocity,
+        ))?;
+        self.push_slur_bend(
+            notes[0].start.saturating_sub(1),
+            bend_value(notes[0].note),
+            channel,
+        )?;
+        if mode == 1 {
+            for item in notes.iter().skip(1) {
+                let target = bend_value(item.note);
+                self.push_slur_bend(item.start, target, channel)?;
+            }
+        } else {
+            for (time, value) in ramp_events {
+                self.push_slur_bend(time, value, channel)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn push_slur_bend(&mut self, time: i64, value: i64, channel: u8) -> Result<()> {
+        if self.track().cc_muted {
+            return Ok(());
+        }
+        let raw = (value + 8192).clamp(0, 16383);
+        self.push_event(Event::new(
+            time,
+            vec![
+                0xe0 | (channel & 0x0f),
+                (raw & 0x7f) as u8,
+                ((raw >> 7) & 0x7f) as u8,
+            ],
+        ))
     }
 
     fn scale_stretch(&self, value: i64, line: usize) -> Result<i64> {
@@ -4674,21 +5142,127 @@ enum OnNoteTarget {
     PitchBend,
 }
 
-/// A list of values handed out one per note, cycling when it runs out.
-#[derive(Debug, Clone)]
-struct OnNote {
-    values: Vec<i64>,
-    next: usize,
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+enum NoteModifierKind {
+    #[default]
+    Normal,
+    Holding,
+    OnNote,
+    OnTime,
+    OnCycle,
 }
 
-impl OnNote {
-    fn take(&mut self) -> Option<i64> {
-        if self.values.is_empty() {
-            return None;
+#[derive(Debug, Clone)]
+struct NoteModifier {
+    kind: NoteModifierKind,
+    in_steps: bool,
+    values: Vec<i64>,
+    next: usize,
+    origin: i64,
+    delay: i64,
+    repeat: bool,
+    random: i64,
+    range: Option<(i64, i64)>,
+    last: i64,
+}
+
+impl Default for NoteModifier {
+    fn default() -> Self {
+        Self {
+            kind: NoteModifierKind::Normal,
+            in_steps: false,
+            values: Vec::new(),
+            next: 0,
+            origin: 0,
+            delay: 0,
+            repeat: true,
+            random: 0,
+            range: None,
+            last: 0,
         }
-        let value = self.values[self.next % self.values.len()];
-        self.next += 1;
-        Some(value)
+    }
+}
+
+impl NoteModifier {
+    fn value(&mut self, time: i64, base: i64, rng: &mut Rng) -> i64 {
+        let start = self.origin.saturating_add(self.delay);
+        let mut value = match self.kind {
+            NoteModifierKind::Normal => base,
+            NoteModifierKind::Holding => self.last,
+            NoteModifierKind::OnNote => {
+                if self.values.is_empty() {
+                    base
+                } else if self.next >= self.values.len() && !self.repeat {
+                    self.kind = NoteModifierKind::Holding;
+                    self.last
+                } else {
+                    let value = self.values[self.next % self.values.len()];
+                    self.next += 1;
+                    self.last = value;
+                    value
+                }
+            }
+            NoteModifierKind::OnTime => self.on_time(time, start, base),
+            NoteModifierKind::OnCycle => {
+                if time < start || self.values.is_empty() {
+                    base
+                } else if self.values.len() == 1 {
+                    self.values[0]
+                } else {
+                    let len = self.values[0];
+                    let step = if len == 0 { 0 } else { (time - start) / len };
+                    self.values[1 + step.rem_euclid((self.values.len() - 1) as i64) as usize]
+                }
+            }
+        };
+        if self.random > 0 {
+            value = value - self.random / 2 + rng.range(0, self.random - 1);
+        }
+        if let Some((low, high)) = self.range {
+            value = value.max(low).min(high);
+        }
+        value
+    }
+
+    fn on_time(&mut self, time: i64, start: i64, base: i64) -> i64 {
+        if time < start || self.values.is_empty() {
+            return base;
+        }
+        let total: i64 = self.values.chunks(3).map(|part| part[2]).sum();
+        if total <= 0 {
+            return self.values.last().copied().unwrap_or(base);
+        }
+        let elapsed = time - start;
+        if !self.repeat && elapsed > total {
+            self.last = self.values[self.values.len() - 2];
+            return self.last;
+        }
+        let position = if self.repeat {
+            let wrapped = elapsed.rem_euclid(total);
+            if elapsed > 0 && wrapped == 0 {
+                total
+            } else {
+                wrapped
+            }
+        } else {
+            elapsed
+        };
+        let mut segment_start = 0;
+        for part in self.values.chunks(3) {
+            let (low, high, len) = (part[0], part[1], part[2]);
+            let segment_end = segment_start + len;
+            if position <= segment_end {
+                if len == 0 {
+                    return low;
+                }
+                return low
+                    + ((position - segment_start) as f64 * (high - low) as f64 / len as f64)
+                        as i64;
+            }
+            self.last = high;
+            segment_start = segment_end;
+        }
+        self.last
     }
 }
 
@@ -4970,5 +5544,73 @@ mod tests {
 
         let error = split_array_initializer("0,(1+2),,{a,b},4", 1, 3).unwrap_err();
         assert!(error.message.contains("上限(3)"));
+    }
+
+    #[test]
+    fn slur_reservation_respects_the_event_budget() {
+        let mut compiler = Compiler::new();
+        compiler.event_count = MAX_EVENTS - 1;
+        let error = compiler.reserve_slur_note(7).unwrap_err();
+        assert_eq!(error.line, 7);
+        assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
+        assert_eq!(compiler.buffered_slur_events, 0);
+        assert!(compiler.stop_requested);
+    }
+
+    #[test]
+    fn closing_slur_checks_its_complete_event_cost_atomically() {
+        let mut compiler = Compiler::new();
+        compiler.event_count = MAX_EVENTS - 2;
+        compiler.buffered_slur_events = 2;
+        compiler.track().slur_notes.push(SlurNote {
+            start: 0,
+            off: 75,
+            note: 60,
+            velocity: 100,
+            transition: None,
+        });
+        let error = compiler
+            .handle_slur_note(
+                SlurNote {
+                    start: 96,
+                    off: 171,
+                    note: 84,
+                    velocity: 100,
+                    transition: None,
+                },
+                false,
+                0,
+            )
+            .unwrap_err();
+        assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
+        assert!(compiler.track().events.is_empty());
+        assert_eq!(compiler.buffered_slur_events, 0);
+    }
+
+    #[test]
+    fn wide_slur_releases_only_its_own_reservation() {
+        let mut compiler = Compiler::new();
+        compiler.buffered_slur_events = 4;
+        compiler.track().slur_notes.push(SlurNote {
+            start: 0,
+            off: 75,
+            note: 60,
+            velocity: 100,
+            transition: None,
+        });
+        compiler
+            .handle_slur_note(
+                SlurNote {
+                    start: 96,
+                    off: 171,
+                    note: 84,
+                    velocity: 100,
+                    transition: None,
+                },
+                false,
+                0,
+            )
+            .unwrap();
+        assert_eq!(compiler.buffered_slur_events, 2);
     }
 }

@@ -1148,18 +1148,12 @@ fn the_comma_form_sets_options_and_the_bracket_form_only_a_length() {
     assert_same_bytes("v.onNote(120,50) c4,80,64", "q80 v64 c");
 }
 
-/// A ramp belongs on a control change; on a note attribute it warns rather
-/// than failing, so the song still compiles.
+/// Wave modifiers belong to controllers; Pascal rejects them on note
+/// attributes instead of silently dropping their musical effect.
 #[test]
-fn unported_modifiers_warn_instead_of_failing() {
-    let out = compile("v.onNoteWave(0,127,48) cd").unwrap();
-    assert!(
-        out.warnings
-            .iter()
-            .any(|w| w.message.contains("onNoteWave")),
-        "expected a warning, got {:?}",
-        out.warnings
-    );
+fn controller_only_modifiers_are_rejected_on_note_attributes() {
+    let error = compile("v.onNoteWave(0,127,48) cd").unwrap_err();
+    assert!(error.message.contains("onNoteWave"), "{error:?}");
     // On a control change the same modifier is implemented: it writes, and
     // says nothing about being unported. (The stdmsg.h hint is expected here,
     // since this compile has no include resolver.)
@@ -1170,6 +1164,125 @@ fn unported_modifiers_warn_instead_of_failing() {
         out.warnings
     );
     assert!(out.smf.windows(2).any(|w| w == [0xb0, 0x0a]));
+}
+
+#[test]
+fn note_attribute_on_time_matches_pascal() {
+    assert_golden(
+        "v.onTime(40,100,!1) c1",
+        "4d546864000000060001000100604d54726b0000000d00903c288232803c284eff2f00",
+    );
+    assert_golden(
+        "v.T(40,100,!1) l2 cc",
+        "4d546864000000060001000100604d54726b0000001600903c288118803c2828903c468118803c4628ff2f00",
+    );
+    assert_golden(
+        "l.onTime(!4,!8,!4) cc",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c6415903c6425803c640bff2f00",
+    );
+    assert_golden(
+        "o.onTime(5,6,!4) l4 cc",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c64159048644b80486415ff2f00",
+    );
+}
+
+#[test]
+fn note_attribute_cycle_delay_repeat_and_range_match_pascal() {
+    assert_golden(
+        "q.onCycle(!4,20,80) l4 cc",
+        "4d546864000000060001000100604d54726b0000001400903c6412803c644e903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "v.Delay(!4) v.onTime(40,100,!1) l4 cc",
+        "4d546864000000060001000100604d54726b0000001400903c644b803c6415903c284b803c2815ff2f00",
+    );
+    assert_golden("v.Repeat(0) v.onTime(40,100,!4) l4 ccc", "4d546864000000060001000100604d54726b0000001c00903c284b803c2815903c644b803c6415903c644b803c6415ff2f00");
+    assert_golden("v.Range(50,80) v.onTime(0,127,!1) l4 ccccc", "4d546864000000060001000100604d54726b0000002c00903c324b803c3215903c324b803c3215903c3f4b803c3f15903c504b803c5015903c504b803c5015ff2f00");
+}
+
+#[test]
+fn slur_gate_and_arpeggio_match_pascal() {
+    assert_golden(
+        "l4 Slur(2,100) q50 c&d",
+        "4d546864000000060001000100604d54726b0000001400903c645f803c6401903e6430803e6430ff2f00",
+    );
+    assert_golden("l16 Slur(3,100) c&e&g", "4d546864000000060001000100604d54726b0000001c00903c64189040641890436413803c64008040640080436405ff2f00");
+    assert_golden(
+        "l4 Slur(2,100) q50 c&c",
+        "4d546864000000060001000100604d54726b0000000c00903c645f803c6461ff2f00",
+    );
+}
+
+#[test]
+fn slur_bend_and_glissando_match_pascal() {
+    assert_golden("l8 Slur(1,0) c&d&c", "4d546864000000060001000100604d54726b0000001800e0004000903c6430e07f7f30e0004026803c640aff2f00");
+    assert_golden("l4 Slur(0,!8) c&e&g", "4d546864000000060001000100604d54726b000000d400b0650000b0640000b0060c00e0561a009043642fe0561a02e0471b02e0391c02e02b1d02e01d1e02e00e1f02e0002002e0722002e0642102e0552202e0472302e0392402e02b2502e01c2602e00e2702e0002802e0722802e0632902e0552a02e0472b02e0392c02e02a2d03e0003033e0003002e0553002e02a3102e0003202e0553202e02a3302e0003402e0553402e02a3502e0003602e0553602e02a3702e0003802e0553802e02a3902e0003a02e0553a02e02a3b02e0003c02e0553c02e02a3d02e0003e03e000405080436414ff2f00");
+    assert_golden("l4 Slur(0,-20) c&e", "4d546864000000060001000100604d54726b0000004000b0650000b0640000b0060c00e0562a009040645fe0562a02e0672c02e0782e02e0093102e01a3302e02b3502e03c3702e04d3903e000403c80406414ff2f00");
+}
+
+#[test]
+fn note_modifiers_and_slur_reject_invalid_arguments() {
+    for (mml, expected) in [
+        ("v.onTime(0,127) c", "3個単位"),
+        ("v.onCycle() c", "引数"),
+        ("v.Range(0) c", "low,high"),
+        ("Slur(4,10) c&d", "0〜3"),
+        ("Slur(0,10,13) c&d", "1〜12"),
+        ("Slur(0,(-9223372036854775807-1)) c&d", "valueが範囲外"),
+        ("Slur(3,-4611686018427387904) c&&d", "時間が範囲外"),
+        ("Slur(2,100) c&", "音符"),
+    ] {
+        let error = compile(mml).unwrap_err();
+        assert!(error.message.contains(expected), "{mml}: {error:?}");
+    }
+}
+
+#[test]
+fn slur_notes_survive_intervening_event_deletion() {
+    let out = compile("P.onTime(0,127,!1) c& DeleteCC(10) d").unwrap();
+    let note_ons: Vec<u8> = out
+        .smf
+        .windows(3)
+        .filter(|event| event[0] == 0x90 && event[2] != 0)
+        .map(|event| event[1])
+        .collect();
+    assert_eq!(note_ons, vec![62]);
+}
+
+#[test]
+fn slur_respects_cc_mute_and_wide_fallback() {
+    assert_golden(
+        "CCMute(on) Slur(1,0) c&d",
+        "4d546864000000060001000100604d54726b0000000d00903e64812c803e6414ff2f00",
+    );
+    assert_golden(
+        "Slur(1,0)c&o7c",
+        "4d546864000000060001000100604d54726b0000001400903c645f803c64019054644c80546414ff2f00",
+    );
+}
+
+#[test]
+fn nonrepeating_note_list_holds_its_final_value() {
+    assert_golden(
+        "v.Repeat(0) v.onNote(40,50) cccc",
+        "4d546864000000060001000100604d54726b0000002400903c284b803c2815903c324b803c3215903c324b803c3215903c324b803c3215ff2f00",
+    );
+}
+
+#[test]
+fn gate_modifier_preserves_its_step_mode() {
+    assert_golden(
+        "l4 q%.onNote(50)c",
+        "4d546864000000060001000100604d54726b0000000c00903c6431803c642fff2f00",
+    );
+    assert_golden(
+        "l4 q%.onNote(50) q.Delay(0) c",
+        "4d546864000000060001000100604d54726b0000000c00903c642f803c6431ff2f00",
+    );
+    assert_golden(
+        "l4 q.onNote(50) q%.Delay(0) c",
+        "4d546864000000060001000100604d54726b0000000c00903c6431803c642fff2f00",
+    );
 }
 
 // --- Div (tuplets) and string macros ---
