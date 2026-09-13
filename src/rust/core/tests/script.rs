@@ -416,6 +416,8 @@ fn scripts_work_with_sutoton_notation() {
 fn builtin_variables() {
     assert_same("SoundType=0; c", "c");
     assert_same("If(SoundType==0){c}Else{d}", "c");
+    assert_same("SoundType=1; If(SoundType==1){c}Else{d}", "c");
+    assert_same("SoundType=2; If(SoundType==2){c}Else{d}", "c");
     assert!(compile("undeclared=5; c").is_err());
 }
 
@@ -688,6 +690,68 @@ fn mml_reports_the_current_setting() {
     // A length comes back in ticks, so l8 is 48 at the default timebase.
     assert_same("l8 Int x=MML(l); n((x+12))", "l8 n60");
     assert_same("y11,42 Int x=MML(y11); n((x+18))", "y11,42 n60");
+}
+
+/// Defaults and state changes match values measured from Pascal v2.385.
+#[test]
+fn mml_reports_legacy_track_state() {
+    let out = compile(
+        "Print(MML(@)) Print(MML(BR)) Print(MML(p%)) Print(MML(p)) Print(MML(Key)) \
+         Print(MML(TimeKey)) Print(MML(TimeKey2)) Print(MML(Port)) Print(MML(y11))",
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        ["0", "2", "-1", "-1", "0", "0", "0", "0", "0"]
+    );
+
+    let out = compile(
+        "@5 RPN(0,0,12) p%=123 Key=4 TimeKey(,,3) TimeKey2(,,2) Port(7) y11,42 \
+         Print(MML(@)) Print(MML(BR)) Print(MML(p%)) Print(MML(p)) Print(MML(Key)) \
+         Print(MML(TimeKey)) Print(MML(TimeKey2)) Print(MML(Port)) Print(MML(y11))",
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        ["5", "12", "123", "64", "4", "3", "2", "7", "42"]
+    );
+}
+
+#[test]
+fn time_key_queries_follow_the_current_track_time() {
+    let out = compile(
+        "TimeKey((1:2:0),(1:3:0),3) Print(MML(TimeKey)) \
+         Time(1:2:0) Print(MML(TimeKey)) c Time(1:3:0) Print(MML(TimeKey)) c",
+    )
+    .unwrap();
+    assert_eq!(out.messages, ["0", "3", "0"]);
+    assert_eq!(
+        out.smf,
+        compile("Time(1:2:0) n63 Time(1:3:0) n60").unwrap().smf
+    );
+}
+
+#[test]
+fn print_time_and_track_return_pascal_style_messages() {
+    let out = compile("Track=1 c4 Track=2 l8 d PrintTime(1) PrintTime PrintTrack(1)").unwrap();
+    assert_eq!(
+        out.messages,
+        [
+            "Track(1);Time(1:2:0);//=96(PrintTime)",
+            "Track(2);Time(1:1:48);//=48(PrintTime)",
+            "Track(1) Channel(1) Voice(0) Time(1:2:0) Time=96",
+            "l%96(n分音符モード) q80(％指定モード) v100 t0 o5 ",
+            "Slur(0,12) BR(2) PitchBend(-1)",
+            "イベント数=1 TrackMute(off) ",
+        ]
+    );
+}
+
+#[test]
+fn track_information_rejects_invalid_tracks_without_panicking() {
+    assert_error_contains("PrintTime(-1)", "トラック番号が不正");
+    assert_error_contains("PrintTrack(99)", "トラック番号が不正");
+    assert_error_contains("Port(-1)", "0〜255");
 }
 
 #[test]

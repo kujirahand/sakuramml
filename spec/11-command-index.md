@@ -35,6 +35,8 @@
 | `TimeBase` | `TimeBase=n` | 実装済み | [03](03-tracks-and-time.md) |
 | `TimeSignature` | `TimeSignature=n,d` | 実装済み | [03](03-tracks-and-time.md) |
 | `Time` | コマンドまたは式 `Time(tick)` / `Time(m:b:s)` | 実装済み | [03](03-tracks-and-time.md) |
+| `PrintTime` | `PrintTime([track])` | 実装済み | [06](06-scripting.md) |
+| `PrintTrack` | `PrintTrack([track])` | 実装済み | [06](06-scripting.md) |
 | `Tempo` | `Tempo=bpm` | 実装済み | [09](09-smf.md) |
 | `TempoChange` | `TempoChange=bpm` | 一部 | [10](10-compatibility.md) |
 
@@ -47,6 +49,7 @@
 | 名前付き CC | `P(value)`, `EP(value)` など | 実装済み | [04](04-midi-control.md) |
 | `p` | `p(value)` / `p%(value)` | 実装済み | [04](04-midi-control.md) |
 | `PitchBend` | `PitchBend(value)` | 実装済み | [04](04-midi-control.md) |
+| `BR` | `BR(value)` | 実装済み | [04](04-midi-control.md) |
 | `RPN` / `NRPN` | `RPN(msb,lsb,data)` | 実装済み | [04](04-midi-control.md) |
 | `DeleteCC` | `DeleteCC(no)` | 実装済み | [04](04-midi-control.md) |
 | `CCMute` | `CCMute(on/off)` | 実装済み | [04](04-midi-control.md) |
@@ -65,9 +68,14 @@
 | `Marker` | `Marker={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
 | `CuePoint` | `CuePoint={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
 | `InstrumentName` | `InstrumentName={"text"}` | 実装済み | [05](05-meta-and-encoding.md) |
+| `Port` | `Port(n)` | 実装済み | [05](05-meta-and-encoding.md) |
 | `Key` / `KeyShift` | `Key=n` | 実装済み | [02](02-notes.md) |
+| `TimeKey` / `TimeKey2` | `TimeKey((from),(to),value)` | 実装済み | [02](02-notes.md) |
 | `KeyFlag` | `KeyFlag+(notes)` / `=(...)` | 実装済み | [02](02-notes.md) |
 | `Include` | `Include(file)` | 実装済み | [07](07-macros-and-includes.md) |
+
+`MML(l|v|o|q|t|@|BR|p%|Key|TimeKey|TimeKey2|Port)`、`MML(yN)`、`SoundType`も
+実装済みです。詳細は[06](06-scripting.md)を参照してください。
 
 ## System・構文設定
 

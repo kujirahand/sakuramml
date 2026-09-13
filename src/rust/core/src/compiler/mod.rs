@@ -57,6 +57,8 @@ pub struct CompileResult {
 #[derive(Debug, Clone)]
 struct TrackState {
     channel: u8,
+    /// MIDI port selected by `Port`.
+    port: i64,
     time: i64,
     octave: i64,
     length: i64,
@@ -77,6 +79,9 @@ struct TrackState {
     gate_in_steps: bool,
     /// The voice last selected with `@`, for `MML(@)`.
     voice: i64,
+    /// Last full/easy pitch-bend values, for `MML(p%)` and `MML(p)`.
+    pitch_bend_full: i64,
+    pitch_bend_easy: i64,
     /// Values queued by `.onNote`, cycled one per note.
     on_note: Vec<(OnNoteTarget, OnNote)>,
     /// Advance specifications attached to control changes and bends.
@@ -116,6 +121,7 @@ impl TrackState {
     fn new(track_no: i64, timebase: i64, step_mode: bool) -> Self {
         Self {
             channel: default_channel(track_no),
+            port: 0,
             time: 0,
             octave: 5,
             length: timebase, // l4 at the default timebase
@@ -129,7 +135,10 @@ impl TrackState {
             last_note: None,
             octave_once: 0,
             gate_in_steps: false,
-            voice: 1,
+            // Pascal reports zero until the first program change.
+            voice: 0,
+            pitch_bend_full: -1,
+            pitch_bend_easy: -1,
             on_note: Vec::new(),
             cc_modifiers: Vec::new(),
             random: Vec::new(),
@@ -140,6 +149,13 @@ impl TrackState {
             used: false,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct TimeKeyRule {
+    from: i64,
+    to: Option<i64>,
+    key: i64,
 }
 
 /// Track number `n` defaults to MIDI channel `n - 1`.
@@ -167,6 +183,11 @@ pub struct Compiler<'a> {
     step_mode: bool,
     voice_no_shift: i64,
     octave_range_shift: i64,
+    /// Time-scoped transpositions. Later matching declarations win.
+    time_keys: Vec<TimeKeyRule>,
+    time_keys2: Vec<TimeKeyRule>,
+    /// Bend range per MIDI channel; GM defaults to two semitones.
+    bend_ranges: [i64; 16],
     /// Value of `q` that means 100% gate (`System.qMax`).
     q_max: i64,
     /// Value of `v` that means full velocity (`System.vMax`).
@@ -238,6 +259,9 @@ impl<'a> Compiler<'a> {
             step_mode: false,
             voice_no_shift: 0,
             octave_range_shift: 0,
+            time_keys: Vec::new(),
+            time_keys2: Vec::new(),
+            bend_ranges: [2; 16],
             q_max: 100,
             v_max: 127,
             q_add: 10,
@@ -874,6 +898,8 @@ impl<'a> Compiler<'a> {
                 self.track().muted = value != 0;
                 Ok(())
             }
+            "PrintTime" => self.print_time(cur, line),
+            "PrintTrack" => self.print_track(cur, line),
             "Solo" | "Mute" => {
                 let tracks = self.read_args(cur, usize::MAX)?;
                 if tracks.is_empty() {
@@ -946,6 +972,9 @@ impl<'a> Compiler<'a> {
                 self.key_shift = self.expect_int_arg(cur, &word)?;
                 Ok(())
             }
+            "TimeKey" => self.time_key(cur, false, line),
+            "TimeKey2" => self.time_key(cur, true, line),
+            "Port" | "PORT" => self.port(cur, line),
             "Time" | "TIME" => self.time_command(cur),
             "TrackSync" => {
                 // Align every track to the latest time pointer.
@@ -983,6 +1012,15 @@ impl<'a> Compiler<'a> {
             "SysEx" | "SYSEX" => self.sysex(cur),
             "DirectSMF" => self.direct_smf(cur),
             "Voice" => self.voice(cur),
+            "BR" => {
+                let value = self.expect_int_arg(cur, "BR")?;
+                let channel = self.track().channel as usize;
+                self.bend_ranges[channel] = value;
+                self.write_cc(101, 0);
+                self.write_cc(100, 0);
+                self.write_cc(6, value);
+                Ok(())
+            }
             "PitchBend" => {
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
                     return Ok(handled);
@@ -999,6 +1037,10 @@ impl<'a> Compiler<'a> {
                     ));
                 }
                 let (msb_cc, lsb_cc) = if is_rpn { (101, 100) } else { (99, 98) };
+                if is_rpn && args[0] == 0 && args[1] == 0 {
+                    let channel = self.track().channel as usize;
+                    self.bend_ranges[channel] = args[2];
+                }
                 self.write_cc(msb_cc, args[0]);
                 self.write_cc(lsb_cc, args[1]);
                 self.write_cc(6, args[2]);
@@ -1407,14 +1449,26 @@ impl<'a> Compiler<'a> {
     /// What a command is currently set to, for `MML(...)`.
     fn command_value(&mut self, name: &str, line: usize) -> Result<i64> {
         let name = name.trim();
+        if name == "p%" {
+            return Ok(self.track().pitch_bend_full);
+        }
+        if name == "p" {
+            return Ok(self.track().pitch_bend_easy);
+        }
         let controller = name
             .strip_prefix('y')
             .and_then(|digits| digits.parse::<i64>().ok())
             .or_else(|| control_change_number(name));
         if let Some(controller) = controller {
-            return Ok(self.cc_modifier_entry(controller).last_value);
+            let value = self.cc_modifier_entry(controller).last_value;
+            return Ok(if value == i64::MIN { 0 } else { value });
         }
         let key_shift = self.key_shift;
+        let time = self.track().time;
+        let time_key = self.active_time_key(false, time);
+        let time_key2 = self.active_time_key(true, time);
+        let channel = self.track().channel as usize;
+        let bend_range = self.bend_ranges[channel];
         let track = self.track();
         Ok(match name {
             "l" => track.length,
@@ -1423,9 +1477,27 @@ impl<'a> Compiler<'a> {
             "q" => track.gate_percent,
             "t" => track.timing,
             "@" => track.voice,
-            "Key" | "TimeKey" => key_shift,
+            "Key" => key_shift,
+            "TimeKey" => time_key,
+            "TimeKey2" => time_key2,
+            "BR" => bend_range,
+            "Port" => track.port,
             other => return Err(MmlError::new(line, format!("MML({other})は取得できません"))),
         })
+    }
+
+    fn active_time_key(&self, second: bool, time: i64) -> i64 {
+        let rules = if second {
+            &self.time_keys2
+        } else {
+            &self.time_keys
+        };
+        rules
+            .iter()
+            .rev()
+            .find(|rule| rule.from <= time && rule.to.is_none_or(|to| time < to))
+            .map(|rule| rule.key)
+            .unwrap_or(0)
     }
 
     /// Run a function body with its parameters bound.
@@ -1667,6 +1739,8 @@ impl<'a> Compiler<'a> {
             let value = advance_spec::clamp_for(no, value);
             let event = match no {
                 advance_spec::BEND_FULL | advance_spec::BEND_EASY => {
+                    self.track().pitch_bend_full = value;
+                    self.track().pitch_bend_easy = (value + 8192) / 128;
                     let raw = (value + 8192).clamp(0, 16383);
                     Event::new(
                         time,
@@ -2473,6 +2547,147 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
+    /// `TimeKey((from),(to),key)` / `TimeKey2(...)` record a time-scoped
+    /// transposition. Empty bounds mean the current cursor and no end.
+    fn time_key(&mut self, cur: &mut Cursor, second: bool, line: usize) -> Result<()> {
+        cur.skip_spaces();
+        if !cur.eat('(') {
+            return Err(MmlError::new(
+                line,
+                "TimeKeyには(開始,終了,値)を指定してください",
+            ));
+        }
+        let body = cur
+            .read_balanced('(', ')')
+            .ok_or_else(|| MmlError::new(line, "TimeKeyの括弧が閉じていません"))?;
+        let args = split_function_args(&body);
+        if args.len() < 3 || args[2].trim().is_empty() {
+            return Err(MmlError::new(
+                line,
+                "TimeKeyには(開始,終了,値)を指定してください",
+            ));
+        }
+        let now = self.track().time;
+        let parse_time = |compiler: &mut Self, text: &str| -> Result<i64> {
+            let text = text.trim();
+            if text.is_empty() {
+                return Ok(now);
+            }
+            let text = text
+                .strip_prefix('(')
+                .and_then(|s| s.strip_suffix(')'))
+                .unwrap_or(text);
+            compiler.time_value(text, line)
+        };
+        let from = parse_time(self, args[0])?;
+        let to = if args[1].trim().is_empty() {
+            None
+        } else {
+            Some(parse_time(self, args[1])?)
+        };
+        if to.is_some_and(|to| to <= from) {
+            return Err(MmlError::new(
+                line,
+                "TimeKeyの終了位置は開始位置より後にしてください",
+            ));
+        }
+        let key = self.eval_source(args[2].trim(), line)?.as_int(line)?;
+        let rule = TimeKeyRule { from, to, key };
+        if second {
+            self.time_keys2.push(rule);
+        } else {
+            self.time_keys.push(rule);
+        }
+        Ok(())
+    }
+
+    /// `Port(n)` stores the current port and emits the SMF port meta event.
+    fn port(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let value = self.expect_int_arg(cur, "Port")?;
+        if !(0..=255).contains(&value) {
+            return Err(MmlError::new(
+                line,
+                format!("Portは0〜255の範囲で指定してください: {value}"),
+            ));
+        }
+        let time = self.track().time;
+        self.track().port = value;
+        self.push_event(Event::meta(time, event::META_PORT, &[value as u8]))
+    }
+
+    fn requested_track(&mut self, cur: &mut Cursor, command: &str, line: usize) -> Result<i64> {
+        let args = self.read_args(cur, 1)?;
+        let no = args.first().copied().unwrap_or(self.current);
+        if no < 0 || !self.tracks.contains_key(&no) {
+            return Err(MmlError::new(
+                line,
+                format!("{command}のトラック番号が不正です: {no}"),
+            ));
+        }
+        Ok(no)
+    }
+
+    fn time_parts(&self, time: i64) -> (i64, i64, i64) {
+        let (numerator, denominator) = self.time_signature;
+        let beat_ticks = self.timebase * 4 / denominator.max(1);
+        let bar_ticks = numerator.max(1) * beat_ticks;
+        let measure = time / bar_ticks + 1;
+        let rest = time % bar_ticks;
+        (measure, rest / beat_ticks + 1, rest % beat_ticks)
+    }
+
+    fn print_time(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let no = self.requested_track(cur, "PrintTime", line)?;
+        let track = &self.tracks[&no];
+        let (measure, beat, tick) = self.time_parts(track.time);
+        self.messages.push(format!(
+            "Track({no});Time({measure}:{beat}:{tick});//={}(PrintTime)",
+            track.time
+        ));
+        Ok(())
+    }
+
+    fn print_track(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let no = self.requested_track(cur, "PrintTrack", line)?;
+        let track = &self.tracks[&no];
+        let (measure, beat, tick) = self.time_parts(track.time);
+        let length_mode = if track.length_in_steps {
+            "ステップモード"
+        } else {
+            "n分音符モード"
+        };
+        let gate = if track.gate_in_steps {
+            format!("q%{}(ステップモード)", track.gate_percent)
+        } else {
+            format!("q{}(％指定モード)", track.gate_percent)
+        };
+        let bend = track.pitch_bend_full;
+        let event_count = track
+            .events
+            .iter()
+            .filter(|event| !matches!(event.data.first(), Some(status) if status & 0xf0 == 0x80))
+            .count();
+        let mute = if track.muted { "on" } else { "off" };
+        self.messages.extend([
+            format!(
+                "Track({no}) Channel({}) Voice({}) Time({measure}:{beat}:{tick}) Time={}",
+                track.channel + 1,
+                track.voice,
+                track.time
+            ),
+            format!(
+                "l%{}({length_mode}) {gate} v{} t{} o{} ",
+                track.length, track.velocity, track.timing, track.octave
+            ),
+            format!(
+                "Slur(0,12) BR({}) PitchBend({bend})",
+                self.bend_ranges[track.channel as usize]
+            ),
+            format!("イベント数={event_count} TrackMute({mute}) "),
+        ]);
+        Ok(())
+    }
+
     /// Convert `totalTicks` or `measure:beat:step` into an absolute time.
     /// Used by both the Time command and the readable `Time(...)` function.
     fn time_value(&mut self, body: &str, line: usize) -> Result<i64> {
@@ -3072,6 +3287,9 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             (track.time - controller_shift, track.channel, track.cc_muted)
         };
+        let raw = ((msb as i64) << 7) | lsb as i64;
+        self.track().pitch_bend_full = raw - 8192;
+        self.track().pitch_bend_easy = msb as i64;
         if muted {
             return;
         }
@@ -3271,7 +3489,13 @@ impl<'a> Compiler<'a> {
             let track = self.track();
             options.octave.unwrap_or(track.octave) + std::mem::take(&mut track.octave_once)
         };
-        let note_no = (octave + self.octave_range_shift) * 12 + base + accidental + self.key_shift;
+        let time = self.track().time;
+        let timed_key = self.active_time_key(false, time) + self.active_time_key(true, time);
+        let note_no = (octave + self.octave_range_shift) * 12
+            + base
+            + accidental
+            + self.key_shift
+            + timed_key;
         self.write_note(note_no, length, options, line)
     }
 

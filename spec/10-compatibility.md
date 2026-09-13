@@ -35,11 +35,14 @@
 | `PlayFrom`, `PlayTo` | 実装済み（一部簡略化） | 下記参照 |
 | `DirectSMF` | 実装済み | 生バイト列をイベントとして書く |
 | `NoteOn`, `NoteOff` | 未実装 | 低水準イベント命令 |
-| `TimeKey`, `TimeKeyFlag`, `TimeKey2` | 未実装 | 時間範囲つき移調・調号 |
+| `TimeKey`, `TimeKey2` | 実装済み | 時間範囲つき移調と現在位置の`MML(...)`参照 |
+| `TimeKeyFlag` | 未実装 | 時間範囲つき調号 |
 | `Stretch` | 実装済み | 二重実行、tick切り捨て、明示休符の従来挙動を含む |
 | `Solo`, `Mute`, `TrackMute` | 実装済み | トラック選択・発音抑制 |
 | `DeleteCC`, `CCMute`, `CCNoMute` | 実装済み | イベント削除・抑制 |
-| `MML(...)` | 一部 | 基本状態とコントロールチェンジの現在値は実装済み。その他の状態参照は未実装 |
+| `MML(...)` | 実装済み | 文書化された基本状態、BR、ベンド、キー、Port、CCの現在値を参照可能 |
+| `PrintTime`, `PrintTrack` | 実装済み | 表示内容は標準出力せず`CompileOutput.messages`へ格納 |
+| `SoundType` | 実装済み | 初期値GM(0)。代入・参照してGM/GS/XGを分岐可能 |
 | `NoteNo(...)` | 実装済み | 音名からMIDIノート番号への変換 |
 | 文字列・配列組み込み関数 | 実装済み | `MID`, `POS/X`, `Replace`, `VarType`, `ArraySort*`, `StrToNum`, `HEX`, `SizeOf` |
 | `.Max` | 実装済み | `q.Max` / `v.Max` |
