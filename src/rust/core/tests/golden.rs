@@ -1221,6 +1221,14 @@ fn nonrepeating_note_list_holds_its_final_value() {
     );
 }
 
+#[test]
+fn gate_modifier_preserves_its_step_mode() {
+    assert_golden(
+        "l4 q%.onNote(50)c",
+        "4d546864000000060001000100604d54726b0000000c00903c6431803c642fff2f00",
+    );
+}
+
 // --- Div (tuplets) and string macros ---
 
 /// `Div{cde}4` fits three notes into one quarter note.

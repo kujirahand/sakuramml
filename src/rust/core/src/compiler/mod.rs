@@ -246,6 +246,8 @@ pub struct Compiler<'a> {
     rng: Rng,
     /// Events written so far, against [`MAX_EVENTS`].
     event_count: usize,
+    /// Event slots reserved by notes buffered in unfinished Slur chains.
+    buffered_slur_events: usize,
     play_from: PlayFromSpec,
     /// Current `Stretch` multiplier. Pascal uses an Extended value and
     /// truncates every affected note/gate independently.
@@ -313,6 +315,7 @@ impl<'a> Compiler<'a> {
             exiting: false,
             rng: Rng::default(),
             event_count: 0,
+            buffered_slur_events: 0,
             play_from: PlayFromSpec::default(),
             stretch_rate: 1.0,
             solo_or_mute: 0,
@@ -385,7 +388,17 @@ impl<'a> Compiler<'a> {
             .values()
             .any(|track| !track.slur_notes.is_empty())
         {
-            return Err(MmlError::new(cur.line(), "&の後に音符がありません"));
+            let error = MmlError::new(cur.line(), "&の後に音符がありません");
+            if !self.recover_errors {
+                return Err(error);
+            }
+            if !self.errors.contains(&error) {
+                self.errors.push(error);
+            }
+            for track in self.tracks.values_mut() {
+                track.slur_notes.clear();
+            }
+            self.buffered_slur_events = 0;
         }
         self.apply_play_from();
 
@@ -564,8 +577,7 @@ impl<'a> Compiler<'a> {
     /// Global meta events such as tempo are always kept in MTrk 0 by the
     /// Pascal implementation, even when a musical track is selected.
     fn push_event_to_track(&mut self, track_no: i64, event: Event) -> Result<()> {
-        self.event_count += 1;
-        if self.event_count > MAX_EVENTS {
+        if self.event_count >= MAX_EVENTS.saturating_sub(self.buffered_slur_events) {
             self.stop_requested = true;
             let error = MmlError::new(0, format!("生成イベント数が上限({MAX_EVENTS})を超えました"));
             // Some legacy event helpers cannot propagate a Result. Preserve
@@ -575,6 +587,7 @@ impl<'a> Compiler<'a> {
             }
             return Err(error);
         }
+        self.event_count += 1;
         let timebase = self.timebase;
         let step_mode = self.step_mode;
         let track = self
@@ -588,7 +601,10 @@ impl<'a> Compiler<'a> {
 
     /// Refuse a bulk event operation before it starts allocating or looping.
     fn ensure_event_capacity(&mut self, additional: usize, line: usize) -> Result<()> {
-        if additional > MAX_EVENTS.saturating_sub(self.event_count) {
+        let available = MAX_EVENTS
+            .saturating_sub(self.event_count)
+            .saturating_sub(self.buffered_slur_events);
+        if additional > available {
             self.stop_requested = true;
             let error = MmlError::new(
                 line,
@@ -600,6 +616,19 @@ impl<'a> Compiler<'a> {
             return Err(error);
         }
         Ok(())
+    }
+
+    /// Reserve the two MIDI event slots an unfinished Slur note may emit.
+    fn reserve_slur_note(&mut self, line: usize) -> Result<()> {
+        self.ensure_event_capacity(2, line)?;
+        self.buffered_slur_events += 2;
+        Ok(())
+    }
+
+    fn clear_current_slur_notes(&mut self) {
+        let released = self.track().slur_notes.len().saturating_mul(2);
+        self.track().slur_notes.clear();
+        self.buffered_slur_events = self.buffered_slur_events.saturating_sub(released);
     }
 
     /// Add to a time value, refusing a result the SMF format cannot express.
@@ -793,7 +822,20 @@ impl<'a> Compiler<'a> {
                 if modifier_in_steps {
                     cur.advance();
                 }
+                let defines_values = if cur.peek() == Some('.') {
+                    let mut probe = cur.clone();
+                    probe.advance();
+                    matches!(
+                        probe.read_word().as_deref(),
+                        Some("onNote" | "N" | "onTime" | "T" | "onCycle" | "C")
+                    )
+                } else {
+                    false
+                };
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Gate)? {
+                    if defines_values {
+                        self.note_modifier_entry(OnNoteTarget::Gate).in_steps = modifier_in_steps;
+                    }
                     return Ok(handled);
                 }
                 // `q%n` gives the gate in ticks; a later plain `q` goes back
@@ -2046,6 +2088,16 @@ impl<'a> Compiler<'a> {
             .unwrap_or(base);
         self.rng = rng;
         value
+    }
+
+    fn note_modifier_step_mode(&mut self, target: OnNoteTarget) -> Option<bool> {
+        self.track()
+            .note_modifiers
+            .iter()
+            .find(|(existing, modifier)| {
+                *existing == target && modifier.kind != NoteModifierKind::Normal
+            })
+            .map(|(_, modifier)| modifier.in_steps)
     }
 
     /// `$c{mml}` — bind one character for use in rhythm mode.
@@ -4128,6 +4180,7 @@ impl<'a> Compiler<'a> {
         };
         let advanced_length = self.note_value(OnNoteTarget::Length, base_length, time);
         let advanced_velocity = self.note_value(OnNoteTarget::Velocity, base_velocity, time);
+        let gate_modifier_in_steps = self.note_modifier_step_mode(OnNoteTarget::Gate);
         let advanced_gate = self.note_value(OnNoteTarget::Gate, base_gate, time);
         let advanced_timing = self.note_value(OnNoteTarget::Timing, base_timing, time);
         let length = length.unwrap_or(advanced_length);
@@ -4135,7 +4188,11 @@ impl<'a> Compiler<'a> {
         let gate_value = options.gate_percent.unwrap_or(advanced_gate);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
-        let gate_in_steps = options.gate_in_steps || self.track().gate_in_steps;
+        let gate_in_steps = if options.gate_percent.is_some() {
+            options.gate_in_steps
+        } else {
+            gate_modifier_in_steps.unwrap_or(self.track().gate_in_steps)
+        };
         let (length, gate) = if self.stretch_rate != 1.0 {
             // Pascal scales the duration and the pre-NoteOff gate separately,
             // then applies the one-tick packed-note adjustment.
@@ -4230,9 +4287,12 @@ impl<'a> Compiler<'a> {
         self.write_cc_modifiers(time, length)?;
 
         if let Some(slur_note) = slur_note {
+            if slur.is_some() {
+                self.reserve_slur_note(line)?;
+            }
             self.handle_slur_note(slur_note, slur.is_some(), channel)?;
         } else if slur.is_none() {
-            self.track().slur_notes.clear();
+            self.clear_current_slur_notes();
         }
 
         let track = self.track();
@@ -4260,6 +4320,9 @@ impl<'a> Compiler<'a> {
             return Ok(());
         }
         let mut notes = std::mem::take(&mut self.track().slur_notes);
+        self.buffered_slur_events = self
+            .buffered_slur_events
+            .saturating_sub(notes.len().saturating_mul(2));
         notes.push(note);
         let mode = self.track().slur_mode;
         let configured = self.track().slur_value;
@@ -5016,6 +5079,7 @@ enum NoteModifierKind {
 #[derive(Debug, Clone)]
 struct NoteModifier {
     kind: NoteModifierKind,
+    in_steps: bool,
     values: Vec<i64>,
     next: usize,
     origin: i64,
@@ -5030,6 +5094,7 @@ impl Default for NoteModifier {
     fn default() -> Self {
         Self {
             kind: NoteModifierKind::Normal,
+            in_steps: false,
             values: Vec::new(),
             next: 0,
             origin: 0,
@@ -5403,5 +5468,16 @@ mod tests {
 
         let error = split_array_initializer("0,(1+2),,{a,b},4", 1, 3).unwrap_err();
         assert!(error.message.contains("上限(3)"));
+    }
+
+    #[test]
+    fn slur_reservation_respects_the_event_budget() {
+        let mut compiler = Compiler::new();
+        compiler.event_count = MAX_EVENTS - 1;
+        let error = compiler.reserve_slur_note(7).unwrap_err();
+        assert_eq!(error.line, 7);
+        assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
+        assert_eq!(compiler.buffered_slur_events, 0);
+        assert!(compiler.stop_requested);
     }
 }
