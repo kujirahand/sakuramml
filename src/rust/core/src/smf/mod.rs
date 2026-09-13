@@ -80,12 +80,11 @@ impl Song {
 
 fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     let mut events = track.events.clone();
-    // Stable sort keeps same-time events in the order they were written,
-    // matching the Pascal implementation's insertion order — except that a
-    // note-off comes last among events sharing its time, because the Pascal
-    // build holds notes back (for ties and chords) and flushes them after the
-    // control changes an advance specification wrote.
-    events.sort_by_key(|e| (e.time, is_note_off(e) as u8));
+    // Stable sort keeps same-time events in the order they were written.
+    // Note-offs generated from ordinary packed notes come last because the
+    // Pascal build appends them during its finalisation pass. A low-level
+    // NoteOff command is already a direct event and must retain its position.
+    events.sort_by_key(|e| (e.time, e.deferred_at_same_time as u8));
 
     let mut body = Vec::new();
     let mut last_time = 0i64;
@@ -109,10 +108,6 @@ fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     chunk.extend_from_slice(&(body.len() as u32).to_be_bytes());
     chunk.extend_from_slice(&body);
     Ok(chunk)
-}
-
-fn is_note_off(event: &Event) -> bool {
-    matches!(event.data.first(), Some(status) if status & 0xf0 == 0x80)
 }
 
 /// Write a delta time, refusing one the format cannot represent.

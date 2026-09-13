@@ -10,6 +10,7 @@ pub const META_INST_NAME: u8 = 0x04;
 pub const META_LYRIC: u8 = 0x05;
 pub const META_MARKER: u8 = 0x06;
 pub const META_CUE_POINT: u8 = 0x07;
+pub const META_CHANNEL_PREFIX: u8 = 0x20;
 pub const META_TEMPO: u8 = 0x51;
 pub const META_TIME_SIGNATURE: u8 = 0x58;
 pub const META_PORT: u8 = 0x21;
@@ -19,11 +20,19 @@ pub const META_PORT: u8 = 0x21;
 pub struct Event {
     pub time: i64,
     pub data: Vec<u8>,
+    /// Packed note-offs are appended during Pascal's finalisation pass and
+    /// therefore sort after other events at the same tick. Direct NoteOff
+    /// commands are ordinary raw events and retain their insertion order.
+    pub(crate) deferred_at_same_time: bool,
 }
 
 impl Event {
     pub fn new(time: i64, data: Vec<u8>) -> Self {
-        Self { time, data }
+        Self {
+            time,
+            data,
+            deferred_at_same_time: false,
+        }
     }
 
     pub fn note_on(time: i64, channel: u8, note: u8, velocity: u8) -> Self {
@@ -31,7 +40,11 @@ impl Event {
     }
 
     pub fn note_off(time: i64, channel: u8, note: u8, velocity: u8) -> Self {
-        Self::new(time, vec![0x80 | (channel & 0x0f), note, velocity])
+        Self {
+            time,
+            data: vec![0x80 | (channel & 0x0f), note, velocity],
+            deferred_at_same_time: true,
+        }
     }
 
     pub fn control_change(time: i64, channel: u8, controller: u8, value: u8) -> Self {
