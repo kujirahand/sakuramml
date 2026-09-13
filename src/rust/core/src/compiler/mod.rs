@@ -1154,6 +1154,9 @@ impl<'a> Compiler<'a> {
                 if !(0..=3).contains(&mode) {
                     return Err(MmlError::new(line, "Slurのtypeは0〜3で指定してください"));
                 }
+                if args.get(1) == Some(&i64::MIN) {
+                    return Err(MmlError::new(line, "Slurのvalueが範囲外です"));
+                }
                 let track = self.track();
                 track.slur_mode = mode;
                 if let Some(&value) = args.get(1) {
@@ -4129,10 +4132,13 @@ impl<'a> Compiler<'a> {
             } else {
                 self.track().slur_value.saturating_mul(2)
             };
+            let magnitude = value
+                .checked_abs()
+                .ok_or_else(|| MmlError::new(cur.line(), "Slurの時間が範囲外です"))?;
             let value = if self.track().slur_value < 0 {
-                -value.abs()
+                -magnitude
             } else {
-                value.abs()
+                magnitude
             };
             return Ok(Some(Some(value)));
         }
@@ -4450,7 +4456,10 @@ impl<'a> Compiler<'a> {
                 let previous_note = notes[note_index - 1];
                 let previous = bend_value(previous_note.note);
                 let duration = previous_note.transition.unwrap_or(configured);
-                let length = duration.abs().max(1);
+                let length = duration
+                    .checked_abs()
+                    .ok_or_else(|| MmlError::new(0, "Slurの時間が範囲外です"))?
+                    .max(1);
                 let from = if duration < 0 {
                     item.start
                 } else {

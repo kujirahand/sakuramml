@@ -1182,6 +1182,8 @@ fn note_modifiers_and_slur_reject_invalid_arguments() {
         ("v.Range(0) c", "low,high"),
         ("Slur(4,10) c&d", "0〜3"),
         ("Slur(0,10,13) c&d", "1〜12"),
+        ("Slur(0,(-9223372036854775807-1)) c&d", "valueが範囲外"),
+        ("Slur(3,-4611686018427387904) c&&d", "時間が範囲外"),
         ("Slur(2,100) c&", "音符"),
     ] {
         let error = compile(mml).unwrap_err();
