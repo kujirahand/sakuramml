@@ -12,6 +12,7 @@ pub const META_MARKER: u8 = 0x06;
 pub const META_CUE_POINT: u8 = 0x07;
 pub const META_TEMPO: u8 = 0x51;
 pub const META_TIME_SIGNATURE: u8 = 0x58;
+pub const META_PORT: u8 = 0x21;
 
 /// A single event at an absolute time, already serialised except its delta.
 #[derive(Debug, Clone, PartialEq, Eq)]
