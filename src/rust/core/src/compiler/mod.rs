@@ -822,19 +822,14 @@ impl<'a> Compiler<'a> {
                 if modifier_in_steps {
                     cur.advance();
                 }
-                let defines_values = if cur.peek() == Some('.') {
-                    let mut probe = cur.clone();
-                    probe.advance();
-                    matches!(
-                        probe.read_word().as_deref(),
-                        Some("onNote" | "N" | "onTime" | "T" | "onCycle" | "C")
-                    )
-                } else {
-                    false
-                };
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Gate)? {
-                    if defines_values {
-                        self.note_modifier_entry(OnNoteTarget::Gate).in_steps = modifier_in_steps;
+                    if let Some((_, modifier)) = self
+                        .track()
+                        .note_modifiers
+                        .iter_mut()
+                        .find(|(target, _)| *target == OnNoteTarget::Gate)
+                    {
+                        modifier.in_steps = modifier_in_steps;
                     }
                     return Ok(handled);
                 }
@@ -4320,14 +4315,28 @@ impl<'a> Compiler<'a> {
             return Ok(());
         }
         let mut notes = std::mem::take(&mut self.track().slur_notes);
-        self.buffered_slur_events = self
-            .buffered_slur_events
-            .saturating_sub(notes.len().saturating_mul(2));
+        let reserved = notes.len().saturating_mul(2);
         notes.push(note);
-        let mode = self.track().slur_mode;
-        let configured = self.track().slur_value;
+        let mut mode = self.track().slur_mode;
+        let mut configured = self.track().slur_value;
+        let final_note = *notes.last().expect("slur has at least two notes");
+        let max_distance = notes
+            .iter()
+            .map(|item| (item.note as i64 - final_note.note as i64).abs())
+            .max()
+            .unwrap_or(0);
+        if matches!(mode, 0 | 1) && max_distance > 12 {
+            mode = 2;
+            configured = 100;
+        }
 
         if mode == 2 {
+            let note_runs = 1 + notes
+                .windows(2)
+                .filter(|pair| pair[0].note != pair[1].note)
+                .count();
+            self.buffered_slur_events = self.buffered_slur_events.saturating_sub(reserved);
+            self.ensure_event_capacity(note_runs.saturating_mul(2), 0)?;
             let mut anchor = 0usize;
             let mut anchor_off = notes[0].off;
             let mut anchor_merged = false;
@@ -4390,6 +4399,8 @@ impl<'a> Compiler<'a> {
         }
 
         if mode == 3 {
+            self.buffered_slur_events = self.buffered_slur_events.saturating_sub(reserved);
+            self.ensure_event_capacity(notes.len().saturating_mul(2), 0)?;
             let maximum = configured.saturating_sub(1).max(0) as usize;
             if maximum == 0 {
                 for note in &notes {
@@ -4422,30 +4433,54 @@ impl<'a> Compiler<'a> {
             return Ok(());
         }
 
-        let final_note = *notes.last().expect("slur has at least two notes");
-        let max_distance = notes
-            .iter()
-            .map(|item| (item.note as i64 - final_note.note as i64).abs())
-            .max()
-            .unwrap_or(0);
         let range_index = channel as usize;
         let mut range = self.bend_ranges[range_index].max(1);
-        if max_distance > 12 {
-            let old_mode = self.track().slur_mode;
-            let old_value = self.track().slur_value;
-            self.track().slur_mode = 2;
-            self.track().slur_value = 100;
-            self.track().slur_notes = notes[..notes.len() - 1].to_vec();
-            let result = self.handle_slur_note(final_note, false, channel);
-            self.track().slur_mode = old_mode;
-            self.track().slur_value = old_value;
-            return result;
-        }
+        let needs_range_change = max_distance > range;
         if max_distance > range {
             range = 12;
+        }
+        let cc_muted = self.track().cc_muted;
+        let bend_value = |pitch: u8| -> i64 {
+            (pitch as i64 - final_note.note as i64).saturating_mul(8192) / range
+        };
+        let mut ramp_events = Vec::new();
+        if !cc_muted && mode == 0 {
+            for (note_index, item) in notes.iter().enumerate().skip(1) {
+                let target = bend_value(item.note);
+                let previous_note = notes[note_index - 1];
+                let previous = bend_value(previous_note.note);
+                let duration = previous_note.transition.unwrap_or(configured);
+                let length = duration.abs().max(1);
+                let from = if duration < 0 {
+                    item.start
+                } else {
+                    item.start - length
+                };
+                let mut modifier = CcModifier::new(advance_spec::BEND_FULL);
+                modifier.kind = Kind::OnTime;
+                modifier.reserve = vec![previous, target, length];
+                let mut rng = std::mem::take(&mut self.rng);
+                ramp_events.extend(modifier.events(from, 0, self.cc_frequency, &mut rng));
+                self.rng = rng;
+            }
+        }
+        let bend_events = if cc_muted {
+            0
+        } else if mode == 1 {
+            notes.len()
+        } else {
+            1usize.saturating_add(ramp_events.len())
+        };
+        let rpn_events = usize::from(!cc_muted && needs_range_change).saturating_mul(3);
+        let required = 2usize
+            .saturating_add(bend_events)
+            .saturating_add(rpn_events);
+        self.buffered_slur_events = self.buffered_slur_events.saturating_sub(reserved);
+        self.ensure_event_capacity(required, 0)?;
+        if needs_range_change {
             self.bend_ranges[range_index] = range;
             let at = notes[0].start.saturating_sub(2);
-            if !self.track().cc_muted {
+            if !cc_muted {
                 self.push_event(Event::control_change(at, channel, 101, 0))?;
                 self.push_event(Event::control_change(at, channel, 100, 0))?;
                 self.push_event(Event::control_change(at, channel, 6, range as u8))?;
@@ -4463,36 +4498,18 @@ impl<'a> Compiler<'a> {
             final_note.note,
             final_note.velocity,
         ))?;
-        let bend_value = |pitch: u8| -> i64 {
-            (pitch as i64 - final_note.note as i64).saturating_mul(8192) / range
-        };
         self.push_slur_bend(
             notes[0].start.saturating_sub(1),
             bend_value(notes[0].note),
             channel,
         )?;
-        for (note_index, item) in notes.iter().enumerate().skip(1) {
-            let target = bend_value(item.note);
-            if mode == 1 {
+        if mode == 1 {
+            for item in notes.iter().skip(1) {
+                let target = bend_value(item.note);
                 self.push_slur_bend(item.start, target, channel)?;
-                continue;
             }
-            let previous_note = notes[note_index - 1];
-            let previous = bend_value(previous_note.note);
-            let duration = previous_note.transition.unwrap_or(configured);
-            let length = duration.abs().max(1);
-            let from = if duration < 0 {
-                item.start
-            } else {
-                item.start - length
-            };
-            let mut modifier = CcModifier::new(advance_spec::BEND_FULL);
-            modifier.kind = Kind::OnTime;
-            modifier.reserve = vec![previous, target, length];
-            let mut rng = std::mem::take(&mut self.rng);
-            let events = modifier.events(from, 0, self.cc_frequency, &mut rng);
-            self.rng = rng;
-            for (time, value) in events {
+        } else {
+            for (time, value) in ramp_events {
                 self.push_slur_bend(time, value, channel)?;
             }
         }
@@ -5479,5 +5496,62 @@ mod tests {
         assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
         assert_eq!(compiler.buffered_slur_events, 0);
         assert!(compiler.stop_requested);
+    }
+
+    #[test]
+    fn closing_slur_checks_its_complete_event_cost_atomically() {
+        let mut compiler = Compiler::new();
+        compiler.event_count = MAX_EVENTS - 2;
+        compiler.buffered_slur_events = 2;
+        compiler.track().slur_notes.push(SlurNote {
+            start: 0,
+            off: 75,
+            note: 60,
+            velocity: 100,
+            transition: None,
+        });
+        let error = compiler
+            .handle_slur_note(
+                SlurNote {
+                    start: 96,
+                    off: 171,
+                    note: 84,
+                    velocity: 100,
+                    transition: None,
+                },
+                false,
+                0,
+            )
+            .unwrap_err();
+        assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
+        assert!(compiler.track().events.is_empty());
+        assert_eq!(compiler.buffered_slur_events, 0);
+    }
+
+    #[test]
+    fn wide_slur_releases_only_its_own_reservation() {
+        let mut compiler = Compiler::new();
+        compiler.buffered_slur_events = 4;
+        compiler.track().slur_notes.push(SlurNote {
+            start: 0,
+            off: 75,
+            note: 60,
+            velocity: 100,
+            transition: None,
+        });
+        compiler
+            .handle_slur_note(
+                SlurNote {
+                    start: 96,
+                    off: 171,
+                    note: 84,
+                    velocity: 100,
+                    transition: None,
+                },
+                false,
+                0,
+            )
+            .unwrap();
+        assert_eq!(compiler.buffered_slur_events, 2);
     }
 }

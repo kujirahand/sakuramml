@@ -1227,6 +1227,14 @@ fn gate_modifier_preserves_its_step_mode() {
         "l4 q%.onNote(50)c",
         "4d546864000000060001000100604d54726b0000000c00903c6431803c642fff2f00",
     );
+    assert_golden(
+        "l4 q%.onNote(50) q.Delay(0) c",
+        "4d546864000000060001000100604d54726b0000000c00903c642f803c6431ff2f00",
+    );
+    assert_golden(
+        "l4 q.onNote(50) q%.Delay(0) c",
+        "4d546864000000060001000100604d54726b0000000c00903c6431803c642fff2f00",
+    );
 }
 
 // --- Div (tuplets) and string macros ---
