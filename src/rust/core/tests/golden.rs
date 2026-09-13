@@ -289,6 +289,14 @@ fn track_name_is_written_as_cp932() {
     );
 }
 
+#[test]
+fn empty_meta_text_is_written_as_a_space() {
+    assert_golden(
+        r#"MetaText={""}"#,
+        "4d546864000000060001000100604d54726b0000000900ff01012000ff2f00",
+    );
+}
+
 // --- Phase 2: voices, control changes, pitch bend, loops ---
 
 #[test]
@@ -306,6 +314,38 @@ fn voice_with_bank_select() {
     assert_golden(
         "@1,2,3 c",
         "4d546864000000060001000100604d54726b0000001700b0000200b0200300c00000903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn voice_and_controllers_precede_the_current_time() {
+    assert_golden(
+        "r4 @2 c",
+        "4d546864000000060001000100604d54726b0000000f5fc00101903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "r4 y7=100 c",
+        "4d546864000000060001000100604d54726b000000105fb0076401903c644b803c6415ff2f00",
+    );
+    assert_golden(
+        "r4 p64 c",
+        "4d546864000000060001000100604d54726b000000105fe0004001903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn controller_shift_moves_cc_and_bend_but_not_program_change() {
+    assert_golden(
+        "r4 System.ControllerShift=2 @2 y7=100 p64 c",
+        "4d546864000000060001000100604d54726b000000175eb0076400e0004001c00101903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn zero_length_numeric_notes_form_a_legacy_chord() {
+    assert_golden(
+        "n60,0 n64,0 n67,4",
+        "4d546864000000060001000100604d54726b0000001c00903c6400904064009043644c803c64008040640080436414ff2f00",
     );
 }
 

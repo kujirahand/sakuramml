@@ -33,6 +33,7 @@ total_different=0
 total_compared=0
 total_event_different=0
 total_event_compared=0
+first_differences=''
 
 printf '%-18s %8s %11s %11s %11s\n' 'sample' 'Pascal' 'Rust' 'byte差' 'event差'
 printf '%-18s %8s %11s %11s %11s\n' '------------------' '--------' '-----------' '-----------' '-----------'
@@ -127,6 +128,11 @@ for source_file in "$repo_dir"/sample/*.mml; do
             total_event_different=$((total_event_different + event_different))
             total_event_compared=$((total_event_compared + event_compared))
             event_summary="${event_rate}%"
+            first_pascal=$(awk '/^< / { sub(/^< /, ""); print; exit }' "$event_diff")
+            first_rust=$(awk '/^> / { sub(/^> /, ""); print; exit }' "$event_diff")
+            if [ -n "$first_pascal" ] || [ -n "$first_rust" ]; then
+                first_differences="${first_differences}\n${sample_name}\n  Pascal: ${first_pascal:-(イベントなし)}\n  Rust:   ${first_rust:-(イベントなし)}"
+            fi
         else
             event_summary='-'
         fi
@@ -155,6 +161,9 @@ fi
 printf '\n合計: %s件 / 比較可能: %s件 / バイト完全一致: %s件\n' \
     "$sample_count" "$comparable_count" "$exact_count"
 printf '加重差異率: byte=%s / event=%s\n' "$total_rate" "$total_event_rate"
+if [ -n "$first_differences" ]; then
+    printf '\n最初の正規化イベント差:%b\n' "$first_differences"
+fi
 
 if [ "$comparable_count" -ne "$sample_count" ]; then
     exit 2
