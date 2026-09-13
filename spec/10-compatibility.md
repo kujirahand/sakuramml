@@ -27,7 +27,8 @@
 | リズムマクロ | 実装済み | `$x{...}` と `Rythm{...}` |
 | Include | 実装済み | resolver 経由、UTF-8/CP932 |
 | 先行指定（CC/ベンド） | 実装済み | `.onNote/.N`, `.onTime/.T`, `.onCycle/.C`, `.onNoteWave/.W`, `.onNoteWaveEx/.WE`, `.onNoteWaveR/.WR`, `.Sine`, `.onNoteSine`, `.Delay`, `.Repeat`, `.Range`, `.Frequency` |
-| 先行指定（音符属性） | 一部 | `v q t l o` に `.onNote` と `.Random`。推移系は警告 |
+| 先行指定（音符属性） | 実装済み | `v q t l o` に `.onNote/.N`、`.onTime/.T`、`.onCycle/.C`、`.Delay`、`.Repeat`、`.Random`、`.Range` |
+| `Slur` | 実装済み | type 0:グリッサンド、1:ベンド、2:ゲート、3:アルペジオ。遷移長・ベンドレンジ指定に対応 |
 | `.C`（onCycle の別名） | 拡張 | 従来版は分岐の記述ミスで未接続。現行 Rust では動作する |
 | `.Random` の乱数値 | 非互換 | 生成器が異なるため値は一致しない（下記参照） |
 | 従来のSystem/構文設定 | 実装済み | `X68mode`, `Stepmode`, `VoiceNoShift`, `OctaveRangeShift`, `GetKeyFlag`, `ControllerShift`, `ArgOrder`, `AllowMultiLine`, `MetaTextEOL` |
@@ -68,7 +69,7 @@
 | `System.VoiceNoShift`、`OctaveRangeShift` | 実装済み | 音色番号と音名オクターブのシフト |
 | `System.GetKeyFlag` | 実装済み | `c,d,e,f,g,a,b` 順の配列を返す |
 | `ArgOrder`、`AllowMultiLine`、`MetaTextEOL` | 実装済み | 音符引数順、複数行和音、メタテキスト改行を設定 |
-| `v/q/t/l/o.onTime`等の音符属性の推移指定 | 一部（警告） | `66.mml`の`v.onTime`等を警告して無視 |
+| `v/q/t/l/o.onTime`等の音符属性の推移指定 | 実装済み | ノート開始時刻で推移値を計算し、音長・ゲート等へ反映 |
 | 先行指定の期間における`!1^1`等の結合音長 | 実装済み | `230.mml`の`EP.onTime`、`P.onTime`に対応 |
 | 関数の数値引数における`!1^1`等の結合音長 | 実装済み | `23.mml`の`chord3.h`呼び出しに対応 |
 | 関数内の`Exit` | 実装済み | 関数だけを終了するよう修正。`random.mml`の後続音符も出力する |
@@ -103,7 +104,7 @@
 | `4.mml` | 残差あり | バグ | ループ終端と`v.onNote`を組み合わせた音長・ゲート差が残る |
 | `40.mml` | 残差あり | バグ | ループ内のテンポ、`t.onNote`、和音を組み合わせた時刻・イベント数の差が残る |
 | `47.mml` | 完全一致 | 一致 | 正規化イベント、SMFバイトとも一致 |
-| `66.mml` | 残差あり | 未実装 | 音符属性の`v.onTime`を警告して無視するため。対応は[#13](https://github.com/kujirahand/sakuramml/issues/13) |
+| `66.mml` | 残差あり | 改善済み | [#13](https://github.com/kujirahand/sakuramml/issues/13)で音符属性の`v.onTime`警告を解消。再計測値はbyte差73.07%、event差46.84% |
 | `hy_joe.mml` | 残差あり | バグ | RPN/NRPN初期化と`p%.onTime`の同時刻イベント順・配置間隔が異なる |
 | `random.mml` | 残差あり | 既知の許容差 | `Random`/`RandomSelect`の系列差。値の一致は対象外で、範囲と決定性を保証する |
 | `sakura2.mml` | 残差あり | バグ | ストトンの反復内にある和音で、音長・ゲートが半分になる箇所がある |
