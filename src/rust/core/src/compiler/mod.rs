@@ -30,6 +30,12 @@ pub const DEFAULT_TIMEBASE: i64 = 96;
 /// far more than any real song — the largest sample here writes a few thousand.
 pub const MAX_EVENTS: usize = 1_000_000;
 
+/// Maximum number of elements held by one dynamically grown array.
+///
+/// An MML source can choose an arbitrary index, so resizing must be bounded
+/// before allocating memory (especially in the WASM build).
+pub const MAX_ARRAY_ELEMENTS: usize = 1_000_000;
+
 /// Ceiling on a track's time pointer, so time arithmetic cannot run away
 /// before the SMF writer would reject the delta anyway.
 pub const MAX_TIME: i64 = crate::smf::MAX_VAR_LEN;
@@ -835,7 +841,9 @@ impl<'a> Compiler<'a> {
             probe.skip_spaces();
             let is_assignment = probe.peek() == Some('=')
                 || matches!(probe.peek(), Some('+') | Some('-'))
-                    && probe.peek() == probe.peek_at(1);
+                    && probe.peek() == probe.peek_at(1)
+                || matches!(self.variables.get(&word), Some(Value::Array(_)))
+                    && probe.peek() == Some('(');
             if is_assignment {
                 return self.assign(cur, &word);
             }
@@ -2840,15 +2848,47 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    /// `name = <value>` where the value is a literal, a `{"string"}` or a
-    /// parenthesised expression; also `name++` and `name--`.
+    /// `name = <value>` or `name(index) = <value>`, where the value is a
+    /// literal, a `{"string"}` or a parenthesised expression; also `name++`
+    /// and `name--`.
     fn assign(&mut self, cur: &mut Cursor, name: &str) -> Result<()> {
         let line = cur.line();
         cur.skip_spaces();
 
+        let array_index =
+            if matches!(self.variables.get(name), Some(Value::Array(_))) && cur.eat('(') {
+                let index = expr::eval(cur, self)?.as_int(line)?;
+                cur.skip_spaces();
+                if !cur.eat(')') {
+                    return Err(MmlError::new(line, "配列の添字が ) で閉じられていません"));
+                }
+                if index < 0 {
+                    return Err(MmlError::new(
+                        line,
+                        format!("配列\"{name}\"の添字に負の値は指定できません: {index}"),
+                    ));
+                }
+                let index = usize::try_from(index).map_err(|_| {
+                    MmlError::new(line, format!("配列\"{name}\"の添字が大きすぎます: {index}"))
+                })?;
+                if index >= MAX_ARRAY_ELEMENTS {
+                    return Err(MmlError::new(
+                        line,
+                        format!("配列\"{name}\"の要素数が上限({MAX_ARRAY_ELEMENTS})を超えます"),
+                    ));
+                }
+                cur.skip_spaces();
+                Some(index)
+            } else {
+                None
+            };
+
         // `I++` and `I--` step a variable by one.
-        for (sign, step) in [('+', 1), ('-', -1)] {
-            if cur.peek() == Some(sign) && cur.peek_at(1) == Some(sign) {
+        if array_index.is_none() {
+            for (sign, step) in [('+', 1), ('-', -1)] {
+                if cur.peek() != Some(sign) || cur.peek_at(1) != Some(sign) {
+                    continue;
+                }
                 cur.advance();
                 cur.advance();
                 let current = self
@@ -2864,10 +2904,26 @@ impl<'a> Compiler<'a> {
         }
 
         if !cur.eat('=') {
+            if array_index.is_some() {
+                return Err(MmlError::new(line, "配列要素の代入には = が必要です"));
+            }
             return Ok(()); // a bare mention of a variable does nothing
         }
         let value = self.read_value(cur)?;
-        self.variables.insert(name.to_string(), value);
+        if let Some(index) = array_index {
+            let Some(Value::Array(items)) = self.variables.get_mut(name) else {
+                return Err(MmlError::new(
+                    line,
+                    format!("\"{name}\"は配列ではありません"),
+                ));
+            };
+            if items.len() <= index {
+                items.resize(index + 1, Value::Int(0));
+            }
+            items[index] = value;
+        } else {
+            self.variables.insert(name.to_string(), value);
+        }
         Ok(())
     }
 

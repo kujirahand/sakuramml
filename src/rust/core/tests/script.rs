@@ -110,6 +110,37 @@ fn arrays_declare_and_index() {
 }
 
 #[test]
+fn array_element_assignment_updates_and_grows_like_pascal() {
+    let out = compile(
+        r#"Array Numbers=(1,2); Numbers(0)=7; Numbers(3)=9
+           Array Strings=({first}); Strings(0)={changed}; Strings(2)={last}
+           Print(SizeOf(Numbers)) Print(Numbers(0)) Print(Numbers(1))
+           Print(Numbers(2)) Print(Numbers(3))
+           Print(SizeOf(Strings)) Print(Strings(0)) Print(Strings(1)) Print(Strings(2))"#,
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        ["4", "7", "2", "0", "9", "3", "changed", "0", "last"]
+    );
+}
+
+#[test]
+fn array_element_assignment_accepts_an_expression_index() {
+    assert_same(
+        "Array A=(60); A((1+1))=64; n(A(0)) n((A(1)+60)) n(A(2))",
+        "n60 n60 n64",
+    );
+}
+
+#[test]
+fn array_element_assignment_rejects_invalid_growth() {
+    assert_error_contains("Array A=(1); A(-1)=9", "負の値");
+    assert_error_contains("Array A=(1); A(1000000)=9", "上限");
+    assert_error_contains("Array A=(1); A(0=9", "閉じられていません");
+}
+
+#[test]
 fn array_index_out_of_range_is_an_error() {
     assert_error_contains("Array a=(60); n(a(5))", "範囲外");
 }
