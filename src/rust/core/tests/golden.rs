@@ -360,6 +360,14 @@ fn low_level_note_off_retains_same_time_insertion_order() {
 }
 
 #[test]
+fn play_from_preserves_packed_note_off_ordering() {
+    assert_golden(
+        "q100 c Time(95) NoteOn(61,100) PlayFrom(48)",
+        "4d546864000000060001000100604d54726b0000000d816f903d6400803c6400ff2f00",
+    );
+}
+
+#[test]
 fn channel_prefix_is_a_one_based_legacy_meta_command() {
     assert_golden(
         "ChannelPrefix(1)",

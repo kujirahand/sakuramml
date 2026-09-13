@@ -891,6 +891,15 @@ fn low_level_midi_commands_validate_their_arguments() {
 }
 
 #[test]
+fn print_track_counts_a_direct_note_off_as_an_event() {
+    let out = compile("NoteOff(60,64) PrintTrack").unwrap();
+    assert_eq!(
+        out.messages.last().map(String::as_str),
+        Some("イベント数=1 TrackMute(off) ")
+    );
+}
+
+#[test]
 fn an_unknown_mml_query_is_an_error() {
     assert_error_contains("Int x=MML(nope); c", "取得できません");
 }

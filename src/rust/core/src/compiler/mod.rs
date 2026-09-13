@@ -482,16 +482,16 @@ impl<'a> Compiler<'a> {
                 if event.time < from_pos {
                     let status = event.data.first().copied();
                     if status == Some(0xf0) && sysex {
-                        rebuilt.push(Event::new(pre_effect, event.data));
+                        rebuilt.push(event.at_time(pre_effect));
                         pre_effect += 1;
                     } else if status == Some(0xff) && event.data.get(1) != Some(&0x51) {
-                        rebuilt.push(Event::new(0, event.data));
+                        rebuilt.push(event.at_time(0));
                     }
                     // Anything else before the cut is dropped: ordinary
                     // events, and the tempo meta (reconstructed below).
                 } else {
                     let shifted = (event.time - from_pos + wait_time).max(0);
-                    rebuilt.push(Event::new(shifted, event.data));
+                    rebuilt.push(event.at_time(shifted));
                 }
             }
 
@@ -3007,7 +3007,7 @@ impl<'a> Compiler<'a> {
         let event_count = track
             .events
             .iter()
-            .filter(|event| !matches!(event.data.first(), Some(status) if status & 0xf0 == 0x80))
+            .filter(|event| !event.deferred_at_same_time)
             .count();
         let mute = if track.muted { "on" } else { "off" };
         self.messages.extend([

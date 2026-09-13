@@ -35,6 +35,12 @@ impl Event {
         }
     }
 
+    /// Move an event without losing metadata used during final serialisation.
+    pub(crate) fn at_time(mut self, time: i64) -> Self {
+        self.time = time;
+        self
+    }
+
     pub fn note_on(time: i64, channel: u8, note: u8, velocity: u8) -> Self {
         Self::new(time, vec![0x90 | (channel & 0x0f), note, velocity])
     }
