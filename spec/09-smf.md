@@ -52,7 +52,8 @@ next  = currentTime + noteLength
 | Key Signature | `FF 59 02 sf 00` |
 | SysEx | `F0 length payload` |
 
-テンポの 3 byte 値は `60,000,000 / BPM` マイクロ秒/四分音符です。BPM は1〜60,000,000でなければなりません。
+テンポの 3 byte 値は `60,000,000 / BPM` マイクロ秒/四分音符です。この値を符号なし24 bitに
+格納でき、かつ0にならないよう、BPMは4〜60,000,000でなければなりません。
 
 `TempoChange`は次の3形式を受理します。
 

@@ -2018,10 +2018,10 @@ impl<'a> Compiler<'a> {
 
     /// Convert BPM to the 24-bit tempo payload value.
     fn tempo_usec(bpm: i64, line: usize) -> Result<u32> {
-        if bpm <= 0 || bpm > 60_000_000 {
+        if !(4..=60_000_000).contains(&bpm) {
             return Err(MmlError::new(
                 line,
-                format!("テンポには1〜60000000の値を指定してください: {bpm}"),
+                format!("テンポには4〜60000000の値を指定してください: {bpm}"),
             ));
         }
         Ok((60_000_000 / bpm) as u32)
