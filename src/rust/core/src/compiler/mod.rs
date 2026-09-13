@@ -2820,7 +2820,7 @@ impl<'a> Compiler<'a> {
             .read_balanced('(', ')')
             .ok_or_else(|| MmlError::new(line, "TimeKeyFlagの括弧が閉じていません"))?;
         let args = split_function_args(&body);
-        if args.len() < 3 || args[2].trim().is_empty() {
+        if args.len() != 3 || args[2].trim().is_empty() {
             return Err(MmlError::new(
                 line,
                 "TimeKeyFlagには(開始,終了,(a,b,c,d,e,f,g))を指定してください",

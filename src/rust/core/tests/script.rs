@@ -769,7 +769,8 @@ fn time_key_flag_rejects_invalid_ranges_and_arrays() {
         "終了位置は開始位置より後",
     );
     assert_error_contains("TimeKeyFlag(,,(0,0,0))c", "7値");
-    assert_error_contains("TimeKeyFlag(,,0,0,0,0,0,0,0)c", "括弧");
+    assert_error_contains("TimeKeyFlag(,,0,0,0,0,0,0,0)c", "開始,終了");
+    assert_error_contains("TimeKeyFlag(,,(0,0,0,0,0,0,0),12)c", "開始,終了");
 }
 
 /// `MML(...)` reports what a command is currently set to.
