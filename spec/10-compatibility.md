@@ -40,6 +40,7 @@
 | `DeleteCC`, `CCMute`, `CCNoMute` | 実装済み | イベント削除・抑制 |
 | `MML(...)` | 一部 | 基本状態とコントロールチェンジの現在値は実装済み。その他の状態参照は未実装 |
 | `NoteNo(...)` | 実装済み | 音名からMIDIノート番号への変換 |
+| 文字列・配列組み込み関数 | 実装済み | `MID`, `POS/X`, `Replace`, `VarType`, `ArraySort*`, `StrToNum`, `HEX`, `SizeOf` |
 | `.Max` | 実装済み | `q.Max` / `v.Max` |
 | `TempoChange` | 一部/非互換 | 単一 BPM だけなら即時 Tempo の別名。従来の推移引数は未実装 |
 | `Cresc`, `Decresc` | 実装済み（従来版のバグを再現） | 下記参照 |

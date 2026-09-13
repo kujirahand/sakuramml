@@ -8,6 +8,7 @@
 Int tempo=120
 Str phrase={"cdef"}
 Array chord=(60,64,67)
+Array names=({mml},{panda},{dragon})
 ```
 
 変数は大域です。宣言済み変数名をコマンド位置で再び書くと代入になります。
@@ -130,14 +131,24 @@ Echo(ドレミファソ)
 | `RandomSelect(a,b,...)` | 引数から 1 個選ぶ |
 | `Step(n)` | n tick。`!n` と同じ考え方 |
 | `StrToLen(n)` | 分母 n の音長を tick に変換 |
-| `SizeOf(v)` | 配列要素数または文字数 |
-| `StrToNum(s)` | 文字列を整数へ変換 |
-| `HEX(n)` | 大文字 16 進文字列 |
+| `SizeOf(v)` | 配列要素数、文字数、整数なら4 |
+| `StrToNum(s)` | 10進文字列または`$`16進文字列を整数へ変換。変換不能なら0 |
+| `HEX(n)` | `$`付き・最低2桁の大文字16進文字列。配列も変換可能 |
 | `#STR(v)` | 文字列化 |
 | `ASC(s)` | 先頭 Unicode 文字のコードポイント |
 | `CHR(n)` | Unicode コードポイントから文字列化 |
+| `MID(s,index,len)` | 1起点の文字位置から文字列を切り出す |
+| `POS(sub,s)` | 部分文字列の1起点位置。見つからなければ0 |
+| `POSX(sub,s,start)` | 指定した1起点位置以降を検索 |
+| `Replace(s,from,to,onoff)` | `off`なら最初、`on`ならすべて置換 |
+| `VarType(v)` | `Int`、`Str`、`Array`のいずれかを返す |
+| `ArraySortNum(a)` | 数値昇順に並べた新しい配列を返す |
+| `ArraySortStr(a)` | 文字列昇順に並べた新しい配列を返す |
 | `VERSION()` | 互換用バージョン数 |
 | `Time(m:b:s)` | 小節・拍・stepを絶対tickへ変換 |
+
+配列は整数と文字列の要素を保持でき、`a(index)` の添字は0起点です。`ArraySort*` は元の配列を
+直接変更せず、並べ替えた配列を返すため、必要なら `a=ArraySortNum(a)` のように代入します。
 
 乱数列は再現可能です。`System.RandomSeed=n` でシードを指定します。
 

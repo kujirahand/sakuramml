@@ -83,6 +83,9 @@
 | `Function` | `Function name(params){...}` | 実装済み | [06](06-scripting.md) |
 | `Result` | `Result=value` | 実装済み | [06](06-scripting.md) |
 | `Print` | `Print(value)` | 実装済み | [06](06-scripting.md) |
+| `MID` / `POS` / `POSX` / `Replace` | 各文字列引数 | 実装済み | [06](06-scripting.md) |
+| `ArraySortNum` / `ArraySortStr` | `ArraySortNum(array)` | 実装済み | [06](06-scripting.md) |
+| `StrToNum` / `HEX` / `VarType` / `SizeOf` | 各値引数 | 実装済み | [06](06-scripting.md) |
 | リズム | `$x{mml}`, `Rythm{...}` | 実装済み | [07](07-macros-and-includes.md) |
 | ストトン定義 | `~{name}={mml}` | 実装済み | [07](07-macros-and-includes.md) |
 | 文字列マクロ | `#name={"mml"}` | 実装済み | [07](07-macros-and-includes.md) |

@@ -485,10 +485,80 @@ fn random_select_picks_one_of_its_arguments() {
 fn size_of_and_string_functions() {
     let out = compile(r#"Array a=(1,2,3); Print((SizeOf(a))) Print((HEX(255))) Print((CHR(65)))"#)
         .unwrap();
-    assert_eq!(out.messages, vec!["3", "FF", "A"]);
+    assert_eq!(out.messages, vec!["3", "$FF", "A"]);
 
     let out = compile(r#"Print((ASC({"A"})))"#).unwrap();
     assert_eq!(out.messages, vec!["65"]);
+}
+
+#[test]
+fn mid_uses_legacy_one_based_character_positions() {
+    let out = compile(
+        r#"Print(MID({cdefg},1,3)) Print(MID({cdefg},0,2)) Print(MID({cdefg},6,2)) Print(MID({あいう},2,1))"#,
+    )
+    .unwrap();
+    assert_eq!(out.messages, vec!["cde", "c", "", "い"]);
+}
+
+#[test]
+fn pos_and_posx_return_one_based_character_positions() {
+    let out = compile(
+        r#"Print(POS({cd},{abcdef})) Print(POS({xx},{abcdef})) Print(POSX({a},{banana},3)) Print(POS({い},{あいう}))"#,
+    )
+    .unwrap();
+    assert_eq!(out.messages, vec!["3", "0", "4", "2"]);
+}
+
+#[test]
+fn replace_can_change_the_first_or_every_match() {
+    let out = compile(
+        r#"Print(Replace({eye},{e},{s},on)) Print(Replace({eye},{e},{s},off)) Print(Replace({abc},{},{x},on))"#,
+    )
+    .unwrap();
+    assert_eq!(out.messages, vec!["sys", "sye", "abc"]);
+}
+
+#[test]
+fn type_and_array_sort_functions_match_pascal() {
+    let out = compile(
+        r#"
+        Int I=1 Str T={x}
+        Array N=(30,20,10,0,1,2,3,4,5)
+        Array S=({mml},{panda},{dragon},{zzz})
+        Print(VarType(I)) Print(VarType(T)) Print(VarType(N))
+        Print(ArraySortNum(N)) Print(ArraySortStr(S)) Print(S(1))
+        "#,
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        vec![
+            "Int",
+            "Str",
+            "Array",
+            "0, 1, 2, 3, 4, 5, 10, 20, 30",
+            "dragon, mml, panda, zzz",
+            "panda",
+        ]
+    );
+}
+
+#[test]
+fn legacy_number_size_and_hex_conversions() {
+    let out = compile(
+        r#"Int I=1 Array A=(127,0,50,100,11) Print(SizeOf(I)) Print(StrToNum({123})) Print(StrToNum({$10})) Print(HEX(A))"#,
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        vec!["4", "123", "16", "$7F, $00, $32, $64, $0B"]
+    );
+}
+
+#[test]
+fn array_sort_functions_validate_their_argument() {
+    assert_error_contains("Print(ArraySortNum({x}))", "配列");
+    assert_error_contains("Array A=() Print(ArraySortStr(A))", "空でない配列");
 }
 
 /// `StrToLen(4)` is a quarter note in ticks — 96 at the default timebase.

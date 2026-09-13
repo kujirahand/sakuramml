@@ -111,17 +111,15 @@ Implemented:
   missing one is a hint, not an error, matching the Pascal build
 * `SysEx`, in both the `SysEx(...)` decimal form and the `SysEx$=...;` hex
   form, plus `$` hexadecimal literals anywhere a number is expected
-* built-in functions `Random`, `RandomSelect`, `SizeOf`, `StrToLen`, `HEX`,
-  `ASC`, `CHR`, `Step`, `VERSION`, and the `SoundType`/`on`/`off` variables.
+* built-in functions `Random`, `RandomSelect`, `SizeOf`, `StrToLen`, `StrToNum`,
+  `MID`, `POS`/`POSX`, `Replace`, `ArraySortNum`/`ArraySortStr`, `VarType`,
+  `HEX`, `ASC`, `CHR`, `Step`, `VERSION`, and the `SoundType`/`on`/`off` variables.
   Randomness comes from a seeded generator in the crate (`System.RandomSeed`
   sets it), so compiles are reproducible and WASM needs no entropy source
 
-Still to port, in the order the sample songs need them: `Stretch`,
-`DirectSMF`, the `#` command-name lookup, `NoteNo`/`MML`, and the
-rest of the 先行指定 family — the wave and cycle variants, and `.onNote` on
-control changes, which the Pascal build writes a tick ahead of the note by a
-rule this port has not pinned down yet. Unported modifiers warn and are
-skipped rather than failing the compile.
+The remaining compatibility gaps are tracked in the repository root
+`plan.md` and `spec/10-compatibility.md`. Unported commands and modifiers warn
+and are skipped where recovery is safe rather than failing the whole compile.
 
 Of the sample songs, `scale.mml` and `rythm-1.mml` compile end to end so far.
 

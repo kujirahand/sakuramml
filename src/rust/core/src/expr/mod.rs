@@ -16,7 +16,7 @@ use crate::lexer::Cursor;
 pub enum Value {
     Int(i64),
     Str(String),
-    Array(Vec<i64>),
+    Array(Vec<Value>),
 }
 
 impl Value {
@@ -38,9 +38,9 @@ impl Value {
             Value::Str(s) => s.clone(),
             Value::Array(items) => items
                 .iter()
-                .map(|v| v.to_string())
+                .map(Value::as_str)
                 .collect::<Vec<_>>()
-                .join(","),
+                .join(", "),
         }
     }
 
@@ -356,13 +356,9 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
                     let index = eval(cur, ctx)?.as_int(line)?;
                     cur.skip_spaces();
                     cur.eat(')');
-                    return items
-                        .get(index as usize)
-                        .copied()
-                        .map(Value::Int)
-                        .ok_or_else(|| {
-                            MmlError::new(line, format!("配列\"{name}\"の範囲外です: {index}"))
-                        });
+                    return items.get(index as usize).cloned().ok_or_else(|| {
+                        MmlError::new(line, format!("配列\"{name}\"の範囲外です: {index}"))
+                    });
                 }
             }
 
@@ -474,7 +470,10 @@ mod tests {
     #[test]
     fn array_indexing() {
         let mut vars = Variables::new();
-        vars.insert("a".into(), Value::Array(vec![10, 20, 30]));
+        vars.insert(
+            "a".into(),
+            Value::Array(vec![Value::Int(10), Value::Int(20), Value::Int(30)]),
+        );
         assert_eq!(eval_str("a(1)", &vars).unwrap(), Value::Int(20));
         assert!(eval_str("a(9)", &vars).is_err());
     }

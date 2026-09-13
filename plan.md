@@ -297,7 +297,7 @@ Phase 0で作った仕様表を使い、以下の順で拡張する（優先度�
    （`.max(0)`のイベント単位クランプは維持しつつ、トラック内部の
    タイムポインタは負を許容）。`spec/02-notes.md`に記載。
 4. ~~`Stretch`、`Solo`/`Mute`/`TrackMute`、`DeleteCC`/`CCMute`/`CCNoMute`~~ 完了。
-5. 組み込み関数の残り: `MID`/`POS`/`Replace`/`ArraySort*`/`StrToNum`等
+5. ~~組み込み関数の残り: `MID`/`POS`/`Replace`/`ArraySort*`/`StrToNum`等~~ 完了。
 6. 配列の動的な拡張（RndMake.mml が範囲外書き込みで落ちる）
 7. ~~`#`マクロ本体内で失敗するケース~~ 完了。`Rythm`内で展開した文字列MMLマクロも
    リズムモードを引き継ぐようにし、`test_01.mml`が通過。

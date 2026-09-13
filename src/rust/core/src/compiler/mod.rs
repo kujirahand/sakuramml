@@ -1155,15 +1155,27 @@ impl<'a> Compiler<'a> {
             "SizeOf" => match args.first() {
                 Some(Value::Array(items)) => Value::Int(items.len() as i64),
                 Some(Value::Str(text)) => Value::Int(text.chars().count() as i64),
-                _ => Value::Int(0),
+                Some(Value::Int(_)) => Value::Int(4),
+                None => Value::Int(0),
             },
-            "StrToNum" => Value::Int(
-                args.first()
-                    .map(|v| v.as_int(line))
-                    .transpose()?
-                    .unwrap_or(0),
-            ),
-            "HEX" => Value::Str(format!("{:X}", int_arg(0)?)),
+            "StrToNum" => {
+                let value = match args.first() {
+                    Some(Value::Int(value)) => *value,
+                    Some(Value::Str(text)) => parse_legacy_integer(text).unwrap_or(0),
+                    _ => 0,
+                };
+                Value::Int(value)
+            }
+            "HEX" => match args.first() {
+                Some(Value::Array(items)) => {
+                    let values = items
+                        .iter()
+                        .map(|item| item.as_int(line).map(format_legacy_hex))
+                        .collect::<Result<Vec<_>>>()?;
+                    Value::Str(values.join(", "))
+                }
+                _ => Value::Str(format_legacy_hex(int_arg(0)?)),
+            },
             "#STR" => Value::Str(args.first().map(|v| v.as_str()).unwrap_or_default()),
             "ASC" => Value::Int(
                 args.first()
@@ -1177,6 +1189,82 @@ impl<'a> Compiler<'a> {
                     .map(String::from)
                     .unwrap_or_default(),
             ),
+            "MID" => {
+                let text = args.first().map(Value::as_str).unwrap_or_default();
+                let index = int_arg(1)?;
+                let count = int_arg(2)?;
+                Value::Str(legacy_mid(&text, index, count))
+            }
+            "POS" | "POSX" => {
+                let needle = args.first().map(Value::as_str).unwrap_or_default();
+                let text = args.get(1).map(Value::as_str).unwrap_or_default();
+                let start = if name == "POSX" && args.len() >= 3 {
+                    int_arg(2)?
+                } else {
+                    1
+                };
+                Value::Int(string_position(&needle, &text, start))
+            }
+            "Replace" => {
+                let text = args.first().map(Value::as_str).unwrap_or_default();
+                let from = args.get(1).map(Value::as_str).unwrap_or_default();
+                let to = args.get(2).map(Value::as_str).unwrap_or_default();
+                let replace_all = int_arg(3)? == 1;
+                let replaced = if from.is_empty() {
+                    text
+                } else if replace_all {
+                    text.replace(&from, &to)
+                } else {
+                    text.replacen(&from, &to, 1)
+                };
+                Value::Str(replaced)
+            }
+            "VarType" => Value::Str(
+                match args.first() {
+                    Some(Value::Int(_)) => "Int",
+                    Some(Value::Str(_)) => "Str",
+                    Some(Value::Array(_)) => "Array",
+                    None => "",
+                }
+                .to_string(),
+            ),
+            "ArraySortNum" => {
+                let Some(Value::Array(items)) = args.first() else {
+                    return Err(MmlError::new(
+                        line,
+                        "ArraySortNumには配列を指定してください",
+                    ));
+                };
+                if items.is_empty() {
+                    return Err(MmlError::new(
+                        line,
+                        "ArraySortNumには空でない配列を指定してください",
+                    ));
+                }
+                let mut keyed = items
+                    .iter()
+                    .map(|item| item.as_int(line).map(|key| (key, item)))
+                    .collect::<Result<Vec<_>>>()?;
+                keyed.sort_by_key(|(key, _)| *key);
+                Value::Array(keyed.into_iter().map(|(_, item)| item.clone()).collect())
+            }
+            "ArraySortStr" => {
+                let Some(Value::Array(items)) = args.first() else {
+                    return Err(MmlError::new(
+                        line,
+                        "ArraySortStrには配列を指定してください",
+                    ));
+                };
+                if items.is_empty() {
+                    return Err(MmlError::new(
+                        line,
+                        "ArraySortStrには空でない配列を指定してください",
+                    ));
+                }
+                let mut sorted = items.clone();
+                sorted.sort_by_key(Value::as_str);
+                Value::Array(sorted)
+            }
             "VERSION" => Value::Int(VERSION_NUMBER),
             // `NoteNo(o4c)` reads a note the way the compiler would and gives
             // back its MIDI number, without playing it.
@@ -2325,7 +2413,19 @@ impl<'a> Compiler<'a> {
         if cur.peek() == Some('=') {
             if kind == VarKind::Array {
                 cur.advance();
-                let items = self.read_args(cur, usize::MAX)?;
+                cur.skip_spaces();
+                if !cur.eat('(') {
+                    return Err(MmlError::new(line, "配列の初期値には(...)が必要です"));
+                }
+                let source = cur
+                    .read_balanced('(', ')')
+                    .ok_or_else(|| MmlError::new(line, "配列の初期値が閉じていません"))?;
+                let mut items = Vec::new();
+                for raw in split_function_args(&source) {
+                    if !raw.trim().is_empty() {
+                        items.push(self.eval_source(raw.trim(), line)?);
+                    }
+                }
                 self.variables.insert(name, Value::Array(items));
                 return Ok(());
             }
@@ -3703,6 +3803,13 @@ fn is_builtin_function(name: &str) -> bool {
             | "SizeOf"
             | "StrToNum"
             | "HEX"
+            | "MID"
+            | "POS"
+            | "POSX"
+            | "Replace"
+            | "VarType"
+            | "ArraySortNum"
+            | "ArraySortStr"
             | "NoteNo"
             | "MML"
             | "#STR"
@@ -3711,6 +3818,50 @@ fn is_builtin_function(name: &str) -> bool {
             | "VERSION"
             | "Time"
     )
+}
+
+fn parse_legacy_integer(text: &str) -> Option<i64> {
+    if let Some(hex) = text.strip_prefix('$') {
+        i64::from_str_radix(hex, 16).ok()
+    } else {
+        text.parse().ok()
+    }
+}
+
+fn format_legacy_hex(value: i64) -> String {
+    format!("${value:02X}")
+}
+
+/// Pascal's JCopy uses 1-based character positions, with the historical
+/// consequence that index 0 and count 2 select only the first character.
+fn legacy_mid(text: &str, index: i64, count: i64) -> String {
+    if count <= 0 {
+        return String::new();
+    }
+    let first = index.max(1);
+    let last = index.saturating_add(count - 1);
+    text.chars()
+        .enumerate()
+        .filter_map(|(offset, ch)| {
+            let position = offset as i64 + 1;
+            (first <= position && position <= last).then_some(ch)
+        })
+        .collect()
+}
+
+/// Return a 1-based character position, or zero when not found.
+fn string_position(needle: &str, text: &str, start: i64) -> i64 {
+    if needle.is_empty() || text.is_empty() {
+        return 0;
+    }
+    let start = start.max(1) as usize;
+    let Some((byte_start, _)) = text.char_indices().nth(start - 1) else {
+        return 0;
+    };
+    let Some(relative) = text[byte_start..].find(needle) else {
+        return 0;
+    };
+    text[..byte_start + relative].chars().count() as i64 + 1
 }
 
 /// Variables the compiler defines itself. `mml_base.pas` registers exactly
