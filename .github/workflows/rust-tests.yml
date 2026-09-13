@@ -1,0 +1,41 @@
+name: Rust tests
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "src/rust/**"
+      - ".github/workflows/rust-tests.yml"
+  pull_request:
+    paths:
+      - "src/rust/**"
+      - ".github/workflows/rust-tests.yml"
+
+defaults:
+  run:
+    working-directory: src/rust
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/rust
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo test
+        run: cargo test --workspace
