@@ -888,6 +888,69 @@ fn low_level_midi_commands_validate_their_arguments() {
     assert_error_contains("ChannelPrefix(0)", "1〜128");
     assert_error_contains("ChannelPrefix(129)", "1〜128");
     assert_error_contains("Port(256)", "0〜255");
+    assert_error_contains("KeyPressure(128)", "0〜127");
+}
+
+#[test]
+fn key_pressure_tracks_only_ordinary_notes_like_pascal() {
+    let initial = compile("KeyPressure(40)").unwrap();
+    assert!(initial.smf.windows(3).any(|bytes| bytes == [0xa0, 0, 40]));
+
+    let after_direct_note = compile("c NoteOn(62,100) KeyPressure(40)").unwrap();
+    assert!(after_direct_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 60, 40]));
+    assert!(!after_direct_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 62, 40]));
+
+    let after_muted_note = compile("c TrackMute(1) d TrackMute(0) KeyPressure(40)").unwrap();
+    assert!(after_muted_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 60, 40]));
+    assert!(!after_muted_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 62, 40]));
+}
+
+#[test]
+fn switch_end_and_msg_box_match_the_script_contract() {
+    assert_same("Int x=2 Switch(x){Case(1){c} Case(2){d} Default{e}}", "d");
+    assert_same("Switch(9){Case(1){c}Default{e}}", "e");
+    assert_same("c End d", "c");
+    let out = compile(r#"MsgBox({"hello"}); MsgBox; Print(3)"#).unwrap();
+    assert_eq!(out.messages, ["hello", "nil", "3"]);
+}
+
+#[test]
+fn play_from_restores_rpn_and_nrpn_only_when_enabled() {
+    let restored =
+        compile("Channel(1) RPN(0,1,7) RPN(0,1,9) Channel(2) y7,11 Time(2:1:0) PlayFrom(2:1:0) c")
+            .unwrap();
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 101, 0]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 100, 1]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 9]));
+    assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 7]));
+    assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb1, 101, 0]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb1, 7, 11]));
+
+    let disabled =
+        compile("PlayFrom.RPN_NRPN(0) RPN(0,1,9) Time(2:1:0) PlayFrom(2:1:0) c").unwrap();
+    let cc_position = |event| {
+        disabled
+            .smf
+            .windows(3)
+            .position(|bytes| bytes == event)
+            .expect("expected restored control change")
+    };
+    // With RPN_NRPN off, Pascal restores the three raw CC values in numeric
+    // controller order rather than replaying an RPN parameter transaction.
+    assert!(cc_position([0xb0, 6, 9]) < cc_position([0xb0, 100, 1]));
+    assert!(cc_position([0xb0, 100, 1]) < cc_position([0xb0, 101, 0]));
 }
 
 #[test]

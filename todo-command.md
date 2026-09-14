@@ -5,21 +5,11 @@
 Rust版の `src/rust/core/src/compiler/mod.rs` を照合した一覧です。GM音色名・ドラム名などの
 定数表は対象外です。
 
-## コマンドとして未実装
-
-| 分野 | コマンド | Pascal版での役割 | Rust版での確認結果 |
-|---|---|---|---|
-| MIDIイベント | `KeyPressure(value)` / `KP(value)` | 最後に発音したノートへのポリフォニック・アフタータッチ | Rustのコマンドディスパッチに分岐がない |
-| 制御構造 | `Switch(expr){ Case(expr){...} Default{...} }` | 条件分岐 | Rustのコマンドディスパッチに分岐がない |
-| 制御 | `End` | 以降のコンパイルを中止する | Rustのコマンドディスパッチに分岐がない |
-| UI | `MsgBox({text})` | ダイアログ表示 | Rustのコマンドディスパッチに分岐がない |
-
 ## 受理するが未実装・一部実装
 
 | コマンド・機能 | 現状 | TODO |
 |---|---|---|
 | `System.LoadSMF(file)` | 警告して無視する。Pascal版にも処理本体はない | ファイルI/Oを含む仕様を決め、実装するか未対応仕様として維持するか決める |
-| `PlayFrom.RPN_NRPN(on/off)` | オプションは解析するが、カット位置でのRPN/NRPN状態復元は行わない | RPN/NRPN選択・Data Entryを復元する |
 
 ## 同期で実装済みになった項目
 
@@ -31,9 +21,13 @@ Rust版の `src/rust/core/src/compiler/mod.rs` を照合した一覧です。GM�
 - `TrackKey`
 - `UseKeyShift`
 - `TempoChange` の推移形式
+- `KeyPressure` / `KP`
+- `Switch`
+- `End`
+- `MsgBox`（コアでは `CompileOutput.messages` に格納し、ホスト側で表示する）
+- `PlayFrom.RPN_NRPN` の状態復元
 
-`spec/10-compatibility.md` もこれらを実装済みとして更新済みです。残る未実装の
-`PlayFrom.RPN_NRPN` 状態復元は、同ファイルの「PlayFrom / PlayToについて」に記載されています。
+`spec/10-compatibility.md` もこれらを実装済みとして更新済みです。
 
 ## 未実装ではないもの
 

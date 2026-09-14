@@ -81,6 +81,9 @@ struct TrackState {
     events: Vec<Event>,
     /// Time at which the most recent note ended, so `^` can extend it.
     last_note: Option<LastNote>,
+    /// Pascal's `LastNodeNo`, used by `KeyPressure`. A newly allocated Pascal
+    /// track is zero-initialized, so pressure before the first note targets 0.
+    last_note_no: u8,
     /// One-shot octave shift from `` ` `` or `"`, applied to the next note.
     octave_once: i64,
     /// `q%n` gives the gate in ticks rather than as a percentage.
@@ -152,6 +155,7 @@ impl TrackState {
             timing: 0,
             events: Vec::new(),
             last_note: None,
+            last_note_no: 0,
             octave_once: 0,
             gate_in_steps: false,
             // Pascal reports zero until the first program change.
@@ -400,7 +404,7 @@ impl<'a> Compiler<'a> {
             }
             self.buffered_slur_events = 0;
         }
-        self.apply_play_from();
+        self.apply_play_from()?;
 
         let mut song = Song::new(self.timebase as u16);
         for (track_no, state) in self.tracks {
@@ -439,18 +443,20 @@ impl<'a> Compiler<'a> {
     /// it at save time rather than as the source is read — so where in the
     /// song `PlayFrom` is written makes no difference to the result.
     ///
-    /// Not reproduced: RPN/NRPN reconstruction at the cut point (rare, and
-    /// no sample song exercises it — see spec/10-compatibility.md).
-    fn apply_play_from(&mut self) {
+    fn apply_play_from(&mut self) -> Result<()> {
         let from_pos = self.play_from.from_pos;
         let to_pos = self.play_from.to_pos;
         // The Pascal build only runs any of this when one bound is set.
         if from_pos <= 0 && to_pos <= 0 {
-            return;
+            return Ok(());
         }
         let wait_time = self.play_from.wait_time;
         let sysex = self.play_from.sysex;
+        let restore_rpn_nrpn = self.play_from.rpn_nrpn;
 
+        // Apply PlayTo before calculating the final event budget.  The
+        // following reconstruction can add events, so the parser's original
+        // event count is no longer sufficient.
         for track in self.tracks.values_mut() {
             track.events.sort_by_key(|e| e.time);
 
@@ -460,7 +466,10 @@ impl<'a> Compiler<'a> {
                     track.events.pop();
                 }
             }
+        }
 
+        let mut final_event_count = 0usize;
+        for track in self.tracks.values_mut() {
             // Reconstruct the state in effect just before `from_pos`, so
             // notes that survive the cut still sound with the right voice,
             // controller values and tempo.
@@ -469,6 +478,12 @@ impl<'a> Compiler<'a> {
             let mut program: Option<u8> = None;
             let mut tempo: Option<u32> = None;
             let mut channel = track.channel;
+            let mut rpn_selection: Option<(bool, u8, u8)> = None;
+            // Pascal keeps RPN and NRPN in separate insertion-ordered lists.
+            // A later Data Entry replaces the value for the same address and
+            // channel without moving its position in that list.
+            let mut restored_rpn: Vec<(u8, u8, u8, u8)> = Vec::new();
+            let mut restored_nrpn: Vec<(u8, u8, u8, u8)> = Vec::new();
             for event in &track.events {
                 if event.time >= from_pos {
                     break;
@@ -478,6 +493,60 @@ impl<'a> Compiler<'a> {
                         if let (Some(&no), Some(&value)) = (event.data.get(1), event.data.get(2)) {
                             cc[no as usize] = Some(value);
                             channel = event.data[0] & 0x0f;
+                            if restore_rpn_nrpn {
+                                match no {
+                                    101 => {
+                                        let lsb = rpn_selection
+                                            .filter(|(rpn, _, _)| *rpn)
+                                            .map(|(_, _, lsb)| lsb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((true, value, lsb));
+                                        cc[no as usize] = None;
+                                    }
+                                    100 => {
+                                        let msb = rpn_selection
+                                            .filter(|(rpn, _, _)| *rpn)
+                                            .map(|(_, msb, _)| msb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((true, msb, value));
+                                        cc[no as usize] = None;
+                                    }
+                                    99 => {
+                                        let lsb = rpn_selection
+                                            .filter(|(rpn, _, _)| !*rpn)
+                                            .map(|(_, _, lsb)| lsb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((false, value, lsb));
+                                        cc[no as usize] = None;
+                                    }
+                                    98 => {
+                                        let msb = rpn_selection
+                                            .filter(|(rpn, _, _)| !*rpn)
+                                            .map(|(_, msb, _)| msb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((false, msb, value));
+                                        cc[no as usize] = None;
+                                    }
+                                    6 => {
+                                        if let Some((is_rpn, msb, lsb)) = rpn_selection {
+                                            let parameter = (channel, msb, lsb, value);
+                                            if is_rpn {
+                                                Self::upsert_play_from_parameter(
+                                                    &mut restored_rpn,
+                                                    parameter,
+                                                );
+                                            } else {
+                                                Self::upsert_play_from_parameter(
+                                                    &mut restored_nrpn,
+                                                    parameter,
+                                                );
+                                            }
+                                            cc[no as usize] = None;
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
                         }
                     }
                     Some(0xe0) => {
@@ -505,11 +574,33 @@ impl<'a> Compiler<'a> {
                 }
             }
 
+            let retained_events = track
+                .events
+                .iter()
+                .filter(|event| {
+                    event.time >= from_pos
+                        || (event.data.first() == Some(&0xf0) && sysex)
+                        || (event.data.first() == Some(&0xff) && event.data.get(1) != Some(&0x51))
+                })
+                .count();
+            let reconstructed_events = if from_pos > 0 {
+                cc.iter().flatten().count()
+                    + usize::from(pitch_bend != 0)
+                    + (restored_rpn.len() + restored_nrpn.len()).saturating_mul(3)
+                    + usize::from(program.is_some())
+                    + usize::from(tempo.is_some())
+            } else {
+                0
+            };
+            let track_final_count = retained_events + reconstructed_events;
+            final_event_count = final_event_count.saturating_add(track_final_count);
+            Self::ensure_play_from_event_capacity(final_event_count)?;
+
             // Discard what falls before the cut (keeping non-tempo meta at
             // time 0, and SysEx at an incrementing slot if `.SysEx(1)` asked
             // for it), and shift the rest back by the cut point.
             let mut pre_effect = 0i64;
-            let mut rebuilt = Vec::with_capacity(track.events.len());
+            let mut rebuilt = Vec::with_capacity(track_final_count);
             for event in track.events.drain(..) {
                 if event.time < from_pos {
                     let status = event.data.first().copied();
@@ -547,6 +638,30 @@ impl<'a> Compiler<'a> {
                     ));
                     pre_effect += 1;
                 }
+                for (is_rpn, parameters) in [(true, restored_rpn), (false, restored_nrpn)] {
+                    let (msb_cc, lsb_cc) = if is_rpn { (101, 100) } else { (99, 98) };
+                    for (parameter_channel, msb, lsb, data) in parameters {
+                        rebuilt.push(Event::control_change(
+                            pre_effect - 2,
+                            parameter_channel,
+                            msb_cc,
+                            msb,
+                        ));
+                        rebuilt.push(Event::control_change(
+                            pre_effect - 1,
+                            parameter_channel,
+                            lsb_cc,
+                            lsb,
+                        ));
+                        rebuilt.push(Event::control_change(
+                            pre_effect,
+                            parameter_channel,
+                            6,
+                            data,
+                        ));
+                        pre_effect += 3;
+                    }
+                }
                 if let Some(prog) = program {
                     rebuilt.push(Event::program_change(pre_effect, channel, prog));
                 }
@@ -565,6 +680,37 @@ impl<'a> Compiler<'a> {
             track.time = rebuilt.iter().map(|e| e.time).max().unwrap_or(0);
             track.events = rebuilt;
         }
+        self.event_count = final_event_count;
+        Ok(())
+    }
+
+    fn upsert_play_from_parameter(
+        parameters: &mut Vec<(u8, u8, u8, u8)>,
+        (channel, msb, lsb, data): (u8, u8, u8, u8),
+    ) {
+        if let Some((_, _, _, existing_data)) =
+            parameters
+                .iter_mut()
+                .find(|(entry_channel, entry_msb, entry_lsb, _)| {
+                    (*entry_channel, *entry_msb, *entry_lsb) == (channel, msb, lsb)
+                })
+        {
+            *existing_data = data;
+        } else {
+            parameters.push((channel, msb, lsb, data));
+        }
+    }
+
+    /// `PlayFrom` replaces the event set after parsing, so enforce the same
+    /// global limit before allocating its rebuilt event vectors.
+    fn ensure_play_from_event_capacity(final_event_count: usize) -> Result<()> {
+        if final_event_count > MAX_EVENTS {
+            return Err(MmlError::new(
+                0,
+                format!("生成イベント数が上限({MAX_EVENTS})を超えました"),
+            ));
+        }
+        Ok(())
     }
 
     /// Record an event on the current track, against the compile's budget.
@@ -1110,6 +1256,7 @@ impl<'a> Compiler<'a> {
             }
             "NoteOn" => self.direct_note(cur, true, line),
             "NoteOff" => self.direct_note(cur, false, line),
+            "KeyPressure" | "KP" => self.key_pressure(cur, line),
             "ChannelPrefix" => self.channel_prefix(cur, line),
             "Port" | "PORT" => self.port(cur, line),
             "Time" | "TIME" => self.time_command(cur),
@@ -1146,6 +1293,12 @@ impl<'a> Compiler<'a> {
                 self.exiting = true;
                 Ok(())
             }
+            "End" => {
+                self.stop_requested = true;
+                Ok(())
+            }
+            "MsgBox" => self.msg_box(cur, line),
+            "Switch" | "SWITCH" => self.switch_statement(cur, line),
             "SysEx" | "SYSEX" => self.sysex(cur),
             "DirectSMF" => self.direct_smf(cur),
             "Voice" => self.voice(cur),
@@ -2612,8 +2765,8 @@ impl<'a> Compiler<'a> {
             let value = self.expect_int_arg(cur, &name)?;
             match name.as_str() {
                 "SysEx" => self.play_from.sysex = value != 0,
-                // Parsed for compatibility; the Pascal build never actually
-                // reads this field either (a dead option there too).
+                // Pascal keeps this compatibility option, although its CC
+                // setting is otherwise unused by the PlayFrom post-process.
                 "CtrlChg" => {}
                 "RPN_NRPN" => self.play_from.rpn_nrpn = value != 0,
                 "Wait" => self.play_from.wait_time = value,
@@ -3077,6 +3230,59 @@ impl<'a> Compiler<'a> {
         let channel = self.track().channel;
         let status = if on { 0x90 } else { 0x80 } | (channel & 0x0f);
         self.push_event(Event::new(time, vec![status, note as u8, velocity as u8]))
+    }
+
+    /// `KeyPressure(value)` / `KP(value)` writes polyphonic aftertouch for
+    /// the most recently written note, as `TSmfKeyPressure` does in Pascal.
+    fn key_pressure(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let value = self.expect_int_arg(cur, "KeyPressure")?;
+        if !(0..=127).contains(&value) {
+            return Err(MmlError::new(
+                line,
+                format!("KeyPressureは0〜127の範囲で指定してください: {value}"),
+            ));
+        }
+        let (time, channel, note) = {
+            let track = self.track();
+            (track.time, track.channel, track.last_note_no)
+        };
+        self.push_event(Event::new(time, vec![0xa0 | channel, note, value as u8]))
+    }
+
+    /// The Rust core has no native dialog. Preserve the command's observable
+    /// compile-time output as a message, so CLI/WASM hosts can render it.
+    fn msg_box(&mut self, cur: &mut Cursor, _line: usize) -> Result<()> {
+        cur.skip_spaces();
+        let text = if cur.peek().is_none() || matches!(cur.peek(), Some(';') | Some('\n')) {
+            "nil".to_string()
+        } else {
+            self.read_value(cur)?.as_str()
+        };
+        self.messages.push(text);
+        Ok(())
+    }
+
+    fn switch_statement(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let value = self.read_condition(cur)?;
+        let body = self.read_block(cur, line)?;
+        let arms = parse_switch_arms(&body, line)?;
+        let mut fallback = None;
+        for (condition, source) in arms {
+            match condition {
+                Some(condition)
+                    if self.eval_source(&condition, line)?.as_str() == value.as_str() =>
+                {
+                    return self.run_fragment(&source, line);
+                }
+                Some(_) => {}
+                None => fallback = Some(source),
+            }
+        }
+        if let Some(source) = fallback {
+            self.run_fragment(&source, line)
+        } else {
+            Ok(())
+        }
     }
 
     /// Pascal accepts ChannelPrefix as a one-based value and stores `n - 1`.
@@ -4347,6 +4553,9 @@ impl<'a> Compiler<'a> {
         }
 
         let track = self.track();
+        if !muted {
+            track.last_note_no = note_no as u8;
+        }
         track.last_note = if !wrote_note {
             None
         } else {
@@ -5390,9 +5599,7 @@ struct PlayFromSpec {
     to_pos: i64,
     wait_time: i64,
     sysex: bool,
-    /// Parsed for compatibility; RPN/NRPN reconstruction at the cut point is
-    /// not implemented (see spec/10-compatibility.md), so this has no effect.
-    #[allow(dead_code)]
+    /// Reconstruct selected RPN/NRPN values at the PlayFrom cut point.
     rpn_nrpn: bool,
 }
 
@@ -5453,6 +5660,65 @@ fn control_change_number(name: &str) -> Option<i64> {
         "DataLSB" => 38,
         _ => return None,
     })
+}
+
+/// Split a `Switch` body into `Case(condition){body}` and `Default{body}`
+/// arms. The body has already been balanced by `read_block`; this scanner
+/// only needs to recognize top-level keywords and their nested delimiters.
+fn parse_switch_arms(source: &str, line: usize) -> Result<Vec<(Option<String>, String)>> {
+    let mut cursor = Cursor::with_line(source, line);
+    let mut arms = Vec::new();
+    while !cursor.is_eof() {
+        cursor.skip_trivia();
+        if cursor.is_eof() {
+            break;
+        }
+        let name = cursor.read_word().ok_or_else(|| {
+            MmlError::new(
+                cursor.line(),
+                "Switch内にはCaseまたはDefaultを指定してください",
+            )
+        })?;
+        match name.as_str() {
+            "Case" | "CASE" => {
+                cursor.skip_trivia();
+                if !cursor.eat('(') {
+                    return Err(MmlError::new(
+                        cursor.line(),
+                        "Caseには(condition)が必要です",
+                    ));
+                }
+                let condition = cursor
+                    .read_balanced('(', ')')
+                    .ok_or_else(|| MmlError::new(cursor.line(), "Caseの括弧が閉じていません"))?;
+                cursor.skip_trivia();
+                if !cursor.eat('{') {
+                    return Err(MmlError::new(cursor.line(), "Caseには{...}が必要です"));
+                }
+                let body = cursor.read_balanced('{', '}').ok_or_else(|| {
+                    MmlError::new(cursor.line(), "Caseのブロックが閉じていません")
+                })?;
+                arms.push((Some(condition), body));
+            }
+            "Default" | "DEFAULT" => {
+                cursor.skip_trivia();
+                if !cursor.eat('{') {
+                    return Err(MmlError::new(cursor.line(), "Defaultには{...}が必要です"));
+                }
+                let body = cursor.read_balanced('{', '}').ok_or_else(|| {
+                    MmlError::new(cursor.line(), "Defaultのブロックが閉じていません")
+                })?;
+                arms.push((None, body));
+            }
+            _ => {
+                return Err(MmlError::new(
+                    cursor.line(),
+                    "Switch内にはCaseまたはDefaultを指定してください",
+                ));
+            }
+        }
+    }
+    Ok(arms)
 }
 
 /// Split a loop body at a top-level `:`.
@@ -5555,6 +5821,32 @@ mod tests {
         assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
         assert_eq!(compiler.buffered_slur_events, 0);
         assert!(compiler.stop_requested);
+    }
+
+    #[test]
+    fn play_from_rebuild_checks_the_final_event_budget_before_allocating() {
+        let error = Compiler::ensure_play_from_event_capacity(MAX_EVENTS + 1).unwrap_err();
+        assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
+    }
+
+    #[test]
+    fn play_from_places_rpn_selectors_before_the_data_entry_time() {
+        let result = Compiler::new()
+            .compile("RPN(0,1,9) @5 Time(2:1:0) PlayFrom.Wait(0) PlayFrom(2:1:0) c")
+            .unwrap();
+        let events = &result.song.tracks[0].events;
+        let time_of = |data: &[u8]| {
+            events
+                .iter()
+                .find(|event| event.data == data)
+                .map(|event| event.time)
+                .expect("expected reconstructed event")
+        };
+
+        assert_eq!(time_of(&[0xb0, 101, 0]), -2);
+        assert_eq!(time_of(&[0xb0, 100, 1]), -1);
+        assert_eq!(time_of(&[0xb0, 6, 9]), 0);
+        assert_eq!(time_of(&[0xc0, 4]), 3);
     }
 
     #[test]
