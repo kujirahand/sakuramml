@@ -4103,6 +4103,10 @@ impl<'a> Compiler<'a> {
         if muted {
             return;
         }
+        // Pascal removes pitch-bend events at or after this time before a
+        // direct p/PitchBend write. Slur-generated bends bypass this path and
+        // intentionally retain coincident values.
+        self.delete_cc_after(advance_spec::BEND_EASY, time);
         let _ = self.push_event(Event::new(time, vec![0xe0 | (channel & 0x0f), lsb, msb]));
     }
 
@@ -4398,12 +4402,34 @@ impl<'a> Compiler<'a> {
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        // Pascal's `r*` suppresses the note/rest event-side effects. A plain
+        // rest consumes every l/q/v/t/o onNote value just like a note, while
+        // `r*` consumes only the default length value.
+        let suppress_event = cur.eat('*');
         // A leading sign rewinds instead of advancing: `r-2.` moves the
         // pointer backward by a dotted half note. `+` is accepted too, and
         // is simply the ordinary direction — `r+2` and `r2` are identical.
         let rewind = cur.eat('-');
         if !rewind {
             cur.eat('+');
+        }
+        let time = self.track().time;
+        let (base_length, base_gate, base_velocity, base_timing, base_octave) = {
+            let track = self.track();
+            (
+                track.length,
+                track.gate_percent,
+                track.velocity,
+                track.timing,
+                track.octave,
+            )
+        };
+        let default_length = self.note_value(OnNoteTarget::Length, base_length, time);
+        if !suppress_event {
+            let _ = self.note_value(OnNoteTarget::Gate, base_gate, time);
+            let _ = self.note_value(OnNoteTarget::Velocity, base_velocity, time);
+            let _ = self.note_value(OnNoteTarget::Timing, base_timing, time);
+            let _ = self.note_value(OnNoteTarget::Octave, base_octave, time);
         }
         let expression_length = if cur.peek() == Some('(') {
             let value = self.read_number(cur)?.unwrap_or(0);
@@ -4425,16 +4451,15 @@ impl<'a> Compiler<'a> {
         // rest length is read after that default and therefore stays literal.
         let length = match explicit {
             Some(length) => length,
-            None => {
-                let default_length = self.track().length;
-                self.scale_stretch(default_length, line)?
-            }
+            None if suppress_event => default_length,
+            None => self.scale_stretch(default_length, line)?,
         };
         let signed = if rewind { -length } else { length };
-        let time = self.track().time;
         // A rest advances the specifications as a note does — the Pascal
         // build calls checkNoteOnCC for both.
-        self.write_cc_modifiers(time, length.max(0))?;
+        if !suppress_event {
+            self.write_cc_modifiers(time, length.max(0))?;
+        }
         let next = self.checked_time(time, signed, line)?;
         let track = self.track();
         track.time = next;
@@ -4578,7 +4603,7 @@ impl<'a> Compiler<'a> {
         } else {
             gate_modifier_in_steps.unwrap_or(self.track().gate_in_steps)
         };
-        let (length, gate) = if self.stretch_rate != 1.0 {
+        let (length, gate, chord_gate) = if self.stretch_rate != 1.0 {
             // Pascal scales the duration and the pre-NoteOff gate separately,
             // then applies the one-tick packed-note adjustment.
             let raw_gate = if gate_in_steps {
@@ -4586,14 +4611,21 @@ impl<'a> Compiler<'a> {
             } else {
                 length.saturating_mul(gate_value) / q_max.max(1)
             };
+            let scaled_gate = self.scale_stretch(raw_gate, line)?;
             (
                 self.scale_stretch(length, line)?,
-                (self.scale_stretch(raw_gate, line)? - 1).max(1),
+                (scaled_gate - 1).max(1),
+                scaled_gate.max(1),
             )
         } else if gate_in_steps {
-            (length, (gate_value - 1).max(1))
+            (length, (gate_value - 1).max(1), gate_value.max(1))
         } else {
-            (length, gate_ticks_scaled(length, gate_value, q_max))
+            let raw_gate = length.saturating_mul(gate_value) / q_max.max(1);
+            (
+                length,
+                gate_ticks_scaled(length, gate_value, q_max),
+                raw_gate.max(1),
+            )
         };
         let (timing, channel) = {
             let track = self.track();
@@ -4643,7 +4675,6 @@ impl<'a> Compiler<'a> {
                 // Pascal's WaonStack bypasses the ordinary packed-note
                 // one-tick shortening for every member, including the final
                 // positive-length note.
-                let chord_gate = gate.saturating_add(1);
                 for note in pending {
                     let note_end = self.checked_time(note.start, chord_gate, line)?;
                     self.push_event(Event::note_on(

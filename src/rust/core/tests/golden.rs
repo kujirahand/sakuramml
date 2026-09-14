@@ -214,6 +214,34 @@ fn rest_advances_time() {
 }
 
 #[test]
+fn plain_rest_advances_note_modifiers_but_eventless_rest_does_not() {
+    assert_golden(
+        "l4 t.onNote(0,4,12,0) 'ceg' r 'ceg'",
+        "4d546864000000060001000100604d54726b0000003400903c6404904064089043643f803c64048040640880436469903c6404904064089043643f803c64048040640880436409ff2f00",
+    );
+    assert_golden(
+        "l4 t.onNote(0,4,12,0) 'ceg' r* 'ceg'",
+        "4d546864000000060001000100604d54726b0000003400903c6404904064089043643f803c64048040640880436469903c64009040640490436447803c64008040640480436411ff2f00",
+    );
+}
+
+#[test]
+fn packed_note_off_order_follows_note_on_time_after_a_rewind() {
+    assert_golden(
+        "q100 Time(1:2:0)c4 Time(1:1:0)e2",
+        "4d546864000000060001000100604d54726b000000140090406460903c645f80406400803c6401ff2f00",
+    );
+}
+
+#[test]
+fn identical_pitch_bends_at_one_tick_are_deduplicated() {
+    assert_golden(
+        "p0 p0",
+        "4d546864000000060001000100604d54726b0000000800e0000000ff2f00",
+    );
+}
+
+#[test]
 fn tie_extends_previous_note() {
     assert_golden(
         "c^c",
@@ -444,6 +472,10 @@ fn zero_length_numeric_notes_form_a_legacy_chord() {
     assert_golden(
         "n60,0 n64,0 n67,4",
         "4d546864000000060001000100604d54726b0000001c00903c6400904064009043644c803c64008040640080436414ff2f00",
+    );
+    assert_golden(
+        "q1 n60,0 n64,0 n67,16",
+        "4d546864000000060001000100604d54726b0000001c00903c64009040640090436401803c64008040640080436417ff2f00",
     );
 }
 
