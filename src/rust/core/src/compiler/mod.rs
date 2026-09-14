@@ -2636,7 +2636,11 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         let body = self.read_block(cur, line)?;
         cur.skip_spaces();
-        let total = self.read_length(cur).unwrap_or_else(|| self.track().length);
+        let default_length = self.track().length;
+        let initial = self.read_length(cur);
+        let total = self
+            .extend_default_length_joins(cur, initial, default_length, line)?
+            .unwrap_or(default_length);
 
         let count = count_notes(&body).max(1);
         let previous = self.track().length;
@@ -4475,6 +4479,7 @@ impl<'a> Compiler<'a> {
             self.read_note_options(cur, false)?
         };
         let explicit = expression_length.or(length);
+        let explicit = self.extend_default_length_joins(cur, explicit, default_length, line)?;
         // Pascal's funcNoteR scales the default rest length, but an explicit
         // rest length is read after that default and therefore stays literal.
         let length = match explicit {
@@ -5046,6 +5051,11 @@ impl<'a> Compiler<'a> {
                     _ => continue,
                 };
                 self.read_note_option(cur, index, &mut length, &mut options)?;
+                if index == 0 {
+                    let default_length = self.track().length;
+                    length =
+                        self.extend_default_length_joins(cur, length, default_length, cur.line())?;
+                }
                 cur.skip_spaces();
                 if position + 1 >= order.len() || !cur.eat(',') {
                     break;
@@ -5055,6 +5065,8 @@ impl<'a> Compiler<'a> {
         } else {
             self.read_note_option(cur, 0, &mut length, &mut options)?;
         }
+        let default_length = self.track().length;
+        length = self.extend_default_length_joins(cur, length, default_length, cur.line())?;
         Ok((length, options))
     }
 
@@ -5108,9 +5120,44 @@ impl<'a> Compiler<'a> {
         self.read_length_in_mode(cur, step_mode)
     }
 
+    /// Complete joins that begin after an omitted/default first length.
+    /// Pascal's GetNoteLength always starts with its supplied default, so a
+    /// suffix such as `c^`, `r^`, or `Div{cde}^` consumes the caret and adds
+    /// one current default length even though no digits follow it.
+    fn extend_default_length_joins(
+        &mut self,
+        cur: &mut Cursor,
+        initial: Option<i64>,
+        default_length: i64,
+        line: usize,
+    ) -> Result<Option<i64>> {
+        let mut total = initial;
+        cur.skip_spaces();
+        while matches!(cur.peek(), Some('^') | Some('+') | Some('-')) {
+            let subtract = cur.eat('-');
+            if !subtract {
+                cur.advance();
+            }
+            cur.skip_spaces();
+            let part = self.read_length(cur).unwrap_or(default_length);
+            let base = total.unwrap_or(default_length);
+            total = Some(
+                if subtract {
+                    base.checked_sub(part)
+                } else {
+                    base.checked_add(part)
+                }
+                .ok_or_else(|| MmlError::new(line, "結合音長が範囲を超えました"))?,
+            );
+            cur.skip_spaces();
+        }
+        Ok(total)
+    }
+
     fn read_length_in_mode(&mut self, cur: &mut Cursor, step_mode: bool) -> Option<i64> {
         let mut total: Option<i64> = None;
         let mut subtract = false;
+        let mut after_operator = false;
         loop {
             // `*` introduces a length that may be an expression: `r*%(Delay)`
             // is a rest of `Delay` ticks, `c*3` a third note. Only there does
@@ -5146,12 +5193,16 @@ impl<'a> Compiler<'a> {
                     Some(n) if n > 0 => Some(self.timebase * 4 / n),
                     other => other,
                 }
+            } else if after_operator {
+                // Pascal treats an omitted part after ^, +, or - as the
+                // current default length. This includes a trailing operator
+                // and lets its following dots extend that default part.
+                Some(self.track().length)
             } else if total.is_some() && cur.peek() == Some('.') {
                 Some(0)
             } else {
                 None
             };
-
             let mut part = match (part, total) {
                 (Some(p), _) => p,
                 (None, Some(_)) => break,
@@ -5185,11 +5236,13 @@ impl<'a> Compiler<'a> {
             match cur.peek() {
                 Some('^') | Some('+') => {
                     subtract = false;
+                    after_operator = true;
                     cur.advance();
                     continue;
                 }
                 Some('-') => {
                     subtract = true;
+                    after_operator = true;
                     cur.advance();
                     continue;
                 }

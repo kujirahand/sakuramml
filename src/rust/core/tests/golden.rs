@@ -201,6 +201,20 @@ fn step_mode_applies_to_explicit_lengths_and_length_arithmetic() {
 }
 
 #[test]
+fn an_omitted_joined_length_part_uses_the_current_default() {
+    assert_golden(
+        "l16 q100 c2^4^",
+        "4d546864000000060001000100604d54726b0000000d00903c648237803c6401ff2f00",
+    );
+    assert_same_bytes("l16 c2+4+", "l16 c2^4^16");
+    assert_same_bytes("l16 c2-4-", "l16 c%72");
+    assert_same_bytes("l16 c2^4^.", "l16 c2^4^16.");
+    assert_same_bytes("l16 c^", "l16 c8");
+    assert_same_bytes("l16 c^,75", "l16 c8,75");
+    assert_same_bytes("l16 r^ c", "l16 r8 c");
+}
+
+#[test]
 fn rest_advances_time() {
     assert_golden(
         "r c",
@@ -1434,6 +1448,7 @@ fn div_leaves_the_pointer_after_the_stated_length() {
         "4d546864000000060001000100604d54726b0000001400903c644b803c6415903e6425803e6400ff2f00",
     );
     assert_same_bytes("Div{cde}4 e", "l12 cde l4 e");
+    assert_same_bytes("l8 Div{cde}^ e^", "l8 Div{cde}4 e^");
 }
 
 /// `#name={mml}` defines a string macro; mentioning it plays its contents.
