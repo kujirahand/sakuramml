@@ -150,7 +150,7 @@ fn adjust_overlapping_notes(events: &mut [Event]) -> Vec<usize> {
         let Some(status) = events[on_index].data.first().copied() else {
             continue;
         };
-        if status & 0xf0 != 0x90 || events[on_index].data.get(2) == Some(&0) {
+        if status & 0xf0 != 0x90 {
             continue;
         }
         let channel = status & 0x0f;

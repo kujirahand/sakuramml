@@ -234,10 +234,33 @@ fn packed_note_off_order_follows_note_on_time_after_a_rewind() {
 }
 
 #[test]
+fn silent_packed_note_off_order_follows_note_on_time_after_a_rewind() {
+    assert_golden(
+        "v0 q100 Time(1:2:0)c4 Time(1:1:0)e2",
+        "4d546864000000060001000100604d54726b000000140090400060903c005f80400000803c0001ff2f00",
+    );
+}
+
+#[test]
 fn identical_pitch_bends_at_one_tick_are_deduplicated() {
     assert_golden(
         "p0 p0",
         "4d546864000000060001000100604d54726b0000000800e0000000ff2f00",
+    );
+}
+
+#[test]
+fn direct_pitch_bends_cancel_both_modifier_forms() {
+    let centred = "4d546864000000060001000100604d54726b0000001000e0004000903c644b803c6415ff2f00";
+    assert_golden("PitchBend.onNote(-8192,8191); p64; c", centred);
+    assert_golden("p.onNote(0,127); PitchBend(0); c", centred);
+}
+
+#[test]
+fn direct_pitch_bend_uses_pascal_insertion_order_when_rewound() {
+    assert_golden(
+        "q100 PitchBend.onNote(-8000,-7000) Time(1:2:4)c Time(1:1:50)d Time(1:1:75)p64",
+        "4d546864000000060001000100604d54726b0000002031e0280901903e6418e0004019e0400101903c642d803e6432803c6400ff2f00",
     );
 }
 
