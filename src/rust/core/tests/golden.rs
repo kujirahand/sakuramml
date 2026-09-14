@@ -254,6 +254,18 @@ fn direct_pitch_bends_cancel_both_modifier_forms() {
     let centred = "4d546864000000060001000100604d54726b0000001000e0004000903c644b803c6415ff2f00";
     assert_golden("PitchBend.onNote(-8192,8191); p64; c", centred);
     assert_golden("p.onNote(0,127); PitchBend(0); c", centred);
+    assert_golden("PitchBend(0); p.onNote(64); c", centred);
+    assert_golden("p64; PitchBend.onNote(0); c", centred);
+}
+
+#[test]
+fn redeclared_bend_modifier_uses_the_direct_bends_current_value() {
+    let rewritten = "4d546864000000060001000100604d54726b0000002000e0000000903c644b803c6414e0004000e0000001903e644b803e6415ff2f00";
+    assert_golden("p.onNote(0); c; PitchBend(0); p.onNote(0); d", rewritten);
+    assert_golden(
+        "PitchBend.onNote(-8192); c; p64; PitchBend.onNote(-8192); d",
+        rewritten,
+    );
 }
 
 #[test]

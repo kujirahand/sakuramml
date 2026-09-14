@@ -2164,15 +2164,12 @@ impl<'a> Compiler<'a> {
         track.cc_modifiers.last_mut().expect("just pushed")
     }
 
-    fn reset_cc_modifier(&mut self, no: i64) {
-        if let Some(modifier) = self
-            .track()
-            .cc_modifiers
-            .iter_mut()
-            .find(|modifier| modifier.no == no)
-        {
-            modifier.kind = Kind::Off;
-        }
+    fn reset_cc_modifier(&mut self, no: i64, time: i64, last_value: i64) {
+        let modifier = self.cc_modifier_entry(no);
+        modifier.kind = Kind::Off;
+        modifier.index = 0;
+        modifier.time = time;
+        modifier.last_value = last_value;
     }
 
     /// Write out one controller's advance specification for a note.
@@ -4116,19 +4113,21 @@ impl<'a> Compiler<'a> {
     }
 
     fn write_pitch_bend_raw(&mut self, lsb: u8, msb: u8) {
-        // Pascal disables both representations regardless of which direct
-        // bend form was used, so the alternate modifier cannot affect the
-        // following note.
-        self.reset_cc_modifier(advance_spec::BEND_FULL);
-        self.reset_cc_modifier(advance_spec::BEND_EASY);
         let controller_shift = self.controller_shift;
         let (time, channel, muted) = {
             let track = self.track();
             (track.time - controller_shift, track.channel, track.cc_muted)
         };
         let raw = ((msb as i64) << 7) | lsb as i64;
-        self.track().pitch_bend_full = raw - 8192;
-        self.track().pitch_bend_easy = msb as i64;
+        let full = raw - 8192;
+        let easy = msb as i64;
+        // Pascal disables and synchronises both representations regardless of
+        // which direct bend form was used. This also gives a later modifier
+        // the correct value for suppressing genuinely duplicate first events.
+        self.reset_cc_modifier(advance_spec::BEND_FULL, time, full);
+        self.reset_cc_modifier(advance_spec::BEND_EASY, time, easy);
+        self.track().pitch_bend_full = full;
+        self.track().pitch_bend_easy = easy;
         if muted {
             return;
         }
