@@ -80,12 +80,21 @@ impl Song {
 
 fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     let mut events = track.events.clone();
-    adjust_overlapping_notes(&mut events);
+    let deferred_order = adjust_overlapping_notes(&mut events);
     // Stable sort keeps same-time events in the order they were written.
     // Note-offs generated from ordinary packed notes come last because the
     // Pascal build appends them during its finalisation pass. A low-level
     // NoteOff command is already a direct event and must retain its position.
-    events.sort_by_key(|e| (e.time, e.deferred_at_same_time as u8));
+    let mut indexed_events: Vec<_> = events.into_iter().enumerate().collect();
+    indexed_events.sort_by_key(|(index, event)| {
+        let order = if event.deferred_at_same_time {
+            deferred_order[*index]
+        } else {
+            *index
+        };
+        (event.time, event.deferred_at_same_time as u8, order)
+    });
+    let mut events: Vec<_> = indexed_events.into_iter().map(|(_, event)| event).collect();
     remove_duplicate_controllers(&mut events);
 
     let mut body = Vec::new();
@@ -115,7 +124,8 @@ fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     Ok(chunk)
 }
 
-/// Pascal drops the earlier of two adjacent, identical CC writes at one tick.
+/// Pascal drops the earlier of two adjacent, identical CC writes at one tick
+/// after sorting the track.
 fn remove_duplicate_controllers(events: &mut [Event]) {
     for index in 1..events.len() {
         let previous = &events[index - 1];
@@ -134,13 +144,13 @@ fn remove_duplicate_controllers(events: &mut [Event]) {
 /// before its NoteOff, even when the channel has changed. This is especially
 /// visible in delay helpers, where several copies of one phrase overlap at
 /// fixed offsets.
-fn adjust_overlapping_notes(events: &mut [Event]) {
+fn adjust_overlapping_notes(events: &mut [Event]) -> Vec<usize> {
     let mut pairs = Vec::new();
     for on_index in 0..events.len() {
         let Some(status) = events[on_index].data.first().copied() else {
             continue;
         };
-        if status & 0xf0 != 0x90 || events[on_index].data.get(2) == Some(&0) {
+        if status & 0xf0 != 0x90 {
             continue;
         }
         let channel = status & 0x0f;
@@ -161,6 +171,10 @@ fn adjust_overlapping_notes(events: &mut [Event]) {
         }
     }
     pairs.sort_by_key(|(_, on, _)| events[*on].time);
+    let mut deferred_order = vec![usize::MAX; events.len()];
+    for (order, &(_, _, off)) in pairs.iter().enumerate() {
+        deferred_order[off] = order;
+    }
 
     for index in 0..pairs.len() {
         let (note, current_on, _) = pairs[index];
@@ -185,6 +199,7 @@ fn adjust_overlapping_notes(events: &mut [Event]) {
             }
         }
     }
+    deferred_order
 }
 
 /// Write a delta time, refusing one the format cannot represent.

@@ -214,6 +214,69 @@ fn rest_advances_time() {
 }
 
 #[test]
+fn plain_rest_advances_note_modifiers_but_eventless_rest_does_not() {
+    assert_golden(
+        "l4 t.onNote(0,4,12,0) 'ceg' r 'ceg'",
+        "4d546864000000060001000100604d54726b0000003400903c6404904064089043643f803c64048040640880436469903c6404904064089043643f803c64048040640880436409ff2f00",
+    );
+    assert_golden(
+        "l4 t.onNote(0,4,12,0) 'ceg' r* 'ceg'",
+        "4d546864000000060001000100604d54726b0000003400903c6404904064089043643f803c64048040640880436469903c64009040640490436447803c64008040640480436411ff2f00",
+    );
+}
+
+#[test]
+fn packed_note_off_order_follows_note_on_time_after_a_rewind() {
+    assert_golden(
+        "q100 Time(1:2:0)c4 Time(1:1:0)e2",
+        "4d546864000000060001000100604d54726b000000140090406460903c645f80406400803c6401ff2f00",
+    );
+}
+
+#[test]
+fn silent_packed_note_off_order_follows_note_on_time_after_a_rewind() {
+    assert_golden(
+        "v0 q100 Time(1:2:0)c4 Time(1:1:0)e2",
+        "4d546864000000060001000100604d54726b000000140090400060903c005f80400000803c0001ff2f00",
+    );
+}
+
+#[test]
+fn identical_pitch_bends_at_one_tick_are_deduplicated() {
+    assert_golden(
+        "p0 p0",
+        "4d546864000000060001000100604d54726b0000000800e0000000ff2f00",
+    );
+}
+
+#[test]
+fn direct_pitch_bends_cancel_both_modifier_forms() {
+    let centred = "4d546864000000060001000100604d54726b0000001000e0004000903c644b803c6415ff2f00";
+    assert_golden("PitchBend.onNote(-8192,8191); p64; c", centred);
+    assert_golden("p.onNote(0,127); PitchBend(0); c", centred);
+    assert_golden("PitchBend(0); p.onNote(64); c", centred);
+    assert_golden("p64; PitchBend.onNote(0); c", centred);
+}
+
+#[test]
+fn redeclared_bend_modifier_uses_the_direct_bends_current_value() {
+    let rewritten = "4d546864000000060001000100604d54726b0000002000e0000000903c644b803c6414e0004000e0000001903e644b803e6415ff2f00";
+    assert_golden("p.onNote(0); c; PitchBend(0); p.onNote(0); d", rewritten);
+    assert_golden(
+        "PitchBend.onNote(-8192); c; p64; PitchBend.onNote(-8192); d",
+        rewritten,
+    );
+}
+
+#[test]
+fn direct_pitch_bend_uses_pascal_insertion_order_when_rewound() {
+    assert_golden(
+        "q100 PitchBend.onNote(-8000,-7000) Time(1:2:4)c Time(1:1:50)d Time(1:1:75)p64",
+        "4d546864000000060001000100604d54726b0000002031e0280901903e6418e0004019e0400101903c642d803e6432803c6400ff2f00",
+    );
+}
+
+#[test]
 fn tie_extends_previous_note() {
     assert_golden(
         "c^c",
@@ -444,6 +507,10 @@ fn zero_length_numeric_notes_form_a_legacy_chord() {
     assert_golden(
         "n60,0 n64,0 n67,4",
         "4d546864000000060001000100604d54726b0000001c00903c6400904064009043644c803c64008040640080436414ff2f00",
+    );
+    assert_golden(
+        "q1 n60,0 n64,0 n67,16",
+        "4d546864000000060001000100604d54726b0000001c00903c64009040640090436401803c64008040640080436417ff2f00",
     );
 }
 

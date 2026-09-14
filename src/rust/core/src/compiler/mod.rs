@@ -1211,7 +1211,7 @@ impl<'a> Compiler<'a> {
                     } else {
                         self.controller_shift
                     };
-                self.delete_cc_after(no, time);
+                self.delete_cc_after(no, time, true);
                 Ok(())
             }
             "CCMute" => {
@@ -2013,7 +2013,7 @@ impl<'a> Compiler<'a> {
             // `.onTime` and `.Sine` write themselves out where they stand and
             // are then finished; the rest wait for the notes they apply to.
             if matches!(kind, Kind::OnTime | Kind::CcSine) {
-                self.delete_cc_after(no, time);
+                self.delete_cc_after(no, time, false);
                 self.write_cc_modifier(no, time, 0)?;
                 self.cc_modifier_entry(no).kind = Kind::Off;
             }
@@ -2164,15 +2164,12 @@ impl<'a> Compiler<'a> {
         track.cc_modifiers.last_mut().expect("just pushed")
     }
 
-    fn reset_cc_modifier(&mut self, no: i64) {
-        if let Some(modifier) = self
-            .track()
-            .cc_modifiers
-            .iter_mut()
-            .find(|modifier| modifier.no == no)
-        {
-            modifier.kind = Kind::Off;
-        }
+    fn reset_cc_modifier(&mut self, no: i64, time: i64, last_value: i64) {
+        let modifier = self.cc_modifier_entry(no);
+        modifier.kind = Kind::Off;
+        modifier.index = 0;
+        modifier.time = time;
+        modifier.last_value = last_value;
     }
 
     /// Write out one controller's advance specification for a note.
@@ -2237,21 +2234,48 @@ impl<'a> Compiler<'a> {
 
     /// Drop control-change events for `no` at or after `time`, as the Pascal
     /// build does before writing a fresh ramp over the same ground.
-    fn delete_cc_after(&mut self, no: i64, time: i64) {
+    fn delete_cc_after(&mut self, no: i64, time: i64, complete: bool) {
         let channel = self.track().channel;
         let status = if matches!(no, advance_spec::BEND_FULL | advance_spec::BEND_EASY) {
             0xe0 | (channel & 0x0f)
         } else {
             0xb0 | (channel & 0x0f)
         };
-        self.track().events.retain(|event| {
-            if event.time < time || event.data.first() != Some(&status) {
-                return true;
+        let matches_controller = |event: &Event| {
+            if event.data.first() != Some(&status) {
+                return false;
             }
             // Pascal treats the bend pseudo controllers 256/257 as the same
             // MIDI event class. Values 128..255 likewise select all CCs.
-            (0..=127).contains(&no) && event.data.get(1) != Some(&(no as u8))
-        });
+            !(0..=127).contains(&no) || event.data.get(1) == Some(&(no as u8))
+        };
+
+        if complete {
+            // DeleteCC sorts first in Pascal, so every matching event in the
+            // requested time range is removed. Retaining insertion order here
+            // keeps packed note pairs adjacent until final SMF serialisation.
+            self.track()
+                .events
+                .retain(|event| event.time < time || !matches_controller(event));
+            return;
+        }
+
+        // Ordinary CC and bend writes scan backward in insertion order. The
+        // first older matching event stops the scan, even if an earlier-
+        // inserted event has a later timestamp after a Time/negative-rest
+        // rewind.
+        let events = &mut self.track().events;
+        let mut index = events.len();
+        while index > 0 {
+            index -= 1;
+            if !matches_controller(&events[index]) {
+                continue;
+            }
+            if events[index].time < time {
+                break;
+            }
+            events.remove(index);
+        }
     }
 
     fn note_value(&mut self, target: OnNoteTarget, base: i64, time: i64) -> i64 {
@@ -4049,7 +4073,6 @@ impl<'a> Compiler<'a> {
         match args[0] {
             advance_spec::BEND_FULL => self.write_pitch_bend(args[1]),
             advance_spec::BEND_EASY => {
-                self.reset_cc_modifier(advance_spec::BEND_EASY);
                 self.write_pitch_bend_raw(0, args[1].clamp(0, 127) as u8);
             }
             controller => self.write_cc(controller, args[1]),
@@ -4071,7 +4094,6 @@ impl<'a> Compiler<'a> {
             .expect_int(cur, "p")
             .map_err(|_| MmlError::new(line, "pには値を指定してください"))?;
         // The simple form sets only the MSB: LSB stays 0.
-        self.reset_cc_modifier(advance_spec::BEND_EASY);
         self.write_pitch_bend_raw(0, value.clamp(0, 127) as u8);
         Ok(())
     }
@@ -4086,7 +4108,6 @@ impl<'a> Compiler<'a> {
     }
 
     fn write_pitch_bend(&mut self, value: i64) {
-        self.reset_cc_modifier(advance_spec::BEND_FULL);
         let raw = (value + 8192).clamp(0, 16383);
         self.write_pitch_bend_raw((raw & 0x7f) as u8, ((raw >> 7) & 0x7f) as u8);
     }
@@ -4098,11 +4119,22 @@ impl<'a> Compiler<'a> {
             (track.time - controller_shift, track.channel, track.cc_muted)
         };
         let raw = ((msb as i64) << 7) | lsb as i64;
-        self.track().pitch_bend_full = raw - 8192;
-        self.track().pitch_bend_easy = msb as i64;
+        let full = raw - 8192;
+        let easy = msb as i64;
+        // Pascal disables and synchronises both representations regardless of
+        // which direct bend form was used. This also gives a later modifier
+        // the correct value for suppressing genuinely duplicate first events.
+        self.reset_cc_modifier(advance_spec::BEND_FULL, time, full);
+        self.reset_cc_modifier(advance_spec::BEND_EASY, time, easy);
+        self.track().pitch_bend_full = full;
+        self.track().pitch_bend_easy = easy;
         if muted {
             return;
         }
+        // Pascal removes pitch-bend events at or after this time before a
+        // direct p/PitchBend write. Slur-generated bends bypass this path and
+        // intentionally retain coincident values.
+        self.delete_cc_after(advance_spec::BEND_EASY, time, false);
         let _ = self.push_event(Event::new(time, vec![0xe0 | (channel & 0x0f), lsb, msb]));
     }
 
@@ -4398,12 +4430,34 @@ impl<'a> Compiler<'a> {
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        // Pascal's `r*` suppresses the note/rest event-side effects. A plain
+        // rest consumes every l/q/v/t/o onNote value just like a note, while
+        // `r*` consumes only the default length value.
+        let suppress_event = cur.eat('*');
         // A leading sign rewinds instead of advancing: `r-2.` moves the
         // pointer backward by a dotted half note. `+` is accepted too, and
         // is simply the ordinary direction — `r+2` and `r2` are identical.
         let rewind = cur.eat('-');
         if !rewind {
             cur.eat('+');
+        }
+        let time = self.track().time;
+        let (base_length, base_gate, base_velocity, base_timing, base_octave) = {
+            let track = self.track();
+            (
+                track.length,
+                track.gate_percent,
+                track.velocity,
+                track.timing,
+                track.octave,
+            )
+        };
+        let default_length = self.note_value(OnNoteTarget::Length, base_length, time);
+        if !suppress_event {
+            let _ = self.note_value(OnNoteTarget::Gate, base_gate, time);
+            let _ = self.note_value(OnNoteTarget::Velocity, base_velocity, time);
+            let _ = self.note_value(OnNoteTarget::Timing, base_timing, time);
+            let _ = self.note_value(OnNoteTarget::Octave, base_octave, time);
         }
         let expression_length = if cur.peek() == Some('(') {
             let value = self.read_number(cur)?.unwrap_or(0);
@@ -4425,16 +4479,15 @@ impl<'a> Compiler<'a> {
         // rest length is read after that default and therefore stays literal.
         let length = match explicit {
             Some(length) => length,
-            None => {
-                let default_length = self.track().length;
-                self.scale_stretch(default_length, line)?
-            }
+            None if suppress_event => default_length,
+            None => self.scale_stretch(default_length, line)?,
         };
         let signed = if rewind { -length } else { length };
-        let time = self.track().time;
         // A rest advances the specifications as a note does — the Pascal
         // build calls checkNoteOnCC for both.
-        self.write_cc_modifiers(time, length.max(0))?;
+        if !suppress_event {
+            self.write_cc_modifiers(time, length.max(0))?;
+        }
         let next = self.checked_time(time, signed, line)?;
         let track = self.track();
         track.time = next;
@@ -4578,7 +4631,7 @@ impl<'a> Compiler<'a> {
         } else {
             gate_modifier_in_steps.unwrap_or(self.track().gate_in_steps)
         };
-        let (length, gate) = if self.stretch_rate != 1.0 {
+        let (length, gate, chord_gate) = if self.stretch_rate != 1.0 {
             // Pascal scales the duration and the pre-NoteOff gate separately,
             // then applies the one-tick packed-note adjustment.
             let raw_gate = if gate_in_steps {
@@ -4586,14 +4639,21 @@ impl<'a> Compiler<'a> {
             } else {
                 length.saturating_mul(gate_value) / q_max.max(1)
             };
+            let scaled_gate = self.scale_stretch(raw_gate, line)?;
             (
                 self.scale_stretch(length, line)?,
-                (self.scale_stretch(raw_gate, line)? - 1).max(1),
+                (scaled_gate - 1).max(1),
+                scaled_gate.max(1),
             )
         } else if gate_in_steps {
-            (length, (gate_value - 1).max(1))
+            (length, (gate_value - 1).max(1), gate_value.max(1))
         } else {
-            (length, gate_ticks_scaled(length, gate_value, q_max))
+            let raw_gate = length.saturating_mul(gate_value) / q_max.max(1);
+            (
+                length,
+                gate_ticks_scaled(length, gate_value, q_max),
+                raw_gate.max(1),
+            )
         };
         let (timing, channel) = {
             let track = self.track();
@@ -4643,7 +4703,6 @@ impl<'a> Compiler<'a> {
                 // Pascal's WaonStack bypasses the ordinary packed-note
                 // one-tick shortening for every member, including the final
                 // positive-length note.
-                let chord_gate = gate.saturating_add(1);
                 for note in pending {
                     let note_end = self.checked_time(note.start, chord_gate, line)?;
                     self.push_event(Event::note_on(
