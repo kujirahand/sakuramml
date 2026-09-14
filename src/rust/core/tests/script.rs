@@ -903,10 +903,29 @@ fn switch_end_and_msg_box_match_the_script_contract() {
 
 #[test]
 fn play_from_restores_rpn_and_nrpn_only_when_enabled() {
-    let restored = compile("RPN(0,1,7) Time(2:1:0) PlayFrom(2:1:0) c").unwrap();
+    let restored =
+        compile("Channel(1) RPN(0,1,7) RPN(0,1,9) Channel(2) y7,11 Time(2:1:0) PlayFrom(2:1:0) c")
+            .unwrap();
     assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 101, 0]));
     assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 100, 1]));
-    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 7]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 9]));
+    assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 7]));
+    assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb1, 101, 0]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb1, 7, 11]));
+
+    let disabled =
+        compile("PlayFrom.RPN_NRPN(0) RPN(0,1,9) Time(2:1:0) PlayFrom(2:1:0) c").unwrap();
+    let cc_position = |event| {
+        disabled
+            .smf
+            .windows(3)
+            .position(|bytes| bytes == event)
+            .expect("expected restored control change")
+    };
+    // With RPN_NRPN off, Pascal restores the three raw CC values in numeric
+    // controller order rather than replaying an RPN parameter transaction.
+    assert!(cc_position([0xb0, 6, 9]) < cc_position([0xb0, 100, 1]));
+    assert!(cc_position([0xb0, 100, 1]) < cc_position([0xb0, 101, 0]));
 }
 
 #[test]

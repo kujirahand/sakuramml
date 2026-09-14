@@ -403,7 +403,7 @@ impl<'a> Compiler<'a> {
             }
             self.buffered_slur_events = 0;
         }
-        self.apply_play_from();
+        self.apply_play_from()?;
 
         let mut song = Song::new(self.timebase as u16);
         for (track_no, state) in self.tracks {
@@ -442,19 +442,20 @@ impl<'a> Compiler<'a> {
     /// it at save time rather than as the source is read — so where in the
     /// song `PlayFrom` is written makes no difference to the result.
     ///
-    /// Not reproduced: RPN/NRPN reconstruction at the cut point (rare, and
-    /// no sample song exercises it — see spec/10-compatibility.md).
-    fn apply_play_from(&mut self) {
+    fn apply_play_from(&mut self) -> Result<()> {
         let from_pos = self.play_from.from_pos;
         let to_pos = self.play_from.to_pos;
         // The Pascal build only runs any of this when one bound is set.
         if from_pos <= 0 && to_pos <= 0 {
-            return;
+            return Ok(());
         }
         let wait_time = self.play_from.wait_time;
         let sysex = self.play_from.sysex;
         let restore_rpn_nrpn = self.play_from.rpn_nrpn;
 
+        // Apply PlayTo before calculating the final event budget.  The
+        // following reconstruction can add events, so the parser's original
+        // event count is no longer sufficient.
         for track in self.tracks.values_mut() {
             track.events.sort_by_key(|e| e.time);
 
@@ -464,7 +465,10 @@ impl<'a> Compiler<'a> {
                     track.events.pop();
                 }
             }
+        }
 
+        let mut final_event_count = 0usize;
+        for track in self.tracks.values_mut() {
             // Reconstruct the state in effect just before `from_pos`, so
             // notes that survive the cut still sound with the right voice,
             // controller values and tempo.
@@ -474,7 +478,11 @@ impl<'a> Compiler<'a> {
             let mut tempo: Option<u32> = None;
             let mut channel = track.channel;
             let mut rpn_selection: Option<(bool, u8, u8)> = None;
-            let mut restored_parameters: Vec<(bool, u8, u8, u8)> = Vec::new();
+            // Pascal keeps RPN and NRPN in separate insertion-ordered lists.
+            // A later Data Entry replaces the value for the same address and
+            // channel without moving its position in that list.
+            let mut restored_rpn: Vec<(u8, u8, u8, u8)> = Vec::new();
+            let mut restored_nrpn: Vec<(u8, u8, u8, u8)> = Vec::new();
             for event in &track.events {
                 if event.time >= from_pos {
                     break;
@@ -520,7 +528,18 @@ impl<'a> Compiler<'a> {
                                     }
                                     6 => {
                                         if let Some((is_rpn, msb, lsb)) = rpn_selection {
-                                            restored_parameters.push((is_rpn, msb, lsb, value));
+                                            let parameter = (channel, msb, lsb, value);
+                                            if is_rpn {
+                                                Self::upsert_play_from_parameter(
+                                                    &mut restored_rpn,
+                                                    parameter,
+                                                );
+                                            } else {
+                                                Self::upsert_play_from_parameter(
+                                                    &mut restored_nrpn,
+                                                    parameter,
+                                                );
+                                            }
                                             cc[no as usize] = None;
                                         }
                                     }
@@ -554,11 +573,33 @@ impl<'a> Compiler<'a> {
                 }
             }
 
+            let retained_events = track
+                .events
+                .iter()
+                .filter(|event| {
+                    event.time >= from_pos
+                        || (event.data.first() == Some(&0xf0) && sysex)
+                        || (event.data.first() == Some(&0xff) && event.data.get(1) != Some(&0x51))
+                })
+                .count();
+            let reconstructed_events = if from_pos > 0 {
+                cc.iter().flatten().count()
+                    + usize::from(pitch_bend != 0)
+                    + (restored_rpn.len() + restored_nrpn.len()).saturating_mul(3)
+                    + usize::from(program.is_some())
+                    + usize::from(tempo.is_some())
+            } else {
+                0
+            };
+            let track_final_count = retained_events + reconstructed_events;
+            final_event_count = final_event_count.saturating_add(track_final_count);
+            Self::ensure_play_from_event_capacity(final_event_count)?;
+
             // Discard what falls before the cut (keeping non-tempo meta at
             // time 0, and SysEx at an incrementing slot if `.SysEx(1)` asked
             // for it), and shift the rest back by the cut point.
             let mut pre_effect = 0i64;
-            let mut rebuilt = Vec::with_capacity(track.events.len());
+            let mut rebuilt = Vec::with_capacity(track_final_count);
             for event in track.events.drain(..) {
                 if event.time < from_pos {
                     let status = event.data.first().copied();
@@ -596,14 +637,31 @@ impl<'a> Compiler<'a> {
                     ));
                     pre_effect += 1;
                 }
-                for (is_rpn, msb, lsb, data) in restored_parameters {
+                for (is_rpn, parameters) in [(true, restored_rpn), (false, restored_nrpn)] {
                     let (msb_cc, lsb_cc) = if is_rpn { (101, 100) } else { (99, 98) };
-                    rebuilt.push(Event::control_change(pre_effect, channel, msb_cc, msb));
-                    pre_effect += 1;
-                    rebuilt.push(Event::control_change(pre_effect, channel, lsb_cc, lsb));
-                    pre_effect += 1;
-                    rebuilt.push(Event::control_change(pre_effect, channel, 6, data));
-                    pre_effect += 1;
+                    for (parameter_channel, msb, lsb, data) in parameters {
+                        rebuilt.push(Event::control_change(
+                            pre_effect,
+                            parameter_channel,
+                            msb_cc,
+                            msb,
+                        ));
+                        pre_effect += 1;
+                        rebuilt.push(Event::control_change(
+                            pre_effect,
+                            parameter_channel,
+                            lsb_cc,
+                            lsb,
+                        ));
+                        pre_effect += 1;
+                        rebuilt.push(Event::control_change(
+                            pre_effect,
+                            parameter_channel,
+                            6,
+                            data,
+                        ));
+                        pre_effect += 1;
+                    }
                 }
                 if let Some(prog) = program {
                     rebuilt.push(Event::program_change(pre_effect, channel, prog));
@@ -623,6 +681,37 @@ impl<'a> Compiler<'a> {
             track.time = rebuilt.iter().map(|e| e.time).max().unwrap_or(0);
             track.events = rebuilt;
         }
+        self.event_count = final_event_count;
+        Ok(())
+    }
+
+    fn upsert_play_from_parameter(
+        parameters: &mut Vec<(u8, u8, u8, u8)>,
+        (channel, msb, lsb, data): (u8, u8, u8, u8),
+    ) {
+        if let Some((_, _, _, existing_data)) =
+            parameters
+                .iter_mut()
+                .find(|(entry_channel, entry_msb, entry_lsb, _)| {
+                    (*entry_channel, *entry_msb, *entry_lsb) == (channel, msb, lsb)
+                })
+        {
+            *existing_data = data;
+        } else {
+            parameters.push((channel, msb, lsb, data));
+        }
+    }
+
+    /// `PlayFrom` replaces the event set after parsing, so enforce the same
+    /// global limit before allocating its rebuilt event vectors.
+    fn ensure_play_from_event_capacity(final_event_count: usize) -> Result<()> {
+        if final_event_count > MAX_EVENTS {
+            return Err(MmlError::new(
+                0,
+                format!("生成イベント数が上限({MAX_EVENTS})を超えました"),
+            ));
+        }
+        Ok(())
     }
 
     /// Record an event on the current track, against the compile's budget.
@@ -2677,8 +2766,8 @@ impl<'a> Compiler<'a> {
             let value = self.expect_int_arg(cur, &name)?;
             match name.as_str() {
                 "SysEx" => self.play_from.sysex = value != 0,
-                // Parsed for compatibility; the Pascal build never actually
-                // reads this field either (a dead option there too).
+                // Pascal keeps this compatibility option, although its CC
+                // setting is otherwise unused by the PlayFrom post-process.
                 "CtrlChg" => {}
                 "RPN_NRPN" => self.play_from.rpn_nrpn = value != 0,
                 "Wait" => self.play_from.wait_time = value,
@@ -5521,9 +5610,7 @@ struct PlayFromSpec {
     to_pos: i64,
     wait_time: i64,
     sysex: bool,
-    /// Parsed for compatibility; RPN/NRPN reconstruction at the cut point is
-    /// not implemented (see spec/10-compatibility.md), so this has no effect.
-    #[allow(dead_code)]
+    /// Reconstruct selected RPN/NRPN values at the PlayFrom cut point.
     rpn_nrpn: bool,
 }
 
@@ -5745,6 +5832,12 @@ mod tests {
         assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
         assert_eq!(compiler.buffered_slur_events, 0);
         assert!(compiler.stop_requested);
+    }
+
+    #[test]
+    fn play_from_rebuild_checks_the_final_event_budget_before_allocating() {
+        let error = Compiler::ensure_play_from_event_capacity(MAX_EVENTS + 1).unwrap_err();
+        assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
     }
 
     #[test]
