@@ -67,6 +67,12 @@ pub trait EvalContext {
     fn call(&mut self, name: &str, args: Vec<Value>, line: usize) -> Result<Option<Value>>;
 
     fn has_function(&self, name: &str) -> bool;
+
+    /// Convert an `!n` script literal to ticks. Plain expression contexts do
+    /// not know the song timebase and retain `!` as logical negation.
+    fn length_literal(&self, _denominator: i64) -> Option<i64> {
+        None
+    }
 }
 
 /// A plain variable map, for expressions that cannot call functions.
@@ -264,6 +270,56 @@ fn parse_unary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
         Some('+') => {
             cur.advance();
             parse_unary(cur, ctx)
+        }
+        Some('!') if cur.peek_at(1).is_some_and(|ch| ch.is_ascii_digit()) => {
+            let mut probe = cur.clone();
+            probe.advance();
+            let denominator = probe
+                .read_int()
+                .ok_or_else(|| MmlError::new(line, "!の後には音長を指定してください"))?;
+            if let Some(mut value) = ctx.length_literal(denominator) {
+                let mut half = value;
+                while probe.eat('.') {
+                    half /= 2;
+                    value = value
+                        .checked_add(half)
+                        .ok_or_else(|| MmlError::new(line, "音長リテラルの値が範囲を超えました"))?;
+                }
+                while probe.eat('^') {
+                    let nested_literal = probe.eat('!');
+                    let joined_denominator = probe
+                        .read_int()
+                        .ok_or_else(|| MmlError::new(line, "^の後には音長を指定してください"))?;
+                    // Pascal recursively parses a second `!` as the
+                    // denominator: `!1^!1` is 384 + NtoStep(384) = 385.
+                    let joined_denominator = if nested_literal {
+                        ctx.length_literal(joined_denominator).ok_or_else(|| {
+                            MmlError::new(line, "入れ子の音長リテラルをtick値へ変換できません")
+                        })?
+                    } else {
+                        joined_denominator
+                    };
+                    let mut joined = ctx
+                        .length_literal(joined_denominator)
+                        .ok_or_else(|| MmlError::new(line, "結合音長をtick値へ変換できません"))?;
+                    let mut joined_half = joined;
+                    while probe.eat('.') {
+                        joined_half /= 2;
+                        joined = joined.checked_add(joined_half).ok_or_else(|| {
+                            MmlError::new(line, "音長リテラルの値が範囲を超えました")
+                        })?;
+                    }
+                    value = value
+                        .checked_add(joined)
+                        .ok_or_else(|| MmlError::new(line, "結合音長の値が範囲を超えました"))?;
+                }
+                *cur = probe;
+                Ok(Value::Int(value))
+            } else {
+                cur.advance();
+                let value = parse_unary(cur, ctx)?;
+                Ok(Value::Int(!value.truthy() as i64))
+            }
         }
         Some('!') if cur.peek_at(1) != Some('=') => {
             cur.advance();

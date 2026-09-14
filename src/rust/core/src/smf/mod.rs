@@ -80,15 +80,20 @@ impl Song {
 
 fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     let mut events = track.events.clone();
+    adjust_overlapping_notes(&mut events);
     // Stable sort keeps same-time events in the order they were written.
     // Note-offs generated from ordinary packed notes come last because the
     // Pascal build appends them during its finalisation pass. A low-level
     // NoteOff command is already a direct event and must retain its position.
     events.sort_by_key(|e| (e.time, e.deferred_at_same_time as u8));
+    remove_duplicate_controllers(&mut events);
 
     let mut body = Vec::new();
     let mut last_time = 0i64;
     for event in &events {
+        if event.data.is_empty() {
+            continue;
+        }
         // A value written a tick ahead of a note at time 0 has a negative
         // time: it sorts before the note, but lands at 0 in the file.
         let time = event.time.max(0);
@@ -108,6 +113,76 @@ fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     chunk.extend_from_slice(&(body.len() as u32).to_be_bytes());
     chunk.extend_from_slice(&body);
     Ok(chunk)
+}
+
+/// Pascal drops the earlier of two adjacent, identical CC writes at one tick.
+fn remove_duplicate_controllers(events: &mut [Event]) {
+    for index in 1..events.len() {
+        let previous = &events[index - 1];
+        let current = &events[index];
+        let duplicate = previous.time == current.time
+            && previous.data.len() == 3
+            && previous.data[0] & 0xf0 == 0xb0
+            && previous.data == current.data;
+        if duplicate {
+            events[index - 1].data.clear();
+        }
+    }
+}
+
+/// Pascal shortens a packed note when the same channel/note is retriggered
+/// before its NoteOff. This is especially visible in delay helpers, where
+/// several copies of one phrase overlap at fixed offsets.
+fn adjust_overlapping_notes(events: &mut [Event]) {
+    let mut pairs = Vec::new();
+    for on_index in 0..events.len() {
+        let Some(status) = events[on_index].data.first().copied() else {
+            continue;
+        };
+        if status & 0xf0 != 0x90 || events[on_index].data.get(2) == Some(&0) {
+            continue;
+        }
+        let key = (
+            status & 0x0f,
+            events[on_index].data.get(1).copied().unwrap_or(0),
+        );
+        if let Some(off_index) = (on_index + 1 < events.len())
+            .then_some(on_index + 1)
+            .filter(|index| {
+                let event = &events[*index];
+                event.deferred_at_same_time
+                    && event.data.first().is_some_and(|byte| byte & 0x0f == key.0)
+                    && event.data.get(1) == Some(&key.1)
+            })
+        {
+            pairs.push((key, on_index, off_index));
+        }
+    }
+    pairs.sort_by_key(|(_, on, _)| events[*on].time);
+
+    for index in 0..pairs.len() {
+        let (key, current_on, _) = pairs[index];
+        let current_time = events[current_on].time;
+        for &(previous_key, previous_on, previous_off) in pairs[..index].iter().rev() {
+            if previous_key != key {
+                continue;
+            }
+            let previous_time = events[previous_on].time;
+            if previous_time + 768 < current_time {
+                break;
+            }
+            if previous_time <= current_time && current_time <= events[previous_off].time {
+                let shortened = current_time - previous_time - 1;
+                if shortened <= 0 {
+                    events[previous_on].data.clear();
+                    events[previous_off].data.clear();
+                } else {
+                    events[previous_off].time = previous_time + shortened;
+                }
+                break;
+            }
+        }
+    }
 }
 
 /// Write a delta time, refusing one the format cannot represent.
@@ -187,6 +262,23 @@ mod tests {
 
         let expected = hex("4d546864000000060001000100604d54726b0000000c00903c644b803c6415ff2f00");
         assert_eq!(song.to_bytes().unwrap(), expected);
+    }
+
+    #[test]
+    fn identical_controllers_at_the_same_time_keep_only_the_later_event() {
+        let mut events = vec![
+            Event::control_change(10, 0, 1, 64),
+            Event::control_change(10, 0, 11, 127),
+            Event::control_change(10, 0, 1, 64),
+            Event::control_change(11, 0, 1, 32),
+            Event::control_change(11, 0, 1, 32),
+        ];
+        remove_duplicate_controllers(&mut events);
+        assert_eq!(events[0].data, [0xb0, 1, 64]);
+        assert_eq!(events[1].data, [0xb0, 11, 127]);
+        assert_eq!(events[2].data, [0xb0, 1, 64]);
+        assert!(events[3].data.is_empty());
+        assert_eq!(events[4].data, [0xb0, 1, 32]);
     }
 
     fn hex(s: &str) -> Vec<u8> {

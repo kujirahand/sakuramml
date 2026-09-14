@@ -502,6 +502,29 @@ fn full_range_pitch_bend_accepts_advance_modifiers() {
 }
 
 #[test]
+fn full_range_pitch_bend_modifier_is_not_clamped_as_easy_bend() {
+    let out = compile("PitchBend.Frequency(24); PitchBend.onTime(-8192,0,!4); r4").unwrap();
+    assert!(out.smf.windows(3).any(|bytes| bytes == [0xe0, 0x00, 0x00]));
+    assert!(out.smf.windows(3).any(|bytes| bytes == [0xe0, 0x00, 0x10]));
+    assert!(out.smf.windows(3).any(|bytes| bytes == [0xe0, 0x00, 0x40]));
+}
+
+#[test]
+fn plain_cc_and_bend_writes_cancel_advance_modifiers() {
+    let cc = compile("l4 M.onNoteWave(0,60,!2); c M(0) r1 c").unwrap();
+    let cc_count = cc
+        .smf
+        .windows(2)
+        .filter(|bytes| *bytes == [0xb0, 1])
+        .count();
+    assert_eq!(cc_count, 32);
+
+    let bend = compile("l4 PitchBend.onNote(-8192,8191); c PitchBend(0) r1 c").unwrap();
+    let bend_count = bend.smf.iter().filter(|byte| **byte == 0xe0).count();
+    assert_eq!(bend_count, 2);
+}
+
+#[test]
 fn rest_accepts_a_parenthesized_length_expression() {
     assert_golden(
         "l%48 Int N=48; r(N-6)c",
@@ -839,6 +862,14 @@ fn get_key_flag_returns_the_pitch_class_array() {
     .unwrap();
     assert_eq!(out.messages, ["1", "-1", "-1"]);
     assert!(!out.warnings.iter().any(|w| w.message.contains("未実装")));
+}
+
+#[test]
+fn key_flag_array_uses_legacy_a_through_g_order() {
+    assert_same_bytes(
+        "System.KeyFlag=(0,0,-1,0,0,0,0); l4 o5 cdefgab",
+        "System.KeyFlag-(c); l4 o5 cdefgab",
+    );
 }
 
 #[test]
@@ -1187,6 +1218,14 @@ fn note_attribute_on_time_matches_pascal() {
 }
 
 #[test]
+fn nested_length_literal_in_on_time_matches_pascal_recursion() {
+    assert_same_bytes(
+        "l32 v.onTime(40,120,!1^!1) [32 c]",
+        "l32 v.onTime(40,120,%385) [32 c]",
+    );
+}
+
+#[test]
 fn note_attribute_cycle_delay_repeat_and_range_match_pascal() {
     assert_golden(
         "q.onCycle(!4,20,80) l4 cc",
@@ -1305,6 +1344,11 @@ fn div_shares_a_length_between_its_notes() {
     assert_same_bytes("Div{crd}4", "l12 c r d");
 }
 
+#[test]
+fn a_chord_counts_as_one_div_element() {
+    assert_same_bytes("Div{'ceg''dfa''egb'}4", "'ceg'12 'dfa'12 'egb'12");
+}
+
 /// The tuplet occupies exactly the length asked for, however much its body
 /// actually plays — a tie inside writes past the end without moving the
 /// pointer any further.
@@ -1361,6 +1405,12 @@ fn chords_sound_their_notes_together() {
 fn chord_length_accepts_a_parenthesized_variable() {
     assert_same_bytes("Function f(len){'ceg'(len)} f(4)", "'ceg'4");
     assert_same_bytes("l%24 Function f(len){'ceg'(len)} f(48)", "'ceg'%48");
+}
+
+#[test]
+fn tied_chord_keeps_sounding_for_the_joined_length() {
+    assert_same_bytes("q100 l4 'ceg'^", "q100 'ceg'2");
+    assert_same_bytes("q100 l4 'ceg'^2", "q100 'ceg'*%288");
 }
 
 /// The pointer moves once for the chord, not once per note in it.
