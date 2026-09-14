@@ -5322,7 +5322,11 @@ impl EvalContext for Compiler<'_> {
     }
 
     fn length_literal(&self, denominator: i64) -> Option<i64> {
-        (denominator > 0).then(|| self.timebase * 4 / denominator)
+        Some(if denominator == 0 {
+            0
+        } else {
+            self.timebase * 4 / denominator
+        })
     }
 }
 

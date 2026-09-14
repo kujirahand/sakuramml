@@ -130,9 +130,10 @@ fn remove_duplicate_controllers(events: &mut [Event]) {
     }
 }
 
-/// Pascal shortens a packed note when the same channel/note is retriggered
-/// before its NoteOff. This is especially visible in delay helpers, where
-/// several copies of one phrase overlap at fixed offsets.
+/// Pascal shortens a packed note when the same note number is retriggered
+/// before its NoteOff, even when the channel has changed. This is especially
+/// visible in delay helpers, where several copies of one phrase overlap at
+/// fixed offsets.
 fn adjust_overlapping_notes(events: &mut [Event]) {
     let mut pairs = Vec::new();
     for on_index in 0..events.len() {
@@ -142,29 +143,30 @@ fn adjust_overlapping_notes(events: &mut [Event]) {
         if status & 0xf0 != 0x90 || events[on_index].data.get(2) == Some(&0) {
             continue;
         }
-        let key = (
-            status & 0x0f,
-            events[on_index].data.get(1).copied().unwrap_or(0),
-        );
+        let channel = status & 0x0f;
+        let note = events[on_index].data.get(1).copied().unwrap_or(0);
         if let Some(off_index) = (on_index + 1 < events.len())
             .then_some(on_index + 1)
             .filter(|index| {
                 let event = &events[*index];
                 event.deferred_at_same_time
-                    && event.data.first().is_some_and(|byte| byte & 0x0f == key.0)
-                    && event.data.get(1) == Some(&key.1)
+                    && event
+                        .data
+                        .first()
+                        .is_some_and(|byte| byte & 0x0f == channel)
+                    && event.data.get(1) == Some(&note)
             })
         {
-            pairs.push((key, on_index, off_index));
+            pairs.push((note, on_index, off_index));
         }
     }
     pairs.sort_by_key(|(_, on, _)| events[*on].time);
 
     for index in 0..pairs.len() {
-        let (key, current_on, _) = pairs[index];
+        let (note, current_on, _) = pairs[index];
         let current_time = events[current_on].time;
-        for &(previous_key, previous_on, previous_off) in pairs[..index].iter().rev() {
-            if previous_key != key {
+        for &(previous_note, previous_on, previous_off) in pairs[..index].iter().rev() {
+            if previous_note != note {
                 continue;
             }
             let previous_time = events[previous_on].time;

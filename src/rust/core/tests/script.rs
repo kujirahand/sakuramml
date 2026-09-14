@@ -183,7 +183,8 @@ fn comparisons_and_logic() {
     assert_same("If(2<=1){c}Else{d}", "d");
     assert_same("If(1&&0){c}Else{d}", "d");
     assert_same("If(1||0){c}Else{d}", "c");
-    assert_same("If(!0){c}Else{d}", "c");
+    assert_same("If(!0){c}Else{d}", "d");
+    assert_same("Int zero=0; If(!zero){c}Else{d}", "c");
     assert_same("If(on){c}Else{d}", "c");
     assert_same("If(off){c}Else{d}", "d");
 }
@@ -331,10 +332,10 @@ fn numeric_function_parameter_accepts_a_joined_length() {
 fn length_literals_work_in_script_expressions() {
     let out = compile(
         "Int a=!8; Int b=(!4.+!8); Int c=(!1^1); Int d=(!1^!1); \
-         Print(a); Print(b); Print(c); Print(d)",
+         Int e=!0; Print(a); Print(b); Print(c); Print(d); Print(e)",
     )
     .unwrap();
-    assert_eq!(out.messages, ["48", "192", "768", "385"]);
+    assert_eq!(out.messages, ["48", "192", "768", "385", "0"]);
 }
 
 #[test]

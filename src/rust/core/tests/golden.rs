@@ -279,6 +279,14 @@ fn track_selects_channel() {
 }
 
 #[test]
+fn overlapping_note_is_shortened_across_channel_changes() {
+    assert_golden(
+        "Channel(1) l1 c Time(1:2:0) Channel(2)c",
+        "4d546864000000060001000100604d54726b0000001500903c645f803c6401913c648232813c644eff2f00",
+    );
+}
+
+#[test]
 fn two_tracks_produce_two_chunks() {
     assert_golden(
         "c TR=2 e",
