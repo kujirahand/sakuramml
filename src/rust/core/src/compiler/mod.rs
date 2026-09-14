@@ -81,6 +81,8 @@ struct TrackState {
     events: Vec<Event>,
     /// Time at which the most recent note ended, so `^` can extend it.
     last_note: Option<LastNote>,
+    /// The last note number written on this track, used by `KeyPressure`.
+    last_note_no: Option<u8>,
     /// One-shot octave shift from `` ` `` or `"`, applied to the next note.
     octave_once: i64,
     /// `q%n` gives the gate in ticks rather than as a percentage.
@@ -152,6 +154,7 @@ impl TrackState {
             timing: 0,
             events: Vec::new(),
             last_note: None,
+            last_note_no: None,
             octave_once: 0,
             gate_in_steps: false,
             // Pascal reports zero until the first program change.
@@ -450,6 +453,7 @@ impl<'a> Compiler<'a> {
         }
         let wait_time = self.play_from.wait_time;
         let sysex = self.play_from.sysex;
+        let restore_rpn_nrpn = self.play_from.rpn_nrpn;
 
         for track in self.tracks.values_mut() {
             track.events.sort_by_key(|e| e.time);
@@ -469,6 +473,8 @@ impl<'a> Compiler<'a> {
             let mut program: Option<u8> = None;
             let mut tempo: Option<u32> = None;
             let mut channel = track.channel;
+            let mut rpn_selection: Option<(bool, u8, u8)> = None;
+            let mut restored_parameters: Vec<(bool, u8, u8, u8)> = Vec::new();
             for event in &track.events {
                 if event.time >= from_pos {
                     break;
@@ -478,6 +484,49 @@ impl<'a> Compiler<'a> {
                         if let (Some(&no), Some(&value)) = (event.data.get(1), event.data.get(2)) {
                             cc[no as usize] = Some(value);
                             channel = event.data[0] & 0x0f;
+                            if restore_rpn_nrpn {
+                                match no {
+                                    101 => {
+                                        let lsb = rpn_selection
+                                            .filter(|(rpn, _, _)| *rpn)
+                                            .map(|(_, _, lsb)| lsb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((true, value, lsb));
+                                        cc[no as usize] = None;
+                                    }
+                                    100 => {
+                                        let msb = rpn_selection
+                                            .filter(|(rpn, _, _)| *rpn)
+                                            .map(|(_, msb, _)| msb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((true, msb, value));
+                                        cc[no as usize] = None;
+                                    }
+                                    99 => {
+                                        let lsb = rpn_selection
+                                            .filter(|(rpn, _, _)| !*rpn)
+                                            .map(|(_, _, lsb)| lsb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((false, value, lsb));
+                                        cc[no as usize] = None;
+                                    }
+                                    98 => {
+                                        let msb = rpn_selection
+                                            .filter(|(rpn, _, _)| !*rpn)
+                                            .map(|(_, msb, _)| msb)
+                                            .unwrap_or(0);
+                                        rpn_selection = Some((false, msb, value));
+                                        cc[no as usize] = None;
+                                    }
+                                    6 => {
+                                        if let Some((is_rpn, msb, lsb)) = rpn_selection {
+                                            restored_parameters.push((is_rpn, msb, lsb, value));
+                                            cc[no as usize] = None;
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
                         }
                     }
                     Some(0xe0) => {
@@ -545,6 +594,15 @@ impl<'a> Compiler<'a> {
                             ((raw >> 7) & 0x7f) as u8,
                         ],
                     ));
+                    pre_effect += 1;
+                }
+                for (is_rpn, msb, lsb, data) in restored_parameters {
+                    let (msb_cc, lsb_cc) = if is_rpn { (101, 100) } else { (99, 98) };
+                    rebuilt.push(Event::control_change(pre_effect, channel, msb_cc, msb));
+                    pre_effect += 1;
+                    rebuilt.push(Event::control_change(pre_effect, channel, lsb_cc, lsb));
+                    pre_effect += 1;
+                    rebuilt.push(Event::control_change(pre_effect, channel, 6, data));
                     pre_effect += 1;
                 }
                 if let Some(prog) = program {
@@ -1110,6 +1168,7 @@ impl<'a> Compiler<'a> {
             }
             "NoteOn" => self.direct_note(cur, true, line),
             "NoteOff" => self.direct_note(cur, false, line),
+            "KeyPressure" | "KP" => self.key_pressure(cur, line),
             "ChannelPrefix" => self.channel_prefix(cur, line),
             "Port" | "PORT" => self.port(cur, line),
             "Time" | "TIME" => self.time_command(cur),
@@ -1146,6 +1205,12 @@ impl<'a> Compiler<'a> {
                 self.exiting = true;
                 Ok(())
             }
+            "End" => {
+                self.stop_requested = true;
+                Ok(())
+            }
+            "MsgBox" => self.msg_box(cur, line),
+            "Switch" | "SWITCH" => self.switch_statement(cur, line),
             "SysEx" | "SYSEX" => self.sysex(cur),
             "DirectSMF" => self.direct_smf(cur),
             "Voice" => self.voice(cur),
@@ -3076,7 +3141,70 @@ impl<'a> Compiler<'a> {
         let time = self.track().time;
         let channel = self.track().channel;
         let status = if on { 0x90 } else { 0x80 } | (channel & 0x0f);
-        self.push_event(Event::new(time, vec![status, note as u8, velocity as u8]))
+        self.push_event(Event::new(time, vec![status, note as u8, velocity as u8]))?;
+        if on {
+            self.track().last_note_no = Some(note as u8);
+        }
+        Ok(())
+    }
+
+    /// `KeyPressure(value)` / `KP(value)` writes polyphonic aftertouch for
+    /// the most recently written note, as `TSmfKeyPressure` does in Pascal.
+    fn key_pressure(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let value = self.expect_int_arg(cur, "KeyPressure")?;
+        if !(0..=127).contains(&value) {
+            return Err(MmlError::new(
+                line,
+                format!("KeyPressureは0〜127の範囲で指定してください: {value}"),
+            ));
+        }
+        let (time, channel, note) = {
+            let track = self.track();
+            (
+                track.time,
+                track.channel,
+                track.last_note_no.ok_or_else(|| {
+                    MmlError::new(line, "KeyPressureの前に音符またはNoteOnが必要です")
+                })?,
+            )
+        };
+        self.push_event(Event::new(time, vec![0xa0 | channel, note, value as u8]))
+    }
+
+    /// The Rust core has no native dialog. Preserve the command's observable
+    /// compile-time output as a message, so CLI/WASM hosts can render it.
+    fn msg_box(&mut self, cur: &mut Cursor, _line: usize) -> Result<()> {
+        cur.skip_spaces();
+        let text = if cur.peek().is_none() || matches!(cur.peek(), Some(';') | Some('\n')) {
+            "nil".to_string()
+        } else {
+            self.read_value(cur)?.as_str()
+        };
+        self.messages.push(text);
+        Ok(())
+    }
+
+    fn switch_statement(&mut self, cur: &mut Cursor, line: usize) -> Result<()> {
+        let value = self.read_condition(cur)?;
+        let body = self.read_block(cur, line)?;
+        let arms = parse_switch_arms(&body, line)?;
+        let mut fallback = None;
+        for (condition, source) in arms {
+            match condition {
+                Some(condition)
+                    if self.eval_source(&condition, line)?.as_str() == value.as_str() =>
+                {
+                    return self.run_fragment(&source, line);
+                }
+                Some(_) => {}
+                None => fallback = Some(source),
+            }
+        }
+        if let Some(source) = fallback {
+            self.run_fragment(&source, line)
+        } else {
+            Ok(())
+        }
     }
 
     /// Pascal accepts ChannelPrefix as a one-based value and stores `n - 1`.
@@ -4347,6 +4475,9 @@ impl<'a> Compiler<'a> {
         }
 
         let track = self.track();
+        if !muted {
+            track.last_note_no = Some(note_no as u8);
+        }
         track.last_note = if !wrote_note {
             None
         } else {
@@ -5453,6 +5584,65 @@ fn control_change_number(name: &str) -> Option<i64> {
         "DataLSB" => 38,
         _ => return None,
     })
+}
+
+/// Split a `Switch` body into `Case(condition){body}` and `Default{body}`
+/// arms. The body has already been balanced by `read_block`; this scanner
+/// only needs to recognize top-level keywords and their nested delimiters.
+fn parse_switch_arms(source: &str, line: usize) -> Result<Vec<(Option<String>, String)>> {
+    let mut cursor = Cursor::with_line(source, line);
+    let mut arms = Vec::new();
+    while !cursor.is_eof() {
+        cursor.skip_trivia();
+        if cursor.is_eof() {
+            break;
+        }
+        let name = cursor.read_word().ok_or_else(|| {
+            MmlError::new(
+                cursor.line(),
+                "Switch内にはCaseまたはDefaultを指定してください",
+            )
+        })?;
+        match name.as_str() {
+            "Case" | "CASE" => {
+                cursor.skip_trivia();
+                if !cursor.eat('(') {
+                    return Err(MmlError::new(
+                        cursor.line(),
+                        "Caseには(condition)が必要です",
+                    ));
+                }
+                let condition = cursor
+                    .read_balanced('(', ')')
+                    .ok_or_else(|| MmlError::new(cursor.line(), "Caseの括弧が閉じていません"))?;
+                cursor.skip_trivia();
+                if !cursor.eat('{') {
+                    return Err(MmlError::new(cursor.line(), "Caseには{...}が必要です"));
+                }
+                let body = cursor.read_balanced('{', '}').ok_or_else(|| {
+                    MmlError::new(cursor.line(), "Caseのブロックが閉じていません")
+                })?;
+                arms.push((Some(condition), body));
+            }
+            "Default" | "DEFAULT" => {
+                cursor.skip_trivia();
+                if !cursor.eat('{') {
+                    return Err(MmlError::new(cursor.line(), "Defaultには{...}が必要です"));
+                }
+                let body = cursor.read_balanced('{', '}').ok_or_else(|| {
+                    MmlError::new(cursor.line(), "Defaultのブロックが閉じていません")
+                })?;
+                arms.push((None, body));
+            }
+            _ => {
+                return Err(MmlError::new(
+                    cursor.line(),
+                    "Switch内にはCaseまたはDefaultを指定してください",
+                ));
+            }
+        }
+    }
+    Ok(arms)
 }
 
 /// Split a loop body at a top-level `:`.

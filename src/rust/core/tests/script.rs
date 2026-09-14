@@ -888,6 +888,25 @@ fn low_level_midi_commands_validate_their_arguments() {
     assert_error_contains("ChannelPrefix(0)", "1〜128");
     assert_error_contains("ChannelPrefix(129)", "1〜128");
     assert_error_contains("Port(256)", "0〜255");
+    assert_error_contains("KeyPressure(1)", "前に音符");
+    assert_error_contains("KeyPressure(128)", "0〜127");
+}
+
+#[test]
+fn switch_end_and_msg_box_match_the_script_contract() {
+    assert_same("Int x=2 Switch(x){Case(1){c} Case(2){d} Default{e}}", "d");
+    assert_same("Switch(9){Case(1){c}Default{e}}", "e");
+    assert_same("c End d", "c");
+    let out = compile(r#"MsgBox({"hello"}); MsgBox; Print(3)"#).unwrap();
+    assert_eq!(out.messages, ["hello", "nil", "3"]);
+}
+
+#[test]
+fn play_from_restores_rpn_and_nrpn_only_when_enabled() {
+    let restored = compile("RPN(0,1,7) Time(2:1:0) PlayFrom(2:1:0) c").unwrap();
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 101, 0]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 100, 1]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 7]));
 }
 
 #[test]
