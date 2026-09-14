@@ -81,8 +81,9 @@ struct TrackState {
     events: Vec<Event>,
     /// Time at which the most recent note ended, so `^` can extend it.
     last_note: Option<LastNote>,
-    /// The last note number written on this track, used by `KeyPressure`.
-    last_note_no: Option<u8>,
+    /// Pascal's `LastNodeNo`, used by `KeyPressure`. A newly allocated Pascal
+    /// track is zero-initialized, so pressure before the first note targets 0.
+    last_note_no: u8,
     /// One-shot octave shift from `` ` `` or `"`, applied to the next note.
     octave_once: i64,
     /// `q%n` gives the gate in ticks rather than as a percentage.
@@ -154,7 +155,7 @@ impl TrackState {
             timing: 0,
             events: Vec::new(),
             last_note: None,
-            last_note_no: None,
+            last_note_no: 0,
             octave_once: 0,
             gate_in_steps: false,
             // Pascal reports zero until the first program change.
@@ -641,26 +642,24 @@ impl<'a> Compiler<'a> {
                     let (msb_cc, lsb_cc) = if is_rpn { (101, 100) } else { (99, 98) };
                     for (parameter_channel, msb, lsb, data) in parameters {
                         rebuilt.push(Event::control_change(
-                            pre_effect,
+                            pre_effect - 2,
                             parameter_channel,
                             msb_cc,
                             msb,
                         ));
-                        pre_effect += 1;
                         rebuilt.push(Event::control_change(
-                            pre_effect,
+                            pre_effect - 1,
                             parameter_channel,
                             lsb_cc,
                             lsb,
                         ));
-                        pre_effect += 1;
                         rebuilt.push(Event::control_change(
                             pre_effect,
                             parameter_channel,
                             6,
                             data,
                         ));
-                        pre_effect += 1;
+                        pre_effect += 3;
                     }
                 }
                 if let Some(prog) = program {
@@ -3230,11 +3229,7 @@ impl<'a> Compiler<'a> {
         let time = self.track().time;
         let channel = self.track().channel;
         let status = if on { 0x90 } else { 0x80 } | (channel & 0x0f);
-        self.push_event(Event::new(time, vec![status, note as u8, velocity as u8]))?;
-        if on {
-            self.track().last_note_no = Some(note as u8);
-        }
-        Ok(())
+        self.push_event(Event::new(time, vec![status, note as u8, velocity as u8]))
     }
 
     /// `KeyPressure(value)` / `KP(value)` writes polyphonic aftertouch for
@@ -3249,13 +3244,7 @@ impl<'a> Compiler<'a> {
         }
         let (time, channel, note) = {
             let track = self.track();
-            (
-                track.time,
-                track.channel,
-                track.last_note_no.ok_or_else(|| {
-                    MmlError::new(line, "KeyPressureの前に音符またはNoteOnが必要です")
-                })?,
-            )
+            (track.time, track.channel, track.last_note_no)
         };
         self.push_event(Event::new(time, vec![0xa0 | channel, note, value as u8]))
     }
@@ -4564,9 +4553,7 @@ impl<'a> Compiler<'a> {
         }
 
         let track = self.track();
-        if !muted {
-            track.last_note_no = Some(note_no as u8);
-        }
+        track.last_note_no = note_no as u8;
         track.last_note = if !wrote_note {
             None
         } else {
@@ -5838,6 +5825,26 @@ mod tests {
     fn play_from_rebuild_checks_the_final_event_budget_before_allocating() {
         let error = Compiler::ensure_play_from_event_capacity(MAX_EVENTS + 1).unwrap_err();
         assert!(error.message.contains(&format!("上限({MAX_EVENTS})")));
+    }
+
+    #[test]
+    fn play_from_places_rpn_selectors_before_the_data_entry_time() {
+        let result = Compiler::new()
+            .compile("RPN(0,1,9) @5 Time(2:1:0) PlayFrom.Wait(0) PlayFrom(2:1:0) c")
+            .unwrap();
+        let events = &result.song.tracks[0].events;
+        let time_of = |data: &[u8]| {
+            events
+                .iter()
+                .find(|event| event.data == data)
+                .map(|event| event.time)
+                .expect("expected reconstructed event")
+        };
+
+        assert_eq!(time_of(&[0xb0, 101, 0]), -2);
+        assert_eq!(time_of(&[0xb0, 100, 1]), -1);
+        assert_eq!(time_of(&[0xb0, 6, 9]), 0);
+        assert_eq!(time_of(&[0xc0, 4]), 3);
     }
 
     #[test]

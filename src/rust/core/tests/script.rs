@@ -888,8 +888,23 @@ fn low_level_midi_commands_validate_their_arguments() {
     assert_error_contains("ChannelPrefix(0)", "1〜128");
     assert_error_contains("ChannelPrefix(129)", "1〜128");
     assert_error_contains("Port(256)", "0〜255");
-    assert_error_contains("KeyPressure(1)", "前に音符");
     assert_error_contains("KeyPressure(128)", "0〜127");
+}
+
+#[test]
+fn key_pressure_tracks_only_ordinary_notes_like_pascal() {
+    let initial = compile("KeyPressure(40)").unwrap();
+    assert!(initial.smf.windows(3).any(|bytes| bytes == [0xa0, 0, 40]));
+
+    let after_direct_note = compile("c NoteOn(62,100) KeyPressure(40)").unwrap();
+    assert!(after_direct_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 60, 40]));
+    assert!(!after_direct_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 62, 40]));
 }
 
 #[test]
