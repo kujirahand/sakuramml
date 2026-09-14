@@ -215,6 +215,33 @@ fn an_omitted_joined_length_part_uses_the_current_default() {
 }
 
 #[test]
+fn omitted_joined_lengths_use_the_advanced_event_default() {
+    assert_golden(
+        "l.onNote(8) c^",
+        "4d546864000000060001000100604d54726b0000000c00903c640b803c6405ff2f00",
+    );
+    assert_same_bytes("l.onNote(8) r^ c", "l%8 r^ c");
+}
+
+#[test]
+fn arg_order_leaves_a_join_for_the_tie_handler_until_length_is_reached() {
+    assert_same_bytes(
+        "l.onNote(8,4) ArgOrder(qlvto) c50^c",
+        "ArgOrder(qlvto) l%8 q50 c l%4 q80 r l%8 c",
+    );
+    assert_golden(
+        "ArgOrder(qlvto) c50^c",
+        "4d546864000000060001000100604d54726b0000001500903c642f803c648111903c644b803c6415ff2f00",
+    );
+}
+
+#[test]
+fn overflowing_joined_lengths_return_an_error() {
+    let error = compile("c%9223372036854775807^").unwrap_err();
+    assert!(error.message.contains("結合音長が範囲を超えました"));
+}
+
+#[test]
 fn rest_advances_time() {
     assert_golden(
         "r c",
@@ -291,7 +318,7 @@ fn direct_pitch_bend_uses_pascal_insertion_order_when_rewound() {
 }
 
 #[test]
-fn tie_extends_previous_note() {
+fn joined_length_extends_the_note() {
     assert_golden(
         "c^c",
         "4d546864000000060001000100604d54726b0000001500903c648118803c6428903c644b803c6415ff2f00",
@@ -940,7 +967,10 @@ fn arg_order_is_track_local() {
         "ArgOrder(v);r8c",
         "4d546864000000060001000100604d54726b0000000c30903c644b803c6415ff2f00",
     );
-    assert_same_bytes("ArgOrder(v);c^8", "c^8");
+    assert_golden(
+        "ArgOrder(v);c^8",
+        "4d546864000000060001000100604d54726b0000000c00903c644b803c6445ff2f00",
+    );
 }
 
 #[test]
