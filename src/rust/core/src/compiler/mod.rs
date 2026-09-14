@@ -187,7 +187,7 @@ struct TimeKeyRule {
 struct TimeKeyFlagRule {
     from: i64,
     to: Option<i64>,
-    /// Stored in the compiler's c,d,e,f,g,a,b order.
+    /// Stored in the compiler's c,d,e,f,g,a,b pitch-class order.
     key_flags: [i64; 7],
 }
 
@@ -239,6 +239,10 @@ pub struct Compiler<'a> {
     /// How many ticks ordinary CC and pitch-bend events precede the cursor.
     /// Program changes always precede it by one tick in the Pascal build.
     controller_shift: i64,
+    /// Accumulated spacing for consecutive RPN/NRPN commands at one cursor.
+    rpn_shift_channel: Option<u8>,
+    rpn_shift_time: i64,
+    rpn_shift: i64,
     allow_multi_line: bool,
     meta_text_eol: i64,
     /// Time signature, used to turn `Time(m:b:t)` into ticks.
@@ -312,6 +316,9 @@ impl<'a> Compiler<'a> {
             v_add: 8,
             measure_shift: 0,
             controller_shift: 1,
+            rpn_shift_channel: None,
+            rpn_shift_time: 0,
+            rpn_shift: 0,
             allow_multi_line: true,
             meta_text_eol: 0,
             time_signature: (4, 4),
@@ -493,6 +500,10 @@ impl<'a> Compiler<'a> {
                         if let (Some(&no), Some(&value)) = (event.data.get(1), event.data.get(2)) {
                             cc[no as usize] = Some(value);
                             channel = event.data[0] & 0x0f;
+                            if !restore_rpn_nrpn && matches!(no, 6 | 98 | 99 | 100 | 101) {
+                                cc[no as usize] = None;
+                                continue;
+                            }
                             if restore_rpn_nrpn {
                                 match no {
                                     101 => {
@@ -1027,14 +1038,14 @@ impl<'a> Compiler<'a> {
             'p' => {
                 cur.advance();
                 if cur.eat('%') {
-                    if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
+                    if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBendFull)? {
                         return Ok(handled);
                     }
                     let value = self.expect_int_arg(cur, "p%")?;
                     self.write_pitch_bend(value);
                     return Ok(());
                 }
-                if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBendEasy)? {
                     return Ok(handled);
                 }
                 self.simple_pitch_bend(cur)
@@ -1331,13 +1342,11 @@ impl<'a> Compiler<'a> {
                 let value = self.expect_int_arg(cur, "BR")?;
                 let channel = self.track().channel as usize;
                 self.bend_ranges[channel] = value;
-                self.write_cc(101, 0);
-                self.write_cc(100, 0);
-                self.write_cc(6, value);
+                self.write_rpn_nrpn(true, 0, 0, Some(value))?;
                 Ok(())
             }
             "PitchBend" => {
-                if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBend)? {
+                if let Some(handled) = self.modifier(cur, OnNoteTarget::PitchBendFull)? {
                     return Ok(handled);
                 }
                 self.pitch_bend(cur)
@@ -1345,20 +1354,17 @@ impl<'a> Compiler<'a> {
             "RPN" | "NRPN" => {
                 let is_rpn = word == "RPN";
                 let args = self.read_args(cur, 3)?;
-                if args.len() < 3 {
+                if args.len() < 2 {
                     return Err(MmlError::new(
                         line,
-                        format!("{word}には3つの値(msb,lsb,data)を指定してください"),
+                        format!("{word}には2つ以上の値(msb,lsb[,data])を指定してください"),
                     ));
                 }
-                let (msb_cc, lsb_cc) = if is_rpn { (101, 100) } else { (99, 98) };
-                if is_rpn && args[0] == 0 && args[1] == 0 {
+                if is_rpn && args[0] == 0 && args[1] == 0 && args.len() >= 3 {
                     let channel = self.track().channel as usize;
                     self.bend_ranges[channel] = args[2];
                 }
-                self.write_cc(msb_cc, args[0]);
-                self.write_cc(lsb_cc, args[1]);
-                self.write_cc(6, args[2]);
+                self.write_rpn_nrpn(is_rpn, args[0], args[1], args.get(2).copied())?;
                 Ok(())
             }
             _ if control_change_number(&word).is_some() => {
@@ -1701,9 +1707,11 @@ impl<'a> Compiler<'a> {
                 let source = args.first().map(Value::as_str).unwrap_or_default();
                 Value::Int(self.time_value(&source, line)?)
             }
-            "System.GetKeyFlag" => {
-                Value::Array(self.key_flags.iter().copied().map(Value::Int).collect())
-            }
+            "System.GetKeyFlag" => Value::Array(
+                ('a'..='g')
+                    .map(|note| Value::Int(self.key_flags[pitch_class_index(note).unwrap()]))
+                    .collect(),
+            ),
             _ => return Err(MmlError::new(line, format!("関数\"{name}\"は未定義です"))),
         };
         Ok(Some(value))
@@ -1890,7 +1898,11 @@ impl<'a> Compiler<'a> {
             let value = match (args.get(index), &param.default) {
                 (Some(value), _) => value.clone(),
                 (None, Some(default)) => default.clone(),
-                (None, None) => Value::Int(0),
+                (None, None) => match function.params[index].kind {
+                    VarKind::Int => Value::Int(0),
+                    VarKind::Str => Value::Str(String::new()),
+                    VarKind::Array => Value::Array(Vec::new()),
+                },
             };
             shadowed.push((param.name.clone(), self.variables.get(&param.name).cloned()));
             self.variables.insert(param.name.clone(), value);
@@ -2152,6 +2164,17 @@ impl<'a> Compiler<'a> {
         track.cc_modifiers.last_mut().expect("just pushed")
     }
 
+    fn reset_cc_modifier(&mut self, no: i64) {
+        if let Some(modifier) = self
+            .track()
+            .cc_modifiers
+            .iter_mut()
+            .find(|modifier| modifier.no == no)
+        {
+            modifier.kind = Kind::Off;
+        }
+    }
+
     /// Write out one controller's advance specification for a note.
     fn write_cc_modifier(&mut self, no: i64, track_time: i64, note_len: i64) -> Result<()> {
         let frequency = self.cc_frequency;
@@ -2366,7 +2389,7 @@ impl<'a> Compiler<'a> {
             return Err(MmlError::new(line, "和音内に改行があります"));
         }
         cur.skip_spaces();
-        let length = if cur.peek() == Some('(') {
+        let mut length = if cur.peek() == Some('(') {
             let value = self.expect_int(cur, "和音の音長")?;
             if self.track().system_step_mode {
                 Some(value)
@@ -2376,6 +2399,20 @@ impl<'a> Compiler<'a> {
         } else {
             self.read_length(cur)
         };
+
+        // A tie immediately after a chord belongs to the chord length. The
+        // generic tie handler cannot extend it because a chord deliberately
+        // clears `last_note` after emitting several simultaneous notes.
+        if cur.peek() == Some('^') {
+            let mut total = length.unwrap_or_else(|| self.track().length);
+            while cur.eat('^') {
+                let part = self.read_length(cur).unwrap_or_else(|| self.track().length);
+                total = total
+                    .checked_add(part)
+                    .ok_or_else(|| MmlError::new(line, "和音の結合音長が範囲を超えました"))?;
+            }
+            length = Some(total);
+        }
 
         let start = self.track().time;
         let previous_length = self.track().length;
@@ -3028,7 +3065,9 @@ impl<'a> Compiler<'a> {
         if cur.eat('=') {
             // Explicit per-pitch-class values.
             let args = self.read_args(cur, 7)?;
-            for (index, value) in args.iter().enumerate().take(7) {
+            for (offset, value) in args.iter().enumerate().take(7) {
+                let note = (b'a' + offset as u8) as char;
+                let index = pitch_class_index(note).expect("a through g are note names");
                 self.key_flags[index] = *value;
             }
         } else {
@@ -3983,9 +4022,8 @@ impl<'a> Compiler<'a> {
                 if probe.peek() == Some('.') {
                     *cur = probe;
                     let target = match no {
-                        advance_spec::BEND_FULL | advance_spec::BEND_EASY => {
-                            OnNoteTarget::PitchBend
-                        }
+                        advance_spec::BEND_FULL => OnNoteTarget::PitchBendFull,
+                        advance_spec::BEND_EASY => OnNoteTarget::PitchBendEasy,
                         _ => OnNoteTarget::ControlChange(no.clamp(0, 127) as u8),
                     };
                     if let Some(handled) = self.modifier(cur, target)? {
@@ -4008,7 +4046,14 @@ impl<'a> Compiler<'a> {
                 "yにはコントロールチェンジ番号と値を指定してください",
             ));
         }
-        self.write_cc(args[0], args[1]);
+        match args[0] {
+            advance_spec::BEND_FULL => self.write_pitch_bend(args[1]),
+            advance_spec::BEND_EASY => {
+                self.reset_cc_modifier(advance_spec::BEND_EASY);
+                self.write_pitch_bend_raw(0, args[1].clamp(0, 127) as u8);
+            }
+            controller => self.write_cc(controller, args[1]),
+        }
         Ok(())
     }
 
@@ -4026,6 +4071,7 @@ impl<'a> Compiler<'a> {
             .expect_int(cur, "p")
             .map_err(|_| MmlError::new(line, "pには値を指定してください"))?;
         // The simple form sets only the MSB: LSB stays 0.
+        self.reset_cc_modifier(advance_spec::BEND_EASY);
         self.write_pitch_bend_raw(0, value.clamp(0, 127) as u8);
         Ok(())
     }
@@ -4040,6 +4086,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn write_pitch_bend(&mut self, value: i64) {
+        self.reset_cc_modifier(advance_spec::BEND_FULL);
         let raw = (value + 8192).clamp(0, 16383);
         self.write_pitch_bend_raw((raw & 0x7f) as u8, ((raw >> 7) & 0x7f) as u8);
     }
@@ -4077,7 +4124,66 @@ impl<'a> Compiler<'a> {
         // Cresc/Decresc's 1-argument form reads a controller's last value, so
         // a plain write must be visible to it too, the way the Pascal build's
         // single TNoteCC.LastValue field is shared by every path that writes.
-        self.cc_modifier_entry(controller as i64).last_value = value as i64;
+        let modifier = self.cc_modifier_entry(controller as i64);
+        modifier.last_value = value as i64;
+        modifier.kind = Kind::Off;
+    }
+
+    /// Pascal stores RPN/NRPN as one node, then expands it during SMF
+    /// finalisation. Selectors precede Data Entry by ControllerShift ticks;
+    /// consecutive commands at the same cursor are moved farther backwards.
+    fn write_rpn_nrpn(
+        &mut self,
+        is_rpn: bool,
+        msb: i64,
+        lsb: i64,
+        data: Option<i64>,
+    ) -> Result<()> {
+        let (time, channel, muted, cc_muted) = {
+            let track = self.track();
+            (track.time, track.channel, track.cc_muted, track.cc_no_mute)
+        };
+        let byte_count = if data.is_some() { 3 } else { 2 };
+        if self.rpn_shift_channel == Some(channel) && self.rpn_shift_time == time {
+            self.rpn_shift += byte_count * self.controller_shift;
+        } else {
+            self.rpn_shift = 0;
+        }
+        self.rpn_shift_channel = Some(channel);
+        self.rpn_shift_time = time;
+
+        if muted {
+            return Ok(());
+        }
+        let base = time - self.rpn_shift - 1;
+        let (msb_cc, lsb_cc) = if is_rpn { (101u8, 100u8) } else { (99u8, 98u8) };
+        if !cc_muted[msb_cc as usize] {
+            self.push_event(Event::control_change(
+                base - self.controller_shift * 2,
+                channel,
+                msb_cc,
+                msb.clamp(0, 127) as u8,
+            ))?;
+        }
+        if !cc_muted[lsb_cc as usize] {
+            self.push_event(Event::control_change(
+                base - self.controller_shift,
+                channel,
+                lsb_cc,
+                lsb.clamp(0, 127) as u8,
+            ))?;
+        }
+        if let Some(data) = data {
+            if !cc_muted[6] {
+                self.push_event(Event::control_change(
+                    base,
+                    channel,
+                    6,
+                    data.clamp(0, 127) as u8,
+                ))?;
+            }
+        }
+        Ok(())
     }
 
     /// Read up to `max` comma-separated integers, with or without parentheses:
@@ -4347,7 +4453,29 @@ impl<'a> Compiler<'a> {
         if rewind || (no_previous_note && cur.peek() == Some('+')) {
             cur.advance();
         }
-        let (length, _) = self.read_note_options(cur, false)?;
+        let (length, mut options) = self.read_note_options(cur, false)?;
+        // A tie is part of the preceding note's length in Pascal. Therefore
+        // comma arguments after an omitted joined part (`d^,75`) continue at
+        // the second ArgOrder field instead of becoming stray commands.
+        if cur.eat(',') {
+            let order = self.track().arg_order.clone();
+            for (position, field) in order.chars().enumerate().skip(1) {
+                let index = match field {
+                    'q' => 1,
+                    'v' => 2,
+                    't' => 3,
+                    'o' => 4,
+                    'l' => 0,
+                    _ => continue,
+                };
+                let mut ignored_length = None;
+                self.read_note_option(cur, index, &mut ignored_length, &mut options)?;
+                cur.skip_spaces();
+                if position + 1 >= order.len() || !cur.eat(',') {
+                    break;
+                }
+            }
+        }
         let length = match length {
             Some(length) => length,
             None => {
@@ -4356,7 +4484,7 @@ impl<'a> Compiler<'a> {
             }
         };
         let signed = if rewind { -length } else { length };
-        let gate_percent = self.track().gate_percent;
+        let gate_percent = options.gate_percent.unwrap_or(self.track().gate_percent);
         let q_max = self.q_max;
         let time = self.track().time;
         let next = self.checked_time(time, signed, line)?;
@@ -5020,7 +5148,9 @@ impl<'a> Compiler<'a> {
     fn read_joined_argument_length(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
         let mut total = 0i64;
         let mut found = false;
+        let mut after_join = false;
         loop {
+            let nested_literal = after_join && cur.peek() == Some('!');
             let mut part = if cur.eat('%') || cur.peek() == Some('!') {
                 self.read_number(cur)?
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
@@ -5031,6 +5161,13 @@ impl<'a> Compiler<'a> {
             let Some(mut part_value) = part.take() else {
                 break;
             };
+            if nested_literal {
+                part_value = if part_value <= 0 {
+                    0
+                } else {
+                    self.timebase * 4 / part_value
+                };
+            }
             let mut half = part_value;
             while cur.eat('.') {
                 half /= 2;
@@ -5043,6 +5180,7 @@ impl<'a> Compiler<'a> {
             if !cur.eat('^') {
                 break;
             }
+            after_join = true;
         }
         Ok(found.then_some(total))
     }
@@ -5182,6 +5320,14 @@ impl EvalContext for Compiler<'_> {
     fn has_function(&self, name: &str) -> bool {
         self.functions.contains_key(name) || is_builtin_function(name)
     }
+
+    fn length_literal(&self, denominator: i64) -> Option<i64> {
+        Some(if denominator == 0 {
+            0
+        } else {
+            self.timebase * 4 / denominator
+        })
+    }
 }
 
 /// The controller number an advance specification would write to, when the
@@ -5189,7 +5335,8 @@ impl EvalContext for Compiler<'_> {
 fn cc_number_of(target: OnNoteTarget) -> Option<i64> {
     match target {
         OnNoteTarget::ControlChange(no) => Some(no as i64),
-        OnNoteTarget::PitchBend => Some(advance_spec::BEND_EASY),
+        OnNoteTarget::PitchBendFull => Some(advance_spec::BEND_FULL),
+        OnNoteTarget::PitchBendEasy => Some(advance_spec::BEND_EASY),
         _ => None,
     }
 }
@@ -5205,6 +5352,18 @@ fn count_notes(body: &str) -> i64 {
     while index < chars.len() {
         let ch = chars[index];
         match ch {
+            '\'' => {
+                // Pascal counts a chord as one tuplet element, regardless of
+                // how many note letters it contains.
+                count += 1;
+                index += 1;
+                while index < chars.len() && chars[index] != '\'' {
+                    index += 1;
+                }
+                if index < chars.len() {
+                    index += 1;
+                }
+            }
             'a'..='g' | 'n' | 'r' => {
                 count += 1;
                 index += 1;
@@ -5348,7 +5507,8 @@ enum OnNoteTarget {
     Length,
     /// A control change, by controller number.
     ControlChange(u8),
-    PitchBend,
+    PitchBendFull,
+    PitchBendEasy,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

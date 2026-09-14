@@ -183,7 +183,8 @@ fn comparisons_and_logic() {
     assert_same("If(2<=1){c}Else{d}", "d");
     assert_same("If(1&&0){c}Else{d}", "d");
     assert_same("If(1||0){c}Else{d}", "c");
-    assert_same("If(!0){c}Else{d}", "c");
+    assert_same("If(!0){c}Else{d}", "d");
+    assert_same("Int zero=0; If(!zero){c}Else{d}", "c");
     assert_same("If(on){c}Else{d}", "c");
     assert_same("If(off){c}Else{d}", "d");
 }
@@ -328,6 +329,24 @@ fn numeric_function_parameter_accepts_a_joined_length() {
 }
 
 #[test]
+fn length_literals_work_in_script_expressions() {
+    let out = compile(
+        "Int a=!8; Int b=(!4.+!8); Int c=(!1^1); Int d=(!1^!1); \
+         Int e=!0; Print(a); Print(b); Print(c); Print(d); Print(e)",
+    )
+    .unwrap();
+    assert_eq!(out.messages, ["48", "192", "768", "385", "0"]);
+}
+
+#[test]
+fn joined_default_length_accepts_following_note_arguments() {
+    let expected = from_hex(
+        "4d546864000000060001000100604d54726b0000001400903e6423803e640d9040641780406401ff2f00",
+    );
+    assert_eq!(compile("l%24 q100 d^,75e").unwrap().smf, expected);
+}
+
+#[test]
 fn function_argument_defaults() {
     let expected = from_hex("4d546864000000060001000100604d54726b0000000c00903e644b803e6415ff2f00");
     assert_eq!(
@@ -338,6 +357,14 @@ fn function_argument_defaults() {
     assert_same("Function f(Int x=62){n(x)} f(60)", "n60");
     // A later parameter may default while an earlier one is given.
     assert_same("Function f(Int a,Int b=64){n(a) n(b)} f(60)", "n60 n64");
+}
+
+#[test]
+fn omitted_string_parameter_defaults_to_an_empty_string() {
+    assert_same(
+        "Function Chord(Str Len){Str S={'ceg'}; S=S+Len; S} Chord",
+        "'ceg'",
+    );
 }
 
 /// An argument the caller leaves out is 0, not an error — the Pascal build
@@ -933,24 +960,19 @@ fn play_from_restores_rpn_and_nrpn_only_when_enabled() {
             .unwrap();
     assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 101, 0]));
     assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 100, 1]));
-    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 9]));
-    assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 7]));
+    // Consecutive parameters are shifted backwards; after time ordering,
+    // Pascal restores the first source command's value last.
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 7]));
+    assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 9]));
     assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb1, 101, 0]));
     assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb1, 7, 11]));
 
     let disabled =
         compile("PlayFrom.RPN_NRPN(0) RPN(0,1,9) Time(2:1:0) PlayFrom(2:1:0) c").unwrap();
-    let cc_position = |event| {
-        disabled
-            .smf
-            .windows(3)
-            .position(|bytes| bytes == event)
-            .expect("expected restored control change")
-    };
-    // With RPN_NRPN off, Pascal restores the three raw CC values in numeric
-    // controller order rather than replaying an RPN parameter transaction.
-    assert!(cc_position([0xb0, 6, 9]) < cc_position([0xb0, 100, 1]));
-    assert!(cc_position([0xb0, 100, 1]) < cc_position([0xb0, 101, 0]));
+    // With RPN_NRPN off, selector and Data Entry controllers are not restored.
+    for event in [[0xb0, 6], [0xb0, 98], [0xb0, 99], [0xb0, 100], [0xb0, 101]] {
+        assert!(!disabled.smf.windows(2).any(|bytes| bytes == event));
+    }
 }
 
 #[test]
