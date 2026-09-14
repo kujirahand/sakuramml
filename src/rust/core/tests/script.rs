@@ -905,6 +905,16 @@ fn key_pressure_tracks_only_ordinary_notes_like_pascal() {
         .smf
         .windows(3)
         .any(|bytes| bytes == [0xa0, 62, 40]));
+
+    let after_muted_note = compile("c TrackMute(1) d TrackMute(0) KeyPressure(40)").unwrap();
+    assert!(after_muted_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 60, 40]));
+    assert!(!after_muted_note
+        .smf
+        .windows(3)
+        .any(|bytes| bytes == [0xa0, 62, 40]));
 }
 
 #[test]

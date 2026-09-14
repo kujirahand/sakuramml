@@ -4553,7 +4553,9 @@ impl<'a> Compiler<'a> {
         }
 
         let track = self.track();
-        track.last_note_no = note_no as u8;
+        if !muted {
+            track.last_note_no = note_no as u8;
+        }
         track.last_note = if !wrote_note {
             None
         } else {
