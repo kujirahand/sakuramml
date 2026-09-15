@@ -2066,3 +2066,38 @@ fn nested_stretch_matches_pascal_rounding() {
         "4d546864000000060001000100604d54726b0000002400903c6400904064009043642f803c64008040640080436401903c642f803c6401ff2f00",
     );
 }
+
+// ---------------------------------------------------------------
+// Join operators (^, +, -) in Stretch, Cresc, and chord lengths
+// ---------------------------------------------------------------
+// PR #37 review: Stretch, Cresc, and chords did not consume
+// leading or trailing ^/+/- operators via extend_default_length_joins.
+
+#[test]
+fn stretch_consumes_trailing_join_operator() {
+    // `Stretch{c}^` — the `^` adds one default length (quarter note) to the
+    // implicit quarter-note target, giving a half-note (192 ticks) target.
+    assert_golden(
+        "q100 Stretch{c}^",
+        "4d546864000000060001000100604d54726b0000000d00903c64813f803c6401ff2f00",
+    );
+    // `Stretch{c}4^8` — explicit quarter + eighth = 144 ticks.
+    assert_golden(
+        "q100 Stretch{c}4^8",
+        "4d546864000000060001000100604d54726b0000000d00903c64810f803c6401ff2f00",
+    );
+}
+
+#[test]
+fn chord_consumes_plus_and_minus_join_operators() {
+    // `'ceg'+8` — default quarter + eighth = 144 ticks.
+    assert_golden(
+        "q100 'ceg'+8",
+        "4d546864000000060001000100604d54726b0000001d00903c640090406400904364810f803c64008040640080436401ff2f00",
+    );
+    // `'ceg'4-8` — quarter minus eighth = 48 ticks.
+    assert_golden(
+        "q100 'ceg'4-8",
+        "4d546864000000060001000100604d54726b0000001c00903c6400904064009043642f803c64008040640080436401ff2f00",
+    );
+}

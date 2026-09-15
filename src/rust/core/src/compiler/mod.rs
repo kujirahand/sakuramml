@@ -2438,21 +2438,12 @@ impl<'a> Compiler<'a> {
             self.read_length(cur)?
         };
 
-        // A tie immediately after a chord belongs to the chord length. The
-        // command-level `^` is a rest in Pascal, so the chord parser must
-        // consume a joined chord length itself.
-        if cur.peek() == Some('^') {
-            let mut total = length.unwrap_or_else(|| self.track().length);
-            while cur.eat('^') {
-                let part = self
-                    .read_length(cur)?
-                    .unwrap_or_else(|| self.track().length);
-                total = total
-                    .checked_add(part)
-                    .ok_or_else(|| MmlError::new(line, "和音の結合音長が範囲を超えました"))?;
-            }
-            length = Some(total);
-        }
+        // A tie / join immediately after a chord belongs to the chord
+        // length. The command-level `^` is a rest in Pascal, so the chord
+        // parser must consume a joined chord length itself. Use the shared
+        // join handler so that `+` and `-` are handled as well.
+        let default_length = self.track().length;
+        length = self.extend_default_length_joins(cur, length, default_length, line)?;
 
         let start = self.track().time;
         let previous_length = self.track().length;
@@ -2569,10 +2560,18 @@ impl<'a> Compiler<'a> {
                 .read_balanced('(', ')')
                 .ok_or_else(|| MmlError::new(line, "Crescの括弧が閉じられていません"))?;
             let mut sub = Cursor::with_line(&raw, line);
-            let len = self.read_length(&mut sub)?.filter(|v| *v > 0);
+            let len = self.read_length(&mut sub)?;
+            let default_length = self.track().length;
+            let len = self
+                .extend_default_length_joins(&mut sub, len, default_length, line)?
+                .filter(|v| *v > 0);
             (len, def1, def2)
         } else {
-            let len = self.read_length(cur)?.filter(|v| *v > 0);
+            let len = self.read_length(cur)?;
+            let default_length = self.track().length;
+            let len = self
+                .extend_default_length_joins(cur, len, default_length, line)?
+                .filter(|v| *v > 0);
             cur.skip_spaces();
             if cur.eat(',') {
                 let mut values = Vec::new();
@@ -2730,7 +2729,9 @@ impl<'a> Compiler<'a> {
     fn read_stretch_length(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
         cur.skip_spaces();
         if cur.peek() != Some('(') {
-            return self.read_length(cur);
+            let initial = self.read_length(cur)?;
+            let default_length = self.track().length;
+            return self.extend_default_length_joins(cur, initial, default_length, cur.line());
         }
         let line = cur.line();
         let source = self.read_paren_source(cur, line)?;
