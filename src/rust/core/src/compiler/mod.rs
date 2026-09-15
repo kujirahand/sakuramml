@@ -79,8 +79,6 @@ struct TrackState {
     gate_percent: i64,
     timing: i64,
     events: Vec<Event>,
-    /// Time at which the most recent note ended, so `^` can extend it.
-    last_note: Option<LastNote>,
     /// Pascal's `LastNodeNo`, used by `KeyPressure`. A newly allocated Pascal
     /// track is zero-initialized, so pressure before the first note targets 0.
     last_note_no: u8,
@@ -112,13 +110,6 @@ struct TrackState {
     slur_mode: i64,
     slur_value: i64,
     slur_notes: Vec<SlurNote>,
-}
-
-#[derive(Debug, Clone, Copy)]
-struct LastNote {
-    /// Index into `events` of the note-off to move when a tie extends it.
-    off_index: usize,
-    start: i64,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -154,7 +145,6 @@ impl TrackState {
             gate_percent: 80,
             timing: 0,
             events: Vec::new(),
-            last_note: None,
             last_note_no: 0,
             octave_once: 0,
             gate_in_steps: false,
@@ -963,8 +953,9 @@ impl<'a> Compiler<'a> {
                 } else {
                     self.step_mode
                 };
+                let default_length = self.track().length;
                 let value = self
-                    .read_length_in_mode(cur, step_mode)
+                    .read_length_in_mode(cur, step_mode, default_length)?
                     .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
                 let track = self.track();
                 track.length = value;
@@ -1276,7 +1267,6 @@ impl<'a> Compiler<'a> {
                 let latest = self.tracks.values().map(|t| t.time).max().unwrap_or(0);
                 for state in self.tracks.values_mut() {
                     state.time = latest;
-                    state.last_note = None;
                 }
                 Ok(())
             }
@@ -2301,6 +2291,30 @@ impl<'a> Compiler<'a> {
             .map(|(_, modifier)| modifier.in_steps)
     }
 
+    /// Advance the per-note defaults in the same order as Pascal's
+    /// `GetTrackDefaultValue`: length, gate, velocity, timing, then octave.
+    fn advance_note_defaults(&mut self, time: i64) -> NoteDefaults {
+        let (length, gate, velocity, timing, octave) = {
+            let track = self.track();
+            (
+                track.length,
+                track.gate_percent,
+                track.velocity,
+                track.timing,
+                track.octave,
+            )
+        };
+        let gate_in_steps = self.note_modifier_step_mode(OnNoteTarget::Gate);
+        NoteDefaults {
+            length: self.note_value(OnNoteTarget::Length, length, time),
+            gate: self.note_value(OnNoteTarget::Gate, gate, time),
+            gate_in_steps,
+            velocity: self.note_value(OnNoteTarget::Velocity, velocity, time),
+            timing: self.note_value(OnNoteTarget::Timing, timing, time),
+            octave: self.note_value(OnNoteTarget::Octave, octave, time),
+        }
+    }
+
     /// `$c{mml}` — bind one character for use in rhythm mode.
     fn define_rythm_macro(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
@@ -2421,16 +2435,18 @@ impl<'a> Compiler<'a> {
                 Some(self.timebase * 4 / value.max(1))
             }
         } else {
-            self.read_length(cur)
+            self.read_length(cur)?
         };
 
         // A tie immediately after a chord belongs to the chord length. The
-        // generic tie handler cannot extend it because a chord deliberately
-        // clears `last_note` after emitting several simultaneous notes.
+        // command-level `^` is a rest in Pascal, so the chord parser must
+        // consume a joined chord length itself.
         if cur.peek() == Some('^') {
             let mut total = length.unwrap_or_else(|| self.track().length);
             while cur.eat('^') {
-                let part = self.read_length(cur).unwrap_or_else(|| self.track().length);
+                let part = self
+                    .read_length(cur)?
+                    .unwrap_or_else(|| self.track().length);
                 total = total
                     .checked_add(part)
                     .ok_or_else(|| MmlError::new(line, "和音の結合音長が範囲を超えました"))?;
@@ -2456,7 +2472,6 @@ impl<'a> Compiler<'a> {
         let track = self.track();
         track.length = previous_length;
         track.time = end;
-        track.last_note = None;
         outcome
     }
 
@@ -2554,10 +2569,10 @@ impl<'a> Compiler<'a> {
                 .read_balanced('(', ')')
                 .ok_or_else(|| MmlError::new(line, "Crescの括弧が閉じられていません"))?;
             let mut sub = Cursor::with_line(&raw, line);
-            let len = self.read_length(&mut sub).filter(|v| *v > 0);
+            let len = self.read_length(&mut sub)?.filter(|v| *v > 0);
             (len, def1, def2)
         } else {
-            let len = self.read_length(cur).filter(|v| *v > 0);
+            let len = self.read_length(cur)?.filter(|v| *v > 0);
             cur.skip_spaces();
             if cur.eat(',') {
                 let mut values = Vec::new();
@@ -2636,7 +2651,11 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         let body = self.read_block(cur, line)?;
         cur.skip_spaces();
-        let total = self.read_length(cur).unwrap_or_else(|| self.track().length);
+        let default_length = self.track().length;
+        let initial = self.read_length(cur)?;
+        let total = self
+            .extend_default_length_joins(cur, initial, default_length, line)?
+            .unwrap_or(default_length);
 
         let count = count_notes(&body).max(1);
         let previous = self.track().length;
@@ -2697,14 +2716,12 @@ impl<'a> Compiler<'a> {
         }
         self.stretch_rate = target as f64 / duration as f64;
         self.track().time = start;
-        self.track().last_note = None;
 
         let result = self.run_fragment(&body, line);
         self.current = original_track;
         self.stretch_rate = previous_rate;
         self.track().muted = previous_mute;
         self.track().time = self.checked_time(start, target, line)?;
-        self.track().last_note = None;
         result.map_err(|error| MmlError::new(error.line, format!("Stretch: {}", error.message)))
     }
 
@@ -2713,7 +2730,7 @@ impl<'a> Compiler<'a> {
     fn read_stretch_length(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
         cur.skip_spaces();
         if cur.peek() != Some('(') {
-            return Ok(self.read_length(cur));
+            return self.read_length(cur);
         }
         let line = cur.line();
         let source = self.read_paren_source(cur, line)?;
@@ -2740,7 +2757,6 @@ impl<'a> Compiler<'a> {
         self.run_fragment(&body, line)?;
         let track = self.track();
         track.time = before;
-        track.last_note = None;
         Ok(())
     }
 
@@ -2796,7 +2812,6 @@ impl<'a> Compiler<'a> {
                 .entry(self.current)
                 .or_insert_with(|| TrackState::new(track_no as i64, timebase, step_mode));
             track.time = start_time;
-            track.last_note = None;
 
             let normalized = self.preprocess(&source);
             if let Err(error) = self.run_fragment(&normalized, line) {
@@ -3133,7 +3148,6 @@ impl<'a> Compiler<'a> {
         let time = self.time_value(&body, line)?;
         let track = self.track();
         track.time = time;
-        track.last_note = None;
         Ok(())
     }
 
@@ -4388,15 +4402,14 @@ impl<'a> Compiler<'a> {
                 .ok_or_else(|| Self::note_number_overflow(line))?;
         }
 
-        cur.skip_spaces();
-        let (length, options) = self.read_note_options(cur, true)?;
-        let slur = self.read_slur_marker(cur)?;
         let time = self.track().time;
-        let base_octave = self.track().octave;
-        let advanced_octave = self.note_value(OnNoteTarget::Octave, base_octave, time);
+        let defaults = self.advance_note_defaults(time);
+        cur.skip_spaces();
+        let (length, options) = self.read_note_options(cur, true, defaults.length)?;
+        let slur = self.read_slur_marker(cur)?;
         let octave = {
             let track = self.track();
-            options.octave.unwrap_or(advanced_octave) + std::mem::take(&mut track.octave_once)
+            options.octave.unwrap_or(defaults.octave) + std::mem::take(&mut track.octave_once)
         };
         let transposition = self.current_transposition(line)?;
         let note_no = octave
@@ -4406,7 +4419,7 @@ impl<'a> Compiler<'a> {
             .and_then(|value| value.checked_add(accidental))
             .and_then(|value| value.checked_add(transposition))
             .ok_or_else(|| Self::note_number_overflow(line))?;
-        self.write_note(note_no, length, options, slur, line)
+        self.write_note(note_no, length, options, defaults, slur, line)
     }
 
     fn note_number(&mut self, cur: &mut Cursor) -> Result<()> {
@@ -4416,16 +4429,15 @@ impl<'a> Compiler<'a> {
         let note_no = self.expect_int_arg(cur, "nコマンドのノート番号")?;
         // `n60,` — the Pascal syntax allows a comma before the options.
         cur.eat(',');
-        let (length, options) = self.read_note_options(cur, true)?;
-        let slur = self.read_slur_marker(cur)?;
         let time = self.track().time;
-        let octave = self.track().octave;
-        let _ = self.note_value(OnNoteTarget::Octave, octave, time);
+        let defaults = self.advance_note_defaults(time);
+        let (length, options) = self.read_note_options(cur, true, defaults.length)?;
+        let slur = self.read_slur_marker(cur)?;
         let transposition = self.current_transposition(line)?;
         let note_no = note_no
             .checked_add(transposition)
             .ok_or_else(|| Self::note_number_overflow(line))?;
-        self.write_note(note_no, length, options, slur, line)
+        self.write_note(note_no, length, options, defaults, slur, line)
     }
 
     fn rest(&mut self, cur: &mut Cursor) -> Result<()> {
@@ -4472,9 +4484,10 @@ impl<'a> Compiler<'a> {
         let (length, _) = if expression_length.is_some() {
             (None, NoteOptions::default())
         } else {
-            self.read_note_options(cur, false)?
+            self.read_note_options(cur, false, default_length)?
         };
         let explicit = expression_length.or(length);
+        let explicit = self.extend_default_length_joins(cur, explicit, default_length, line)?;
         // Pascal's funcNoteR scales the default rest length, but an explicit
         // rest length is read after that default and therefore stays literal.
         let length = match explicit {
@@ -4491,68 +4504,14 @@ impl<'a> Compiler<'a> {
         let next = self.checked_time(time, signed, line)?;
         let track = self.track();
         track.time = next;
-        track.last_note = None;
         Ok(())
     }
 
-    /// `^` extends the previous note; with no preceding note it is a rest.
+    /// A `^` that was not consumed by a note's length field follows Pascal's
+    /// `funcNoteR` path and therefore behaves exactly like a rest. This can
+    /// happen when a custom ArgOrder stops before reaching `l`.
     fn tie(&mut self, cur: &mut Cursor) -> Result<()> {
-        let line = cur.line();
-        // As with `r`, a leading sign only makes sense when there is no
-        // previous note to extend — the Pascal build routes both through the
-        // same handler (funcNoteR).
-        let no_previous_note = self.track().last_note.is_none();
-        let rewind = no_previous_note && cur.peek() == Some('-');
-        if rewind || (no_previous_note && cur.peek() == Some('+')) {
-            cur.advance();
-        }
-        let (length, mut options) = self.read_note_options(cur, false)?;
-        // A tie is part of the preceding note's length in Pascal. Therefore
-        // comma arguments after an omitted joined part (`d^,75`) continue at
-        // the second ArgOrder field instead of becoming stray commands.
-        if cur.eat(',') {
-            let order = self.track().arg_order.clone();
-            for (position, field) in order.chars().enumerate().skip(1) {
-                let index = match field {
-                    'q' => 1,
-                    'v' => 2,
-                    't' => 3,
-                    'o' => 4,
-                    'l' => 0,
-                    _ => continue,
-                };
-                let mut ignored_length = None;
-                self.read_note_option(cur, index, &mut ignored_length, &mut options)?;
-                cur.skip_spaces();
-                if position + 1 >= order.len() || !cur.eat(',') {
-                    break;
-                }
-            }
-        }
-        let length = match length {
-            Some(length) => length,
-            None => {
-                let default_length = self.track().length;
-                self.scale_stretch(default_length, line)?
-            }
-        };
-        let signed = if rewind { -length } else { length };
-        let gate_percent = options.gate_percent.unwrap_or(self.track().gate_percent);
-        let q_max = self.q_max;
-        let time = self.track().time;
-        let next = self.checked_time(time, signed, line)?;
-        let track = self.track();
-        track.time = next;
-
-        let Some(last) = track.last_note else {
-            return Ok(()); // no note to extend: behaves as a rest
-        };
-        let total = track.time - last.start;
-        let gate = gate_ticks_scaled(total, gate_percent, q_max);
-        if let Some(Event { time, .. }) = track.events.get_mut(last.off_index) {
-            *time = last.start + gate;
-        }
-        Ok(())
+        self.rest(cur)
     }
 
     fn read_slur_marker(&mut self, cur: &mut Cursor) -> Result<Option<Option<i64>>> {
@@ -4597,6 +4556,7 @@ impl<'a> Compiler<'a> {
         note_no: i64,
         length: Option<i64>,
         options: NoteOptions,
+        defaults: NoteDefaults,
         slur: Option<Option<i64>>,
         line: usize,
     ) -> Result<()> {
@@ -4607,29 +4567,15 @@ impl<'a> Compiler<'a> {
             ));
         }
         let time = self.track().time;
-        let (base_length, base_velocity, base_gate, base_timing) = {
-            let track = self.track();
-            (
-                track.length,
-                track.velocity,
-                track.gate_percent,
-                track.timing,
-            )
-        };
-        let advanced_length = self.note_value(OnNoteTarget::Length, base_length, time);
-        let advanced_velocity = self.note_value(OnNoteTarget::Velocity, base_velocity, time);
-        let gate_modifier_in_steps = self.note_modifier_step_mode(OnNoteTarget::Gate);
-        let advanced_gate = self.note_value(OnNoteTarget::Gate, base_gate, time);
-        let advanced_timing = self.note_value(OnNoteTarget::Timing, base_timing, time);
-        let length = length.unwrap_or(advanced_length);
-        let raw_velocity = options.velocity.unwrap_or(advanced_velocity);
-        let gate_value = options.gate_percent.unwrap_or(advanced_gate);
+        let length = length.unwrap_or(defaults.length);
+        let raw_velocity = options.velocity.unwrap_or(defaults.velocity);
+        let gate_value = options.gate_percent.unwrap_or(defaults.gate);
         let (q_max, v_max) = (self.q_max, self.v_max);
         let velocity = scale_velocity(raw_velocity, v_max);
         let gate_in_steps = if options.gate_percent.is_some() {
             options.gate_in_steps
         } else {
-            gate_modifier_in_steps.unwrap_or(self.track().gate_in_steps)
+            defaults.gate_in_steps.unwrap_or(self.track().gate_in_steps)
         };
         let (length, gate, chord_gate) = if self.stretch_rate != 1.0 {
             // Pascal scales the duration and the pre-NoteOff gate separately,
@@ -4657,7 +4603,7 @@ impl<'a> Compiler<'a> {
         };
         let (timing, channel) = {
             let track = self.track();
-            (options.timing.unwrap_or(advanced_timing), track.channel)
+            (options.timing.unwrap_or(defaults.timing), track.channel)
         };
         // Inside a chord every note starts together.
         let time = self.chord_start.unwrap_or(time);
@@ -4667,7 +4613,6 @@ impl<'a> Compiler<'a> {
 
         let muted = self.track().muted;
         let slur_participates = slur.is_some() || !self.track().slur_notes.is_empty();
-        let mut wrote_note = false;
         let mut slur_note = None;
         if length == 0 {
             if !muted {
@@ -4698,7 +4643,6 @@ impl<'a> Compiler<'a> {
             if !muted && pending.is_empty() {
                 self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
                 self.push_event(Event::note_off(end, channel, note_no as u8, velocity))?;
-                wrote_note = true;
             } else if !muted {
                 // Pascal's WaonStack bypasses the ordinary packed-note
                 // one-tick shortening for every member, including the final
@@ -4721,7 +4665,6 @@ impl<'a> Compiler<'a> {
                 let chord_end = self.checked_time(start, chord_gate, line)?;
                 self.push_event(Event::note_on(start, channel, note_no as u8, velocity))?;
                 self.push_event(Event::note_off(chord_end, channel, note_no as u8, velocity))?;
-                wrote_note = true;
             }
         }
         // Advance specifications run after the note, which is the only point
@@ -4743,14 +4686,6 @@ impl<'a> Compiler<'a> {
         if !muted {
             track.last_note_no = note_no as u8;
         }
-        track.last_note = if !wrote_note {
-            None
-        } else {
-            Some(LastNote {
-                off_index: track.events.len() - 1,
-                start,
-            })
-        };
         // A chord moves the pointer once, when it closes.
         if self.chord_start.is_none() {
             self.track().time = next;
@@ -4999,6 +4934,7 @@ impl<'a> Compiler<'a> {
         &mut self,
         cur: &mut Cursor,
         use_arg_order: bool,
+        default_length: i64,
     ) -> Result<(Option<i64>, NoteOptions)> {
         let mut options = NoteOptions::default();
         let mut length = None;
@@ -5016,7 +4952,9 @@ impl<'a> Compiler<'a> {
                     break;
                 }
                 if index == 0 {
-                    self.read_note_option(cur, index, &mut length, &mut options)?;
+                    self.read_note_option(cur, index, default_length, &mut length, &mut options)?;
+                    length =
+                        self.extend_default_length_joins(cur, length, default_length, cur.line())?;
                 } else {
                     // Skip it: past the length these values have no effect,
                     // and they may be written in forms a number parser would
@@ -5045,7 +4983,11 @@ impl<'a> Compiler<'a> {
                     'o' => 4,
                     _ => continue,
                 };
-                self.read_note_option(cur, index, &mut length, &mut options)?;
+                self.read_note_option(cur, index, default_length, &mut length, &mut options)?;
+                if index == 0 {
+                    length =
+                        self.extend_default_length_joins(cur, length, default_length, cur.line())?;
+                }
                 cur.skip_spaces();
                 if position + 1 >= order.len() || !cur.eat(',') {
                     break;
@@ -5053,7 +4995,8 @@ impl<'a> Compiler<'a> {
                 cur.skip_spaces();
             }
         } else {
-            self.read_note_option(cur, 0, &mut length, &mut options)?;
+            self.read_note_option(cur, 0, default_length, &mut length, &mut options)?;
+            length = self.extend_default_length_joins(cur, length, default_length, cur.line())?;
         }
         Ok((length, options))
     }
@@ -5062,6 +5005,7 @@ impl<'a> Compiler<'a> {
         &mut self,
         cur: &mut Cursor,
         index: usize,
+        default_length: i64,
         length: &mut Option<i64>,
         options: &mut NoteOptions,
     ) -> Result<()> {
@@ -5073,7 +5017,8 @@ impl<'a> Compiler<'a> {
             cur.advance();
         }
         let value = if index == 0 {
-            self.read_length(cur)
+            let step_mode = self.track().system_step_mode;
+            self.read_length_in_mode(cur, step_mode, default_length)?
         } else if index == 1 && cur.peek() == Some('!') {
             self.read_joined_argument_length(cur)?
         } else if matches!(cur.peek(), Some(',') | Some(')') | None) {
@@ -5103,14 +5048,58 @@ impl<'a> Compiler<'a> {
     }
 
     /// A length spec: `4`, `8.`, `%48` (raw ticks), or a `^`-joined sum.
-    fn read_length(&mut self, cur: &mut Cursor) -> Option<i64> {
+    fn read_length(&mut self, cur: &mut Cursor) -> Result<Option<i64>> {
         let step_mode = self.track().system_step_mode;
-        self.read_length_in_mode(cur, step_mode)
+        let default_length = self.track().length;
+        self.read_length_in_mode(cur, step_mode, default_length)
     }
 
-    fn read_length_in_mode(&mut self, cur: &mut Cursor, step_mode: bool) -> Option<i64> {
+    /// Complete joins that begin after an omitted/default first length.
+    /// Pascal's GetNoteLength always starts with its supplied default, so a
+    /// suffix such as `c^`, `r^`, or `Div{cde}^` consumes the caret and adds
+    /// one current default length even though no digits follow it.
+    fn extend_default_length_joins(
+        &mut self,
+        cur: &mut Cursor,
+        initial: Option<i64>,
+        default_length: i64,
+        line: usize,
+    ) -> Result<Option<i64>> {
+        let mut total = initial;
+        cur.skip_spaces();
+        while matches!(cur.peek(), Some('^') | Some('+') | Some('-')) {
+            let subtract = cur.eat('-');
+            if !subtract {
+                cur.advance();
+            }
+            cur.skip_spaces();
+            let step_mode = self.track().system_step_mode;
+            let part = self
+                .read_length_in_mode(cur, step_mode, default_length)?
+                .unwrap_or(default_length);
+            let base = total.unwrap_or(default_length);
+            total = Some(
+                if subtract {
+                    base.checked_sub(part)
+                } else {
+                    base.checked_add(part)
+                }
+                .ok_or_else(|| MmlError::new(line, "結合音長が範囲を超えました"))?,
+            );
+            cur.skip_spaces();
+        }
+        Ok(total)
+    }
+
+    fn read_length_in_mode(
+        &mut self,
+        cur: &mut Cursor,
+        step_mode: bool,
+        default_length: i64,
+    ) -> Result<Option<i64>> {
         let mut total: Option<i64> = None;
         let mut subtract = false;
+        let mut after_operator = false;
         loop {
             // `*` introduces a length that may be an expression: `r*%(Delay)`
             // is a rest of `Delay` ticks, `c*3` a third note. Only there does
@@ -5133,25 +5122,30 @@ impl<'a> Compiler<'a> {
                     }
                 })
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
-                let n = cur.read_int()?;
-                if step_mode {
-                    Some(n)
-                } else if n <= 0 {
-                    Some(0)
-                } else {
-                    Some(self.timebase * 4 / n)
-                }
+                cur.read_int().map(|n| {
+                    if step_mode {
+                        n
+                    } else if n <= 0 {
+                        0
+                    } else {
+                        self.timebase * 4 / n
+                    }
+                })
             } else if starred && cur.peek() == Some('(') {
                 match self.read_number(cur).ok().flatten() {
                     Some(n) if n > 0 => Some(self.timebase * 4 / n),
                     other => other,
                 }
+            } else if after_operator {
+                // Pascal treats an omitted part after ^, +, or - as the
+                // current default length. This includes a trailing operator
+                // and lets its following dots extend that default part.
+                Some(default_length)
             } else if total.is_some() && cur.peek() == Some('.') {
                 Some(0)
             } else {
                 None
             };
-
             let mut part = match (part, total) {
                 (Some(p), _) => p,
                 (None, Some(_)) => break,
@@ -5159,9 +5153,9 @@ impl<'a> Compiler<'a> {
                     // A bare dot after no digits means "the default length,
                     // dotted"; anything else is not a length at all.
                     if cur.peek() == Some('.') {
-                        self.track().length
+                        default_length
                     } else {
-                        return None;
+                        return Ok(None);
                     }
                 }
             };
@@ -5172,24 +5166,31 @@ impl<'a> Compiler<'a> {
             while cur.peek() == Some('.') {
                 cur.advance();
                 half /= 2;
-                dotted += half;
+                dotted = dotted
+                    .checked_add(half)
+                    .ok_or_else(|| MmlError::new(cur.line(), "結合音長が範囲を超えました"))?;
             }
             part = dotted;
 
-            total = Some(if subtract {
-                total.unwrap_or(0) - part
-            } else {
-                total.unwrap_or(0) + part
-            });
+            total = Some(
+                if subtract {
+                    total.unwrap_or(0).checked_sub(part)
+                } else {
+                    total.unwrap_or(0).checked_add(part)
+                }
+                .ok_or_else(|| MmlError::new(cur.line(), "結合音長が範囲を超えました"))?,
+            );
 
             match cur.peek() {
                 Some('^') | Some('+') => {
                     subtract = false;
+                    after_operator = true;
                     cur.advance();
                     continue;
                 }
                 Some('-') => {
                     subtract = true;
+                    after_operator = true;
                     cur.advance();
                     continue;
                 }
@@ -5197,7 +5198,7 @@ impl<'a> Compiler<'a> {
             }
             break;
         }
-        total
+        Ok(total)
     }
 
     /// Length-valued numeric arguments use `!n` for an n-th note, and may
@@ -5973,6 +5974,16 @@ struct NoteOptions {
     velocity: Option<i64>,
     timing: Option<i64>,
     octave: Option<i64>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct NoteDefaults {
+    length: i64,
+    gate: i64,
+    gate_in_steps: Option<bool>,
+    velocity: i64,
+    timing: i64,
+    octave: i64,
 }
 
 /// Sounding length for a note: `trunc(length * q / 100) - 1`, at least 1 tick.
