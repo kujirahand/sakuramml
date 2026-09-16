@@ -89,6 +89,8 @@
 
   <div class="row">
     <button id="compile" class="primary">コンパイル</button>
+    <button id="play" disabled>▶ 再生</button>
+    <button id="stop" disabled>■ 停止</button>
     <button id="download" disabled>MIDIをダウンロード</button>
     <span class="samples">
       <button data-mml="テンポ120&#10;音量100 音階5&#10;ドレミファソラシド">ストトン</button>
@@ -103,18 +105,31 @@
   <footer>
     コアはI/Oを持たないRustライブラリで、このページ・CLI・WASIで同じコードが動きます。
     入力はUTF-8/CP932を自動判定し、MIDIのメタテキストは互換性のためCP932で書き出します。
+    再生には <a href="https://github.com/cagpie/PicoAudio.js" target="_blank" rel="noopener">PicoAudio.js</a> を使用しています。
   </footer>
 </main>
 
+<script src="https://unpkg.com/picoaudio@1/dist/browser/PicoAudio.min.js"></script>
 <script type="module">
 import init, { compileMml, version } from "../pkg/sakuramml_wasm.js";
 
 const log = document.getElementById("log");
 const editor = document.getElementById("mml");
 const compileButton = document.getElementById("compile");
+const playButton = document.getElementById("play");
+const stopButton = document.getElementById("stop");
 const downloadButton = document.getElementById("download");
 
 let midi = null;
+let picoAudio = null;
+
+function getPicoAudio() {
+  if (!picoAudio) {
+    picoAudio = new PicoAudio();
+    picoAudio.init();
+  }
+  return picoAudio;
+}
 
 function show(html, kind = "") {
   log.className = kind;
@@ -138,12 +153,17 @@ compileButton.addEventListener("click", () => {
     result = compileMml(editor.value);
   } catch (error) {
     midi = null;
+    playButton.disabled = true;
+    stopButton.disabled = true;
     downloadButton.disabled = true;
     show(escapeHtml(String(error.message ?? error)), "err");
     return;
   }
 
+  if (picoAudio) picoAudio.pause();
   midi = result.midi;
+  playButton.disabled = false;
+  stopButton.disabled = true;
   downloadButton.disabled = false;
 
   const lines = result.errors.length === 0
@@ -169,6 +189,23 @@ downloadButton.addEventListener("click", () => {
   link.download = "song.mid";
   link.click();
   URL.revokeObjectURL(url);
+});
+
+playButton.addEventListener("click", () => {
+  if (!midi) return;
+  try {
+    const pa = getPicoAudio();
+    pa.setData(pa.parseSMF(new Uint8Array(midi)));
+    pa.play();
+    stopButton.disabled = false;
+  } catch (error) {
+    show(escapeHtml(String(error.message ?? error)), "err");
+  }
+});
+
+stopButton.addEventListener("click", () => {
+  if (picoAudio) picoAudio.pause();
+  stopButton.disabled = true;
 });
 
 for (const button of document.querySelectorAll(".samples button")) {
