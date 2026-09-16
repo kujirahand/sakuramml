@@ -302,9 +302,7 @@ fn sysex_command(bytes: &[u8]) -> Option<String> {
     let length = read_vlq(bytes, &mut offset).ok()? as usize;
     let payload = bytes.get(offset..offset.checked_add(length)?)?;
     let mut values: Vec<String> = Vec::new();
-    if payload.first() != Some(&0xF0) {
-        values.push("F0".to_string());
-    }
+    values.push("F0".to_string());
     values.extend(payload.iter().map(|byte| format!("{byte:02X}")));
     Some(format!("SysEx$({})", values.join(",")))
 }
@@ -369,11 +367,19 @@ fn tempo_command(data: &[u8]) -> Option<String> {
 }
 
 /// `TimeSignature=分子,分母` — the SMF denominator byte is a power of two.
-/// The value is skipped when the grid could not hold the resulting beat.
+/// The value is skipped when the grid could not hold the resulting beat, or
+/// when the metronome/32nd-note bytes don't match what the compiler writes
+/// for this division, since those bytes would otherwise be lost.
 fn time_signature_command(data: &[u8], division: u16) -> Option<String> {
     let data = <[u8; 4]>::try_from(data).ok()?;
-    let (numerator, denominator) = (u64::from(data[0]), 1u64 << data[1]);
-    (numerator >= 1 && u64::from(division) * 4 >= denominator)
+    let numerator = u64::from(data[0]);
+    let denominator = 1u64.checked_shl(u32::from(data[1]))?;
+    let expected_clocks = division.clamp(0, 255) as u8;
+    let expected_32nds = (division / 8).clamp(0, 255) as u8;
+    (numerator >= 1
+        && u64::from(division) * 4 >= denominator
+        && data[2] == expected_clocks
+        && data[3] == expected_32nds)
         .then(|| format!("TimeSignature={numerator},{denominator}"))
 }
 
@@ -561,6 +567,33 @@ mod tests {
         let track = b"\x00\xff\x51\x03\x00\xff\x41";
         let text = dump(&smf(&[track, END_OF_TRACK])).expect("valid SMF");
         assert!(text.contains("TIME(1:1:0) DirectSMF($FF,$51,$03,$00,$FF,$41)"));
+    }
+
+    #[test]
+    fn keeps_time_signatures_with_an_oversized_denominator_exponent_as_direct_smf() {
+        // A denominator exponent of 64 would overflow a naive `1 << data[1]`.
+        let track = b"\x00\xff\x58\x04\x04\x40\x60\x0c";
+        let text = dump(&smf(&[track, END_OF_TRACK])).expect("valid SMF");
+        assert!(text.contains("TIME(1:1:0) DirectSMF($FF,$58,$04,$04,$40,$60,$0C)"));
+    }
+
+    #[test]
+    fn keeps_time_signatures_with_mismatched_metronome_bytes_as_direct_smf() {
+        // Division is 96, so the compiler always writes cc=96,bb=12; other
+        // values must not be collapsed into the same `TimeSignature=4,4`.
+        let track = b"\x00\xff\x58\x04\x04\x02\x18\x08";
+        let text = dump(&smf(&[track, END_OF_TRACK])).expect("valid SMF");
+        assert!(text.contains("TIME(1:1:0) DirectSMF($FF,$58,$04,$04,$02,$18,$08)"));
+    }
+
+    #[test]
+    fn distinguishes_sysex_payloads_that_start_with_f0() {
+        let track = b"\x00\xf0\x02\xf0\x01\
+            \x00\xf0\x01\x01\
+            \x00\xff\x2f\0";
+        let text = dump(&smf(&[track])).expect("valid SMF");
+        assert!(text.contains("TIME(1:1:0) SysEx$(F0,F0,01)"));
+        assert!(text.contains("TIME(1:1:0) SysEx$(F0,01)"));
     }
 
     #[test]
