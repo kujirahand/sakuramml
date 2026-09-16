@@ -255,12 +255,18 @@ pub struct Compiler<'a> {
     selected_tracks: BTreeSet<i64>,
     /// While writing a chord, the time every note in it starts at.
     chord_start: Option<i64>,
+    /// While writing a chord, its own explicit length (`'ceg'4`), if any —
+    /// `Some(None)` is not distinguishable from "no chord", but a chord
+    /// without an explicit length behaves the same as omitting it, so the
+    /// outer `Option` alone marks "inside a chord" and the inner one marks
+    /// "the chord gave an explicit length".
+    chord_length: Option<Option<i64>>,
     /// While writing a chord, the gate/velocity/timing/octave defaults from
     /// its trailing `'ceg'4,80,100,0,5` arguments, consulted by every note
     /// in the body (Pascal's `RecWaon.Option`). Unlike `chord_start`, these
     /// never touch persistent track state, so an ordinary command inside the
-    /// body (`o5`, `v100`, ...) still changes it for good, same as outside a
-    /// chord.
+    /// body (`l8`, `o5`, `v100`, ...) still changes it for good, same as
+    /// outside a chord.
     chord_options: Option<NoteOptions>,
     /// `.Frequency` — how often a ramp writes, in ticks.
     cc_frequency: i64,
@@ -329,6 +335,7 @@ impl<'a> Compiler<'a> {
             solo_or_mute: 0,
             selected_tracks: BTreeSet::new(),
             chord_start: None,
+            chord_length: None,
             chord_options: None,
             cc_frequency: advance_spec::DEFAULT_FREQUENCY,
             rythm_macros: rythm::Macros::new(),
@@ -2332,8 +2339,12 @@ impl<'a> Compiler<'a> {
             timing: self.note_value(OnNoteTarget::Timing, timing, time),
             octave: self.note_value(OnNoteTarget::Octave, octave, time),
         };
-        // `'ceg'4,80,100,0,5` — the chord's trailing gate/velocity/timing/
-        // octave apply as the default for every note in its body.
+        // `'ceg'4,80,100,0,5` — the chord's own length and its trailing
+        // gate/velocity/timing/octave apply as the default for every note in
+        // its body, overriding even an active `.onNote` modifier's result.
+        if let Some(Some(length)) = self.chord_length {
+            defaults.length = length;
+        }
         if let Some(chord_options) = self.chord_options {
             if let Some(gate) = chord_options.gate_percent {
                 defaults.gate = gate;
@@ -2508,28 +2519,26 @@ impl<'a> Compiler<'a> {
         }
 
         let start = self.track().time;
-        let previous_length = self.track().length;
-        if let Some(length) = length {
-            self.track().length = length;
-        }
 
         // Every note in the body starts at `start`; the pointer moves once,
-        // afterwards, by the chord's own length. The gate/velocity/timing/
-        // octave defaults apply to every note in the body without touching
-        // persistent track state, so an ordinary command inside the body
-        // (`o5`, `v100`, ...) still changes it for good.
+        // afterwards, by the chord's own length. The length/gate/velocity/
+        // timing/octave defaults apply to every note in the body without
+        // touching persistent track state, so an ordinary command inside
+        // the body (`l8`, `o5`, `v100`, ...) still changes it for good, and
+        // an explicit chord length overrides even a note's own `.onNote`
+        // length modifier, matching Pascal's `RecWaon.Option` precedence.
         let outer_start = self.chord_start.replace(start);
+        let outer_length = self.chord_length.replace(length);
         let outer_options = self.chord_options.replace(options);
         let outcome = self.run_fragment(&body, line);
         self.chord_start = outer_start;
+        self.chord_length = outer_length;
         self.chord_options = outer_options;
 
-        let length = length.unwrap_or(previous_length);
+        let length = length.unwrap_or(default_length);
         let length = self.scale_stretch(length, line)?;
         let end = self.checked_time(start, length, line)?;
-        let track = self.track();
-        track.length = previous_length;
-        track.time = end;
+        self.track().time = end;
         outcome
     }
 

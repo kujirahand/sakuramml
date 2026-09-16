@@ -1531,6 +1531,14 @@ fn chords_sound_their_notes_together() {
 fn chord_trailing_options_set_note_defaults_like_pascal() {
     assert_same_bytes("v127 'ce',,60", "v60 'ce' v127");
     assert_same_bytes("v127 'ce',,60 d", "v60 'ce' v127 d");
+    // The chord's own length is a default too, not a persistent override:
+    // it doesn't persist past the chord, but a genuine `l` command inside
+    // the body does (Pascal's `RecWaon.Option` precedence).
+    assert_same_bytes("l4 'ce'8 d", "l8 'ce' l4 d");
+    assert_same_bytes("'l8 ce'4 d", "l8 'ce'4 l8 d");
+    // An explicit chord length overrides even an active `.onNote` length
+    // modifier for the notes in its body.
+    assert_same_bytes("l.onNote(48) 'ce'4", "'ce'4");
 }
 
 #[test]
