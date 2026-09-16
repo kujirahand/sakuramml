@@ -1,142 +1,142 @@
 //------------------------------------------------------------------------------ Header.
 /*
-ƒR[ƒhƒWƒFƒlƒŒ[ƒ^wƒR[ƒh‚Tx
-ver.1.07 LastUpdate = 2002/12/23@‚İ‚¶‚ñ‚±
+ã‚³ãƒ¼ãƒ‰ã‚¸ã‚§ãƒãƒ¬ãƒ¼ã‚¿ã€ã‚³ãƒ¼ãƒ‰ï¼•ã€
+ver.1.07 LastUpdate = 2002/12/23ã€€ã¿ã˜ã‚“ã“
 
-wƒeƒ“ƒ|ƒ‰ƒŠƒXƒP[ƒ‰ƒTƒ|[ƒgx
-	ƒ‚[ƒhŒn
-	ƒn[ƒ‚ƒjƒbƒNŒn
-	ƒƒƒfƒBƒbƒNŒn
+ã€ãƒ†ãƒ³ãƒãƒ©ãƒªã‚¹ã‚±ãƒ¼ãƒ©ã‚µãƒãƒ¼ãƒˆã€
+	ãƒ¢ãƒ¼ãƒ‰ç³»
+	ãƒãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ç³»
+	ãƒ¡ãƒ­ãƒ‡ã‚£ãƒƒã‚¯ç³»
 
-	ŠeíƒXƒP[ƒ‹‚Íg—pA‘Sƒgƒ‰ƒbƒN‚É‘Î‚µ‚Ä
-	—LŒø‚É‚È‚èA‰½‚ğg—p‚µ‚½‚Ì‚©‚ªƒOƒ[ƒoƒ‹
-	•Ï”‚Öc‚è‚Ü‚·B
+	å„ç¨®ã‚¹ã‚±ãƒ¼ãƒ«ã¯ä½¿ç”¨æ™‚ã€å…¨ãƒˆãƒ©ãƒƒã‚¯ã«å¯¾ã—ã¦
+	æœ‰åŠ¹ã«ãªã‚Šã€ä½•ã‚’ä½¿ç”¨ã—ãŸã®ã‹ãŒã‚°ãƒ­ãƒ¼ãƒãƒ«
+	å¤‰æ•°ã¸æ®‹ã‚Šã¾ã™ã€‚
 
-wƒfƒBƒOƒŠ[ƒl[ƒ€ƒTƒ|[ƒgx
-	ƒgƒ‰ƒCƒAƒh
-	‚r‚•‚“‚S
-	‚V‚”‚ˆ
-	‚X‚”‚ˆ
+ã€ãƒ‡ã‚£ã‚°ãƒªãƒ¼ãƒãƒ¼ãƒ ã‚µãƒãƒ¼ãƒˆã€
+	ãƒˆãƒ©ã‚¤ã‚¢ãƒ‰
+	ï¼³ï½•ï½“ï¼”
+	ï¼—ï½”ï½ˆ
+	ï¼™ï½”ï½ˆ
 
-	‡T,‡U,‡V,‡W,‡X,‡Y,‡Z‚»‚ê‚¼‚ê‚É‚R˜a‰¹A‚S˜a‰¹
-	‚X‚”‚ˆAƒTƒXƒyƒ“ƒh‚S‚ª—pˆÓ‚³‚êA‘S‚Ä‚Ì˜a‰¹‚Í
-	ƒXƒP[ƒ‹ƒ}ƒNƒ‚É‚æ‚Á‚Ä•ÏŒ`‚µ‚Ü‚·B
+	â… ,â…¡,â…¢,â…£,â…¤,â…¥,â…¦ãã‚Œãã‚Œã«ï¼“å’ŒéŸ³ã€ï¼”å’ŒéŸ³
+	ï¼™ï½”ï½ˆã€ã‚µã‚¹ãƒšãƒ³ãƒ‰ï¼”ãŒç”¨æ„ã•ã‚Œã€å…¨ã¦ã®å’ŒéŸ³ã¯
+	ã‚¹ã‚±ãƒ¼ãƒ«ãƒã‚¯ãƒ­ã«ã‚ˆã£ã¦å¤‰å½¢ã—ã¾ã™ã€‚
 
-wƒCƒ“ƒo[ƒgƒTƒ|[ƒgx
-	ƒgƒ‰ƒCƒAƒh
-	‚V‚”‚ˆ
-	‚X‚”‚ˆ
-	ƒI[ƒvƒ“ƒ{ƒCƒVƒ“ƒOi{ƒCƒ“ƒ^[ƒoƒ‹ƒXƒvƒŒƒbƒ_j
-	ƒNƒ[ƒYƒ{ƒCƒVƒ“ƒO
+ã€ã‚¤ãƒ³ãƒãƒ¼ãƒˆã‚µãƒãƒ¼ãƒˆã€
+	ãƒˆãƒ©ã‚¤ã‚¢ãƒ‰
+	ï¼—ï½”ï½ˆ
+	ï¼™ï½”ï½ˆ
+	ã‚ªãƒ¼ãƒ—ãƒ³ãƒœã‚¤ã‚·ãƒ³ã‚°ï¼ˆï¼‹ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚¹ãƒ—ãƒ¬ãƒƒãƒ€ï¼‰
+	ã‚¯ãƒ­ãƒ¼ã‚ºãƒœã‚¤ã‚·ãƒ³ã‚°
 
-	˜a‰¹‘S‘Ì‚Ì‚‚³‚ğ©—R‚Éã‰º‚³‚¹‚é–‚ª‰Â”\‚Å
-	X‚ÉƒI[ƒvƒ“EƒNƒ[ƒY‚Ì‘I‘ğAƒI[ƒvƒ“‚Ìê‡
-	‚ÍŠJ‚«‹ï‡‚ğ‚Q’iŠK‚Å’²ß‚Å‚«‚Ü‚·B
+	å’ŒéŸ³å…¨ä½“ã®é«˜ã•ã‚’è‡ªç”±ã«ä¸Šä¸‹ã•ã›ã‚‹äº‹ãŒå¯èƒ½ã§
+	æ›´ã«ã‚ªãƒ¼ãƒ—ãƒ³ãƒ»ã‚¯ãƒ­ãƒ¼ã‚ºã®é¸æŠã€ã‚ªãƒ¼ãƒ—ãƒ³ã®å ´åˆ
+	ã¯é–‹ãå…·åˆã‚’ï¼’æ®µéšã§èª¿ç¯€ã§ãã¾ã™ã€‚
 
-wƒCƒ“ƒT[ƒgƒR[ƒhƒTƒ|[ƒgiƒI[ƒgƒXƒP[ƒ‹jx
-	ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	— ƒR[ƒh
-	ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	‡U‡XieƒR[ƒhƒ}ƒCƒi[A‡U‚‚Vó‚Tj
-	‡U‡Xi‡X— ƒR[ƒhj
-	ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	ƒWƒƒƒYƒXƒ^ƒCƒ‹‚Ìƒhƒ~ƒiƒ“ƒgŠeí
+ã€ã‚¤ãƒ³ã‚µãƒ¼ãƒˆã‚³ãƒ¼ãƒ‰ã‚µãƒãƒ¼ãƒˆï¼ˆã‚ªãƒ¼ãƒˆã‚¹ã‚±ãƒ¼ãƒ«ï¼‰ã€
+	ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	è£ã‚³ãƒ¼ãƒ‰
+	ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	â…¡â…¤ï¼ˆè¦ªã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒŠãƒ¼æ™‚ã€â…¡ï¼ï½ï¼—â™­ï¼•ï¼‰
+	â…¡â…¤ï¼ˆâ…¤ï¼è£ã‚³ãƒ¼ãƒ‰ï¼‰
+	ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	ã‚¸ãƒ£ã‚ºã‚¹ã‚¿ã‚¤ãƒ«ã®ãƒ‰ãƒŸãƒŠãƒ³ãƒˆå„ç¨®
 
-	˜a‰¹‚É‘Î‚µAè‘O‚Ì¬ß‚Ö—lX‚È‹@”\‚ÌƒR[ƒh‚ğ
-	‘}“ü‚·‚é–‚ªo—ˆA‚»‚ê‚É‚æ‚Á‚Ä¶‚¶‚½’²†‚Ì
-	•Ï‰»‚âˆÚ’²‚Í©“®‚Å‘Sƒgƒ‰ƒbƒN‚É“K—p‚³‚ê‚Ü‚·B
+	å’ŒéŸ³ã«å¯¾ã—ã€æ‰‹å‰ã®å°ç¯€ã¸æ§˜ã€…ãªæ©Ÿèƒ½ã®ã‚³ãƒ¼ãƒ‰ã‚’
+	æŒ¿å…¥ã™ã‚‹äº‹ãŒå‡ºæ¥ã€ãã‚Œã«ã‚ˆã£ã¦ç”Ÿã˜ãŸèª¿å·ã®
+	å¤‰åŒ–ã‚„ç§»èª¿ã¯è‡ªå‹•ã§å…¨ãƒˆãƒ©ãƒƒã‚¯ã«é©ç”¨ã•ã‚Œã¾ã™ã€‚
 
-wƒtƒFƒCƒ“ƒgƒTƒ|[ƒgx
-	ƒCƒ“ƒT[ƒgƒR[ƒhg—pA‚»‚ê‚ğŒÄ‚Ño‚µ‚½
-	eƒR[ƒh‚ğƒ~ƒ…[ƒg‚·‚éƒtƒFƒCƒ“ƒg‚ªg—p‰Â”\
-	‚Å‚·B
+ã€ãƒ•ã‚§ã‚¤ãƒ³ãƒˆã‚µãƒãƒ¼ãƒˆã€
+	ã‚¤ãƒ³ã‚µãƒ¼ãƒˆã‚³ãƒ¼ãƒ‰ä½¿ç”¨æ™‚ã€ãã‚Œã‚’å‘¼ã³å‡ºã—ãŸ
+	è¦ªã‚³ãƒ¼ãƒ‰ã‚’ãƒŸãƒ¥ãƒ¼ãƒˆã™ã‚‹ãƒ•ã‚§ã‚¤ãƒ³ãƒˆãŒä½¿ç”¨å¯èƒ½
+	ã§ã™ã€‚
 
-wƒI[ƒ‹ƒ~ƒ…[ƒgƒTƒ|[ƒgx
-	‹È‚ªŠ®¬‚µ chord5.h ‚É‚æ‚éƒKƒCƒh‰¹‚ª
-	•K—v‚È‚­‚È‚Á‚½AƒXƒP[ƒ‹‚Ìİ’è‚¾‚¯‚ğ
-	c‚µ‚ÄƒKƒCƒh‰¹‚ğÁ‰¹‚·‚é–‚ªo—ˆ‚Ü‚·B
+ã€ã‚ªãƒ¼ãƒ«ãƒŸãƒ¥ãƒ¼ãƒˆã‚µãƒãƒ¼ãƒˆã€
+	æ›²ãŒå®Œæˆã— chord5.h ã«ã‚ˆã‚‹ã‚¬ã‚¤ãƒ‰éŸ³ãŒ
+	å¿…è¦ãªããªã£ãŸæ™‚ã€ã‚¹ã‚±ãƒ¼ãƒ«ã®è¨­å®šã ã‘ã‚’
+	æ®‹ã—ã¦ã‚¬ã‚¤ãƒ‰éŸ³ã‚’æ¶ˆéŸ³ã™ã‚‹äº‹ãŒå‡ºæ¥ã¾ã™ã€‚
 
-w‚s‚r‚cw’èƒTƒ|[ƒgx
-	‚siƒƒWƒƒ[ŒnƒgƒjƒbƒNj		‚P‚Uí
-	‚riƒƒWƒƒ[ŒnƒTƒuƒhƒ~ƒiƒ“ƒgj	‚P‚Rí
-	‚ciƒƒWƒƒ[Œnƒhƒ~ƒiƒ“ƒgj		‚P‚Qí
-	‚s‚iƒ}ƒCƒi[ŒnƒgƒjƒbƒNj		‚P‚Qí
-	‚r‚iƒ}ƒCƒi[ŒnƒTƒuƒhƒ~ƒiƒ“ƒgj	‚P‚Rí
-	‚c‚iƒ}ƒCƒi[Œnƒhƒ~ƒiƒ“ƒgj		‚P‚Tí
+ã€ï¼´ï¼³ï¼¤æŒ‡å®šã‚µãƒãƒ¼ãƒˆã€
+	ï¼´ï¼ˆãƒ¡ã‚¸ãƒ£ãƒ¼ç³»ãƒˆãƒ‹ãƒƒã‚¯ï¼‰		ï¼‘ï¼–ç¨®
+	ï¼³ï¼ˆãƒ¡ã‚¸ãƒ£ãƒ¼ç³»ã‚µãƒ–ãƒ‰ãƒŸãƒŠãƒ³ãƒˆï¼‰	ï¼‘ï¼“ç¨®
+	ï¼¤ï¼ˆãƒ¡ã‚¸ãƒ£ãƒ¼ç³»ãƒ‰ãƒŸãƒŠãƒ³ãƒˆï¼‰		ï¼‘ï¼’ç¨®
+	ï¼´ï½ï¼ˆãƒã‚¤ãƒŠãƒ¼ç³»ãƒˆãƒ‹ãƒƒã‚¯ï¼‰		ï¼‘ï¼’ç¨®
+	ï¼³ï½ï¼ˆãƒã‚¤ãƒŠãƒ¼ç³»ã‚µãƒ–ãƒ‰ãƒŸãƒŠãƒ³ãƒˆï¼‰	ï¼‘ï¼“ç¨®
+	ï¼¤ï½ï¼ˆãƒã‚¤ãƒŠãƒ¼ç³»ãƒ‰ãƒŸãƒŠãƒ³ãƒˆï¼‰		ï¼‘ï¼•ç¨®
 
-	ƒR[ƒh‚ğ‹@”\–¼‚Åw’è‰Â”\B
-	ƒfƒBƒOƒŠ[ƒl[ƒ€w’è‚ÅƒTƒ|[ƒg‚³‚ê‚Ä‚¢‚é
+	ã‚³ãƒ¼ãƒ‰ã‚’æ©Ÿèƒ½åã§æŒ‡å®šå¯èƒ½ã€‚
+	ãƒ‡ã‚£ã‚°ãƒªãƒ¼ãƒãƒ¼ãƒ æŒ‡å®šã§ã‚µãƒãƒ¼ãƒˆã•ã‚Œã¦ã„ã‚‹
 	
-	EƒCƒ“ƒo[ƒg
-	EƒCƒ“ƒT[ƒgiƒI[ƒgƒXƒP[ƒ‹j
-	EƒtƒFƒCƒ“ƒg
-	EƒI[ƒ‹ƒ~ƒ…[ƒg
+	ãƒ»ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
+	ãƒ»ã‚¤ãƒ³ã‚µãƒ¼ãƒˆï¼ˆã‚ªãƒ¼ãƒˆã‚¹ã‚±ãƒ¼ãƒ«ï¼‰
+	ãƒ»ãƒ•ã‚§ã‚¤ãƒ³ãƒˆ
+	ãƒ»ã‚ªãƒ¼ãƒ«ãƒŸãƒ¥ãƒ¼ãƒˆ
 	
-	‚±‚ê‚ç‘S‚Ä‚ÉƒAƒNƒZƒX‰Â”\AƒXƒP[ƒ‹‚Í
-	©“®İ’è‚ÅA’²†‚Ì•Ï‰»‚ª‘Sƒgƒ‰ƒbƒN‚É
-	“K—p‚³‚ê‚Ü‚·B
+	ã“ã‚Œã‚‰å…¨ã¦ã«ã‚¢ã‚¯ã‚»ã‚¹å¯èƒ½ã€ã‚¹ã‚±ãƒ¼ãƒ«ã¯
+	è‡ªå‹•è¨­å®šã§ã€èª¿å·ã®å¤‰åŒ–ãŒå…¨ãƒˆãƒ©ãƒƒã‚¯ã«
+	é©ç”¨ã•ã‚Œã¾ã™ã€‚
 
-wƒI[ƒgƒgƒ‰ƒ“ƒXƒ|ƒWƒVƒ‡ƒ“ƒTƒ|[ƒgx
-	‚T“xŒ—‚Ö‚ÌˆÚ’²‚ğuˆÚ’²‚·‚é•iƒL[ƒVƒtƒg’ljv
-	‚Å‚Í‚È‚­u“]’²Š´‚Ì‹­‚³v‚Æ‚µ‚Äw’è‚·‚é–‚ª
-	o—ˆ‚Ü‚·B
+ã€ã‚ªãƒ¼ãƒˆãƒˆãƒ©ãƒ³ã‚¹ãƒã‚¸ã‚·ãƒ§ãƒ³ã‚µãƒãƒ¼ãƒˆã€
+	ï¼•åº¦åœã¸ã®ç§»èª¿ã‚’ã€Œç§»èª¿ã™ã‚‹å¹…ï¼ˆã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ï¼‰ã€
+	ã§ã¯ãªãã€Œè»¢èª¿æ„Ÿã®å¼·ã•ã€ã¨ã—ã¦æŒ‡å®šã™ã‚‹äº‹ãŒ
+	å‡ºæ¥ã¾ã™ã€‚
 
-	‚±‚ê‚É‚æ‚èA‚T“xŒ—A‹ße’²A“¯å’²‚Æ‚¢‚¤
-	ŠT”O‚ğ’m‚ç‚È‚­‚Ä‚à³Šm‚É“]’²‚·‚é–‚ªo—ˆA
-	“]’²ŒãƒXƒ€[ƒY‚ÉŒ³‚Ì’²‚Ö–ß‚Á‚Ä—ˆ‚é–‚ª
-	‰Â”\‚Å‚·B
+	ã“ã‚Œã«ã‚ˆã‚Šã€ï¼•åº¦åœã€è¿‘è¦ªèª¿ã€åŒä¸»èª¿ã¨ã„ã†
+	æ¦‚å¿µã‚’çŸ¥ã‚‰ãªãã¦ã‚‚æ­£ç¢ºã«è»¢èª¿ã™ã‚‹äº‹ãŒå‡ºæ¥ã€
+	è»¢èª¿å¾Œã‚¹ãƒ ãƒ¼ã‚ºã«å…ƒã®èª¿ã¸æˆ»ã£ã¦æ¥ã‚‹äº‹ãŒ
+	å¯èƒ½ã§ã™ã€‚
 
 
  (Tab = 6)
 */
 //------------------------------------------------------------------------------
-Int Open		= 0				// ƒI[ƒvƒ“ƒ{ƒCƒVƒ“ƒOƒtƒ‰ƒO(1=open,2=more)
-Int NowScale	= 0				// Œ»İ‚ÌƒXƒP[ƒ‹
-Int ModeNo		= 0				// ƒ‚[ƒhw’è—p•Ï”
-Int RootBass	= 0				// ƒx[ƒX‰¹ƒKƒCƒh”­‰¹(0=on)
-Int Chord5_off	= 0				// ”­‰¹ƒtƒ‰ƒOiƒIƒtAƒXƒP[ƒ‰‚Ì‚İ“®ìj
-Int Feint		= 0				// ƒtƒFƒCƒ“ƒgƒtƒ‰ƒO
-Int Relative	= 0				// ƒgƒ‰ƒ“ƒX—p•Ï”
-Int Shift_val	= 0				// ƒgƒ‰ƒ“ƒX—p•Ï”
-Int InsertMode	= 0				// ƒRƒ“ƒ{—p•Ï”
-Int LenII		= 0				// ƒRƒ“ƒ{—pˆø”
-Int InvII		= 0				// ƒRƒ“ƒ{—pˆø”
-Int LenIII		= 0				// ƒRƒ“ƒ{—pˆø”
-Int InvIII		= 0				// ƒRƒ“ƒ{—pˆø”
-Int Disp		= 1				// ƒwƒ‹ƒv•\¦—pƒtƒ‰ƒO
-Int Top		= 0				// ƒgƒbƒvƒm[ƒg—p•Ï”
+Int Open		= 0				// ã‚ªãƒ¼ãƒ—ãƒ³ãƒœã‚¤ã‚·ãƒ³ã‚°ãƒ•ãƒ©ã‚°(1=open,2=more)
+Int NowScale	= 0				// ç¾åœ¨ã®ã‚¹ã‚±ãƒ¼ãƒ«
+Int ModeNo		= 0				// ãƒ¢ãƒ¼ãƒ‰æŒ‡å®šç”¨å¤‰æ•°
+Int RootBass	= 0				// ãƒ™ãƒ¼ã‚¹éŸ³ã‚¬ã‚¤ãƒ‰ç™ºéŸ³(0=on)
+Int Chord5_off	= 0				// ç™ºéŸ³ãƒ•ãƒ©ã‚°ï¼ˆã‚ªãƒ•æ™‚ã€ã‚¹ã‚±ãƒ¼ãƒ©ã®ã¿å‹•ä½œï¼‰
+Int Feint		= 0				// ãƒ•ã‚§ã‚¤ãƒ³ãƒˆãƒ•ãƒ©ã‚°
+Int Relative	= 0				// ãƒˆãƒ©ãƒ³ã‚¹ç”¨å¤‰æ•°
+Int Shift_val	= 0				// ãƒˆãƒ©ãƒ³ã‚¹ç”¨å¤‰æ•°
+Int InsertMode	= 0				// ã‚³ãƒ³ãƒœç”¨å¤‰æ•°
+Int LenII		= 0				// ã‚³ãƒ³ãƒœç”¨å¼•æ•°
+Int InvII		= 0				// ã‚³ãƒ³ãƒœç”¨å¼•æ•°
+Int LenIII		= 0				// ã‚³ãƒ³ãƒœç”¨å¼•æ•°
+Int InvIII		= 0				// ã‚³ãƒ³ãƒœç”¨å¼•æ•°
+Int Disp		= 1				// ãƒ˜ãƒ«ãƒ—è¡¨ç¤ºç”¨ãƒ•ãƒ©ã‚°
+Int Top		= 0				// ãƒˆãƒƒãƒ—ãƒãƒ¼ãƒˆç”¨å¤‰æ•°
 //------------------------------------------------------------------------------ TransFunction.
 
 Function Trans(Value){
-	TimeKey2(,,Shift_val)						// ˆê’UƒL[‚ğŒ³‚Ö–ß‚·
-	Relative = Value * 5						// ˆø”‚ğ‚T“xŒ—‚Ö•ÏŠ·
-	Shift_val = Relative % 12					// ƒIƒNƒ^[ƒuƒVƒtƒgi—]‚è‚ªÀÛ‚ÌKey’lj
-	If( Shift_val> 6 ){ Shift_val = Shift_val - 12 }	// ã•û‚É‘Î‚·‚é•â³
-	If( Shift_val<-6 ){ Shift_val = Shift_val + 12 }	// ‰º•û‚É‘Î‚·‚é•â³
-	TimeKey2(,,Shift_val)						// –Ú“I‚ÌƒL[‚ÖƒVƒtƒg
+	TimeKey2(,,Shift_val)						// ä¸€æ—¦ã‚­ãƒ¼ã‚’å…ƒã¸æˆ»ã™
+	Relative = Value * 5						// å¼•æ•°ã‚’ï¼•åº¦åœã¸å¤‰æ›
+	Shift_val = Relative % 12					// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚·ãƒ•ãƒˆï¼ˆä½™ã‚ŠãŒå®Ÿéš›ã®Keyå€¤ï¼‰
+	If( Shift_val> 6 ){ Shift_val = Shift_val - 12 }	// ä¸Šæ–¹ã«å¯¾ã™ã‚‹è£œæ­£
+	If( Shift_val<-6 ){ Shift_val = Shift_val + 12 }	// ä¸‹æ–¹ã«å¯¾ã™ã‚‹è£œæ­£
+	TimeKey2(,,Shift_val)						// ç›®çš„ã®ã‚­ãƒ¼ã¸ã‚·ãƒ•ãƒˆ
 //	Print (Shift_val)
-	Shift_val = MML(TimeKey2) - Shift_val			// Ÿ‰ñŒ³‚Ö–ß‚·ˆ×‚Ìî•ñ‚ğc‚·
+	Shift_val = MML(TimeKey2) - Shift_val			// æ¬¡å›å…ƒã¸æˆ»ã™ç‚ºã®æƒ…å ±ã‚’æ®‹ã™
 }
 
 //------------------------------------------------------------------------------ InvertFunction.
 
 //=================================
-//@ƒgƒ‰ƒCƒAƒhƒCƒ“ƒo[ƒg
+//ã€€ãƒˆãƒ©ã‚¤ã‚¢ãƒ‰ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 //=================================
 Function Invert3(){
-	Int O_value = Inv / 3;			// ƒCƒ“ƒo[ƒg’l‚Í‚R’PˆÊ‚ÅƒIƒNƒ^[ƒuƒAƒbƒv‚È‚Ì‚Åc
-	Int O_shift = O_value * 12;		// ‚R‚ÅŠ„‚Á‚½’l‚ªƒIƒNƒ^[ƒu’l‚É‚È‚é
-	Note1 = Note1 + O_shift;		// ‚»‚ê‚¼‚ê‚Ìƒm[ƒg‚ğƒIƒNƒ^[ƒu’²®
+	Int O_value = Inv / 3;			// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã¯ï¼“å˜ä½ã§ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—ãªã®ã§â€¦
+	Int O_shift = O_value * 12;		// ï¼“ã§å‰²ã£ãŸå€¤ãŒã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ãªã‚‹
+	Note1 = Note1 + O_shift;		// ãã‚Œãã‚Œã®ãƒãƒ¼ãƒˆã‚’ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–èª¿æ•´
 	Note2 = Note2 + O_shift;
 	Note3 = Note3 + O_shift;
-	Int AAA = O_value * 3;			// ƒIƒNƒ^[ƒu’l‚É‚R‚ğ‚©‚¯‚Äc
-	Inv = Inv - AAA				// ƒCƒ“ƒo[ƒg’l‚©‚çˆø‚­‚Æu—]‚èv‚ªo‚é
-	/* u—]‚èv’l‚É‚æ‚Á‚ÄƒCƒ“ƒo[ƒgi‰ñ“]j‚³‚¹‚é */
+	Int AAA = O_value * 3;			// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ï¼“ã‚’ã‹ã‘ã¦â€¦
+	Inv = Inv - AAA				// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã‹ã‚‰å¼•ãã¨ã€Œä½™ã‚Šã€ãŒå‡ºã‚‹
+	/* ã€Œä½™ã‚Šã€å€¤ã«ã‚ˆã£ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆï¼ˆå›è»¢ï¼‰ã•ã›ã‚‹ */
 	If(Inv==-2){Note3 = Note3 - 12; Note2 = Note2 - 12}
 	If(Inv==-1){Note3 = Note3 - 12}
 	If(Inv==1){Note1 = Note1 + 12}
 	If(Inv==2){Note1 = Note1 + 12; Note2 = Note2 + 12}
-	/* ƒI[ƒvƒ“‰» */
+	/* ã‚ªãƒ¼ãƒ—ãƒ³åŒ– */
 	If(Open==1){
 		Note3 = Note3 - 12;
 	}
@@ -147,25 +147,25 @@ Function Invert3(){
 }
 
 //=================================
-//@‚V‚”‚ˆƒCƒ“ƒo[ƒg
+//ã€€ï¼—ï½”ï½ˆã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 //=================================
 Function Invert4(){
-	Int O_value = Inv / 4;			// ƒCƒ“ƒo[ƒg’l‚Í‚S’PˆÊ‚ÅƒIƒNƒ^[ƒuƒAƒbƒv‚È‚Ì‚Åc
-	Int O_shift = O_value * 12;		// ‚S‚ÅŠ„‚Á‚½’l‚ªƒIƒNƒ^[ƒu’l‚É‚È‚é
-	Note1 = Note1 + O_shift;		// ‚»‚ê‚¼‚ê‚Ìƒm[ƒg‚ğƒIƒNƒ^[ƒu’²®
+	Int O_value = Inv / 4;			// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã¯ï¼”å˜ä½ã§ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—ãªã®ã§â€¦
+	Int O_shift = O_value * 12;		// ï¼”ã§å‰²ã£ãŸå€¤ãŒã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ãªã‚‹
+	Note1 = Note1 + O_shift;		// ãã‚Œãã‚Œã®ãƒãƒ¼ãƒˆã‚’ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–èª¿æ•´
 	Note2 = Note2 + O_shift;
 	Note3 = Note3 + O_shift;
 	Note4 = Note4 + O_shift;
-	Int AAA = O_value * 4;			// ƒIƒNƒ^[ƒu’l‚É‚S‚ğ‚©‚¯‚Äc
-	Inv = Inv - AAA				// ƒCƒ“ƒo[ƒg’l‚©‚çˆø‚­‚Æu—]‚èv‚ªo‚é
-	/* u—]‚èv’l‚É‚æ‚Á‚ÄƒCƒ“ƒo[ƒgi‰ñ“]j‚³‚¹‚é */
+	Int AAA = O_value * 4;			// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ï¼”ã‚’ã‹ã‘ã¦â€¦
+	Inv = Inv - AAA				// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã‹ã‚‰å¼•ãã¨ã€Œä½™ã‚Šã€ãŒå‡ºã‚‹
+	/* ã€Œä½™ã‚Šã€å€¤ã«ã‚ˆã£ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆï¼ˆå›è»¢ï¼‰ã•ã›ã‚‹ */
 	If(Inv==-3){Note4 = Note4 - 12; Note3 = Note3 - 12; Note2 = Note2 - 12}
 	If(Inv==-2){Note4 = Note4 - 12; Note3 = Note3 - 12}
 	If(Inv==-1){Note4 = Note4 - 12}
 	If(Inv==1){Note1 = Note1 + 12}
 	If(Inv==2){Note1 = Note1 + 12; Note2 = Note2 + 12}
 	If(Inv==3){Note1 = Note1 + 12; Note2 = Note2 + 12; Note3 = Note3 + 12}
-	/* ƒI[ƒvƒ“‰» */
+	/* ã‚ªãƒ¼ãƒ—ãƒ³åŒ– */
 	If(Open==1){
 		Note3 = Note3 - 12;
 	}
@@ -176,25 +176,25 @@ Function Invert4(){
 }
 
 //=================================
-//@‚X‚”‚ˆƒCƒ“ƒo[ƒg
+//ã€€ï¼™ï½”ï½ˆã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 //=================================
 Function Invert5(){
-	Int O_value = Inv / 4;			// ƒCƒ“ƒo[ƒg’l‚Í‚S’PˆÊ‚ÅƒIƒNƒ^[ƒuƒAƒbƒv‚È‚Ì‚Åc
-	Int O_shift = O_value * 12;		// ‚S‚ÅŠ„‚Á‚½’l‚ªƒIƒNƒ^[ƒu’l‚É‚È‚é
-	Note1 = Note1 + O_shift;		// ‚»‚ê‚¼‚ê‚Ìƒm[ƒg‚ğƒIƒNƒ^[ƒu’²®
+	Int O_value = Inv / 4;			// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã¯ï¼”å˜ä½ã§ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—ãªã®ã§â€¦
+	Int O_shift = O_value * 12;		// ï¼”ã§å‰²ã£ãŸå€¤ãŒã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ãªã‚‹
+	Note1 = Note1 + O_shift;		// ãã‚Œãã‚Œã®ãƒãƒ¼ãƒˆã‚’ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–èª¿æ•´
 	Note2 = Note2 + O_shift;
 	Note3 = Note3 + O_shift;
 	Note4 = Note4 + O_shift;
-	Int AAA = O_value * 4;			// ƒIƒNƒ^[ƒu’l‚É‚S‚ğ‚©‚¯‚Äc
-	Inv = Inv - AAA				// ƒCƒ“ƒo[ƒg’l‚©‚çˆø‚­‚Æu—]‚èv‚ªo‚é
-	/* u—]‚èv’l‚É‚æ‚Á‚ÄƒCƒ“ƒo[ƒgi‰ñ“]j‚³‚¹‚é */
+	Int AAA = O_value * 4;			// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ï¼”ã‚’ã‹ã‘ã¦â€¦
+	Inv = Inv - AAA				// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã‹ã‚‰å¼•ãã¨ã€Œä½™ã‚Šã€ãŒå‡ºã‚‹
+	/* ã€Œä½™ã‚Šã€å€¤ã«ã‚ˆã£ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆï¼ˆå›è»¢ï¼‰ã•ã›ã‚‹ */
 	If(Inv==-3){Note4 = Note4 - 12; Note3 = Note3 - 12; Note2 = Note2 - 12}
 	If(Inv==-2){Note4 = Note4 - 12; Note3 = Note3 - 12}
 	If(Inv==-1){Note4 = Note4 - 12}
 	If(Inv==1){Note1 = Note1 + 12}
 	If(Inv==2){Note1 = Note1 + 12; Note2 = Note2 + 12}
 	If(Inv==3){Note1 = Note1 + 12; Note2 = Note2 + 12; Note3 = Note3 + 12}
-	/* ƒI[ƒvƒ“‰» */
+	/* ã‚ªãƒ¼ãƒ—ãƒ³åŒ– */
 	If(Open==1){
 		Note3 = Note3 - 12;
 	}
@@ -372,7 +372,7 @@ Function Invert5(){
 
 //------------------------------------------------------------------------------ MainFunction.
 
-/* ‡U */
+/* â…¡ */
 Function Two(Len,Inv){
 	Int Note0 = NoteNo(o4d);
 	Int Note1 = NoteNo(o5d);
@@ -380,7 +380,7 @@ Function Two(Len,Inv){
 	Int Note3 = NoteNo(o5a);
 	Int Note4 = NoteNo(o6c);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Chord5_off==0){
 		If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -388,7 +388,7 @@ Function Two(Len,Inv){
 	}
 }
 
-/* ‡X */
+/* â…¤ */
 Function Domi(Len,Inv){
 	Int Note0 = NoteNo(o3g);
 	Int Note1 = NoteNo(o5f);
@@ -396,7 +396,7 @@ Function Domi(Len,Inv){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Chord5_off==0){
 		If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -412,7 +412,7 @@ Function Dimi(Len,Inv){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Chord5_off==0){
 		If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -424,103 +424,103 @@ Function Dimi(Len,Inv){
 
 /* Secondry dominant insert */
 Function SecD(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	/* Œ³ƒR[ƒh‚ªƒ}ƒCƒi[‚¾‚Á‚½‚çƒhƒ~ƒiƒ“ƒg‚Íƒn[ƒ‚ƒjƒbƒN */
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	/* å…ƒã‚³ãƒ¼ãƒ‰ãŒãƒã‚¤ãƒŠãƒ¼ã ã£ãŸã‚‰ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã¯ãƒãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ */
 	If(Which_is==4){TimeKeyFlag(,,0,0,0,0,0,0,0)}
 	If(Which_is==3){TimeKeyFlag(,,-1,0,0,0,-1,0,0)}
 	If(Which_is==-8){TimeKeyFlag(,,0,0,0,0,0,0,0)}
 	If(Which_is==-9){TimeKeyFlag(,,-1,0,0,0,-1,0,0)}
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹@Combo!!"} }
-	Domi(LenII,InvII+DefInv+Inv)			// ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³ã€€Combo!!"} }
+	Domi(LenII,InvII+DefInv+Inv)			// ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
 
 /* Secondry dominant sub-chord insert */
 Function SubD(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,-1,-1,-1,-1,-1,0,0)		// ƒIƒ‹ƒ^[ƒhEƒp[ƒtƒFƒNƒg‚TthƒrƒƒE
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,-1,-1,-1,-1,-1,0,0)		// ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰ãƒ»ãƒ‘ãƒ¼ãƒ•ã‚§ã‚¯ãƒˆï¼•thãƒ“ãƒ­ã‚¦
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹@Combo!!"} }
-	Two(LenII,InvII+DefInv+Inv)			// — ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³ã€€Combo!!"} }
+	Two(LenII,InvII+DefInv+Inv)			// è£ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
 
 /* Passing diminished insert */
 Function P_Dim(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,-1,0,0,0,-1,0,0)		// ƒn[ƒ‚ƒjƒbƒNƒ}ƒCƒi[
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,-1,0,0,0,-1,0,0)		// ãƒãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ãƒã‚¤ãƒŠãƒ¼
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒVEƒŒEƒtƒ@Eƒ‰‚Ì˜a‰¹@Combo!!"} }
-	Dimi(LenII,InvII+DefInv+Inv)			// ƒpƒbƒVƒ“ƒO‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ã®å’ŒéŸ³ã€€Combo!!"} }
+	Dimi(LenII,InvII+DefInv+Inv)			// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
 
-/* ‡U‡X insert */
+/* â…¡â…¤ insert */
 Function SecD_2(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	/* Œ³ƒR[ƒh‚ªƒ}ƒCƒi[‚¾‚Á‚½‚çƒhƒ~ƒiƒ“ƒg‚Íƒn[ƒ‚ƒjƒbƒN */
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	/* å…ƒã‚³ãƒ¼ãƒ‰ãŒãƒã‚¤ãƒŠãƒ¼ã ã£ãŸã‚‰ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã¯ãƒãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ */
 	//Int Which_is = 4
 	If(Which_is==4){TimeKeyFlag(,,0,0,0,0,0,0,0)}
 	If(Which_is==3){TimeKeyFlag(,,-1,0,0,0,-1,0,0)}
 	If(Which_is==-8){TimeKeyFlag(,,0,0,0,0,0,0,0)}
 	If(Which_is==-9){TimeKeyFlag(,,-1,0,0,0,-1,0,0)}
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹@Combo!!"} }
-	Two(LenII,InvII+DefInv+Inv)			// ‡U‚ğ‘}“ü
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³ã€€Combo!!"} }
+	Two(LenII,InvII+DefInv+Inv)			// â…¡ã‚’æŒ¿å…¥
 	If(LenIII==0){LenIII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹@Cool!!"} }
-	Domi(LenIII,InvIII+DefInv+Inv)		// ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³ã€€Cool!!"} }
+	Domi(LenIII,InvIII+DefInv+Inv)		// ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 	LenIII = 0
 	InvIII = 0
 }
 
-/* ‡U + Secondry dominant sub-chord insert */
+/* â…¡ + Secondry dominant sub-chord insert */
 Function SubD_2(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,0,0,0,0,0,0,0)			// ƒAƒCƒIƒjƒAƒ“
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,0,0,0,0,0,0,0)			// ã‚¢ã‚¤ã‚ªãƒ‹ã‚¢ãƒ³
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹@Combo!!"} }
-	Two(LenII,InvII+DefInv+Inv)			// ‡U‚ğ‘}“ü
-	TimeKeyFlag(,,-1,-1,-1,-1,-1,0,0)		// ‡XƒIƒ‹ƒ^[ƒh
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³ã€€Combo!!"} }
+	Two(LenII,InvII+DefInv+Inv)			// â…¡ã‚’æŒ¿å…¥
+	TimeKeyFlag(,,-1,-1,-1,-1,-1,0,0)		// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
 	If(LenIII==0){LenIII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹@Cool!!"} }
-	Two(LenIII,InvIII+DefInv+Inv)			// — ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³ã€€Cool!!"} }
+	Two(LenIII,InvIII+DefInv+Inv)			// è£ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 	LenIII = 0
@@ -529,25 +529,25 @@ Function SubD_2(){
 
 /* Doppel insert */
 Function DopD(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,0,0,0,0,0,1,0)			// ƒŠƒfƒBƒAƒ“
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,0,0,0,0,0,1,0)			// ãƒªãƒ‡ã‚£ã‚¢ãƒ³
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹@Combo!!"} }
-	Two(LenII,InvII+DefInv+Inv)			// ‡U‚ğ‘}“ü
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³ã€€Combo!!"} }
+	Two(LenII,InvII+DefInv+Inv)			// â…¡ã‚’æŒ¿å…¥
 	If(LenIII==0){LenIII = MML(l)}
-	/* Œ³ƒR[ƒh‚ªƒ}ƒCƒi[‚¾‚Á‚½‚çƒhƒ~ƒiƒ“ƒg‚Íƒn[ƒ‚ƒjƒbƒN */
+	/* å…ƒã‚³ãƒ¼ãƒ‰ãŒãƒã‚¤ãƒŠãƒ¼ã ã£ãŸã‚‰ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã¯ãƒãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ */
 	If(Which_is==4){TimeKeyFlag(,,0,0,0,0,0,0,0)}
 	If(Which_is==3){TimeKeyFlag(,,-1,0,0,0,-1,0,0)}
 	If(Which_is==-8){TimeKeyFlag(,,0,0,0,0,0,0,0)}
 	If(Which_is==-9){TimeKeyFlag(,,-1,0,0,0,-1,0,0)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹@Cool!!"} }
-	Domi(LenIII,InvIII+DefInv+Inv)		// ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³ã€€Cool!!"} }
+	Domi(LenIII,InvIII+DefInv+Inv)		// ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 	LenIII = 0
@@ -556,85 +556,85 @@ Function DopD(){
 
 /* Secondry dominant insert (For jazz) */
 Function JazzD1(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,0,0,1,0,0,0,0)			// ‡X7ƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,0,0,1,0,0,0,0)			// â…¤7ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹@Jazzy!!"} }
-	Domi(LenII,InvII+DefInv+Inv)			// ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³ã€€Jazzy!!"} }
+	Domi(LenII,InvII+DefInv+Inv)			// ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
 
 /* Secondry dominant insert (For jazz) */
 Function JazzD2(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,-1,-1,-1,-1,-1,0,0)		// ‡Xm7ó5ƒIƒ‹ƒ^[ƒh
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,-1,-1,-1,-1,-1,0,0)		// â…¤m7â™­5ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹@Jazzy!!"} }
-	Domi(LenII,InvII+DefInv+Inv)			// ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³ã€€Jazzy!!"} }
+	Domi(LenII,InvII+DefInv+Inv)			// ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
 
 /* Secondry dominant insert (For jazz) */
 Function JazzD3(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,0,-1,0,-1,-1,0,0)		// ‡Xm7ó5ƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,0,-1,0,-1,-1,0,0)		// â…¤m7â™­5ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹@Jazzy!!"} }
-	Domi(LenII,InvII+DefInv+Inv)			// ƒhƒ~ƒiƒ“ƒg‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³ã€€Jazzy!!"} }
+	Domi(LenII,InvII+DefInv+Inv)			// ãƒ‰ãƒŸãƒŠãƒ³ãƒˆã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
 
 /* Secondry dominant insert (For jazz) */
 Function JazzD4(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,0,0,1,0,0,0,0)			// ‡X7ƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,0,0,1,0,0,0,0)			// â…¤7ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹@Jazzy!!"} }
-	Two(LenII,InvII+DefInv+Inv)			// ‡UmM7‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³ã€€Jazzy!!"} }
+	Two(LenII,InvII+DefInv+Inv)			// â…¡mM7ã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
 
 /* Secondry dominant insert (For jazz) */
 Function JazzD5(){
-	Int KSValue = Note0 - NoteNo(o4c);		// ƒh‚Æƒ‹[ƒg‚ÌƒCƒ“ƒ^[ƒoƒ‹‚ğ’²‚×‚é
-	If(KSValue<-4){KSValue=KSValue+12}		// ƒx[ƒX‚ª’á‰ß‚¬‚½‚çƒIƒNƒ^[ƒuƒAƒbƒv
-	Int NowKey = MML(TimeKey);			// ƒL[ƒVƒtƒg’l‚ğ’²‚×‚Ä
-	Int KSTrue = KSValue + NowKey			// ƒZƒJƒ“ƒ_ƒŠ‚ÌƒXƒP[ƒ‹ŠJn’n“_‚ğo‚·
-	TimeKey(,,KSTrue);				// ƒZƒJƒ“ƒ_ƒŠ‚Ìƒ‹[ƒg‚ÖˆÚ’²
-	TimeKeyFlag(,,0,-1,0,-1,-1,0,0)		// ‡Xm7ó5ƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
+	Int KSValue = Note0 - NoteNo(o4c);		// ãƒ‰ã¨ãƒ«ãƒ¼ãƒˆã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã‚’èª¿ã¹ã‚‹
+	If(KSValue<-4){KSValue=KSValue+12}		// ãƒ™ãƒ¼ã‚¹ãŒä½éããŸã‚‰ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—
+	Int NowKey = MML(TimeKey);			// ã‚­ãƒ¼ã‚·ãƒ•ãƒˆå€¤ã‚’èª¿ã¹ã¦
+	Int KSTrue = KSValue + NowKey			// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ã‚¹ã‚±ãƒ¼ãƒ«é–‹å§‹åœ°ç‚¹ã‚’å‡ºã™
+	TimeKey(,,KSTrue);				// ã‚»ã‚«ãƒ³ãƒ€ãƒªã®ãƒ«ãƒ¼ãƒˆã¸ç§»èª¿
+	TimeKeyFlag(,,0,-1,0,-1,-1,0,0)		// â…¤m7â™­5ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
 	If(LenII==0){LenII = MML(l)}
-	If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹@Jazzy!!"} }
-	Two(LenII,InvII+DefInv+Inv)			// ‡UaugM7‚ğ‘}“ü
-	TimeKey(,,NowKey)					// ’²‚ğŒ³‚Ö–ß‚·
-	#ModeUndo						// ƒXƒP[ƒ‹‚àŒ³‚Ö–ß‚·
+	If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³ã€€Jazzy!!"} }
+	Two(LenII,InvII+DefInv+Inv)			// â…¡augM7ã‚’æŒ¿å…¥
+	TimeKey(,,NowKey)					// èª¿ã‚’å…ƒã¸æˆ»ã™
+	#ModeUndo						// ã‚¹ã‚±ãƒ¼ãƒ«ã‚‚å…ƒã¸æˆ»ã™
 	LenII = 0
 	InvII = 0
 }
@@ -647,29 +647,29 @@ Function C_(Len,Inv){
 	Int Note1 = NoteNo(o5e);
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o6c);
-	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒhEƒ~Eƒ\‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒhEƒ~Eƒ\‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -681,29 +681,29 @@ Function D_(Len,Inv){
 	Int Note1 = NoteNo(o5f);
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -715,29 +715,29 @@ Function E_(Len,Inv){
 	Int Note1 = NoteNo(o5e);
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o5b);
-	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ~Eƒ\EƒV‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ãƒŸãƒ»ã‚½ãƒ»ã‚·ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ~Eƒ\EƒV‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ãƒŸãƒ»ã‚½ãƒ»ã‚·ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -749,29 +749,29 @@ Function F_(Len,Inv){
 	Int Note1 = NoteNo(o5f);
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6c);
-	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -783,29 +783,29 @@ Function G_(Len,Inv){
 	Int Note1 = NoteNo(o5g);
 	Int Note2 = NoteNo(o5b);
 	Int Note3 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒ‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒ‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -817,29 +817,29 @@ Function A_(Len,Inv){
 	Int Note1 = NoteNo(o5e);
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6c);
-	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒ‰EƒhEƒ~‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒ‰EƒhEƒ~‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -851,29 +851,29 @@ Function B_(Len,Inv){
 	Int Note1 = NoteNo(o5f);
 	Int Note2 = NoteNo(o5b);
 	Int Note3 = NoteNo(o6d);
-	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒVEƒŒEƒtƒ@‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒVEƒŒEƒtƒ@‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -885,29 +885,29 @@ Function C_4(Len,Inv){
 	Int Note1 = NoteNo(o5f);
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o6c);
-	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒhEƒtƒ@Eƒ\‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒ‰ãƒ»ãƒ•ã‚¡ãƒ»ã‚½ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒhEƒtƒ@Eƒ\‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒ‰ãƒ»ãƒ•ã‚¡ãƒ»ã‚½ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -919,29 +919,29 @@ Function D_4(Len,Inv){
 	Int Note1 = NoteNo(o5g);
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒ\Eƒ‰‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ã‚½ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒ\Eƒ‰‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ã‚½ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -953,29 +953,29 @@ Function E_4(Len,Inv){
 	Int Note1 = NoteNo(o5e);
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o5b);
-	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ~Eƒ‰EƒV‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ãƒŸãƒ»ãƒ©ãƒ»ã‚·ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ~Eƒ‰EƒV‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ãƒŸãƒ»ãƒ©ãƒ»ã‚·ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -987,29 +987,29 @@ Function F_4(Len,Inv){
 	Int Note1 = NoteNo(o5f);
 	Int Note2 = NoteNo(o5b);
 	Int Note3 = NoteNo(o6c);
-	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒtƒ@EƒVEƒh‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ•ã‚¡ãƒ»ã‚·ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒtƒ@EƒVEƒh‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ•ã‚¡ãƒ»ã‚·ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1021,29 +1021,29 @@ Function G_4(Len,Inv){
 	Int Note1 = NoteNo(o5g);
 	Int Note2 = NoteNo(o6c);
 	Int Note3 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒhEƒŒ‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ãƒ‰ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒhEƒŒ‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ãƒ‰ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1055,29 +1055,29 @@ Function A_4(Len,Inv){
 	Int Note1 = NoteNo(o5e);
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6d);
-	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒ‰EƒŒEƒ~‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ©ãƒ»ãƒ¬ãƒ»ãƒŸã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒ‰EƒŒEƒ~‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ©ãƒ»ãƒ¬ãƒ»ãƒŸã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1089,29 +1089,29 @@ Function B_4(Len,Inv){
 	Int Note1 = NoteNo(o5e);
 	Int Note2 = NoteNo(o5f);
 	Int Note3 = NoteNo(o5b);
-	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert3()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒVEƒ~Eƒtƒ@‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ã‚·ãƒ»ãƒŸãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒVEƒ~Eƒtƒ@‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ã‚·ãƒ»ãƒŸãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1124,29 +1124,29 @@ Function C_7(Len,Inv){
 	Int Note2 = NoteNo(o5e);
 	Int Note3 = NoteNo(o5g);
 	Int Note4 = NoteNo(o5b);
-	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert4()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒhEƒ~Eƒ\EƒV‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ãƒ»ã‚·ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒhEƒ~Eƒ\EƒV‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ãƒ»ã‚·ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1159,29 +1159,29 @@ Function D_7(Len,Inv){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o5c);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert4()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1194,29 +1194,29 @@ Function E_7(Len,Inv){
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert4()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ~Eƒ\EƒVEƒŒ‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ãƒŸãƒ»ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ~Eƒ\EƒVEƒŒ‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ãƒŸãƒ»ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1229,29 +1229,29 @@ Function F_7(Len,Inv){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6c);
 	Int Note4 = NoteNo(o6e);
-	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert4()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒtƒ@Eƒ‰EƒhEƒ~‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒtƒ@Eƒ‰EƒhEƒ~‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1264,29 +1264,29 @@ Function G_7(Len,Inv){
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -3; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -3; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert4()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1299,29 +1299,29 @@ Function A_7(Len,Inv){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o5c);
 	Int Note4 = NoteNo(o6e);
-	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  2; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  2; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert4()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒ‰EƒhEƒ~Eƒ\‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒ‰EƒhEƒ~Eƒ\‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1334,29 +1334,29 @@ Function B_7(Len,Inv){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert4()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒVEƒŒEƒtƒ@Eƒ‰‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒVEƒŒEƒtƒ@Eƒ‰‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1369,29 +1369,29 @@ Function C_9(Len,Inv){
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4e) - NoteNo(o4c)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert5()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒ~Eƒ\EƒVEƒŒ‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒŸãƒ»ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒh@@ƒ~Eƒ\EƒVEƒŒ‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ‰ã€€ã€€ãƒŸãƒ»ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1404,29 +1404,29 @@ Function D_9(Len,Inv){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6c);
 	Int Note4 = NoteNo(o6e);
-	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  0; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4f) - NoteNo(o4d)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  0; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  0; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  0; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  0; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert5()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒtƒ@Eƒ‰EƒhEƒ~‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒŒ@@ƒtƒ@Eƒ‰EƒhEƒ~‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ¬ã€€ã€€ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1439,29 +1439,29 @@ Function E_9(Len,Inv){
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4g) - NoteNo(o4e)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert5()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ~@@ƒ\EƒVEƒŒEƒtƒ@‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒŸã€€ã€€ã‚½ãƒ»ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1474,29 +1474,29 @@ Function F_9(Len,Inv){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6c);
 	Int Note4 = NoteNo(o6e);
-	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4a) - NoteNo(o4f)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert5()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒ‰EƒhEƒ~Eƒ\‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒtƒ@@ƒ‰EƒhEƒ~Eƒ\‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ•ã‚¡ã€€ãƒ©ãƒ»ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1509,29 +1509,29 @@ Function G_9(Len,Inv){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv = -1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o4b) - NoteNo(o4g)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv = -2; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv = -1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv = -2; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv = -2; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv = -1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv = -2; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv = -2; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv = -2; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv = -2; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv = -1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv = -1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert5()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒVEƒŒEƒtƒ@Eƒ‰‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ\@@ƒVEƒŒEƒtƒ@Eƒ‰‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚½ã€€ã€€ã‚·ãƒ»ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1544,29 +1544,29 @@ Function A_9(Len,Inv){
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6e);
-	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  1; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  2; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5c) - NoteNo(o4a)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  1; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  1; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  1; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  2; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  1; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  1; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  1; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  1; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert5()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒhEƒ~Eƒ\EƒV‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ãƒ»ã‚·ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒ‰@@ƒhEƒ~Eƒ\EƒV‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ãƒ©ã€€ã€€ãƒ‰ãƒ»ãƒŸãƒ»ã‚½ãƒ»ã‚·ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1579,29 +1579,29 @@ Function B_9(Len,Inv){
 	Int Note2 = NoteNo(o5f);
 	Int Note3 = NoteNo(o5a);
 	Int Note4 = NoteNo(o6d);
-	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ƒƒWƒƒ[‚©ƒ}ƒCƒi[‚©‚ğc‚·
-	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ƒZƒJƒ“ƒ_ƒŠƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==2){ Int DefInv =  1; SubD() }	// — ƒR[ƒh
-	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ƒpƒbƒVƒ“ƒOƒfƒBƒ~ƒjƒbƒVƒ…
-	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// ‡U‡X
-	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// ‡U‡Xi— ƒR[ƒhj
-	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ƒhƒbƒyƒ‹ƒhƒ~ƒiƒ“ƒg
-	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ
-	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// ‡XƒIƒ‹ƒ^[ƒh
-	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“i“¯ƒhƒŠƒAƒ“ó‚Xj
-	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// ‡XƒŠƒfƒBƒAƒ“‚V‚”‚ˆ‡UmM7
-	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// ‡XƒX[ƒp[ƒƒNƒŠƒAƒ“‡UaugM7
+	Int Which_is = NoteNo(o5d) - NoteNo(o4b)		// ãƒ¡ã‚¸ãƒ£ãƒ¼ã‹ãƒã‚¤ãƒŠãƒ¼ã‹ã‚’æ®‹ã™
+	If(InsertMode==1){ Int DefInv =  0; SecD() }	// ã‚»ã‚«ãƒ³ãƒ€ãƒªãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==2){ Int DefInv =  1; SubD() }	// è£ã‚³ãƒ¼ãƒ‰
+	If(InsertMode==3){ Int DefInv =  0; P_Dim() }	// ãƒ‘ãƒƒã‚·ãƒ³ã‚°ãƒ‡ã‚£ãƒŸãƒ‹ãƒƒã‚·ãƒ¥
+	If(InsertMode==4){ Int DefInv =  0; SecD_2() }	// â…¡â…¤
+	If(InsertMode==5){ Int DefInv =  1; SubD_2() }	// â…¡â…¤ï¼ˆè£ã‚³ãƒ¼ãƒ‰ï¼‰
+	If(InsertMode==6){ Int DefInv =  0; DopD() }	// ãƒ‰ãƒƒãƒšãƒ«ãƒ‰ãƒŸãƒŠãƒ³ãƒˆ
+	If(InsertMode==7){ Int DefInv =  0; JazzD1() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆ
+	If(InsertMode==8){ Int DefInv =  0; JazzD2() }	// â…¤ã‚ªãƒ«ã‚¿ãƒ¼ãƒ‰
+	If(InsertMode==9){ Int DefInv =  0; JazzD3() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³ï¼ˆåŒãƒ‰ãƒªã‚¢ãƒ³â™­ï¼™ï¼‰
+	If(InsertMode==10){Int DefInv =  1; JazzD4() }	// â…¤ãƒªãƒ‡ã‚£ã‚¢ãƒ³ï¼—ï½”ï½ˆâ…¡mM7
+	If(InsertMode==11){Int DefInv =  1; JazzD5() }	// â…¤ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â…¡augM7
 	Inv = Inv + Top
 	Invert5()
 	InsertMode = 0
 	If(Len==0){Len = MML(l)}
 	If(Chord5_off==0){
 		If(Feint==0){
-			If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹"} }
+			If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 			If(RootBass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}
 		}Else{
-		If(Disp==1){ MetaText={"ƒx[ƒXƒV@@ƒŒEƒtƒ@Eƒ‰Eƒh‚Ì˜a‰¹"} }
+		If(Disp==1){ MetaText={"ãƒ™ãƒ¼ã‚¹ï¼ã‚·ã€€ã€€ãƒ¬ãƒ»ãƒ•ã‚¡ãƒ»ãƒ©ãƒ»ãƒ‰ã®å’ŒéŸ³"} }
 		r%(Len)
 	}
 	Feint = 0
@@ -1697,92 +1697,92 @@ Function Combo11(val1,val2,val3,val4){
 }
 
 
-/* ‡T */		Function T1(val1,val2){#Mode(0) C_(val1,val2)}
-/* ‡Ym */		Function T2(val1,val2){#Mode(0) A_(val1,val2)}
-/* ‡Vm */		Function T3(val1,val2){#Mode(0) E_(val1,val2)}
-/* ‡Tsus4 */	Function T4(val1,val2){#Mode(0) C_4(val1,val2)}
-/* ‡Ysus4 */	Function T5(val1,val2){#Mode(0) A_4(val1,val2)}
-/* ‡Vsus4 */	Function T6(val1,val2){#Mode(0) E_4(val1,val2)}
-/* ‡Tmaj7 */	Function T7(val1,val2){#Mode(0) C_7(val1,val2)}
-/* ‡Ym7 */		Function T8(val1,val2){#Mode(0) A_7(val1,val2)}
-/* ‡Vm7 */		Function T9(val1,val2){#Mode(0) E_7(val1,val2)}
-/* ‡Tmaj9 */	Function T10(val1,val2){#Mode(0) C_9(val1,val2)}
-/* ‡Ym9 */		Function T11(val1,val2){#Mode(0) A_9(val1,val2)}
-/* ‡Vm9 */		Function T12(val1,val2){#Mode(0) E_9(val1,val2)}
-/* ‡T7(-7) */	Function T13(val1,val2){#Mode(4) C_(val1,val2)}
-/* ‡T7 */		Function T14(val1,val2){#Mode(4) C_7(val1,val2)}
-/* ‡V7 */		Function T15(val1,val2){#HMinor(2) E_7(val1,val2)}
-/* ‡Taug */		Function T16(val1,val2){#HMinor(2) C_(val1,val2)}
+/* â…  */		Function T1(val1,val2){#Mode(0) C_(val1,val2)}
+/* â…¥m */		Function T2(val1,val2){#Mode(0) A_(val1,val2)}
+/* â…¢m */		Function T3(val1,val2){#Mode(0) E_(val1,val2)}
+/* â… sus4 */	Function T4(val1,val2){#Mode(0) C_4(val1,val2)}
+/* â…¥sus4 */	Function T5(val1,val2){#Mode(0) A_4(val1,val2)}
+/* â…¢sus4 */	Function T6(val1,val2){#Mode(0) E_4(val1,val2)}
+/* â… maj7 */	Function T7(val1,val2){#Mode(0) C_7(val1,val2)}
+/* â…¥m7 */		Function T8(val1,val2){#Mode(0) A_7(val1,val2)}
+/* â…¢m7 */		Function T9(val1,val2){#Mode(0) E_7(val1,val2)}
+/* â… maj9 */	Function T10(val1,val2){#Mode(0) C_9(val1,val2)}
+/* â…¥m9 */		Function T11(val1,val2){#Mode(0) A_9(val1,val2)}
+/* â…¢m9 */		Function T12(val1,val2){#Mode(0) E_9(val1,val2)}
+/* â… 7(-7) */	Function T13(val1,val2){#Mode(4) C_(val1,val2)}
+/* â… 7 */		Function T14(val1,val2){#Mode(4) C_7(val1,val2)}
+/* â…¢7 */		Function T15(val1,val2){#HMinor(2) E_7(val1,val2)}
+/* â… aug */		Function T16(val1,val2){#HMinor(2) C_(val1,val2)}
 
-/* ‡W */		Function S1(val1,val2){#Mode(0) F_(val1,val2)}
-/* ‡Um */		Function S2(val1,val2){#Mode(0) D_(val1,val2)}
-/* ‡U */		Function S3(val1,val2){#Mode(3) D_(val1,val2)}
-/* ‡Wsus4 */	Function S4(val1,val2){#Mode(4) F_4(val1,val2)}
-/* ‡Usus4 */	Function S5(val1,val2){#Mode(0) D_4(val1,val2)}
-/* ‡Wmaj7 */	Function S6(val1,val2){#Mode(0) F_7(val1,val2)}
-/* ‡Um7 */		Function S7(val1,val2){#Mode(0) D_7(val1,val2)}
-/* ‡W#m7ó5 */	Function S8(val1,val2){#MMinor(3) F_7(val1,val2)}
-/* ‡Wmaj9 */	Function S9(val1,val2){#Mode(0) F_9(val1,val2)}
-/* ‡Um9 */		Function S10(val1,val2){#Mode(0) D_9(val1,val2)}
-/* ‡U9 */		Function S11(val1,val2){#Mode(3) D_9(val1,val2)}
-/* ‡W7 */		Function S12(val1,val2){#MMinor(0) F_7(val1,val2)}
-/* ‡U7 */		Function S13(val1,val2){#Mode(3) D_7(val1,val2)}
+/* â…£ */		Function S1(val1,val2){#Mode(0) F_(val1,val2)}
+/* â…¡m */		Function S2(val1,val2){#Mode(0) D_(val1,val2)}
+/* â…¡ */		Function S3(val1,val2){#Mode(3) D_(val1,val2)}
+/* â…£sus4 */	Function S4(val1,val2){#Mode(4) F_4(val1,val2)}
+/* â…¡sus4 */	Function S5(val1,val2){#Mode(0) D_4(val1,val2)}
+/* â…£maj7 */	Function S6(val1,val2){#Mode(0) F_7(val1,val2)}
+/* â…¡m7 */		Function S7(val1,val2){#Mode(0) D_7(val1,val2)}
+/* â…£#m7â™­5 */	Function S8(val1,val2){#MMinor(3) F_7(val1,val2)}
+/* â…£maj9 */	Function S9(val1,val2){#Mode(0) F_9(val1,val2)}
+/* â…¡m9 */		Function S10(val1,val2){#Mode(0) D_9(val1,val2)}
+/* â…¡9 */		Function S11(val1,val2){#Mode(3) D_9(val1,val2)}
+/* â…£7 */		Function S12(val1,val2){#MMinor(0) F_7(val1,val2)}
+/* â…¡7 */		Function S13(val1,val2){#Mode(3) D_7(val1,val2)}
 
-/* ‡X */		Function D1(val1,val2){#Mode(0) G_(val1,val2)}
-/* ‡Zmó5 */	Function D2(val1,val2){#Mode(0) B_(val1,val2)}
-/* ‡Zó */		Function D3(val1,val2){#Mode(4) B_(val1,val2)}
-/* ‡Xsus4 */	Function D4(val1,val2){#Mode(0) G_4(val1,val2)}
-/* ‡X7 */		Function D5(val1,val2){#Mode(0) G_7(val1,val2)}
-/* ‡Zm7ó5 */	Function D6(val1,val2){#Mode(0) B_7(val1,val2)}
-/* ‡Zómaj7 */	Function D7(val1,val2){#Mode(4) B_7(val1,val2)}
-/* ‡X9 */		Function D8(val1,val2){#Mode(0) G_9(val1,val2)}
-/* ‡Zómaj9 */	Function D9(val1,val2){#Mode(4) B_9(val1,val2)}
-/* ‡Xmaj7 */	Function D10(val1,val2){#Mode(3) G_7(val1,val2)}
-/* ‡Zm */		Function D11(val1,val2){#Mode(3) B_(val1,val2)}
-/* ‡Zm7 */		Function D12(val1,val2){#Mode(3) B_7(val1,val2)}
+/* â…¤ */		Function D1(val1,val2){#Mode(0) G_(val1,val2)}
+/* â…¦mâ™­5 */	Function D2(val1,val2){#Mode(0) B_(val1,val2)}
+/* â…¦â™­ */		Function D3(val1,val2){#Mode(4) B_(val1,val2)}
+/* â…¤sus4 */	Function D4(val1,val2){#Mode(0) G_4(val1,val2)}
+/* â…¤7 */		Function D5(val1,val2){#Mode(0) G_7(val1,val2)}
+/* â…¦m7â™­5 */	Function D6(val1,val2){#Mode(0) B_7(val1,val2)}
+/* â…¦â™­maj7 */	Function D7(val1,val2){#Mode(4) B_7(val1,val2)}
+/* â…¤9 */		Function D8(val1,val2){#Mode(0) G_9(val1,val2)}
+/* â…¦â™­maj9 */	Function D9(val1,val2){#Mode(4) B_9(val1,val2)}
+/* â…¤maj7 */	Function D10(val1,val2){#Mode(3) G_7(val1,val2)}
+/* â…¦m */		Function D11(val1,val2){#Mode(3) B_(val1,val2)}
+/* â…¦m7 */		Function D12(val1,val2){#Mode(3) B_7(val1,val2)}
 
-/* ‡Tm */		Function Tm1(val1,val2){#Mode(5) C_(val1,val2)}
-/* ‡Vó */		Function Tm2(val1,val2){#Mode(5) E_(val1,val2)}
-/* ‡Tsus4 */	Function Tm3(val1,val2){#Mode(5) C_4(val1,val2)}
-/* ‡Vósus4 */	Function Tm4(val1,val2){#Mode(5) E_4(val1,val2)}
-/* ‡Tm7 */		Function Tm5(val1,val2){#Mode(5) C_7(val1,val2)}
-/* ‡Vómaj7 */	Function Tm6(val1,val2){#Mode(5) E_7(val1,val2)}
-/* ‡Tm9 */		Function Tm7(val1,val2){#Mode(5) C_9(val1,val2)}
-/* ‡Vómaj9 */	Function Tm8(val1,val2){#Mode(5) E_9(val1,val2)}
-/* ‡TmM7 */		Function Tm9(val1,val2){#MMinor(0) C_7(val1,val2)}
-/* ‡Vó7 */		Function Tm10(val1,val2){#Mode(2) E_7(val1,val2)}
-/* ‡Tdim */		Function Tm11(val1,val2){#HMinor(6) C_7(val1,val2)}
-/* ‡VóaugM7 */	Function Tm12(val1,val2){#MMinor(0) E_7(val1,val2)}
+/* â… m */		Function Tm1(val1,val2){#Mode(5) C_(val1,val2)}
+/* â…¢â™­ */		Function Tm2(val1,val2){#Mode(5) E_(val1,val2)}
+/* â… sus4 */	Function Tm3(val1,val2){#Mode(5) C_4(val1,val2)}
+/* â…¢â™­sus4 */	Function Tm4(val1,val2){#Mode(5) E_4(val1,val2)}
+/* â… m7 */		Function Tm5(val1,val2){#Mode(5) C_7(val1,val2)}
+/* â…¢â™­maj7 */	Function Tm6(val1,val2){#Mode(5) E_7(val1,val2)}
+/* â… m9 */		Function Tm7(val1,val2){#Mode(5) C_9(val1,val2)}
+/* â…¢â™­maj9 */	Function Tm8(val1,val2){#Mode(5) E_9(val1,val2)}
+/* â… mM7 */		Function Tm9(val1,val2){#MMinor(0) C_7(val1,val2)}
+/* â…¢â™­7 */		Function Tm10(val1,val2){#Mode(2) E_7(val1,val2)}
+/* â… dim */		Function Tm11(val1,val2){#HMinor(6) C_7(val1,val2)}
+/* â…¢â™­augM7 */	Function Tm12(val1,val2){#MMinor(0) E_7(val1,val2)}
 
-/* ‡Wm */		Function Sm1(val1,val2){#Mode(5) F_7(val1,val2)}
-/* ‡Yó */		Function Sm2(val1,val2){#Mode(5) A_(val1,val2)}
-/* ‡Umó5 */	Function Sm3(val1,val2){#Mode(5) D_(val1,val2)}
-/* ‡Wsus4 */	Function Sm4(val1,val2){#Mode(5) F_4(val1,val2)}
-/* ‡Yósus4 */	Function Sm5(val1,val2){#Mode(2) A_4(val1,val2)}
-/* ‡Wm7 */		Function Sm6(val1,val2){#Mode(5) F_7(val1,val2)}
-/* ‡Yómaj7 */	Function Sm7(val1,val2){#Mode(5) A_7(val1,val2)}
-/* ‡Um7ó5 */	Function Sm8(val1,val2){#Mode(5) D_7(val1,val2)}
-/* ‡Wm9 */		Function Sm9(val1,val2){#Mode(5) F_9(val1,val2)}
-/* ‡Yómaj9 */	Function Sm10(val1,val2){#Mode(5) A_9(val1,val2)}
-/* ‡W7 */		Function Sm11(val1,val2){#Mode(1) F_7(val1,val2)}
-/* ‡Ym7ó5 */	Function Sm12(val1,val2){#Mode(1) A_7(val1,val2)}
-/* ‡Um7 */		Function Sm13(val1,val2){#Mode(1) D_7(val1,val2)}
+/* â…£m */		Function Sm1(val1,val2){#Mode(5) F_7(val1,val2)}
+/* â…¥â™­ */		Function Sm2(val1,val2){#Mode(5) A_(val1,val2)}
+/* â…¡mâ™­5 */	Function Sm3(val1,val2){#Mode(5) D_(val1,val2)}
+/* â…£sus4 */	Function Sm4(val1,val2){#Mode(5) F_4(val1,val2)}
+/* â…¥â™­sus4 */	Function Sm5(val1,val2){#Mode(2) A_4(val1,val2)}
+/* â…£m7 */		Function Sm6(val1,val2){#Mode(5) F_7(val1,val2)}
+/* â…¥â™­maj7 */	Function Sm7(val1,val2){#Mode(5) A_7(val1,val2)}
+/* â…¡m7â™­5 */	Function Sm8(val1,val2){#Mode(5) D_7(val1,val2)}
+/* â…£m9 */		Function Sm9(val1,val2){#Mode(5) F_9(val1,val2)}
+/* â…¥â™­maj9 */	Function Sm10(val1,val2){#Mode(5) A_9(val1,val2)}
+/* â…£7 */		Function Sm11(val1,val2){#Mode(1) F_7(val1,val2)}
+/* â…¥m7â™­5 */	Function Sm12(val1,val2){#Mode(1) A_7(val1,val2)}
+/* â…¡m7 */		Function Sm13(val1,val2){#Mode(1) D_7(val1,val2)}
 
-/* ‡Xm */		Function Dm1(val1,val2){#Mode(5) G_(val1,val2)}
-/* ‡X */		Function Dm2(val1,val2){#HMinor(0) G_(val1,val2)}
-/* ‡Zó */		Function Dm3(val1,val2){#Mode(5) B_(val1,val2)}
-/* ‡Uó */		Function Dm4(val1,val2){#Mode(2) D_(val1,val2)}
-/* ‡Xsus4 */	Function Dm5(val1,val2){#Mode(5) G_4(val1,val2)}
-/* ‡Zósus4 */	Function Dm6(val1,val2){#Mode(5) B_4(val1,val2)}
-/* ‡Xm7 */		Function Dm7(val1,val2){#Mode(5) G_7(val1,val2)}
-/* ‡X7 */		Function Dm8(val1,val2){#HMinor(0) G_7(val1,val2)}
-/* ‡Zó7 */		Function Dm9(val1,val2){#Mode(5) B_7(val1,val2)}
-/* ‡Uómaj7 */	Function Dm10(val1,val2){#Mode(2) D_7(val1,val2)}
-/* ‡Zómaj7 */	Function Dm11(val1,val2){#Mode(1) B_7(val1,val2)}
-/* ‡Xm9 */		Function Dm12(val1,val2){#Mode(1) G_9(val1,val2)}
-/* ‡Uómaj9 */	Function Dm13(val1,val2){#Mode(2) D_9(val1,val2)}
-/* ‡Zóm7 */	Function Dm14(val1,val2){#Mode(2) B_7(val1,val2)}
-/* ‡Zdim */		Function Dm15(val1,val2){#HMinor(0) B_7(val1,val2)}
+/* â…¤m */		Function Dm1(val1,val2){#Mode(5) G_(val1,val2)}
+/* â…¤ */		Function Dm2(val1,val2){#HMinor(0) G_(val1,val2)}
+/* â…¦â™­ */		Function Dm3(val1,val2){#Mode(5) B_(val1,val2)}
+/* â…¡â™­ */		Function Dm4(val1,val2){#Mode(2) D_(val1,val2)}
+/* â…¤sus4 */	Function Dm5(val1,val2){#Mode(5) G_4(val1,val2)}
+/* â…¦â™­sus4 */	Function Dm6(val1,val2){#Mode(5) B_4(val1,val2)}
+/* â…¤m7 */		Function Dm7(val1,val2){#Mode(5) G_7(val1,val2)}
+/* â…¤7 */		Function Dm8(val1,val2){#HMinor(0) G_7(val1,val2)}
+/* â…¦â™­7 */		Function Dm9(val1,val2){#Mode(5) B_7(val1,val2)}
+/* â…¡â™­maj7 */	Function Dm10(val1,val2){#Mode(2) D_7(val1,val2)}
+/* â…¦â™­maj7 */	Function Dm11(val1,val2){#Mode(1) B_7(val1,val2)}
+/* â…¤m9 */		Function Dm12(val1,val2){#Mode(1) G_9(val1,val2)}
+/* â…¡â™­maj9 */	Function Dm13(val1,val2){#Mode(2) D_9(val1,val2)}
+/* â…¦â™­m7 */	Function Dm14(val1,val2){#Mode(2) B_7(val1,val2)}
+/* â…¦dim */		Function Dm15(val1,val2){#HMinor(0) B_7(val1,val2)}
 
 Function TopNote(val){ Top = val }
 

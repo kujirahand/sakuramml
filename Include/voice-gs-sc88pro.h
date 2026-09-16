@@ -1,6 +1,6 @@
 /*
-	Rorand SC-88pro 音色表
-	音色(SC88pr_Piano1) のように使う
+	Rorand SC-88pro 髻ｳ濶ｲ陦ｨ
+	髻ｳ濶ｲ(SC88pr_Piano1) 縺ｮ繧医≧縺ｫ菴ｿ縺�
 */
 Array SC88pr_Piano1	=(1,0,0);
 Array SC88pr_Piano1w	=(1,8,0);

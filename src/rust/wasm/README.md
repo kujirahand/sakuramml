@@ -33,16 +33,25 @@ const midiBlob = new Blob([result.midi], { type: "audio/midi" });
 source errors are returned together with partial MIDI data. A fatal error that
 prevents MIDI serialization is thrown.
 
-`stdmsg.h` is embedded. Other definition files can be registered before a
-compile:
+Every standard `Include/*.h` macro file is embedded in the package, so
+`Include(chord2.h)` works with no extra setup:
+
+```js
+import init, { compileMml } from "sakuramml-v2";
+
+await init();
+const result = compileMml("Include(chord2.h) ドレミ");
+```
+
+Definition files outside `Include/` can be registered before a compile:
 
 ```js
 import init, { addInclude, compileMml } from "sakuramml-v2";
 
 await init();
-const bytes = new Uint8Array(await fetch("/Include/chord2.h").then((r) => r.arrayBuffer()));
-addInclude("chord2.h", bytes);
-const result = compileMml("Include(chord2.h) ドレミ");
+const bytes = new Uint8Array(await fetch("/my-defs.h").then((r) => r.arrayBuffer()));
+addInclude("my-defs.h", bytes);
+const result = compileMml("Include(my-defs.h) ドレミ");
 ```
 
 The package targets browsers and browser-oriented bundlers. Input is accepted

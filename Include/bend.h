@@ -1,35 +1,35 @@
 /*
 =title        "bend.h" ver.0.63
-=description  �s�b�`�x���h�Ɋւ���֐� (2001/04/08)
+=description  ピッチベンドに関する関数 (2001/04/08)
 =keywords     SAKURA Function
 */
 //--------------------------------------------------------------------
-/** �T�v
+/** 概要
 
-�s�b�`�x���h�́A�������ꎞ�I�ɕς�����A�A���I�ɕω������邱�ƂŁA
-�M�^�[�̃`���[�L���O�Ȃǂ̉��t���Č����邱�Ƃ��ł��܂��B
+ピッチベンドは、音程を一時的に変えたり、連続的に変化させることで、
+ギターのチョーキングなどの演奏を再現することができます。
 
-�Ⴆ�΁A"A"�̉����𔭉�����Ƃ��A�s�b�`�x���h���g����"G"����"A"�ɃX���[�Y
-�ɉ�����ω������邱�Ƃ��ł��܂��B
+例えば、"A"の音程を発音するとき、ピッチベンドを使って"G"から"A"にスムーズ
+に音程を変化させることができます。
 
-* �g����
+* 使い方
 
 Include(bend.h);
 
-���A�ȓ��ɏ��������Ă��������B
+を、曲頭に書き加えてください。
 */
 
 /** BendUp(Len, Delay)
 
-���x���h�A�b�v�F������������Ȃ߂炩�ɏグ�āA�w��̉����ɂ���B
+◇ベンドアップ：音程を下からなめらかに上げて、指定の音程にする。
 
-	Len	�w�肵�������ɂȂ�܂ł̒������X�e�b�v���w�肵�܂��B
-	Delay	�x���h�A�b�v���J�n�����܂ł̒������X�e�b�v�w�肵�܂��B
+	Len	指定した音程になるまでの長さをステップを指定します。
+	Delay	ベンドアップが開始されるまでの長さをステップ指定します。
 
-	��jBendUp�i48,96)
+	例）BendUp（48,96)
 
-	�p�����[�^�̐擪��"!"���L�q�����n�������w�肷�邱�Ƃ��ł��܂��B
-	��jBendUp(!8,!4)
+	パラメータの先頭に"!"を記述するとn分音符指定することができます。
+	例）BendUp(!8,!4)
 */
 Function BendUp(Len, Delay){
 	Sub{
@@ -41,15 +41,15 @@ Function BendUp(Len, Delay){
 
 /**BendDown(Len, Delay)
 
-���x���h�_�E���F�������ォ��Ȃ߂炩�ɉ����āA�w��̉����ɂ���B
+◇ベンドダウン：音程を上からなめらかに下げて、指定の音程にする。
 
-	Len	�w�肵�������ɂȂ�܂ł̒������X�e�b�v���w�肵�܂��B
-	Delay	�x���h�A�b�v���J�n�����܂ł̒������X�e�b�v�w�肵�܂��B
+	Len	指定した音程になるまでの長さをステップを指定します。
+	Delay	ベンドアップが開始されるまでの長さをステップ指定します。
 
-	��jBendUp�i48,96)
+	例）BendUp（48,96)
 
-	�p�����[�^�̐擪��"!"���L�q�����n�������w�肷�邱�Ƃ��ł��܂��B
-	��jBendUp(!8,!4)
+	パラメータの先頭に"!"を記述するとn分音符指定することができます。
+	例）BendUp(!8,!4)
 */
 Function BendDown(Len, Delay){
 	Sub{
@@ -62,16 +62,16 @@ Function BendDown(Len, Delay){
 
 /**BendEx(Len, Delay, Str Note1, Str Note2)
 
-���x���h�g���P�FNote1 ���� Note2 �����炩�ɂȂ��B
+◇ベンド拡張１：Note1 から Note2 を滑らかにつなぐ。
 
-	Len	�w�肵�������ɂȂ�܂ł̒������X�e�b�v���w�肵�܂��B
-	Delay	�x���h�A�b�v���J�n�����܂ł̒������X�e�b�v�w�肵�܂��B
-	Str Note1	�J�n���鉹��
-	Str Note2	�I�����鉹��
+	Len	指定した音程になるまでの長さをステップを指定します。
+	Delay	ベンドアップが開始されるまでの長さをステップ指定します。
+	Str Note1	開始する音程
+	Str Note2	終了する音程
 
-	�p�����[�^�̐擪��"!"���L�q�����n�������w�肷�邱�Ƃ��ł��܂��B
-�@�@�@�@�x���h�݂̂��������ނ̂ŁA Note2 �́A���̊֐��̌�ɏ����Ă��������B
-	��jBendEx(!4,!4,{o4c},{o5c}) o5c1
+	パラメータの先頭に"!"を記述するとn分音符指定することができます。
+　　　　ベンドのみを書き込むので、 Note2 は、この関数の後に書いてください。
+	例）BendEx(!4,!4,{o4c},{o5c}) o5c1
 */
 Function BendEx(Len, Delay, Str Note1, Str Note2){
 	Int N1 = NoteNo(Note1);
@@ -91,12 +91,12 @@ Function BendEx(Len, Delay, Str Note1, Str Note2){
 
 /**RandomBend(ON_OR_OFF,Value)
 
-�������_���x���h�F�������ƂɃ����_���ȃx���h�l���������ށB
+◇ランダムベンド：発音ごとにランダムなベンド値を書き込む。
 
-	ON_OR_OFF	on�Ń����_�����J�n�Aoff�Œ�~���܂��B
-	Value		�x���h�̍ő�l���w�肵�܂��B�ȗ���
+	ON_OR_OFF	onでランダムを開始、offで停止します。
+	Value		ベンドの最大値を指定します。省略可
 
-	��jRandomBend(on,2000)
+	例）RandomBend(on,2000)
 */
 Function RandomBend(ON_OR_OFF,Value){
 	IF(Value == 0){ Value = $2000 }
@@ -107,7 +107,7 @@ Function RandomBend(ON_OR_OFF,Value){
 		IF(ON_OR_OFF==(off)){
 			PitchBend = 0;
 		}ELSE{
-			Print({"RandomBend�̈����ɂ́A(on)��(off)���w�肵�Ă��������B"});
+			Print({"RandomBendの引数には、(on)か(off)を指定してください。"});
 		}
 	}
 }

@@ -2,7 +2,7 @@
 KORG ELECTRIBE ER-1
 */
 
-// Part ŠyŠí”Ô†
+// Part æ¥½å™¨ç•ªå·
 Int BD = 0; //Bass Drum
 Int SD = $A; //Snare Drum
 Int TAM = $14
@@ -48,7 +48,7 @@ ER1ModType(SD,4);
 ER1ModSpeed(SD,40);
 ER1ModDepth(SD,12);
 
-//•W€‚Ì
+//æ¨™æº–ã®æ™‚
 $b{o3c} //BD
 $s{o3d} //Snare
 $m{o3e} //Tam

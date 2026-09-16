@@ -1,19 +1,19 @@
 //------------------------------------------------------------------------------ Header.
 //
-//@‚ç‚­‚¿‚ñ‚Õ‚ë‚®‚ê‚Á‚µ‚å‚ñŠÖ”@ver.1.00 LastUpdate = 2000/05/26@‚İ‚Ã‚¡‚ñ‚±
+//ã€€ã‚‰ãã¡ã‚“ã·ã‚ãã‚Œã£ã—ã‚‡ã‚“é–¢æ•°ã€€ver.1.00 LastUpdate = 2000/05/26ã€€ã¿ã¥ãƒã‚“ã“
 //
-//@@‚sC‚r‚cC‚cC‚r‚c‚lC‚s‚C‚r‚C‚c‚w’èƒTƒ|[ƒg (For Sakura)
-//@@‚sC‚rC‚cC‚r‚lC‚s‚C‚r‚C‚c‚w’èƒTƒ|[ƒg (For Sakura)
-//@@¦Œ€•¨‚É‚Â‚«g‚¢‚·‚¬’ˆÓ
+//ã€€ã€€ï¼´ï¼Œï¼³ï¼¤ï¼Œï¼¤ï¼Œï¼³ï¼¤ï¼­ï¼Œï¼´ï½ï¼Œï¼³ï½ï¼Œï¼¤ï½æŒ‡å®šã‚µãƒãƒ¼ãƒˆ (For Sakura)
+//ã€€ã€€ï¼´ï¼Œï¼³ï¼Œï¼¤ï¼Œï¼³ï¼­ï¼Œï¼´ï½ï¼Œï¼³ï½ï¼Œï¼¤ï½æŒ‡å®šã‚µãƒãƒ¼ãƒˆ (For Sakura)
+//ã€€ã€€â€»åŠ‡ç‰©ã«ã¤ãä½¿ã„ã™ãæ³¨æ„
 //
 //------------------------------------------------------------------------------ KeyPosition.
-Int KEY = 0;					// ’²w’è—pó‚¯“n‚µ•Ï”
-Int Disp = 0;					// ƒR[ƒh\¬‰¹•ƒm[ƒe[ƒVƒ‡ƒ“•\¦ƒtƒ‰ƒO
-Int Open = 0;					// ƒI[ƒvƒ“ƒ{ƒCƒVƒ“ƒOƒtƒ‰ƒO
-Int Mode = 0;					// ƒ`ƒƒ[ƒ`ƒ‚[ƒhw’è—p•Ï”
-Int Minor = 0;					// ƒiƒ`ƒ…ƒ‰ƒ‹ƒ}ƒCƒi[ƒtƒ‰ƒO
-Int Minor_Sw = 0;					// ƒ‚[ƒh•\¦—pØ‚è‘Ö‚¦ƒXƒCƒbƒ`
-Int C  = 0;						// ’²w’è—p‘ã”
+Int KEY = 0;					// èª¿æŒ‡å®šç”¨å—ã‘æ¸¡ã—å¤‰æ•°
+Int Disp = 0;					// ã‚³ãƒ¼ãƒ‰æ§‹æˆéŸ³ï¼†ãƒãƒ¼ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³è¡¨ç¤ºãƒ•ãƒ©ã‚°
+Int Open = 0;					// ã‚ªãƒ¼ãƒ—ãƒ³ãƒœã‚¤ã‚·ãƒ³ã‚°ãƒ•ãƒ©ã‚°
+Int Mode = 0;					// ãƒãƒ£ãƒ¼ãƒãƒ¢ãƒ¼ãƒ‰æŒ‡å®šç”¨å¤‰æ•°
+Int Minor = 0;					// ãƒŠãƒãƒ¥ãƒ©ãƒ«ãƒã‚¤ãƒŠãƒ¼ãƒ•ãƒ©ã‚°
+Int Minor_Sw = 0;					// ãƒ¢ãƒ¼ãƒ‰è¡¨ç¤ºç”¨åˆ‡ã‚Šæ›¿ãˆã‚¹ã‚¤ãƒƒãƒ
+Int C  = 0;						// èª¿æŒ‡å®šç”¨ä»£æ•°
 Int Cp = 1;
 Int D  = 2;
 Int Dp = 3;
@@ -25,7 +25,7 @@ Int Gp = -4;
 Int A  = -3;
 Int Ap = -2;
 Int B  = -1;
-#KEY_C	= {KEY = C;}			// ’²w’è—p•¶š—ñƒ}ƒNƒ
+#KEY_C	= {KEY = C;}			// èª¿æŒ‡å®šç”¨æ–‡å­—åˆ—ãƒã‚¯ãƒ­
 #KEY_Cp	= {KEY = Cp;}
 #KEY_D	= {KEY = D;}
 #KEY_Dp	= {KEY = Dp;}
@@ -39,27 +39,27 @@ Int B  = -1;
 #KEY_B	= {KEY = B;}
 //------------------------------------------------------------------------------ InvertFunction.
 Function Invert(){
-	Note0 = Note0 + KEY;			// w’è‚³‚ê‚½’²‚Öƒm[ƒg’l‚ğƒVƒtƒg
+	Note0 = Note0 + KEY;			// æŒ‡å®šã•ã‚ŒãŸèª¿ã¸ãƒãƒ¼ãƒˆå€¤ã‚’ã‚·ãƒ•ãƒˆ
 	Note1 = Note1 + KEY;
 	Note2 = Note2 + KEY;
 	Note3 = Note3 + KEY;
 	Note4 = Note4 + KEY;
-	Int O_value = Inv / 4;			// ƒCƒ“ƒo[ƒg’l‚Í‚S’PˆÊ‚ÅƒIƒNƒ^[ƒuƒAƒbƒv‚È‚Ì‚Åc
-	Int O_shift = O_value * 12;		// ‚S‚ÅŠ„‚Á‚½’l‚ªƒIƒNƒ^[ƒu’l‚É‚È‚é
-	Note1 = Note1 + O_shift;		// ‚»‚ê‚¼‚ê‚Ìƒm[ƒg‚ğƒIƒNƒ^[ƒu’²®
+	Int O_value = Inv / 4;			// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã¯ï¼”å˜ä½ã§ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—ãªã®ã§â€¦
+	Int O_shift = O_value * 12;		// ï¼”ã§å‰²ã£ãŸå€¤ãŒã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ãªã‚‹
+	Note1 = Note1 + O_shift;		// ãã‚Œãã‚Œã®ãƒãƒ¼ãƒˆã‚’ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–èª¿æ•´
 	Note2 = Note2 + O_shift;
 	Note3 = Note3 + O_shift;
 	Note4 = Note4 + O_shift;
-	Int AAA = O_value * 4;			// ƒIƒNƒ^[ƒu’l‚É‚S‚ğ‚©‚¯‚Äc
-	Inv = Inv - AAA				// ƒCƒ“ƒo[ƒg’l‚©‚çˆø‚­‚Æu—]‚èv‚ªo‚é
-	/* u—]‚èv’l‚É‚æ‚Á‚ÄƒCƒ“ƒo[ƒgi‰ñ“]j‚³‚¹‚é */
+	Int AAA = O_value * 4;			// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ï¼”ã‚’ã‹ã‘ã¦â€¦
+	Inv = Inv - AAA				// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã‹ã‚‰å¼•ãã¨ã€Œä½™ã‚Šã€ãŒå‡ºã‚‹
+	/* ã€Œä½™ã‚Šã€å€¤ã«ã‚ˆã£ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆï¼ˆå›è»¢ï¼‰ã•ã›ã‚‹ */
 	If(Inv==-3){Note4 = Note4 - 12; Note3 = Note3 - 12; Note2 = Note2 - 12}
 	If(Inv==-2){Note4 = Note4 - 12; Note3 = Note3 - 12}
 	If(Inv==-1){Note4 = Note4 - 12}
 	If(Inv==1){Note1 = Note1 + 12}
 	If(Inv==2){Note1 = Note1 + 12; Note2 = Note2 + 12}
 	If(Inv==3){Note1 = Note1 + 12; Note2 = Note2 + 12; Note3 = Note3 + 12}
-	/* ƒI[ƒvƒ“‰» */
+	/* ã‚ªãƒ¼ãƒ—ãƒ³åŒ– */
 	If(Open==1){
 		Note3 = Note3 - 12;
 	}
@@ -130,20 +130,20 @@ Function NumToNote(Int N0,Int N1,Int N2,Int N3,Int N4){
 	If(N4==4){#N4={E  }};If(N4==5){#N4={F  }};If(N4==6){#N4={F# }}; If(N4==7){#N4={G  }};
 	If(N4==8){#N4={G# }};If(N4==9){#N4={A  }};If(N4==10){#N4={A# }};If(N4==11){#N4={B  }};
 
-	Print(#N0+#Ch+#N1+#N2+#N3+#N4+#Nm+#Op);		// ƒR[ƒh\¬‰¹•\¦
+	Print(#N0+#Ch+#N1+#N2+#N3+#N4+#Nm+#Op);		// ã‚³ãƒ¼ãƒ‰æ§‹æˆéŸ³è¡¨ç¤º
 
-	Array Ioni  = (0,2,4,5,7,9,11);		// ƒAƒCƒIƒjƒAƒ“
-	Array Dori  = (0,2,3,5,7,9,10);		// ƒhƒŠƒAƒ“
-	Array Phry  = (0,1,3,5,7,8,10);		// ƒtƒŠƒWƒAƒ“
-	Array Lydi  = (0,2,4,6,7,9,11);		// ƒŠƒfƒBƒAƒ“
-	Array Mixo  = (0,2,4,5,7,9,10);		// ƒ~ƒNƒ\ƒŠƒfƒBƒAƒ“
-	Array Aeol  = (0,2,3,5,7,8,10);		// ƒGƒIƒŠƒAƒ“
-	Array Hypo  = (0,1,3,5,6,8,10);		// ƒƒNƒŠƒAƒ“
-	Array Mix6  = (0,2,4,5,7,8,10);		// ƒ~ƒNƒ\ƒŠƒfƒBƒAƒ“ó‚U‚”‚ˆ
-	Array Phr3  = (0,1,4,5,7,8,10);		// ƒtƒŠƒWƒAƒ“Eƒiƒ`ƒ…ƒ‰ƒ‹‚R‚’‚„
-	Array Hyp7  = (0,1,3,4,6,8,9);		// ƒX[ƒp[ƒƒNƒŠƒAƒ“óó‚V‚”‚ˆ
-	Array Hyp4  = (0,1,3,4,6,8,10);		// ƒƒNƒŠƒAƒ“ó‚S‚”‚ˆ
-	Array Scale = (0,0,0,0,0,0,0);		// ƒXƒP[ƒ‹‚ÌŠí
+	Array Ioni  = (0,2,4,5,7,9,11);		// ã‚¢ã‚¤ã‚ªãƒ‹ã‚¢ãƒ³
+	Array Dori  = (0,2,3,5,7,9,10);		// ãƒ‰ãƒªã‚¢ãƒ³
+	Array Phry  = (0,1,3,5,7,8,10);		// ãƒ•ãƒªã‚¸ã‚¢ãƒ³
+	Array Lydi  = (0,2,4,6,7,9,11);		// ãƒªãƒ‡ã‚£ã‚¢ãƒ³
+	Array Mixo  = (0,2,4,5,7,9,10);		// ãƒŸã‚¯ã‚½ãƒªãƒ‡ã‚£ã‚¢ãƒ³
+	Array Aeol  = (0,2,3,5,7,8,10);		// ã‚¨ã‚ªãƒªã‚¢ãƒ³
+	Array Hypo  = (0,1,3,5,6,8,10);		// ãƒ­ã‚¯ãƒªã‚¢ãƒ³
+	Array Mix6  = (0,2,4,5,7,8,10);		// ãƒŸã‚¯ã‚½ãƒªãƒ‡ã‚£ã‚¢ãƒ³â™­ï¼–ï½”ï½ˆ
+	Array Phr3  = (0,1,4,5,7,8,10);		// ãƒ•ãƒªã‚¸ã‚¢ãƒ³ãƒ»ãƒŠãƒãƒ¥ãƒ©ãƒ«ï¼“ï½’ï½„
+	Array Hyp7  = (0,1,3,4,6,8,9);		// ã‚¹ãƒ¼ãƒ‘ãƒ¼ãƒ­ã‚¯ãƒªã‚¢ãƒ³â™­â™­ï¼—ï½”ï½ˆ
+	Array Hyp4  = (0,1,3,4,6,8,10);		// ãƒ­ã‚¯ãƒªã‚¢ãƒ³â™­ï¼”ï½”ï½ˆ
+	Array Scale = (0,0,0,0,0,0,0);		// ã‚¹ã‚±ãƒ¼ãƒ«ã®å™¨
 	If(Mode==0){Scale=Ioni;#Spn={   Ionian}};
 	If(Mode==1){Scale=Dori;#Spn={   Dorian}};
 	If(Mode==2){Scale=Phry;#Spn={   Phrygian}};
@@ -208,7 +208,7 @@ Function T1(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 1; Int NoteH = Note2 + 1;
 	Int Note8 = Note3;     Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 - 1; Int NoteE = Note4;     Int NoteJ = Note4 - 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -232,7 +232,7 @@ Function T2(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2    ; Int NoteC = Note2    ; Int NoteH = Note2    ;
 	Int Note8 = Note3;     Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 - 1; Int NoteE = Note4;     Int NoteJ = Note4 - 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -256,7 +256,7 @@ Function T3(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 1; Int NoteH = Note2 + 1;
 	Int Note8 = Note3    ; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4    ; Int NoteE = Note4 + 1; Int NoteJ = Note4    ;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -280,7 +280,7 @@ Function T4(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 - 3; Int NoteC = Note2 - 1; Int NoteH = Note2 - 2;
 	Int Note8 = Note3 - 1; Int NoteD = Note3    ; Int NoteI = Note3 - 1;
 	Int Note9 = Note4 - 1; Int NoteE = Note4 - 1; Int NoteJ = Note4 - 2;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -304,7 +304,7 @@ Function T5(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 2; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 2;
 	Int Note9 = Note4    ; Int NoteE = Note4 + 2; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -328,7 +328,7 @@ Function T6(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 - 2; Int NoteC = Note2 - 2; Int NoteH = Note2 - 2;
 	Int Note8 = Note3 - 3; Int NoteD = Note3 - 1; Int NoteI = Note3 - 2;
 	Int Note9 = Note4 - 1; Int NoteE = Note4    ; Int NoteJ = Note4 - 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -352,7 +352,7 @@ Function T7(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 - 2; Int NoteC = Note2 - 2; Int NoteH = Note2 - 2;
 	Int Note8 = Note3 - 3; Int NoteD = Note3 - 1; Int NoteI = Note3 - 2;
 	Int Note9 = Note4 - 1; Int NoteE = Note4    ; Int NoteJ = Note4 - 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -376,7 +376,7 @@ Function S1(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2    ; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 1; Int NoteD = Note3 - 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4    ; Int NoteE = Note4 - 2; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -403,7 +403,7 @@ Function S2(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2    ; Int NoteH = Note2 - 1;
 	Int Note8 = Note3 + 1; Int NoteD = Note3 - 2; Int NoteI = Note3 - 3;
 	Int Note9 = Note4    ; Int NoteE = Note4 - 2; Int NoteJ = Note4 - 2;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -430,7 +430,7 @@ Function S3(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 2; Int NoteH = Note2 + 2;
 	Int Note8 = Note3    ; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 2; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -457,7 +457,7 @@ Function S4(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 2; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 1; Int NoteD = Note3 + 1; Int NoteI = Note3 + 1;
 	Int Note9 = Note4    ; Int NoteE = Note4 + 2; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -484,7 +484,7 @@ Function D1(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 4; Int NoteC = Note2 + 5; Int NoteH = Note2 + 4;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -508,7 +508,7 @@ Function D2(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 4; Int NoteC = Note2 + 5; Int NoteH = Note2 + 4;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4    ; Int NoteE = Note4    ; Int NoteJ = Note4    ;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -532,7 +532,7 @@ Function D3(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 2; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -556,7 +556,7 @@ Function D4(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 3; Int NoteH = Note2 + 2;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -574,7 +574,7 @@ Function SM1(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -596,7 +596,7 @@ Function SM2(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -618,7 +618,7 @@ Function SM3(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -640,7 +640,7 @@ Function SM4(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -662,7 +662,7 @@ Function SM5(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -684,7 +684,7 @@ Function SM6(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g);
 	Int Note4 = NoteNo(o5a+);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -706,7 +706,7 @@ Function SM7(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -728,7 +728,7 @@ Function S_D1(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5a);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -750,7 +750,7 @@ Function S_D2(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5a);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -772,7 +772,7 @@ Function D_T(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g);
 	Int Note4 = NoteNo(o5b);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -791,7 +791,7 @@ Function T_S(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5a);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -813,7 +813,7 @@ Function SM_T1(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -835,7 +835,7 @@ Function SM_T2(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g);
 	Int Note4 = NoteNo(o5a+);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -857,7 +857,7 @@ Function SM_T3(Int Len,Int Inv,Int Bass){
 	Int Note3 = NoteNo(o5g+);
 	Int Note4 = NoteNo(o6c);
 	Invert()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){
 		n(Note0),0; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 		}Else{
@@ -885,7 +885,7 @@ Function Tm1(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 2; Int NoteH = Note2 + 2;
 	Int Note8 = Note3;     Int NoteD = Note3 + 1; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 - 1; Int NoteE = Note4;     Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -909,7 +909,7 @@ Function Tm2(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2;     Int NoteC = Note2;     Int NoteH = Note2;
 	Int Note8 = Note3;     Int NoteD = Note3 + 1; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 - 1; Int NoteE = Note4;     Int NoteJ = Note4 - 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -933,7 +933,7 @@ Function Tm3(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 - 2; Int NoteC = Note2 - 2; Int NoteH = Note2 - 2;
 	Int Note8 = Note3 - 3; Int NoteD = Note3 - 2; Int NoteI = Note3 - 2;
 	Int Note9 = Note4 - 1; Int NoteE = Note4;     Int NoteJ = Note4 - 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -957,7 +957,7 @@ Function Tm4(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 1; Int NoteH = Note2 + 1;
 	Int Note8 = Note3;     Int NoteD = Note3 + 1; Int NoteI = Note3 + 1;
 	Int Note9 = Note4;     Int NoteE = Note4 + 1; Int NoteJ = Note4;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -981,7 +981,7 @@ Function Tm5(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2;     Int NoteC = Note2 + 1; Int NoteH = Note2;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1005,7 +1005,7 @@ Function Sm1(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 2; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 2;
 	Int Note9 = Note4;     Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1029,7 +1029,7 @@ Function Sm2(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 2; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 2;
 	Int Note9 = Note4;     Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1053,7 +1053,7 @@ Function Sm3(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 2; Int NoteC = Note2 + 2; Int NoteH = Note2 + 2;
 	Int Note8 = Note3 + 1; Int NoteD = Note3 + 2; Int NoteI = Note3 + 2;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 2; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1077,7 +1077,7 @@ Function Dm1(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 - 1; Int NoteC = Note2;     Int NoteH = Note2 - 1;
 	Int Note8 = Note3 - 1; Int NoteD = Note3 - 1; Int NoteI = Note3 - 2;
 	Int Note9 = Note4 - 2; Int NoteE = Note4 - 2; Int NoteJ = Note4 - 2;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1101,7 +1101,7 @@ Function Dm2(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 4; Int NoteC = Note2 + 5; Int NoteH = Note2 + 3;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4;     Int NoteE = Note4;     Int NoteJ = Note4;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1125,7 +1125,7 @@ Function Dm3(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 - 1; Int NoteC = Note2;     Int NoteH = Note2 - 1;
 	Int Note8 = Note3 - 1; Int NoteD = Note3 - 1; Int NoteI = Note3 - 2;
 	Int Note9 = Note4 - 2; Int NoteE = Note4 - 2; Int NoteJ = Note4 - 2;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1149,7 +1149,7 @@ Function Dm4(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 2; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1173,7 +1173,7 @@ Function Dm5(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 2; Int NoteH = Note2 + 1;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 1; Int NoteE = Note4 + 1; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1197,7 +1197,7 @@ Function Dm6(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 - 3; Int NoteC = Note2 - 2; Int NoteH = Note2 - 2;
 	Int Note8 = Note3 - 1; Int NoteD = Note3;     Int NoteI = Note3 - 1;
 	Int Note9 = Note4 - 2; Int NoteE = Note4 - 2; Int NoteJ = Note4 - 3;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1221,7 +1221,7 @@ Function Dm7(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 2; Int NoteH = Note2 + 2;
 	Int Note8 = Note3 + 2; Int NoteD = Note3 + 3; Int NoteI = Note3 + 2;
 	Int Note9 = Note4 + 2; Int NoteE = Note4 + 2; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()
@@ -1245,7 +1245,7 @@ Function Dm8(Len,Inv,Bass,SecD_SW,SecD_Len,TwoF_SW,TwoF_Len){
 	Int Note7 = Note2 + 1; Int NoteC = Note2 + 2; Int NoteH = Note2 + 2;
 	Int Note8 = Note3 + 1; Int NoteD = Note3 + 2; Int NoteI = Note3 + 1;
 	Int Note9 = Note4 + 2; Int NoteE = Note4 + 2; Int NoteJ = Note4 + 1;
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(SecD_Len==0){SecD_Len = Len};
 	If(TwoF_Len==0){TwoF_Len = Len};
 	Ins_opt()

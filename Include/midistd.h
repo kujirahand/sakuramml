@@ -15,48 +15,48 @@
 Include(midistd_cc.h);					//Control Change Message Define
 Include(midistd_ex.h);					//System Exclusive Message Define
 
-//Debug—p(Bit)
-INT MidiStd_Debug = $0001;				//01 : ˆø”“à—e‚ğCheck‚·‚éB(å‚ÉRange)
-										//02 : MML‚Ö‚Ì•ÏŠ·Œ‹‰Ê‚ğPrompt‚Éo—Í‚·‚éB
-										//04 : –¢’è‹`
-										//	`
-										//80 : –¢’è‹`
+//Debugç”¨(Bit)
+INT MidiStd_Debug = $0001;				//01 : å¼•æ•°å†…å®¹ã‚’Checkã™ã‚‹ã€‚(ä¸»ã«Range)
+										//02 : MMLã¸ã®å¤‰æ›çµæœã‚’Promptã«å‡ºåŠ›ã™ã‚‹ã€‚
+										//04 : æœªå®šç¾©
+										//	ï½
+										//80 : æœªå®šç¾©
 
 //======================================================
 //					Functions
 //======================================================
 //==============================================
-//		”’l‚ğ•ª‰ğ‚µ‚Ü‚·
-//		i‹¤’Ê‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—M–½—ßj
+//		æ•°å€¤ã‚’åˆ†è§£ã—ã¾ã™
+//		ï¼ˆå…±é€šã®ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡å‘½ä»¤ï¼‰
 //----------------------------------------------
 //		Input
-//			INT	iSize	‚¢‚­‚Â‚Ì”z—ñ•Ï”‚É‚·‚é‚©H
-//			INT	iValue	”’l(LSB‚ªÅ‰)
+//			INT	iSize	ã„ãã¤ã®é…åˆ—å¤‰æ•°ã«ã™ã‚‹ã‹ï¼Ÿ
+//			INT	iValue	æ•°å€¤(LSBãŒæœ€åˆ)
 //		OutPut
 //			Array	
 //----------------------------------------------
 Function DivValue(INT I_Size, INT I_Value){
 
-	//ƒ[ƒJƒ‹•Ï”’è‹`
-	INT NumMul;						//‰‰Z—p
-	Array	A_Value=();				//•Ô‚è’l—p‚Ì”z—ñ•Ï”
+	//ãƒ­ãƒ¼ã‚«ãƒ«å¤‰æ•°å®šç¾©
+	INT NumMul;						//æ¼”ç®—ç”¨
+	Array	A_Value=();				//è¿”ã‚Šå€¤ç”¨ã®é…åˆ—å¤‰æ•°
 
-	//ˆø”‚ÌƒŒƒ“ƒWCheck
+	//å¼•æ•°ã®ãƒ¬ãƒ³ã‚¸Check
 	If(MidiStd_Debug & $01){
-		//Å‘å’l‚ÌŒvZ
-		INT	I_ValueMax=1;			//Å‘å’lŒvZ—p
+		//æœ€å¤§å€¤ã®è¨ˆç®—
+		INT	I_ValueMax=1;			//æœ€å¤§å€¤è¨ˆç®—ç”¨
 		For(Int Loop=0; Loop<I_Size; Loop++) {
 			I_ValueMax = (I_ValueMax*128);
 		};
 
-		//Å‘å’l‚ğ’´‚¦‚Ä‚¢‚é‚©Check
+		//æœ€å¤§å€¤ã‚’è¶…ãˆã¦ã„ã‚‹ã‹Check
 		If( (I_Value<0) | (I_Value=>I_ValueMax) ){
-			Print("Wanning ˆø”‚Ì”ÍˆÍ‚ğ’´‚¦‚Ä‚¢‚Ü‚·B Data=",I_Value);
+			Print("Wanning å¼•æ•°ã®ç¯„å›²ã‚’è¶…ãˆã¦ã„ã¾ã™ã€‚ Data=",I_Value);
 			I_Value=0;
 		};
 	};
 
-	//•ª‰ğˆ—
+	//åˆ†è§£å‡¦ç†
 	For(INT Loop=0; Loop<I_Size; Loop++){
 		NumMul = 1;
 		For(Int LoopMul=0; LoopMul<Loop; LoopMul++) {
@@ -65,41 +65,41 @@ Function DivValue(INT I_Size, INT I_Value){
 		A_Value(Loop)=(I_Value & $7F*NumMul)/NumMul;
 	};
 
-	//•Ô‚è’l
+	//è¿”ã‚Šå€¤
 	Result = A_Value;
 };
 //==============================================
-//		”’l‚ğ•ª‰ğ‚µ‚Ü‚·
-//		i‹¤’Ê‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—M–½—ßj
+//		æ•°å€¤ã‚’åˆ†è§£ã—ã¾ã™
+//		ï¼ˆå…±é€šã®ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡å‘½ä»¤ï¼‰
 //----------------------------------------------
 //		Input
-//			INT	iSize	‚¢‚­‚Â‚Ì”z—ñ•Ï”‚É‚·‚é‚©H
-//			INT	iValue	”’l(LSB‚ªÅŒã)
+//			INT	iSize	ã„ãã¤ã®é…åˆ—å¤‰æ•°ã«ã™ã‚‹ã‹ï¼Ÿ
+//			INT	iValue	æ•°å€¤(LSBãŒæœ€å¾Œ)
 //		OutPut
 //			Array	
 //----------------------------------------------
 Function DivValueX(INT I_Size, INT I_Value){
 
-	//ƒ[ƒJƒ‹•Ï”’è‹`
-	INT NumMul;						//‰‰Z—p
-	Array	A_Value=();				//•Ô‚è’l—p‚Ì”z—ñ•Ï”
+	//ãƒ­ãƒ¼ã‚«ãƒ«å¤‰æ•°å®šç¾©
+	INT NumMul;						//æ¼”ç®—ç”¨
+	Array	A_Value=();				//è¿”ã‚Šå€¤ç”¨ã®é…åˆ—å¤‰æ•°
 
-	//ˆø”‚ÌƒŒƒ“ƒWCheck
+	//å¼•æ•°ã®ãƒ¬ãƒ³ã‚¸Check
 	If(MidiStd_Debug & $01){
-		//Å‘å’l‚ÌŒvZ
-		INT	I_ValueMax=1;			//Å‘å’lŒvZ—p
+		//æœ€å¤§å€¤ã®è¨ˆç®—
+		INT	I_ValueMax=1;			//æœ€å¤§å€¤è¨ˆç®—ç”¨
 		For(Int Loop=0; Loop<I_Size; Loop++) {
 			I_ValueMax = (I_ValueMax*128);
 		};
 
-		//Å‘å’l‚ğ’´‚¦‚Ä‚¢‚é‚©Check
+		//æœ€å¤§å€¤ã‚’è¶…ãˆã¦ã„ã‚‹ã‹Check
 		If( (I_Value<0) | (I_Value=>I_ValueMax) ){
-			Print("Wanning ˆø”‚Ì”ÍˆÍ‚ğ’´‚¦‚Ä‚¢‚Ü‚·B Data=",I_Value);
+			Print("Wanning å¼•æ•°ã®ç¯„å›²ã‚’è¶…ãˆã¦ã„ã¾ã™ã€‚ Data=",I_Value);
 			I_Value=0;
 		};
 	};
 
-	//•ª‰ğˆ—
+	//åˆ†è§£å‡¦ç†
 	For(INT Loop=0; Loop<I_Size; Loop++){
 		NumMul = 1;
 		For(Int LoopMul=0; LoopMul<Loop; LoopMul++) {
@@ -108,16 +108,16 @@ Function DivValueX(INT I_Size, INT I_Value){
 		A_Value(I_Size-Loop-1)=(I_Value & $7F*NumMul)/NumMul;
 	};
 
-	//•Ô‚è’l
+	//è¿”ã‚Šå€¤
 	Result = A_Value;
 };
 //==============================================
 //		CheckSUM
 //----------------------------------------------
 //		Input
-//			Array	A_Data		ƒf[ƒ^
+//			Array	A_Data		ãƒ‡ãƒ¼ã‚¿
 //		OutPut
-//			INT		CheckSum	ƒ`ƒFƒbƒNƒTƒ€
+//			INT		CheckSum	ãƒã‚§ãƒƒã‚¯ã‚µãƒ 
 //----------------------------------------------
 Function CheckSum(Array A_Data){
 	INT	A_Length=SizeOf(A_Data);

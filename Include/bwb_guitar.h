@@ -1,38 +1,38 @@
 //----------------------------------------------------------------------------------------------
 //_bwb_guitar.h
-//		by	�����F		(bluewhitebear@hotmail.com)
+//		by	青い白熊		(bluewhitebear@hotmail.com)
 //		Hp	Blue Darkness	(http://www.nothing-kb.jp/~bluedarkness/)
 //----------------------------------------------------------------------------------------------
-//_���[�U�[�ϐ�
-//	�����̕��т́u6��,5��,4��,3��,2��,1���v�̏��ł��B
-Array	BG_STRINGS=0,0,0,0,0,0;			//�����Ƃ̃x���V�e�B�̒ǉ���
-Int	BG_KEY=0;					//�S�̂̃`���[�j���O�A�J�|�i�����P�ʁj
-Int	BG_LAG=!128;				//�X�g���[�N���̃Y��
-Int	BG_PEDAL=off;				//����x�Ƀy�_���𓥂�ŁA�����[�X���Č�����
-Int	BG_PRINT=off;				//�\���@�\
-Int	BG_VELOCITY_FIRST=20;			//�ŏ��̉��̃x���V�e�B���Z�l�i�ŏ�����Q�Ԗڂ������̒l�����Z�j
-Int	BG_VELOCITY_LAST=10;			//�Ō�̉��̃x���V�e�B���Z�l�i�Ōォ��Q�Ԗڂ������̒l�����Z�j
-Int	BG_VELOCITY_MOMENTUM=-2;		//����炷���Ƃɉ��Z���Ă����x���V�e�B�l�i�������Ȃ��Ȃ�j
-Int	BG_ARPEGGIO_MUTE_VELOCITY=-50;	//�A���y�W�I���t���̃~���[�g���t�̍ۂ̉��Z�x���V�e�B�̒l
-Int	BG_ARPEGGIO_MUTE_GATE=-20;		//�A���y�W�I���t���̃~���[�g���t�̍ۂ̉��Z�Q�[�g�̒l
-Int	BG_RHYTHM_MUTE_VELOCITY=-30;		//���Y�����t���̃~���[�g���t�̍ۂ̉��Z�x���V�e�B�̒l
-Int	BG_RHYTHM_MUTE_GATE=-40;		//���Y�����t���̃~���[�g���t�̍ۂ̉��Z�Q�[�g�̒l
+//_ユーザー変数
+//	※弦の並びは「6弦,5弦,4弦,3弦,2弦,1弦」の順です。
+Array	BG_STRINGS=0,0,0,0,0,0;			//弦ごとのベロシティの追加量
+Int	BG_KEY=0;					//全体のチューニング、カポ（半音単位）
+Int	BG_LAG=!128;				//ストローク時のズレ
+Int	BG_PEDAL=off;				//握る度にペダルを踏んで、リリースを再現する
+Int	BG_PRINT=off;				//表示機能
+Int	BG_VELOCITY_FIRST=20;			//最初の音のベロシティ加算値（最初から２番目も半分の値が加算）
+Int	BG_VELOCITY_LAST=10;			//最後の音のベロシティ加算値（最後から２番目も半分の値が加算）
+Int	BG_VELOCITY_MOMENTUM=-2;		//音を鳴らすごとに加算していくベロシティ値（勢いがなくなる）
+Int	BG_ARPEGGIO_MUTE_VELOCITY=-50;	//アルペジオ演奏時のミュート演奏の際の加算ベロシティの値
+Int	BG_ARPEGGIO_MUTE_GATE=-20;		//アルペジオ演奏時のミュート演奏の際の加算ゲートの値
+Int	BG_RHYTHM_MUTE_VELOCITY=-30;		//リズム演奏時のミュート演奏の際の加算ベロシティの値
+Int	BG_RHYTHM_MUTE_GATE=-40;		//リズム演奏時のミュート演奏の際の加算ゲートの値
 //----------------------------------------------------------------------------------------------
-//_�V�X�e���ϐ�
-Array	BG_FINGER=0,0,0,0,0,0;			//�������Ă���ӏ�
-Int	BG_POSITION=1;				//�|�W�V�����̍����i�P�`�T�j
-Array	BG_OPEN=40,45,50,55,59,64;		//�J�����̃m�[�g���w��
+//_システム変数
+Array	BG_FINGER=0,0,0,0,0,0;			//押さえている箇所
+Int	BG_POSITION=1;				//ポジションの高さ（１～５）
+Array	BG_OPEN=40,45,50,55,59,64;		//開放弦のノートを指定
 //----------------------------------------------------------------------------------------------
-//_���������̊֐�
-//_����[BG_GRASP(�����z��ϐ�)]
+//_内部処理の関数
+//_握る[BG_GRASP(内部配列変数)]
 Function BG_GRASP(Array BG_GRASP_ARRAY){
-	//�y�_������
+	//ペダル処理
 	If(BG_PEDAL==on){
 		y64,0;r*(%1);y64,127;r*(-%1);
 		If(BG_PRINT==on){Print({"y64,0;r*(%1);y64,127;r*(-%1);"});}
 		}
 
-	//�z�񏈗�
+	//配列処理
 	If(BG_GRASP_ARRAY(0)<0){BG_POSITION=1;}
 	If(BG_GRASP_ARRAY(0)>5){BG_POSITION=5;}
 	If( (BG_GRASP_ARRAY(0)>0)&(BG_GRASP_ARRAY(0)<6) ){BG_POSITION=BG_GRASP_ARRAY(0);}
@@ -40,8 +40,8 @@ Function BG_GRASP(Array BG_GRASP_ARRAY){
 		BG_FINGER(BG_GRASP_I)=BG_GRASP_ARRAY( (BG_POSITION-1)*6 + 1 + BG_GRASP_I );}
 }
 
-//_�ڐG�U��؂�̃x���V�e�B�C���̊֐�
-//BG_TOUCHANDGO(�炷���̖{���i�����̃~���[�g���݁j,���[�v��,From,To,D:1 U:-1)
+//_接触振り切りのベロシティ修正の関数
+//BG_TOUCHANDGO(鳴らす弦の本数（中弦のミュート込み）,ループ回数,From,To,D:1 U:-1)
 Function BG_TOUCHANDGO(Int BG_TOUCHANDGO_I,Int BG_TOUCHANDGO_FOR,Int BG_TOUCHANDGO_FRM,Int BG_TOUCHANDGO_MTO,Int BG_TOUCHANDGO_UD){
 	Int	BG_TOUCHANDGO_RESULT
 	Switch(BG_TOUCHANDGO_I){
@@ -67,10 +67,10 @@ Function BG_TOUCHANDGO(Int BG_TOUCHANDGO_I,Int BG_TOUCHANDGO_FOR,Int BG_TOUCHAND
 	Result=BG_TOUCHANDGO_RESULT;
 }
 //----------------------------------------------------------------------------------------------
-//_���s����֐�
-//_�R�[�h�t�H�[���֐�	BG_CHORDFORM
+//_実行する関数
+//_コードフォーム関数	BG_CHORDFORM
 Function BG_CHORDFORM(){
-	Str	BG_CHORDFORM_STR={"�U��,�T��,�S��,�R��,�Q��,�P�� = "};
+	Str	BG_CHORDFORM_STR={"６弦,５弦,４弦,３弦,２弦,１弦 = "};
 	For(Int BG_CHORDFORM_I=0;BG_CHORDFORM_I<6;BG_CHORDFORM_I++){
 		If(BG_FINGER(BG_CHORDFORM_I)==-1){
 			BG_CHORDFORM_STR=BG_CHORDFORM_STR+{"M"};
@@ -85,41 +85,41 @@ Function BG_CHORDFORM(){
 
 }
 //----------------------------------------------------------------------------------------------
-//_�_�E���X�g���[�N[BGD(l,q,v,t,h,LAG,FROM,TO)]
+//_ダウンストローク[BGD(l,q,v,t,h,LAG,FROM,TO)]
 /*
 	BGD(l,q,v,t,h,LAG,FROM,TO)
-		l	(BGD_INT_LEN)	�E�E�E	����
-		q	(BGD_INT_GAT)	�E�E�E	���Z�Q�[�g�l
-		v	(BGD_INT_VEL)	�E�E�E	���Z�x���V�e�B�l
-		t	(BGD_INT_TIM)	�E�E�E	���Z�^�C�~���O�l
-		h	(BGD_INT_HAT)	�E�E�E	on���ƁA�Q�[�g���Z�����œ����ɉ����~�߂�
-		LAG	(BGD_INT_LAG)	�E�E�E	�X�g���[�N���̃Y���̉��Z�l
-		FROM	(BGD_INT_FRM)	�E�E�E	���Ԗڂ̌�����	�i�����l�U�j
-		TO	(BGD_INT_MTO)	�E�E�E	���Ԗڂ܂ł̌���	�i�����l�P�j
+		l	(BGD_INT_LEN)	・・・	長さ
+		q	(BGD_INT_GAT)	・・・	加算ゲート値
+		v	(BGD_INT_VEL)	・・・	加算ベロシティ値
+		t	(BGD_INT_TIM)	・・・	加算タイミング値
+		h	(BGD_INT_HAT)	・・・	onだと、ゲート減算処理で同時に音を止める
+		LAG	(BGD_INT_LAG)	・・・	ストローク時のズレの加算値
+		FROM	(BGD_INT_FRM)	・・・	何番目の弦から	（初期値６）
+		TO	(BGD_INT_MTO)	・・・	何番目までの弦を	（初期値１）
 */
 Function BGD(Int BGD_INT_LEN,Int BGD_INT_GAT,Int BGD_INT_VEL,Int BGD_INT_TIM,Int BGD_INT_HAT,Int BGD_INT_LAG,Int BGD_INT_FRM,Int BGD_INT_MTO){
-	//���[�J���ϐ��錾
-	Int	BGD_MML_VEL=MML(v);	//�f�t�H���g�x���V�e�B�擾
-	Int	BGD_MML_TIM=MML(t);	//�f�t�H���g�^�C�~���O�擾
-	Int	BGD_MML_GAT=MML(q);	//�f�t�H���g�Q�[�g�擾
-	Int	BGD_MML_HAT=MML(h);	//�f�t�H���g�Q�[�g���Z�l�擾
-	Int	BGD_FRM;			//�������t���J�n�ϐ��@[�U���P]��[�O���T]
-	Int	BGD_MTO;			//�������t���I���ϐ��@[�U���P]��[�O���T]
-	Str	BGD_RUN;			//���s������
+	//ローカル変数宣言
+	Int	BGD_MML_VEL=MML(v);	//デフォルトベロシティ取得
+	Int	BGD_MML_TIM=MML(t);	//デフォルトタイミング取得
+	Int	BGD_MML_GAT=MML(q);	//デフォルトゲート取得
+	Int	BGD_MML_HAT=MML(h);	//デフォルトゲート減算値取得
+	Int	BGD_FRM;			//内部演奏弦開始変数　[６→１]⇒[０→５]
+	Int	BGD_MTO;			//内部演奏弦終了変数　[６→１]⇒[０→５]
+	Str	BGD_RUN;			//実行文字列
 	Int	BGD_TEMP;			//Temp
 	
-	//�e�����̖{���̒����@�����ē����ϐ��ɕϊ��@[�U���P]��[�O���T]
+	//弾く弦の本数の調整　そして内部変数に変換　[６→１]⇒[０→５]
 	If( (BGD_INT_FRM<1) | (BGD_INT_FRM>6) ){BGD_FRM=0;}
 	If( (BGD_INT_FRM>0) & (BGD_INT_FRM<7) ){BGD_FRM=6-BGD_INT_FRM;}
-	For(Int BGD_I=0;BGD_I<6;BGD_I++){	If( BG_FINGER(BGD_FRM)==-1 ){BGD_FRM++;}Else{BGD_I=6;}	}//�Œቹ�����~���[�g�̏ꍇ�A�e���Ȃ�
+	For(Int BGD_I=0;BGD_I<6;BGD_I++){	If( BG_FINGER(BGD_FRM)==-1 ){BGD_FRM++;}Else{BGD_I=6;}	}//最低音弦がミュートの場合、弾かない
 
 	If( (BGD_INT_MTO<1) | (BGD_INT_MTO>6) ){BGD_MTO=5;}
 	If( (BGD_INT_MTO>0) & (BGD_INT_MTO<7) ){BGD_MTO=6-BGD_INT_MTO;}
-	For(Int BGD_I=5;BGD_I>-1;BGD_I--){	If( BG_FINGER(BGD_MTO)==-1 ){BGD_MTO--;}Else{BGD_I=-1;}	}//�ō��������~���[�g�̏ꍇ�A�e���Ȃ�
+	For(Int BGD_I=5;BGD_I>-1;BGD_I--){	If( BG_FINGER(BGD_MTO)==-1 ){BGD_MTO--;}Else{BGD_I=-1;}	}//最高音弦がミュートの場合、弾かない
 
 	BGD_RUN=CHR(39)	//	BGD_RUN='
 
-	//���[�v�ɂ�镶���񐶐�
+	//ループによる文字列生成
 	If(BGD_FRM<=BGD_MTO){
 		For(Int BGD_I=BGD_FRM;BGD_I<=BGD_MTO;BGD_I++){
 			If(BG_FINGER(BGD_I)!=-1){
@@ -134,54 +134,54 @@ If( BGD_INT_HAT==on ){	BGD_RUN=BGD_RUN+{"h("}+( BGD_MML_HAT+((BG_LAG+BGD_INT_LAG
 			}
 		}
 
-	//���s������Ƀx���V�e�B�A�^�C�~���O�A�Q�[�g�A�����̏���␳
+	//実行文字列にベロシティ、タイミング、ゲート、長さの情報を補正
 				BGD_RUN=BGD_RUN+{"v("}+BGD_MML_VEL+{");"}
 				BGD_RUN=BGD_RUN+{"t("}+BGD_MML_TIM+{");"}
 				BGD_RUN=BGD_RUN+{"q("}+BGD_MML_GAT+{");"}
 If( BGD_INT_HAT==on ){	BGD_RUN=BGD_RUN+{"h("}+BGD_MML_HAT+{");"}	}
 				BGD_RUN=BGD_RUN+CHR(39)+{"%("}+BGD_INT_LEN+{")"}
 
-	//���s�@BG_PRINT==on�̎��A�\�������˂�
+	//実行　BG_PRINT==onの時、表示も兼ねる
 		If(BG_PRINT==on){Print(BGD_RUN);}
 		BGD_RUN;
 
-	}Else{Print({"BWB_GUITAR.H ERROR!!"})}	//	�u�@If(BGD_FRM<=BGD_MTO){�@�v����������Ȃ����B
+	}Else{Print({"BWB_GUITAR.H ERROR!!"})}	//	「　If(BGD_FRM<=BGD_MTO){　」が満たされない時。
 }
 //----------------------------------------------------------------------------------------------
-//_�A�b�v�X�g���[�N[BGU(l,q,v,t,LAG,FROM,TO)]
+//_アップストローク[BGU(l,q,v,t,LAG,FROM,TO)]
 /*
 	BGU(l,q,v,t,LAG,FROM,TO)
-		l	(BGU_INT_LEN)	�E�E�E	����
-		q	(BGU_INT_GAT)	�E�E�E	���Z�Q�[�g�l
-		v	(BGU_INT_VEL)	�E�E�E	���Z�x���V�e�B�l
-		t	(BGU_INT_TIM)	�E�E�E	���Z�^�C�~���O�l
-		LAG	(BGU_INT_LAG)	�E�E�E	�X�g���[�N���̃Y���̉��Z�l
-		FROM	(BGU_INT_FRM)	�E�E�E	���Ԗڂ̌�����	�i�����l�P�j
-		TO	(BGU_INT_MTO)	�E�E�E	���Ԗڂ܂ł̌���	�i�����l�U�j
+		l	(BGU_INT_LEN)	・・・	長さ
+		q	(BGU_INT_GAT)	・・・	加算ゲート値
+		v	(BGU_INT_VEL)	・・・	加算ベロシティ値
+		t	(BGU_INT_TIM)	・・・	加算タイミング値
+		LAG	(BGU_INT_LAG)	・・・	ストローク時のズレの加算値
+		FROM	(BGU_INT_FRM)	・・・	何番目の弦から	（初期値１）
+		TO	(BGU_INT_MTO)	・・・	何番目までの弦を	（初期値６）
 */
 Function BGU(Int BGU_INT_LEN,Int BGU_INT_GAT,Int BGU_INT_VEL,Int BGU_INT_TIM,Int BGU_INT_HAT,Int BGU_INT_LAG,Int BGU_INT_FRM,Int BGU_INT_MTO){
-	//���[�J���ϐ��錾
-	Int	BGU_MML_VEL=MML(v);	//�f�t�H���g�x���V�e�B�擾
-	Int	BGU_MML_TIM=MML(t);	//�f�t�H���g�^�C�~���O�擾
-	Int	BGU_MML_GAT=MML(q);	//�f�t�H���g�Q�[�g�擾
-	Int	BGU_MML_HAT=MML(h);	//�f�t�H���g�Q�[�g���Z�l�擾
-	Int	BGU_FRM;			//�������t���J�n�ϐ��@[�P���U]��[�T���O]
-	Int	BGU_MTO;			//�������t���I���ϐ��@[�P���U]��[�T���O]
-	Str	BGU_RUN;			//���s������
+	//ローカル変数宣言
+	Int	BGU_MML_VEL=MML(v);	//デフォルトベロシティ取得
+	Int	BGU_MML_TIM=MML(t);	//デフォルトタイミング取得
+	Int	BGU_MML_GAT=MML(q);	//デフォルトゲート取得
+	Int	BGU_MML_HAT=MML(h);	//デフォルトゲート減算値取得
+	Int	BGU_FRM;			//内部演奏弦開始変数　[１→６]⇒[５→０]
+	Int	BGU_MTO;			//内部演奏弦終了変数　[１→６]⇒[５→０]
+	Str	BGU_RUN;			//実行文字列
 	Int	BGU_TEMP;			//Temp
 	
-	//�e�����̖{���̒����@�����ē����ϐ��ɕϊ��@[�P���U]��[�T���O]
+	//弾く弦の本数の調整　そして内部変数に変換　[１→６]⇒[５→０]
 	If( (BGU_INT_FRM<1) | (BGU_INT_FRM>6) ){BGU_FRM=5;}
 	If( (BGU_INT_FRM>0) & (BGU_INT_FRM<7) ){BGU_FRM=6-BGU_INT_FRM;}
-	For(Int BGU_I=5;BGU_I>-1;BGU_I--){	If( BG_FINGER(BGU_FRM)==-1 ){BGU_FRM--;}Else{BGU_I=-1;}	}//�Œቹ�����~���[�g�̏ꍇ�A�e���Ȃ�
+	For(Int BGU_I=5;BGU_I>-1;BGU_I--){	If( BG_FINGER(BGU_FRM)==-1 ){BGU_FRM--;}Else{BGU_I=-1;}	}//最低音弦がミュートの場合、弾かない
 
 	If( (BGU_INT_MTO<1) | (BGU_INT_MTO>6) ){BGU_MTO=0;}
 	If( (BGU_INT_MTO>0) & (BGU_INT_MTO<7) ){BGU_MTO=6-BGU_INT_MTO;}
-	For(Int BGU_I=0;BGU_I<6;BGU_I++){	If( BG_FINGER(BGU_MTO)==-1 ){BGU_MTO++;}Else{BGU_I=6;}	}//�ō��������~���[�g�̏ꍇ�A�e���Ȃ�
+	For(Int BGU_I=0;BGU_I<6;BGU_I++){	If( BG_FINGER(BGU_MTO)==-1 ){BGU_MTO++;}Else{BGU_I=6;}	}//最高音弦がミュートの場合、弾かない
 
 	BGU_RUN=CHR(39)	//	BGU_RUN='
 
-	//���[�v�ɂ�镶���񐶐�
+	//ループによる文字列生成
 	If(BGU_FRM>=BGU_MTO){
 		For(Int BGU_I=BGU_FRM;BGU_I>=BGU_MTO;BGU_I--){
 			If(BG_FINGER(BGU_I)!=-1){
@@ -196,49 +196,49 @@ If( BGU_INT_HAT==on ){	BGU_RUN=BGU_RUN+{"h("}+( BGU_MML_HAT+((BG_LAG+BGU_INT_LAG
 			}
 		}
 
-	//���s������Ƀx���V�e�B�A�^�C�~���O�A�Q�[�g�A�����̏���␳
+	//実行文字列にベロシティ、タイミング、ゲート、長さの情報を補正
 				BGU_RUN=BGU_RUN+{"v("}+BGU_MML_VEL+{");"}
 				BGU_RUN=BGU_RUN+{"t("}+BGU_MML_TIM+{");"}
 				BGU_RUN=BGU_RUN+{"q("}+BGU_MML_GAT+{");"}
 If( BGU_INT_HAT==on ){	BGU_RUN=BGU_RUN+{"h("}+BGU_MML_HAT+{");"}	}
 				BGU_RUN=BGU_RUN+CHR(39)+{"%("}+BGU_INT_LEN+{")"}
 
-	//���s�@BG_PRINT==on�̎��A�\�������˂�
+	//実行　BG_PRINT==onの時、表示も兼ねる
 		If(BG_PRINT==on){Print(BGU_RUN);}
 		BGU_RUN;
 
-	}Else{Print({"BWB_GUITAR.H ERROR!!"})}	//	�u�@If(BGD_FRM<=BGD_MTO){�@�v����������Ȃ����B
+	}Else{Print({"BWB_GUITAR.H ERROR!!"})}	//	「　If(BGD_FRM<=BGD_MTO){　」が満たされない時。
 }
 //----------------------------------------------------------------------------------------------
-//_�A���y�W�I�X�g���[�N
+//_アルペジオストローク
 /*
-	BGA{������}
-		������̒��ɂ�bwb_guitar.h���L��MML���g����B
-		�ȉ��ɂ��̃R�}���h�ƕ��@�����߂��B
+	BGA{文字列}
+		文字列の中にはbwb_guitar.h特有のMMLが使われる。
+		以下にそのコマンドと文法をしめす。
 
-	�R�}���h
-		A�F�U����e���܂��B
-		B�F�T����e���܂��B
-		C�F�S����e���܂��B
-		D�F�R����e���܂��B
-		E�F�Q����e���܂��B
-		F�F�P����e���܂��B
-		a�F�U�����キ�e���܂��B
-		b�F�T�����キ�e���܂��B
-		c�F�S�����キ�e���܂��B
-		d�F�R�����キ�e���܂��B
-		e�F�Q�����キ�e���܂��B
-		f�F�P�����キ�e���܂��B
-		r�F�x��
-		^�F�^�C
-		<�F�A���y�W�I�R�}���h���̓��[�h����ꎞ�I�ɔ����o��
-		>�F�A���y�W�I�R�}���h���̓��[�h�ɖ߂� 
+	コマンド
+		A：６弦を弾きます。
+		B：５弦を弾きます。
+		C：４弦を弾きます。
+		D：３弦を弾きます。
+		E：２弦を弾きます。
+		F：１弦を弾きます。
+		a：６弦を弱く弾きます。
+		b：５弦を弱く弾きます。
+		c：４弦を弱く弾きます。
+		d：３弦を弱く弾きます。
+		e：２弦を弱く弾きます。
+		f：１弦を弱く弾きます。
+		r：休符
+		^：タイ
+		<：アルペジオコマンド入力モードから一時的に抜け出す
+		>：アルペジオコマンド入力モードに戻る 
 */
 Function BGA(Str BGA_STR){
-	Int	BGA_MML_VEL=MML(v);	//�f�t�H���g�x���V�e�B�擾
-	Int	BGA_MML_GAT=MML(q);	//�f�t�H���g�Q�[�g�擾
-	Str	BGA_RUN;			//���s������
-	Int	BGA_MODE=0;			//0:����@1:�ʏ�
+	Int	BGA_MML_VEL=MML(v);	//デフォルトベロシティ取得
+	Int	BGA_MML_GAT=MML(q);	//デフォルトゲート取得
+	Str	BGA_RUN;			//実行文字列
+	Int	BGA_MODE=0;			//0:特殊　1:通常
 
 	For(Int BGA_I=1;BGA_I<=SizeOf(BGA_STR);BGA_I++){
 		Switch(BGA_MODE){
@@ -268,17 +268,17 @@ Function BGA(Str BGA_STR){
 			}
 		}
 	}
-	//���s�����񐶐�
+	//実行文字列生成
 	BGA_RUN=BGA_RUN+{";v("}+BGA_MML_VEL+{");q("}+BGA_MML_GAT+{");"}
 
-	//���s�@BG_PRINT==on�̎��A�\�������˂�
+	//実行　BG_PRINT==onの時、表示も兼ねる
 	If(BG_PRINT==on){Print(BGA_RUN);}
 	BGA_RUN;
 }
 Function BGA_ADDNOTE(Int BGA_ADDNOTE_NUMBER,Int BGA_VEL,Int BGA_GAT,Int BGA_ADDNOTE_MUTE){
-	Str	BGA_ADDNOTE_STR;	//�Ԃ蕶����
-	Int	BGA_ADDVEL		//���Z������
-	Int	BGA_ADDGAT		//���Z�Q�[�g
+	Str	BGA_ADDNOTE_STR;	//返り文字列
+	Int	BGA_ADDVEL		//加算文字列
+	Int	BGA_ADDGAT		//加算ゲート
 
 	If(BG_FINGER(BGA_ADDNOTE_NUMBER)==-1){BGA_ADDNOTE_STR={r};}
 	Else{
@@ -296,57 +296,57 @@ Function BGA_ADDNOTE(Int BGA_ADDNOTE_NUMBER,Int BGA_VEL,Int BGA_GAT,Int BGA_ADDN
 	Result=BGA_ADDNOTE_STR;
 }
 //----------------------------------------------------------------------------------------------
-//_���Y���X�g���[�N
+//_リズムストローク
 /*
-	BGR{������}
-		������̒��ɂ�bwb_guitar.h���L��MML���g����B
-		�ȉ��ɂ��̃R�}���h�ƕ��@�����߂��B
+	BGR{文字列}
+		文字列の中にはbwb_guitar.h特有のMMLが使われる。
+		以下にそのコマンドと文法をしめす。
 
-	�R�}���h
-		A�F�S���_�E���X�g���[�N
-		S�F�S���A�b�v�X�g���[�N
-		Z�F�ቹ����{���_�E���X�g���[�N
-		X�F�ቹ����{���A�b�v�X�g���[�N
-		Q�F��������{���_�E���X�g���[�N
-		W�F��������{���A�b�v�X�g���[�N
-		a�F�S���_�E���X�g���[�N�i��߁j
-		s�F�S���A�b�v�X�g���[�N�i��߁j
-		z�F�ቹ����{���_�E���X�g���[�N�i��߁j
-		x�F�ቹ����{���A�b�v�X�g���[�N�i��߁j
-		q�F��������{���_�E���X�g���[�N�i��߁j
-		w�F��������{���A�b�v�X�g���[�N�i��߁j
-		r�F�x��
-		^�F�^�C
-		<�F�A���y�W�I�R�}���h���̓��[�h����ꎞ�I�ɔ����o��
-		>�F�A���y�W�I�R�}���h���̓��[�h�ɖ߂� 
+	コマンド
+		A：全弦ダウンストローク
+		S：全弦アップストローク
+		Z：低音弦二本をダウンストローク
+		X：低音弦二本をアップストローク
+		Q：高音弦二本をダウンストローク
+		W：高音弦二本をアップストローク
+		a：全弦ダウンストローク（弱め）
+		s：全弦アップストローク（弱め）
+		z：低音弦二本をダウンストローク（弱め）
+		x：低音弦二本をアップストローク（弱め）
+		q：高音弦二本をダウンストローク（弱め）
+		w：高音弦二本をアップストローク（弱め）
+		r：休符
+		^：タイ
+		<：アルペジオコマンド入力モードから一時的に抜け出す
+		>：アルペジオコマンド入力モードに戻る 
 
 
-	���@�Ɋւ�����e
-	Q:	�ቹ����{�Ƃ����̂͂ǂ��������Ƃł����H
-	A:	�����Ⴂ�����猷���{�I�ԂƂ������Ƃł��B
-		�Ⴆ�΁A�U�����珇�Ԃ�(1,3,1,1,1,1)�Ƃ����R�[�h�t�H�[���ł���΁A
-		�U���ƂT����e�����ƂɂȂ�܂��B
-		�܂��A�~���[�g���ꂽ��������ꍇ�A����̓J�E���g���܂���B
-		�Ⴆ�΁A�U�����珇�Ԃ�(2,M,1,2,1,M)�Ƃ����R�[�h�t�H�[���ł���΁A
-		�T�����~���[�g����Ă邽�߁A�J�E���g�����A
-		�U���ƂS���݂̂�e�����ƂɂȂ�܂��B
-		��������{�Ƃ����͓̂��l�̍�Ƃ������������̌����{�I�Ԃ��ƂɂȂ�܂��B
+	文法に関する内容
+	Q:	低音弦二本というのはどういうことですか？
+	A:	音が低い方から弦を二本選ぶということです。
+		例えば、６弦から順番に(1,3,1,1,1,1)というコードフォームであれば、
+		６弦と５弦を弾くことになります。
+		また、ミュートされた弦がある場合、それはカウントしません。
+		例えば、６弦から順番に(2,M,1,2,1,M)というコードフォームであれば、
+		５弦がミュートされてるため、カウントせず、
+		６弦と４弦のみを弾くことになります。
+		高音弦二本というのは同様の作業を音が高い方の弦を二本選ぶことになります。
 	
 */
 Function BGR(Str BGR_STR){
-	//���[�J���ϐ��錾
-	Int	BGR_MML_VEL=MML(v);	//�f�t�H���g�x���V�e�B�擾
-	Int	BGR_MML_TIM=MML(t);	//�f�t�H���g�^�C�~���O�擾
-	Int	BGR_MML_GAT=MML(q);	//�f�t�H���g�Q�[�g�擾
-	Str	BGR_RUN;			//���s������
-	Int	BGR_MODE=0;			//�ǂݍ��݃��[�h
+	//ローカル変数宣言
+	Int	BGR_MML_VEL=MML(v);	//デフォルトベロシティ取得
+	Int	BGR_MML_TIM=MML(t);	//デフォルトタイミング取得
+	Int	BGR_MML_GAT=MML(q);	//デフォルトゲート取得
+	Str	BGR_RUN;			//実行文字列
+	Int	BGR_MODE=0;			//読み込みモード
 	
-	Int	BGR_LO			//�Œቹ���̔ԍ�
-	Int	BGR_HI			//�ō������̔ԍ�
+	Int	BGR_LO			//最低音弦の番号
+	Int	BGR_HI			//最高音弦の番号
 	For(Int BGR_I=0;BGR_I<6;BGR_I++){	If(BG_FINGER(BGR_I)!=-1){BGR_LO=BGR_I;BGR_I=100;}	}
 	For(Int BGR_I=5;BGR_I>-1;BGR_I--){	If(BG_FINGER(BGR_I)!=-1){BGR_HI=BGR_I;BGR_I=-10;}	}
 
-	//�����񏈗�
+	//文字列処理
 	For(Int BGR_I=1;BGR_I<=SizeOf(BGR_STR);BGR_I++){
 		Switch(BGR_MODE){
 			Case(0){
@@ -375,10 +375,10 @@ Function BGR(Str BGR_STR){
 			}
 		}
 	}
-	//���s�����񐶐�
+	//実行文字列生成
 	BGR_RUN=BGR_RUN+{";v("}+BGR_MML_VEL+{");q("}+BGR_MML_GAT+{");t("}+BGR_MML_TIM+{");"}
 
-	//���s�@BG_PRINT==on�̎��A�\�������˂�
+	//実行　BG_PRINT==onの時、表示も兼ねる
 	If(BG_PRINT==on){Print(BGR_RUN);}
 	BGR_RUN;
 }
@@ -433,7 +433,7 @@ Function BGR_ADDNOTE(Int BGR_ADDNOTE_MUTE,Int BGR_ADDNOTE_UD,Int BGR_ADDNOTE_MOD
 							BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"t("}+( BGR_MML_TIM + (BG_LAG*(BGR_I-BGR_LO)) )+{");"};
 							BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"q("}+( BGR_MML_GAT + BG_RHYTHM_MUTE_GATE*BGR_ADDNOTE_MUTE)+{");"};
 							BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"n("}+( BG_KEY+BG_OPEN(BGR_I)+BG_FINGER(BGR_I) )+{");"};
-							BGR_TEMP++;		//�炷�񐔂̃R���g���[���i�Q��܂Łj
+							BGR_TEMP++;		//鳴らす回数のコントロール（２回まで）
 						}Else{
 						BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"r;"};
 						}
@@ -441,16 +441,16 @@ Function BGR_ADDNOTE(Int BGR_ADDNOTE_MUTE,Int BGR_ADDNOTE_UD,Int BGR_ADDNOTE_MOD
 				}
 				Case(-1){
 					For(Int BGR_I=BGR_LO+1;BGR_I<=BGR_HI;BGR_I++){
-						If(BG_FINGER(BGR_I)!=-1){BGR_TEMP=BGR_I;BGR_I=BGR_HI+1;}	//�Q���ڂ̌��ԍ��̃R���g���[��
+						If(BG_FINGER(BGR_I)!=-1){BGR_TEMP=BGR_I;BGR_I=BGR_HI+1;}	//２音目の弦番号のコントロール
 					}
-					//�P���ڂ̍�����
+					//１音目の高い音
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"v("}+( BGR_MML_VEL + BG_VELOCITY_FIRST + BG_RHYTHM_MUTE_VELOCITY*BGR_ADDNOTE_MUTE+BG_STRINGS(BGR_TEMP) )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"t("}+( BGR_MML_TIM )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"q("}+( BGR_MML_GAT + BG_RHYTHM_MUTE_GATE*BGR_ADDNOTE_MUTE)+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"n("}+( BG_KEY+BG_OPEN(BGR_TEMP)+BG_FINGER(BGR_TEMP) )+{");"};
-					//�ԂɃ~���[�g������̂��l��
+					//間にミュートが入るのを考慮
 					For(Int BGR_I=FRM+1;BGR_I<BGR_TEMP;BGR_I++){BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"r;"};}
-					//�Q���ڂ̒Ⴂ��
+					//２音目の低い音
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"v("}+( BGR_MML_VEL + BG_VELOCITY_LAST + BG_RHYTHM_MUTE_VELOCITY*BGR_ADDNOTE_MUTE+BG_STRINGS(BGR_LO)+BG_VELOCITY_MOMENTUM*(BGR_TEMP-BGR_LO) )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"t("}+( BGR_MML_TIM + (BG_LAG*(BGR_TEMP-BGR_LO)) )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"q("}+( BGR_MML_GAT + BG_RHYTHM_MUTE_GATE*BGR_ADDNOTE_MUTE)+{");"};
@@ -462,16 +462,16 @@ Function BGR_ADDNOTE(Int BGR_ADDNOTE_MUTE,Int BGR_ADDNOTE_UD,Int BGR_ADDNOTE_MOD
 			Switch(BGR_ADDNOTE_UD){
 				Case(1){
 					For(Int BGR_I=BGR_HI-1;BGR_I>=BGR_LO;BGR_I--){
-						If(BG_FINGER(BGR_I)!=-1){BGR_TEMP=BGR_I;BGR_I=BGR_LO-1;}	//�Q���ڂ̌��ԍ��̃R���g���[��
+						If(BG_FINGER(BGR_I)!=-1){BGR_TEMP=BGR_I;BGR_I=BGR_LO-1;}	//２音目の弦番号のコントロール
 					}
-					//�P���ڂ̒Ⴂ��
+					//１音目の低い音
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"v("}+( BGR_MML_VEL + BG_VELOCITY_FIRST + BG_RHYTHM_MUTE_VELOCITY*BGR_ADDNOTE_MUTE+BG_STRINGS(BGR_TEMP) )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"t("}+( BGR_MML_TIM )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"q("}+( BGR_MML_GAT + BG_RHYTHM_MUTE_GATE*BGR_ADDNOTE_MUTE)+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"n("}+( BG_KEY+BG_OPEN(BGR_TEMP)+BG_FINGER(BGR_TEMP) )+{");"};
-					//�ԂɃ~���[�g������̂��l��
+					//間にミュートが入るのを考慮
 					For(Int BGR_I=FRM+1;BGR_I<BGR_TEMP;BGR_I++){BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"r;"};}
-					//�Q���ڂ̍�����
+					//２音目の高い音
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"v("}+( BGR_MML_VEL + BG_VELOCITY_LAST + BG_RHYTHM_MUTE_VELOCITY*BGR_ADDNOTE_MUTE+BG_STRINGS(BGR_HI)+BG_VELOCITY_MOMENTUM*(BGR_HI-BGR_TEMP) )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"t("}+( BGR_MML_TIM + (BG_LAG*(BGR_HI-BGR_TEMP)) )+{");"};
 					BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"q("}+( BGR_MML_GAT + BG_RHYTHM_MUTE_GATE*BGR_ADDNOTE_MUTE)+{");"};
@@ -489,7 +489,7 @@ Function BGR_ADDNOTE(Int BGR_ADDNOTE_MUTE,Int BGR_ADDNOTE_UD,Int BGR_ADDNOTE_MOD
 							BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"t("}+( BGR_MML_TIM + (BG_LAG*(BGR_HI-BGR_I)) )+{");"};
 							BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"q("}+( BGR_MML_GAT + BG_RHYTHM_MUTE_GATE*BGR_ADDNOTE_MUTE)+{");"};
 							BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"n("}+( BG_KEY+BG_OPEN(BGR_I)+BG_FINGER(BGR_I) )+{");"};
-							BGR_TEMP++;		//�炷�񐔂̃R���g���[���i�Q��܂Łj
+							BGR_TEMP++;		//鳴らす回数のコントロール（２回まで）
 						}Else{
 						BGR_ADDNOTE_STR=BGR_ADDNOTE_STR+{"r;"};
 						}
@@ -505,11 +505,11 @@ Function BGR_ADDNOTE(Int BGR_ADDNOTE_MUTE,Int BGR_ADDNOTE_UD,Int BGR_ADDNOTE_MOD
 
 }
 /*
-�|�W�V�����P�F�Œ�t���b�g���O�`�Q��ڈ�
-�|�W�V�����Q�F�Œ�t���b�g���O�`�T��ڈ�
-�|�W�V�����R�F�t���b�g�̕��ϒl���U��ڈ�
-�|�W�V�����S�F�t���b�g�̕��ϒl���X��ڈ�
-�|�W�V�����T�F�Œ�t���b�g�������悻�P�O�O���ڈ��@�P�U�͒����Ȃ��B�P�T���������B
+ポジション１：最低フレットが０～２を目安
+ポジション２：最低フレットが０～５を目安
+ポジション３：フレットの平均値が６を目安
+ポジション４：フレットの平均値が９を目安
+ポジション５：最低フレットがおおよそ１０前後を目安　１６は超えない。１５がいくつか。
 */
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //_C

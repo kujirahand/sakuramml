@@ -1,20 +1,20 @@
 /*
 =title        "groove.h" ver.0.13
-=description  ƒ^ƒCƒ~ƒ“ƒO‚ð‚¸‚ç‚µ‚½‚èƒOƒ‹[ƒu§ŒäŠÖ”(1999/12/27) ƒNƒWƒ‰”òsŠ÷
+=description  ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã‚’ãšã‚‰ã—ãŸã‚Šã‚°ãƒ«ãƒ¼ãƒ–åˆ¶å¾¡é–¢æ•°(1999/12/27) ã‚¯ã‚¸ãƒ©é£›è¡Œæœº
 =keywords     SAKURA Function Timing
 */
 
-/** ŠT—v
-ƒtƒŒ[ƒY‚ðƒXƒBƒ“ƒO‚³‚¹‚½‚èA‚âƒ^ƒCƒ~ƒ“ƒO‚ð‚¸‚ç‚µ‚½‚è‚µ‚Ü‚·B 
+/** æ¦‚è¦
+ãƒ•ãƒ¬ãƒ¼ã‚ºã‚’ã‚¹ã‚£ãƒ³ã‚°ã•ã›ãŸã‚Šã€ã‚„ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã‚’ãšã‚‰ã—ãŸã‚Šã—ã¾ã™ã€‚ 
 
-* Žg‚¢•û
+* ä½¿ã„æ–¹
 	Include(groove.h);
-	‚Ìˆê•¶‚ðA‹È“ª‚É‘‚«‰Á‚¦‚Ä‚­‚¾‚³‚¢B
+	ã®ä¸€æ–‡ã‚’ã€æ›²é ­ã«æ›¸ãåŠ ãˆã¦ãã ã•ã„ã€‚
 */
 
 
 /** ResetTiming()
-žƒ^ƒCƒ~ƒ“ƒOƒŠƒZƒbƒg
+â—‡ã‚¿ã‚¤ãƒŸãƒ³ã‚°ãƒªã‚»ãƒƒãƒˆ
 */
 Function ResetTiming(){
 	t__0 = 0;  t__5 = 0;
@@ -26,8 +26,8 @@ Function ResetTiming(){
 
 
 /** RndTiming(Val)
-žƒ^ƒCƒ~ƒ“ƒO‚ðƒ‰ƒ“ƒ_ƒ€‚Éƒoƒ‰‚·
-	Val	ƒ^ƒCƒ~ƒ“ƒO‚ð‚Î‚ç‚·’lAƒXƒeƒbƒv’l‚ÅŽw’èB
+â—‡ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«ãƒãƒ©ã™
+	Val	ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã‚’ã°ã‚‰ã™å€¤ã€ã‚¹ãƒ†ãƒƒãƒ—å€¤ã§æŒ‡å®šã€‚
 */
 Function RndTiming(Val){
 	t.Random(Val);
@@ -35,16 +35,16 @@ Function RndTiming(Val){
 
 
 /** Swing16(Val)
-ž16beat Swing
-	Val	ƒXƒBƒ“ƒO‚·‚é’lAƒXƒeƒbƒv’l‚ÅŽw’èB
+â—‡16beat Swing
+	Val	ã‚¹ã‚£ãƒ³ã‚°ã™ã‚‹å€¤ã€ã‚¹ãƒ†ãƒƒãƒ—å€¤ã§æŒ‡å®šã€‚
 */
 Function Swing16(Val){
 	t__9.onCycle(!16,0,Val);
 }
 
 /** Swing8(Val)
-ž8beat Swing
-	Val	ƒXƒBƒ“ƒO‚·‚é’lAƒXƒeƒbƒv’l‚ÅŽw’èB
+â—‡8beat Swing
+	Val	ã‚¹ã‚£ãƒ³ã‚°ã™ã‚‹å€¤ã€ã‚¹ãƒ†ãƒƒãƒ—å€¤ã§æŒ‡å®šã€‚
 */
 Function Swing8(Val){
 	t__8.onCycle(!8,0,Val);
@@ -52,8 +52,8 @@ Function Swing8(Val){
 
 
 /** TimingForward(Val)
-ž‘S‘Ì“I‚É‘OƒmƒŠ‚ÈƒŠƒYƒ€
-	Val	‘OƒmƒŠ‚É‚·‚é’lB
+â—‡å…¨ä½“çš„ã«å‰ãƒŽãƒªãªãƒªã‚ºãƒ 
+	Val	å‰ãƒŽãƒªã«ã™ã‚‹å€¤ã€‚
 */
 Function TimingForward(Val){
 	Val = Val * -1;
@@ -61,8 +61,8 @@ Function TimingForward(Val){
 }
 
 /** TimingBack(Val)
-ž‘S‘Ì“I‚ÉŒãƒmƒŠ‚ÈƒŠƒYƒ€
-	Val	ŒãƒmƒŠ‚É‚·‚é’lB
+â—‡å…¨ä½“çš„ã«å¾ŒãƒŽãƒªãªãƒªã‚ºãƒ 
+	Val	å¾ŒãƒŽãƒªã«ã™ã‚‹å€¤ã€‚
 */
 Function TimingBack(Val){
 	t__7.onTime(0,Val,!1);

@@ -1,6 +1,6 @@
 /*
-	Roralnd SC-8850 音色表
-	音色(SC8850_Piano1) のように使う
+	Roralnd SC-8850 髻ｳ濶ｲ陦ｨ
+	髻ｳ濶ｲ(SC8850_Piano1) 縺ｮ繧医≧縺ｫ菴ｿ縺�
 */
 Array SC8850_Piano1	=(1,0,0);
 Array SC8850_UprightPiano	=(1,1,0);

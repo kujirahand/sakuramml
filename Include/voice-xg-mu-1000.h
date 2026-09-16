@@ -1,8 +1,8 @@
 /*
-	Yamaha MU-1000 ‰¹F•\
+	Yamaha MU-1000 éŸ³è‰²è¡¨
 
-	(g—p—á)
-	‰¹F(MU1000_GrandPno) ƒhƒŒƒ~
+	(ä½¿ç”¨ä¾‹)
+	éŸ³è‰²(MU1000_GrandPno) ãƒ‰ãƒ¬ãƒŸ
 */
 //XG-MU1000-1
 Array MU1000_GrandPno	 = (1,0,0);
