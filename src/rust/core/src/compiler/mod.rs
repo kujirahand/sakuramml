@@ -4535,7 +4535,13 @@ impl<'a> Compiler<'a> {
                 track.octave,
             )
         };
-        let default_length = self.note_value(OnNoteTarget::Length, base_length, time);
+        let mut default_length = self.note_value(OnNoteTarget::Length, base_length, time);
+        // An explicit chord length (`'r c'4`) is the default for every rest
+        // in the body too, not just its notes, overriding even an active
+        // `.onNote` length modifier — matches `advance_note_defaults`.
+        if let Some(Some(length)) = self.chord_length {
+            default_length = length;
+        }
         if !suppress_event {
             let _ = self.note_value(OnNoteTarget::Gate, base_gate, time);
             let _ = self.note_value(OnNoteTarget::Velocity, base_velocity, time);

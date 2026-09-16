@@ -1539,6 +1539,12 @@ fn chord_trailing_options_set_note_defaults_like_pascal() {
     // An explicit chord length overrides even an active `.onNote` length
     // modifier for the notes in its body.
     assert_same_bytes("l.onNote(48) 'ce'4", "'ce'4");
+    // A rest in the chord body is bounded by the chord's explicit length
+    // too, not the persistent track length, when writing its CC ramp.
+    assert_same_bytes(
+        "l8 y11.onNoteWave(0,127,%2000) 'r'4 c",
+        "l4 y11.onNoteWave(0,127,%2000) r l8 c",
+    );
 }
 
 #[test]
