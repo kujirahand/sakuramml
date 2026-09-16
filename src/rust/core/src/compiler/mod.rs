@@ -255,6 +255,19 @@ pub struct Compiler<'a> {
     selected_tracks: BTreeSet<i64>,
     /// While writing a chord, the time every note in it starts at.
     chord_start: Option<i64>,
+    /// While writing a chord, its own explicit length (`'ceg'4`), if any —
+    /// `Some(None)` is not distinguishable from "no chord", but a chord
+    /// without an explicit length behaves the same as omitting it, so the
+    /// outer `Option` alone marks "inside a chord" and the inner one marks
+    /// "the chord gave an explicit length".
+    chord_length: Option<Option<i64>>,
+    /// While writing a chord, the gate/velocity/timing/octave defaults from
+    /// its trailing `'ceg'4,80,100,0,5` arguments, consulted by every note
+    /// in the body (Pascal's `RecWaon.Option`). Unlike `chord_start`, these
+    /// never touch persistent track state, so an ordinary command inside the
+    /// body (`l8`, `o5`, `v100`, ...) still changes it for good, same as
+    /// outside a chord.
+    chord_options: Option<NoteOptions>,
     /// `.Frequency` — how often a ramp writes, in ticks.
     cc_frequency: i64,
     /// Single-character drum macros, from `$c{...}`.
@@ -322,6 +335,8 @@ impl<'a> Compiler<'a> {
             solo_or_mute: 0,
             selected_tracks: BTreeSet::new(),
             chord_start: None,
+            chord_length: None,
+            chord_options: None,
             cc_frequency: advance_spec::DEFAULT_FREQUENCY,
             rythm_macros: rythm::Macros::new(),
             rythm_depth: 0,
@@ -1495,7 +1510,11 @@ impl<'a> Compiler<'a> {
         if source.trim().is_empty() {
             return Ok(Vec::new());
         }
-        let raw_args = if params.len() == 1 && params[0].kind == VarKind::Str {
+        // `Function Echo(Str S){...}` may be called `Echo(raw MML)`: the
+        // whole parenthesized text becomes `S` unquoted (spec/06-scripting.md
+        // "Str仮引数が1個の関数").
+        let single_raw_str_param = params.len() == 1 && params[0].kind == VarKind::Str;
+        let raw_args = if single_raw_str_param {
             vec![source.as_str()]
         } else {
             split_function_args(&source)
@@ -1511,10 +1530,17 @@ impl<'a> Compiler<'a> {
                 params.get(index).map(|param| param.kind),
                 Some(VarKind::Str)
             ) {
+                // `{...}` and `(...)` are unambiguous string delimiters, and
+                // a variable name is a string variable to read — all three
+                // still route to `eval_source` below to strip/evaluate them,
+                // even in the single-`Str`-param raw-MML passthrough. A
+                // leading `"`, though, is the octave-down note marker in raw
+                // MML, not a string literal, so it only counts as a string
+                // when this isn't that passthrough form.
                 let is_string_value = raw.starts_with('{')
-                    || raw.starts_with('"')
                     || raw.starts_with('(')
-                    || matches!(self.variables.get(raw), Some(Value::Str(_)));
+                    || matches!(self.variables.get(raw), Some(Value::Str(_)))
+                    || (!single_raw_str_param && raw.starts_with('"'));
                 if !is_string_value {
                     args.push(Value::Str(raw.to_string()));
                     continue;
@@ -2305,14 +2331,36 @@ impl<'a> Compiler<'a> {
             )
         };
         let gate_in_steps = self.note_modifier_step_mode(OnNoteTarget::Gate);
-        NoteDefaults {
+        let mut defaults = NoteDefaults {
             length: self.note_value(OnNoteTarget::Length, length, time),
             gate: self.note_value(OnNoteTarget::Gate, gate, time),
             gate_in_steps,
             velocity: self.note_value(OnNoteTarget::Velocity, velocity, time),
             timing: self.note_value(OnNoteTarget::Timing, timing, time),
             octave: self.note_value(OnNoteTarget::Octave, octave, time),
+        };
+        // `'ceg'4,80,100,0,5` — the chord's own length and its trailing
+        // gate/velocity/timing/octave apply as the default for every note in
+        // its body, overriding even an active `.onNote` modifier's result.
+        if let Some(Some(length)) = self.chord_length {
+            defaults.length = length;
         }
+        if let Some(chord_options) = self.chord_options {
+            if let Some(gate) = chord_options.gate_percent {
+                defaults.gate = gate;
+                defaults.gate_in_steps = Some(chord_options.gate_in_steps);
+            }
+            if let Some(velocity) = chord_options.velocity {
+                defaults.velocity = velocity;
+            }
+            if let Some(timing) = chord_options.timing {
+                defaults.timing = timing;
+            }
+            if let Some(octave) = chord_options.octave {
+                defaults.octave = octave;
+            }
+        }
+        defaults
     }
 
     /// `$c{mml}` — bind one character for use in rhythm mode.
@@ -2427,6 +2475,7 @@ impl<'a> Compiler<'a> {
             return Err(MmlError::new(line, "和音内に改行があります"));
         }
         cur.skip_spaces();
+        let default_length = self.track().length;
         let mut length = if cur.peek() == Some('(') {
             let value = self.expect_int(cur, "和音の音長")?;
             if self.track().system_step_mode {
@@ -2437,6 +2486,21 @@ impl<'a> Compiler<'a> {
         } else {
             self.read_length(cur)?
         };
+
+        // `'ceg'4,80,100,0,5` — gate/velocity/timing/octave after the length,
+        // in that fixed order (Pascal's `RecWaon.Option` chain, unlike a
+        // note's `ArgOrder`), applied as the defaults for every note in the
+        // chord body.
+        let mut options = NoteOptions::default();
+        for index in 1..=4 {
+            cur.skip_spaces();
+            if !cur.eat(',') {
+                break;
+            }
+            cur.skip_spaces();
+            let mut unused_length = None;
+            self.read_note_option(cur, index, default_length, &mut unused_length, &mut options)?;
+        }
 
         // A tie immediately after a chord belongs to the chord length. The
         // command-level `^` is a rest in Pascal, so the chord parser must
@@ -2455,23 +2519,26 @@ impl<'a> Compiler<'a> {
         }
 
         let start = self.track().time;
-        let previous_length = self.track().length;
-        if let Some(length) = length {
-            self.track().length = length;
-        }
 
         // Every note in the body starts at `start`; the pointer moves once,
-        // afterwards, by the chord's own length.
-        let outer = self.chord_start.replace(start);
+        // afterwards, by the chord's own length. The length/gate/velocity/
+        // timing/octave defaults apply to every note in the body without
+        // touching persistent track state, so an ordinary command inside
+        // the body (`l8`, `o5`, `v100`, ...) still changes it for good, and
+        // an explicit chord length overrides even a note's own `.onNote`
+        // length modifier, matching Pascal's `RecWaon.Option` precedence.
+        let outer_start = self.chord_start.replace(start);
+        let outer_length = self.chord_length.replace(length);
+        let outer_options = self.chord_options.replace(options);
         let outcome = self.run_fragment(&body, line);
-        self.chord_start = outer;
+        self.chord_start = outer_start;
+        self.chord_length = outer_length;
+        self.chord_options = outer_options;
 
-        let length = length.unwrap_or(previous_length);
+        let length = length.unwrap_or(default_length);
         let length = self.scale_stretch(length, line)?;
         let end = self.checked_time(start, length, line)?;
-        let track = self.track();
-        track.length = previous_length;
-        track.time = end;
+        self.track().time = end;
         outcome
     }
 
@@ -4262,16 +4329,20 @@ impl<'a> Compiler<'a> {
                     }
                     _ => None,
                 }
-            } else if parenthesised && matches!(cur.peek(), Some('!') | Some('%')) {
+            } else if parenthesised && cur.peek() == Some('%') {
                 self.read_joined_argument_length(cur)?
             } else if parenthesised {
-                // Inside parentheses each argument may be an expression.
+                // Inside parentheses each argument may be an expression. A
+                // leading `!n` note-length literal (e.g. `!1*7`) is parsed
+                // by `expr::parse_unary`, which then continues into the
+                // normal arithmetic grammar for anything that follows it.
                 match cur.peek() {
                     Some(c)
                         if c.is_ascii_digit()
                             || c == '-'
                             || c == '('
                             || c == '$'
+                            || c == '!'
                             || c.is_ascii_alphabetic() =>
                     {
                         let line = cur.line();
@@ -4464,7 +4535,13 @@ impl<'a> Compiler<'a> {
                 track.octave,
             )
         };
-        let default_length = self.note_value(OnNoteTarget::Length, base_length, time);
+        let mut default_length = self.note_value(OnNoteTarget::Length, base_length, time);
+        // An explicit chord length (`'r c'4`) is the default for every rest
+        // in the body too, not just its notes, overriding even an active
+        // `.onNote` length modifier — matches `advance_note_defaults`.
+        if let Some(Some(length)) = self.chord_length {
+            default_length = length;
+        }
         if !suppress_event {
             let _ = self.note_value(OnNoteTarget::Gate, base_gate, time);
             let _ = self.note_value(OnNoteTarget::Velocity, base_velocity, time);

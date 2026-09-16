@@ -43,6 +43,11 @@ pub fn dump(bytes: &[u8]) -> Result<String, String> {
                     note_name(note),
                     format_length(length, midi.division)
                 ));
+            } else if let Some((channel, controller, value)) = control_change(&event.bytes) {
+                out.push_str(&format!(
+                    "TIME({time}) CH({}) y{controller},{value}\n",
+                    channel + 1
+                ));
             } else {
                 let payload = event
                     .bytes
@@ -229,6 +234,12 @@ fn is_note_off(bytes: &[u8]) -> bool {
     bytes.len() == 3 && (bytes[0] & 0xF0 == 0x80 || (bytes[0] & 0xF0 == 0x90 && bytes[2] == 0))
 }
 
+/// A control change (`$Bn`) reads more clearly as the `y` command
+/// (`y{controller},{value}`) than as raw `DirectSMF` bytes.
+fn control_change(bytes: &[u8]) -> Option<(u8, u8, u8)> {
+    (bytes.len() == 3 && bytes[0] & 0xF0 == 0xB0).then(|| (bytes[0] & 0x0F, bytes[1], bytes[2]))
+}
+
 fn is_end_of_track(bytes: &[u8]) -> bool {
     bytes == [0xFF, 0x2F, 0x00]
 }
@@ -309,6 +320,15 @@ mod tests {
             MTrk\0\0\0\x07\0\xc0\x05\0\xff\x2f\0";
         let text = dump(midi).expect("valid SMF should dump");
         assert!(text.contains("TIME(1:1:0) DirectSMF($C0,$05)"));
+    }
+
+    #[test]
+    fn dumps_control_changes_as_the_y_command() {
+        let midi = b"MThd\0\0\0\x06\0\x01\0\x01\0\x60\
+            MTrk\0\0\0\x08\0\xb2\x0b\x40\0\xff\x2f\0";
+        let text = dump(midi).expect("valid SMF should dump");
+        assert!(text.contains("TIME(1:1:0) CH(3) y11,64"));
+        assert!(!text.contains("DirectSMF"));
     }
 
     #[test]

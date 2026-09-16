@@ -1334,6 +1334,9 @@ fn note_attribute_on_time_matches_pascal() {
         "o.onTime(5,6,!4) l4 cc",
         "4d546864000000060001000100604d54726b0000001400903c644b803c64159048644b80486415ff2f00",
     );
+    // A `!n` length literal inside a `.T(...)` time argument may carry
+    // arithmetic after it, e.g. `!1*7` for seven whole notes.
+    assert_same_bytes("CH(11) EP.T(40,100,!1*2)", "CH(11) EP.T(40,100,%768)");
 }
 
 #[test]
@@ -1518,6 +1521,29 @@ fn chords_sound_their_notes_together() {
         "'ceg'2",
         "4d546864000000060001000100604d54726b0000001d00903c64009040640090436\
          48118803c64008040640080436428ff2f00",
+    );
+}
+
+/// `'ceg',,v` — the gate/velocity/timing/octave after the length apply as
+/// defaults to every note in the chord body, the same as Pascal's
+/// `RecWaon.Option`, and do not persist past the chord.
+#[test]
+fn chord_trailing_options_set_note_defaults_like_pascal() {
+    assert_same_bytes("v127 'ce',,60", "v60 'ce' v127");
+    assert_same_bytes("v127 'ce',,60 d", "v60 'ce' v127 d");
+    // The chord's own length is a default too, not a persistent override:
+    // it doesn't persist past the chord, but a genuine `l` command inside
+    // the body does (Pascal's `RecWaon.Option` precedence).
+    assert_same_bytes("l4 'ce'8 d", "l8 'ce' l4 d");
+    assert_same_bytes("'l8 ce'4 d", "l8 'ce'4 l8 d");
+    // An explicit chord length overrides even an active `.onNote` length
+    // modifier for the notes in its body.
+    assert_same_bytes("l.onNote(48) 'ce'4", "'ce'4");
+    // A rest in the chord body is bounded by the chord's explicit length
+    // too, not the persistent track length, when writing its CC ramp.
+    assert_same_bytes(
+        "l8 y11.onNoteWave(0,127,%2000) 'r'4 c",
+        "l4 y11.onNoteWave(0,127,%2000) r l8 c",
     );
 }
 

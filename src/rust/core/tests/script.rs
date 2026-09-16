@@ -321,6 +321,12 @@ fn string_parameter_accepts_raw_mml() {
     assert_same("Function f(Str S){S} f(ドレミ)", "cde");
     assert_same("Function f(Str S){S} f(c4,80,100)", "c4,80,100");
     assert_same("Function f(Str S, Int N){S n(N)} f(c,62)", "c n62");
+    // A leading `"` in the raw MML is the octave-down marker for the next
+    // note, not a quoted string literal, even for a single `Str` parameter.
+    assert_same("Function f(Str S){S} f(\"c\"c)", "\"c\"c");
+    // A leading `{...}` is still a braced string literal, even for a single
+    // `Str` parameter: the braces are stripped, not passed through as MML.
+    assert_same("Function f(Str S){S} f({[2 c]})", "[2 c]");
 }
 
 #[test]
