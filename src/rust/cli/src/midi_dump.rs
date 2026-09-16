@@ -51,7 +51,7 @@ pub fn dump(bytes: &[u8]) -> Result<String, String> {
                     note_name(note),
                     format_length(length, midi.division)
                 ));
-            } else if let Some((channel, command)) = event_command(&event.bytes, midi.division) {
+            } else if let Some((channel, command)) = event_command(&event.bytes) {
                 let label = match channel {
                     Some(channel) => channel_label(&mut last_channel, channel),
                     None => String::new(),
@@ -84,7 +84,7 @@ fn channel_label(last: &mut Option<u8>, channel: u8) -> String {
 
 /// The MML command form of a non-note event, with its channel when it is a
 /// channel voice message. `None` means only raw `DirectSMF` bytes describe it.
-fn event_command(bytes: &[u8], division: u16) -> Option<(Option<u8>, String)> {
+fn event_command(bytes: &[u8]) -> Option<(Option<u8>, String)> {
     if let Some((channel, controller, value)) = control_change(bytes) {
         return Some((Some(channel), format!("y{controller},{value}")));
     }
@@ -97,7 +97,7 @@ fn event_command(bytes: &[u8], division: u16) -> Option<(Option<u8>, String)> {
     if let Some(text) = sysex_command(bytes) {
         return Some((None, text));
     }
-    Some((None, meta_command(bytes, division)?))
+    Some((None, meta_command(bytes)?))
 }
 
 fn parse(bytes: &[u8]) -> Result<MidiFile, String> {
@@ -308,7 +308,14 @@ fn sysex_command(bytes: &[u8]) -> Option<String> {
 }
 
 /// Meta events that have a SakuraMML command are written as that command.
-fn meta_command(bytes: &[u8], division: u16) -> Option<String> {
+///
+/// `TimeSignature` and `KeyFlag` are deliberately left as `DirectSMF`:
+/// re-emitting them as commands would feed them back into the compiler,
+/// which recomputes every later `TIME()` from the running time signature
+/// (`Compiler::time_value`) and every later note name from the running key
+/// flags (`Compiler::key_flags`) — shifting events that the dump already
+/// resolved to absolute ticks and absolute pitches.
+fn meta_command(bytes: &[u8]) -> Option<String> {
     if bytes.first() != Some(&0xFF) {
         return None;
     }
@@ -323,8 +330,6 @@ fn meta_command(bytes: &[u8], division: u16) -> Option<String> {
         }
         0x21 if data.len() == 1 => Some(format!("Port({})", data[0])),
         0x51 => tempo_command(data),
-        0x58 => time_signature_command(data, division),
-        0x59 => key_signature_command(data),
         _ => None,
     }
 }
@@ -364,40 +369,6 @@ fn tempo_command(data: &[u8]) -> Option<String> {
     }
     let bpm = (60_000_000 + usec / 2) / usec;
     ((4..=60_000_000).contains(&bpm) && 60_000_000 / bpm == usec).then(|| format!("Tempo={bpm}"))
-}
-
-/// `TimeSignature=分子,分母` — the SMF denominator byte is a power of two.
-/// The value is skipped when the grid could not hold the resulting beat, or
-/// when the metronome/32nd-note bytes don't match what the compiler writes
-/// for this division, since those bytes would otherwise be lost.
-fn time_signature_command(data: &[u8], division: u16) -> Option<String> {
-    let data = <[u8; 4]>::try_from(data).ok()?;
-    let numerator = u64::from(data[0]);
-    let denominator = 1u64.checked_shl(u32::from(data[1]))?;
-    let expected_clocks = division.clamp(0, 255) as u8;
-    let expected_32nds = (division / 8).clamp(0, 255) as u8;
-    (numerator >= 1
-        && u64::from(division) * 4 >= denominator
-        && data[2] == expected_clocks
-        && data[3] == expected_32nds)
-        .then(|| format!("TimeSignature={numerator},{denominator}"))
-}
-
-/// `$FF,$59` is emitted by `KeyFlag`; the sharp (or flat) count maps back to
-/// the leading note letters in circle-of-fifths order.
-fn key_signature_command(data: &[u8]) -> Option<String> {
-    let data = <[u8; 2]>::try_from(data).ok()?;
-    let sharps_or_flats = i8::try_from(data[0]).ok()?;
-    if data[1] != 0 || !(-7..=7).contains(&sharps_or_flats) {
-        return None;
-    }
-    const SHARP_ORDER: &str = "fcgdaeb";
-    const FLAT_ORDER: &str = "beadgcf";
-    Some(match sharps_or_flats {
-        0 => "KeyFlag()".to_string(),
-        count if count > 0 => format!("KeyFlag({})", &SHARP_ORDER[..count as usize]),
-        count => format!("KeyFlag-({})", &FLAT_ORDER[..(-count) as usize]),
-    })
 }
 
 fn is_end_of_track(bytes: &[u8]) -> bool {
@@ -537,15 +508,11 @@ mod tests {
     #[test]
     fn dumps_meta_events_as_their_commands() {
         let track = b"\x00\xff\x51\x03\x07\x35\x78\
-            \x00\xff\x58\x04\x02\x02\x60\x0c\
-            \x00\xff\x59\x02\x02\x00\
             \x00\xff\x03\x05hello\
             \x00\xff\x20\x01\x02\
             \x00\xff\x21\x01\x03";
         let text = dump(&smf(&[track, END_OF_TRACK])).expect("valid SMF");
         assert!(text.contains("TIME(1:1:0) Tempo=127"));
-        assert!(text.contains("TIME(1:1:0) TimeSignature=2,4"));
-        assert!(text.contains("TIME(1:1:0) KeyFlag(fc)"));
         assert!(text.contains("TIME(1:1:0) TrackName(\"hello\")"));
         assert!(text.contains("TIME(1:1:0) ChannelPrefix(3)"));
         assert!(text.contains("TIME(1:1:0) Port(3)"));
@@ -570,20 +537,17 @@ mod tests {
     }
 
     #[test]
-    fn keeps_time_signatures_with_an_oversized_denominator_exponent_as_direct_smf() {
-        // A denominator exponent of 64 would overflow a naive `1 << data[1]`.
-        let track = b"\x00\xff\x58\x04\x04\x40\x60\x0c";
+    fn keeps_time_signature_and_key_flag_meta_events_as_direct_smf() {
+        // Re-emitting these as `TimeSignature=`/`KeyFlag()` would feed them
+        // back into the compiler, which recomputes every later `TIME()` from
+        // the running time signature and every later note name from the
+        // running key flags — shifting events the dump already resolved to
+        // absolute ticks and absolute pitches. They must stay raw.
+        let track = b"\x00\xff\x58\x04\x04\x02\x60\x0c\
+            \x00\xff\x59\x02\x02\x00";
         let text = dump(&smf(&[track, END_OF_TRACK])).expect("valid SMF");
-        assert!(text.contains("TIME(1:1:0) DirectSMF($FF,$58,$04,$04,$40,$60,$0C)"));
-    }
-
-    #[test]
-    fn keeps_time_signatures_with_mismatched_metronome_bytes_as_direct_smf() {
-        // Division is 96, so the compiler always writes cc=96,bb=12; other
-        // values must not be collapsed into the same `TimeSignature=4,4`.
-        let track = b"\x00\xff\x58\x04\x04\x02\x18\x08";
-        let text = dump(&smf(&[track, END_OF_TRACK])).expect("valid SMF");
-        assert!(text.contains("TIME(1:1:0) DirectSMF($FF,$58,$04,$04,$02,$18,$08)"));
+        assert!(text.contains("TIME(1:1:0) DirectSMF($FF,$58,$04,$04,$02,$60,$0C)"));
+        assert!(text.contains("TIME(1:1:0) DirectSMF($FF,$59,$02,$02,$00)"));
     }
 
     #[test]
