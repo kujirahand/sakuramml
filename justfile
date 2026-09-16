@@ -19,8 +19,14 @@ build-npm:
 
 # Build the WebAssembly package and serve the browser demo locally.
 wasm-demo port="8000": buld-wasm
-    @echo "Serving demo at http://localhost:{{port}}/demo/"
-    cd src/rust/wasm && python3 -m http.server {{port}}
+    #!/usr/bin/env sh
+    set -e
+    port={{quote(port)}}
+    case "$port" in
+        ''|*[!0-9]*) echo "wasm-demo: port must be a number, got '$port'" >&2; exit 1 ;;
+    esac
+    echo "Serving demo at http://localhost:$port/demo/"
+    cd src/rust/wasm && exec python3 -m http.server "$port"
 
 # Build, smoke-test, and inspect the npm package without publishing it.
 check-npm:
