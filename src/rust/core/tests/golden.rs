@@ -1334,6 +1334,9 @@ fn note_attribute_on_time_matches_pascal() {
         "o.onTime(5,6,!4) l4 cc",
         "4d546864000000060001000100604d54726b0000001400903c644b803c64159048644b80486415ff2f00",
     );
+    // A `!n` length literal inside a `.T(...)` time argument may carry
+    // arithmetic after it, e.g. `!1*7` for seven whole notes.
+    assert_same_bytes("CH(11) EP.T(40,100,!1*2)", "CH(11) EP.T(40,100,%768)");
 }
 
 #[test]
@@ -1519,6 +1522,15 @@ fn chords_sound_their_notes_together() {
         "4d546864000000060001000100604d54726b0000001d00903c64009040640090436\
          48118803c64008040640080436428ff2f00",
     );
+}
+
+/// `'ceg',,v` — the gate/velocity/timing/octave after the length apply as
+/// defaults to every note in the chord body, the same as Pascal's
+/// `RecWaon.Option`, and do not persist past the chord.
+#[test]
+fn chord_trailing_options_set_note_defaults_like_pascal() {
+    assert_same_bytes("v127 'ce',,60", "v60 'ce' v127");
+    assert_same_bytes("v127 'ce',,60 d", "v60 'ce' v127 d");
 }
 
 #[test]
