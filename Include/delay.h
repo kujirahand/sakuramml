@@ -1,30 +1,30 @@
 /*
 =title       "delay.h" ver.1.00
-=description  �G�t�F�N�^�[�Ȃǂ��g��Ȃ��ŁA�f�B���C���Č�����֐��Q(2000/07/08)
+=description  エフェクターなどを使わないで、ディレイを再現する関数群(2000/07/08)
 =keywords SAKURA Function
 */
 
-/** �T�v
-�f�B���C�Ƃ́A���������x��ĕ������Ă���A��܂т��̂悤�Ȍ��ʂ̂��Ƃł��B
-���ʁA�f�B���C���g���ɂ́A�u�G�t�F�N�^�[�v���g���܂��B
-�������A�����ɂ���ẮA�G�t�F�N�^�[�̂Ȃ����̂�����̂ŁA
-�����ł́A�G�t�F�N�^�[���g��Ȃ��ŁA�l�h�c�h������g���āA�f�B���C���Č����܂��B
+/** 概要
+ディレイとは、音が少し遅れて聞こえてくる、やまびこのような効果のことです。
+普通、ディレイを使うには、「エフェクター」を使います。
+しかし、音源によっては、エフェクターのないものもあるので、
+ここでは、エフェクターを使わないで、ＭＩＤＩ情報を駆使して、ディレイを再現します。
 
-* �g����
+* 使い方
 
 Include(delay.h);
 
-�̈ꕶ���A�ȓ��ɏ��������Ă��������B
+の一文を、曲頭に書き加えてください。
 */
 
 /**MidiDelayS(Str S)
-���V���v���f�B���C
-	S	�f�B���C���ʂ����������t���[�Y�������܂��B
+◇シンプルディレイ
+	S	ディレイ効果をかけたいフレーズを書きます。
 
-	��j
-	MidiDelayS( �h���~�t�@�\ );
+	例）
+	MidiDelayS( ドレミファソ );
 */
-Function MidiDelayS(Str S){	// �V���v���ȃf�B���C
+Function MidiDelayS(Str S){	// シンプルなディレイ
 	Int Temp_v = MML(v);
 	Int Dly = !8
 	Int Dec_v = Temp_v / 8;
@@ -41,13 +41,13 @@ Function MidiDelayS(Str S){	// �V���v���ȃf�B���C
 
 
 /** MidiDelay(Str S, Int Repeat, Int Delay)
-���ėp�I�ȃf�B���C�F���s�[�g�񐔂ƃ^�C�����w��ł���ėp�I�ȃf�B���C
+◇汎用的なディレイ：リピート回数とタイムを指定できる汎用的なディレイ
 
-	S	�f�B���C���ʂ����������t���[�Y
-	Repeat	�J��Ԃ��񐔂��w��
-	Delay	�x�点�鎞�Ԃ��w��
+	S	ディレイ効果をかけたいフレーズ
+	Repeat	繰り返し回数を指定
+	Delay	遅らせる時間を指定
 	
-	��j
+	例）
 	MidiDelay({v100o5l4cegedfaf},2,!8);
 */
 Function MidiDelay(Str S,Int Repeat, Int Delay){
@@ -66,12 +66,12 @@ Function MidiDelay(Str S,Int Repeat, Int Delay){
 }
 
 /** MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus)
-���L�[�f�B���C�F�f�B���C�̒x��ďo��m�[�g�̉������ς��s�v�c�ȃf�B���C
+◇キーディレイ：ディレイの遅れて出るノートの音程が変わる不思議なディレイ
 
-	S	�f�B���C���ʂ����������t���[�Y
-	Repeat	�J��Ԃ��񐔂��w��
-	Delay	�x�点�鎞�Ԃ��w��
-	KeyPlus �����̕ω��ʂ��w��
+	S	ディレイ効果をかけたいフレーズ
+	Repeat	繰り返し回数を指定
+	Delay	遅らせる時間を指定
+	KeyPlus 音程の変化量を指定
 */
 Function MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus){
 	Int Temp_v = MML(v);
@@ -95,11 +95,11 @@ Function MidiDelayKey(Str S,Int Repeat, Int Delay, Int KeyPlus){
 
 
 /**MidiDelayRev(Str S, Int Repeat, Int Delay)
-���t��]�f�B���C�F�f�B���C���t���[�Y���O����n�܂�e�[�v�t��]�̂悤�ȃf�B���C
+◇逆回転ディレイ：ディレイがフレーズより前から始まるテープ逆回転のようなディレイ
 
-	S	�f�B���C���ʂ����������t���[�Y
-	Repeat	�J��Ԃ��񐔂��w��
-	Delay	�x�点�鎞�Ԃ��w��
+	S	ディレイ効果をかけたいフレーズ
+	Repeat	繰り返し回数を指定
+	Delay	遅らせる時間を指定
 */
 Function MidiDelayRev(Str S, Int Repeat, Int Delay){
 	Int Temp_v = MML(v);
@@ -120,11 +120,11 @@ Function MidiDelayRev(Str S, Int Repeat, Int Delay){
 
 
 /**MidiDelayTap(Str S, Int Repeat, Int Delay)
-���^�b�v�f�B���C�F�f�B���C�^�C�����Z���Ȃ��Ă����f�B���C
+◇タップディレイ：ディレイタイムが短くなっていくディレイ
 
-	S	�f�B���C���ʂ����������t���[�Y
-	Repeat	�J��Ԃ��񐔂��w��
-	Delay	�x�点�鎞�Ԃ��w��
+	S	ディレイ効果をかけたいフレーズ
+	Repeat	繰り返し回数を指定
+	Delay	遅らせる時間を指定
 */
 Function MidiDelayTap(Str S, Int Repeat, Int Delay){
 	Int Temp_v = MML(v);
@@ -145,11 +145,11 @@ Function MidiDelayTap(Str S, Int Repeat, Int Delay){
 }
 
 /** MidiDelayTap2(Str S, Int Repeat, Int Delay)
-���^�b�v�f�B���C�Q�F�f�B���C�^�C�����Z���Ȃ��Ă����f�B���C�A�Q�[�g���Z���Ȃ�
+◇タップディレイ２：ディレイタイムが短くなっていくディレイ、ゲートが短くなる
 
-	S	�f�B���C���ʂ����������t���[�Y
-	Repeat	�J��Ԃ��񐔂��w��
-	Delay	�x�点�鎞�Ԃ��w��
+	S	ディレイ効果をかけたいフレーズ
+	Repeat	繰り返し回数を指定
+	Delay	遅らせる時間を指定
 */
 Function MidiDelayTap2(Str S, Int Repeat, Int Delay){
 	Int Temp_v = MML(v);

@@ -16,8 +16,9 @@ thread_local! {
     static EXTRA_INCLUDES: RefCell<Vec<(String, Vec<u8>)>> = const { RefCell::new(Vec::new()) };
 }
 
-/// `stdmsg.h` is embedded at build time so a page is self-contained; anything
-/// else the song asks for comes from [`add_include`].
+/// Every standard `Include/*.h` macro file is embedded at build time so a
+/// page is self-contained; anything else the song asks for comes from
+/// [`add_include`].
 fn includes() -> MemoryIncludes {
     let mut includes = MemoryIncludes::new();
     for (name, contents) in EMBEDDED_INCLUDES {
@@ -133,5 +134,11 @@ mod tests {
         assert_eq!(&result.midi[..4], b"MThd");
         assert_eq!(result.errors.len(), 1);
         assert!(result.errors[0].contains("NotACommand"));
+    }
+
+    #[test]
+    fn standard_includes_are_embedded_and_need_no_add_include() {
+        let result = compile_mml("Include(chord2.h) c").expect("should compile");
+        assert!(result.errors.is_empty(), "errors: {:?}", result.errors);
     }
 }

@@ -1,51 +1,51 @@
 // -----------------------------------------------------------------------------
-// Roland SC-8850 SYSTEM EXCLUSIVE ŠÖ” "SC-8850.h" ver1.0 (2002/10/20)
+// Roland SC-8850 SYSTEM EXCLUSIVE é–¢æ•° "SC-8850.h" ver1.0 (2002/10/20)
 //
 //                                      programed by. 4neria (4neria@mcn.ne.jp)
 // -----------------------------------------------------------------------------
 
-// ƒ†[ƒU[’è‹`(”CˆÓ‚Å•ÏX‰Â”\ ‚±‚±‚©‚ç)----------------------------------------
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©(ä»»æ„ã§å¤‰æ›´å¯èƒ½ ã“ã“ã‹ã‚‰)----------------------------------------
 
 /* -----------------------------------------------------------------------------
- ‚²©•ª‚Ì‰¹Œ¹‚É‡‚Á‚½ƒfƒoƒCƒXƒiƒ“ƒo[‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B
- ’l‚Ì”ÍˆÍ: [1`32] ƒfƒtƒHƒ‹ƒg’l: [17]
+ ã”è‡ªåˆ†ã®éŸ³æºã«åˆã£ãŸãƒ‡ãƒã‚¤ã‚¹ãƒŠãƒ³ãƒãƒ¼ã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚
+ å€¤ã®ç¯„å›²: [1ï½32] ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤: [17]
 ------------------------------------------------------------------------------*/
 Int DeviceNumberGS = 17; //private
 
-// •ÏX‹Ö~(‚±‚±‚©‚ç)-----------------------------------------------------------
-If((DeviceNumberGS<1)||(DeviceNumberGS>32)) { MsgBox({" DeviceNumberGS‚Ì’l‚Ì”ÍˆÍ‚Í1`32‚Å‚·."});  End; }
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã‹ã‚‰)-----------------------------------------------------------
+If((DeviceNumberGS<1)||(DeviceNumberGS>32)) { MsgBox({" DeviceNumberGSã®å€¤ã®ç¯„å›²ã¯1ï½32ã§ã™."});  End; }
 DeviceNumberGS -= 1;
-// •ÏX‹Ö~(‚±‚±‚Ü‚Å)-----------------------------------------------------------
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã¾ã§)-----------------------------------------------------------
 
 /* -----------------------------------------------------------------------------
- ‚²©•ª‚Ì‰¹Œ¹‚É‡‚Á‚½ƒ|[ƒg‚Ì”‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B
- SC-8850                                                                   c 4
- SC-88,SC-88VL,SC-88ST,M-GS64,SC-88Pro,SC-88ST Pro,SK-88Pro,SC-880,SC-8820 c 2
- SC-33,SC-55,SC-55mkII,‘¼GSŒİŠ·‰¹Œ¹                                        c 1
+ ã”è‡ªåˆ†ã®éŸ³æºã«åˆã£ãŸãƒãƒ¼ãƒˆã®æ•°ã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚
+ SC-8850                                                                   â€¦ 4
+ SC-88,SC-88VL,SC-88ST,M-GS64,SC-88Pro,SC-88ST Pro,SK-88Pro,SC-880,SC-8820 â€¦ 2
+ SC-33,SC-55,SC-55mkII,ä»–GSäº’æ›éŸ³æº                                        â€¦ 1
 ------------------------------------------------------------------------------*/
 Int PortNumberGS_MAX = 2; //private
 
-// •ÏX‹Ö~(‚±‚±‚©‚ç)-----------------------------------------------------------
-If((PortNumberGS_MAX<1)||(PortNumberGS_MAX>4)) { MsgBox ({"PortNumberGS_MAX‚Ì’l‚É0‚â•‰‚Ì’lA‚Ü‚½‚Í5ˆÈã‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ."}); End; }
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã‹ã‚‰)-----------------------------------------------------------
+If((PortNumberGS_MAX<1)||(PortNumberGS_MAX>4)) { MsgBox ({"PortNumberGS_MAXã®å€¤ã«0ã‚„è² ã®å€¤ã€ã¾ãŸã¯5ä»¥ä¸Šã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“."}); End; }
 Int PortNumberGS = $00; Int ChannelNumberGS = $00; Int _Port_G = $00; Int _Channel = $00; Port(0); //private
-// •ÏX‹Ö~(‚±‚±‚Ü‚Å)-----------------------------------------------------------
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã¾ã§)-----------------------------------------------------------
 
-// ƒ†[ƒU[’è‹`(”CˆÓ‚Å•ÏX‰Â”\ ‚±‚±‚Ü‚Å)----------------------------------------
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©(ä»»æ„ã§å¤‰æ›´å¯èƒ½ ã“ã“ã¾ã§)----------------------------------------
 
-// ”Ä—pŠÖ”(•ÏX‹Ö~ ‚±‚±‚©‚ç)--------------------------------------------------
-Function GS_EX(Array _Data) { //private GSd—l‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—M (ADR HIGH/MID/LOW,DATA)
+// æ±ç”¨é–¢æ•°(å¤‰æ›´ç¦æ­¢ ã“ã“ã‹ã‚‰)--------------------------------------------------
+Function GS_EX(Array _Data) { //private GSä»•æ§˜ã®ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡ (ADR HIGH/MID/LOW,DATA)
  SysEx=$F0,$41,(DeviceNumberGS),$42,$12,{(_Data)},$F7;
 }
-Function GS_PartEX(_M,_L,Array _Data) { //private GSd—l‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—MMultiPart—p (ADR HIGH/MID/LOW,DATA)
- If((PortNumberGS<0)||(PortNumberGS>PortNumberGS_MAX)) { MsgBox ({"PortNumberGS‚Ì’l‚É•‰‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ. ‚Ü‚½‚ÍPortNumberGS_MAX‚Ì’l("}+PortNumberGS_MAX+{")‚ğ’´‚¦‚Ä‚¢‚Ü‚·."}); End; }
+Function GS_PartEX(_M,_L,Array _Data) { //private GSä»•æ§˜ã®ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡MultiPartç”¨ (ADR HIGH/MID/LOW,DATA)
+ If((PortNumberGS<0)||(PortNumberGS>PortNumberGS_MAX)) { MsgBox ({"PortNumberGSã®å€¤ã«è² ã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“. ã¾ãŸã¯PortNumberGS_MAXã®å€¤("}+PortNumberGS_MAX+{")ã‚’è¶…ãˆã¦ã„ã¾ã™."}); End; }
  If(PortNumberGS==$00) {
   _Port_G = MML(Port);
-  If((_Port_G<0)||(_Port_G>(PortNumberGS_MAX-1))) { MsgBox ({"Port();‚Ì’l‚É•‰‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ. ‚Ü‚½‚ÍPortNumberGS_MAX‚Ì’l("}+PortNumberGS_MAX+{")‚ğ’´‚¦‚Ä‚¢‚Ü‚·."}); End; }
+  If((_Port_G<0)||(_Port_G>(PortNumberGS_MAX-1))) { MsgBox ({"Port();ã®å€¤ã«è² ã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“. ã¾ãŸã¯PortNumberGS_MAXã®å€¤("}+PortNumberGS_MAX+{")ã‚’è¶…ãˆã¦ã„ã¾ã™."}); End; }
  } Else {
   _Port_G = PortNumberGS - 1;
  }
  Int _H = (_Port_G * $10) + $40; //private
- If((ChannelNumberGS<0)||(ChannelNumberGS>16)) { MsgBox({"ChannelNumberGS‚Ì”ÍˆÍ‚Í0`16‚Ü‚Å‚Å‚·."}); End; }
+ If((ChannelNumberGS<0)||(ChannelNumberGS>16)) { MsgBox({"ChannelNumberGSã®ç¯„å›²ã¯0ï½16ã¾ã§ã§ã™."}); End; }
  If(ChannelNumberGS==$00) {
   Int _TmpChannel = Channel; //private
   If(_TmpChannel==10) {
@@ -63,16 +63,16 @@ Function GS_PartEX(_M,_L,Array _Data) { //private GSd—l‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—MMu
  _M = _M + _Channel;
  SysEx=$F0,$41,(DeviceNumberGS),$42,$12,{(_H),(_M),(_L),(_Data)},$F7;
 }
-Function GS_DrumEX(_N,Str _DNoteNumber,_M,Array _Data) { //private GSd—l‚Ìƒhƒ‰ƒ€‚ÉŠÖ‚í‚éƒGƒNƒXƒNƒ‹[ƒVƒu‘—M (DrumMapNumber,DrumNoteNumber,ADR MID,DATA)
- If((PortNumberGS<0)||(PortNumberGS>PortNumberGS_MAX)) { MsgBox ({"PortNumberGS‚Ì’l‚É•‰‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ. ‚Ü‚½‚ÍPortNumberGS_MAX‚Ì’l("}+PortNumberGS_MAX+{")‚ğ’´‚¦‚Ä‚¢‚Ü‚·."}); End; }
+Function GS_DrumEX(_N,Str _DNoteNumber,_M,Array _Data) { //private GSä»•æ§˜ã®ãƒ‰ãƒ©ãƒ ã«é–¢ã‚ã‚‹ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡ (DrumMapNumber,DrumNoteNumber,ADR MID,DATA)
+ If((PortNumberGS<0)||(PortNumberGS>PortNumberGS_MAX)) { MsgBox ({"PortNumberGSã®å€¤ã«è² ã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“. ã¾ãŸã¯PortNumberGS_MAXã®å€¤("}+PortNumberGS_MAX+{")ã‚’è¶…ãˆã¦ã„ã¾ã™."}); End; }
  If(PortNumberGS==$00) {
   _Port_G = MML(Port);
-  If((_Port_G<0)||(_Port_G>(PortNumberGS_MAX-1))) { MsgBox ({"Port();‚Ì’l‚É•‰‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ. ‚Ü‚½‚ÍPortNumberGS_MAX‚Ì’l("}+PortNumberGS_MAX+{")‚ğ’´‚¦‚Ä‚¢‚Ü‚·."}); End; }
+  If((_Port_G<0)||(_Port_G>(PortNumberGS_MAX-1))) { MsgBox ({"Port();ã®å€¤ã«è² ã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“. ã¾ãŸã¯PortNumberGS_MAXã®å€¤("}+PortNumberGS_MAX+{")ã‚’è¶…ãˆã¦ã„ã¾ã™."}); End; }
  } Else {
   _Port_G = PortNumberGS - 1;
  }
  Int _H = (_Port_G * $10) + $41; //private
- If((_N<1)||(_N>2)) { MsgBox({"GS DrumŠÖ˜A‚ÌDrumMapNumber‚Ì’l‚ª•s³‚Å‚·. ƒpƒ‰ƒ[ƒ^‚Ì”ÍˆÍ‚Í1`2‚Ü‚Å‚Å‚·."}); End; }
+ If((_N<1)||(_N>2)) { MsgBox({"GS Drumé–¢é€£ã®DrumMapNumberã®å€¤ãŒä¸æ­£ã§ã™. ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ç¯„å›²ã¯1ï½2ã¾ã§ã§ã™."}); End; }
  _M = ((_N - 1) * $10) + _M;
  Int _Tmp = StrOrNum(_DNoteNumber); //private
  Int _DNN; //private
@@ -81,11 +81,11 @@ Function GS_DrumEX(_N,Str _DNoteNumber,_M,Array _Data) { //private GSd—l‚Ìƒhƒ‰ƒ
  } Else {
   _DNN = NoteNo(_DNoteNumber);
  }
- If((_DNN<$00)||(_DNN>$7F)) { MsgBox({"GS_DrumEX‚ÌNoteNumber‚Ìw’è‚É•s³‚ª‚ ‚è‚Ü‚·."}); End; }
+ If((_DNN<$00)||(_DNN>$7F)) { MsgBox({"GS_DrumEXã®NoteNumberã®æŒ‡å®šã«ä¸æ­£ãŒã‚ã‚Šã¾ã™."}); End; }
  SysEx=$F0,$41,(DeviceNumberGS),$42,$12,{(_H),(_M),(_DNN),(_Data)},$F7;
 }
-Function GS_UserDrumEX(_N,Str _DNoteNumber,_M,Array _Data) { //private GSd—l‚Ìƒ†[ƒU[ƒhƒ‰ƒ€‚ÉŠÖ‚í‚éƒGƒNƒXƒNƒ‹[ƒVƒu‘—M (DrumMapNumber,DrumNoteNumber,ADR MID,DATA)
- If((_N<1)||(_N>2)) { MsgBox({"GS UserDrumŠÖ˜A‚ÌDrumMapNumber‚Ì’l‚ª•s³‚Å‚·. ƒpƒ‰ƒ[ƒ^‚Ì”ÍˆÍ‚Í1`2‚Ü‚Å‚Å‚·."}); End; }
+Function GS_UserDrumEX(_N,Str _DNoteNumber,_M,Array _Data) { //private GSä»•æ§˜ã®ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒ‰ãƒ©ãƒ ã«é–¢ã‚ã‚‹ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡ (DrumMapNumber,DrumNoteNumber,ADR MID,DATA)
+ If((_N<1)||(_N>2)) { MsgBox({"GS UserDrumé–¢é€£ã®DrumMapNumberã®å€¤ãŒä¸æ­£ã§ã™. ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ç¯„å›²ã¯1ï½2ã¾ã§ã§ã™."}); End; }
  _M = ((_N - 1) * $10) + _M;
  Int _Tmp = StrOrNum(_DNoteNumber); //private
  Int _DNN; //private
@@ -94,17 +94,17 @@ Function GS_UserDrumEX(_N,Str _DNoteNumber,_M,Array _Data) { //private GSd—l‚Ìƒ
  } Else {
   _DNN = NoteNo(_DNoteNumber);
  }
- If((_DNN<$00)||(_DNN>$7F)) { MsgBox({"GS_UserDrumEX‚ÌNoteNumber‚Ìw’è‚É•s³‚ª‚ ‚è‚Ü‚·."}); End; }
+ If((_DNN<$00)||(_DNN>$7F)) { MsgBox({"GS_UserDrumEXã®NoteNumberã®æŒ‡å®šã«ä¸æ­£ãŒã‚ã‚Šã¾ã™."}); End; }
  SysEx=$F0,$41,(DeviceNumberGS),$42,$12,{$21,(_M),(_DNN),(_Data)},$F7;
 }
-Function GS_UserInstEX(_N,_L,_M,_D) { //private GSd—l‚Ìƒ†[ƒU[ƒCƒ“ƒXƒgƒDƒ‹ƒƒ“ƒg‚ÉŠÖ‚í‚éƒGƒNƒXƒNƒ‹[ƒVƒu‘—M (DrumMapNumber,DrumNoteNumber,ADR MID,DATA)
- If((_N<1)||(_N>2)) { MsgBox({"GS UserInstŠÖ˜A‚ÌInstBankNumber‚Ì’l‚ª•s³‚Å‚·. ƒpƒ‰ƒ[ƒ^‚Ì”ÍˆÍ‚Í1`2‚Ü‚Å‚Å‚·."}); End; }
+Function GS_UserInstEX(_N,_L,_M,_D) { //private GSä»•æ§˜ã®ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚¤ãƒ³ã‚¹ãƒˆã‚¥ãƒ«ãƒ¡ãƒ³ãƒˆã«é–¢ã‚ã‚‹ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡ (DrumMapNumber,DrumNoteNumber,ADR MID,DATA)
+ If((_N<1)||(_N>2)) { MsgBox({"GS UserInsté–¢é€£ã®InstBankNumberã®å€¤ãŒä¸æ­£ã§ã™. ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ç¯„å›²ã¯1ï½2ã¾ã§ã§ã™."}); End; }
  _M = ((_N - 1) * $10) + _M;
- If((_L<$00)||(_L>$7F)) { MsgBox({"GS_UserInstEX‚ÌProgramNumber‚Ì’l‚ª•s³‚Å‚·. ƒpƒ‰ƒ[ƒ^‚Ì”ÍˆÍ‚Í0`127‚Ü‚Å‚Å‚·."}); End; }
+ If((_L<$00)||(_L>$7F)) { MsgBox({"GS_UserInstEXã®ProgramNumberã®å€¤ãŒä¸æ­£ã§ã™. ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ç¯„å›²ã¯0ï½127ã¾ã§ã§ã™."}); End; }
  SysEx=$F0,$41,(DeviceNumberGS),$42,$12,{$20,(_M),(_L),(_D)},$F7;
 }
 
-// ”Ä—pŠÖ”(•ÏX‹Ö~ ‚±‚±‚Ü‚Å)--------------------------------------------------
+// æ±ç”¨é–¢æ•°(å¤‰æ›´ç¦æ­¢ ã“ã“ã¾ã§)--------------------------------------------------
 
 // SC SYSTEM--------------------------------------------------------------------
 Function GS_SYSTEM_MODE_SET() {
@@ -136,7 +136,7 @@ Function GS_MASTER_PAN(_D) {
 Function GS_MODE_SET() {
  GS_EX($40,$00,$7F,$00);
 }
-// ƒŠƒo[ƒu---------------------------------------------------------------------
+// ãƒªãƒãƒ¼ãƒ–---------------------------------------------------------------------
 Function GS_REVERB_MACRO(_D) {
  GS_EX($40,$01,$30,_D);
 }
@@ -158,7 +158,7 @@ Function GS_REVERB_DELAY_FEEDBACK(_D) {
 Function GS_REVERB_PREDELAY_TIME(_D) {
  GS_EX($40,$01,$37,_D);
 }
-// ƒR[ƒ‰ƒX---------------------------------------------------------------------
+// ã‚³ãƒ¼ãƒ©ã‚¹---------------------------------------------------------------------
 Function GS_CHORUS_MACRO(_D) {
  GS_EX($40,$01,$38,_D);
 }
@@ -186,7 +186,7 @@ Function GS_CHORUS_SEND_LEVEL_TO_REVERB(_D) {
 Function GS_CHORUS_SEND_LEVEL_TO_DELAY(_D) {
  GS_EX($40,$01,$40,_D);
 }
-// ƒfƒBƒŒƒC---------------------------------------------------------------------
+// ãƒ‡ã‚£ãƒ¬ã‚¤---------------------------------------------------------------------
 Function GS_DELAY_MACRO(_D) {
  GS_EX($40,$01,$50,_D);
 }
@@ -220,7 +220,7 @@ Function GS_DELAY_FEEDBACK(_D) {
 Function GS_DELAY_SEND_LEVEL_TO_REVERB(_D) {
  GS_EX($40,$01,$5A,_D);
 }
-// ‚d‚p-------------------------------------------------------------------------
+// ï¼¥ï¼±-------------------------------------------------------------------------
 Function GS_EQ_LOW_FREQ(_D) {
  GS_EX($40,$02,$00,_D);
 }
@@ -233,7 +233,7 @@ Function GS_EQ_HIGH_FREQ(_D) {
 Function GS_EQ_HIGH_GAIN(_D) {
  GS_EX($40,$02,$03,_D);
 }
-// ‚d‚e‚w-----------------------------------------------------------------------
+// ï¼¥ï¼¦ï¼¸-----------------------------------------------------------------------
 Function GS_EFX_TYPE(_A,_B) {
  GS_EX($40,$03,$00,_A,_B);
 }
@@ -264,7 +264,7 @@ Function GS_EFX_COTROL_DEPTH2(_D) {
 Function GS_EFX_SEND_EQ_SWITCH(_D) {
  GS_EX($40,$03,$1F,_D);
 }
-// ƒp[ƒg-----------------------------------------------------------------------
+// ãƒ‘ãƒ¼ãƒˆ-----------------------------------------------------------------------
 Function GS_TONE_NUMBER(_A,_B) {
  GS_PartEX($10,$00,_A,_B);
 }
@@ -616,7 +616,7 @@ Function GS_OUTPUT_ASSIGN(_D) {
 Function GS_PART_EFX_ASSIGN(_D) {
  GS_PartEX($40,$22,_D);
 }
-// ƒhƒ‰ƒ€-----------------------------------------------------------------------
+// ãƒ‰ãƒ©ãƒ -----------------------------------------------------------------------
 Function GS_DRUM_PLAY_NOTE_NUMBER(_N,Str _A,_B) {
  GS_DrumEX(_N,_A,$01,_B);
 }
@@ -644,7 +644,7 @@ Function GS_DRUM_RX_NOTE_ON(_N,Str _A,_B) {
 Function GS_DRUM_DELAY_SEND_LEVEL(_N,Str _A,_B) {
  GS_DrumEX(_N,_A,$09,_B);
 }
-// ƒ†[ƒU[ƒCƒ“ƒXƒgƒDƒ‹ƒƒ“ƒg---------------------------------------------------
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚¤ãƒ³ã‚¹ãƒˆã‚¥ãƒ«ãƒ¡ãƒ³ãƒˆ---------------------------------------------------
 Function GS_USERINST_SOURCE_TONE_BANK_LSB(_N,_A,_B) {
  GS_UserInstEX(_N,_A,$00,_B);
 }
@@ -678,7 +678,7 @@ Function GS_USERINST_TVF_TVA_ENV_RELEASE(_N,_A,_B) {
 Function GS_USERINST_VIBRATO_DELAY(_N,_A,_B) {
  GS_UserInstEX(_N,_A,$0A,_B);
 }
-// ƒ†[ƒU[ƒhƒ‰ƒ€---------------------------------------------------------------
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒ‰ãƒ©ãƒ ---------------------------------------------------------------
 Function GS_USERDRUM_PLAY_NOTE(_N,Str _A,_B) {
  GS_UserDrumEX(_N,_A,$01,_B);
 }

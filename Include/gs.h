@@ -1,15 +1,15 @@
 /*
 =title        "gs.h" ver.0.71
-=description  ‚f‚r‰¹Œ¹“Á—L‚Ì–½—ß‚ğ’è‹`‚µ‚½ŠÖ” (2003/07/02)
+=description  ï¼§ï¼³éŸ³æºç‰¹æœ‰ã®å‘½ä»¤ã‚’å®šç¾©ã—ãŸé–¢æ•° (2003/07/02)
 =keywords     SAKURA Function gs
 */
 
-/** ŠT—v
-Roland GS ‰¹Œ¹‚É“Á—L‚Ì–½—ß‚ğ’è‹`‚µ‚½ŠÖ”‚Å‚·B
+/** æ¦‚è¦
+â—‡Roland GS éŸ³æºã«ç‰¹æœ‰ã®å‘½ä»¤ã‚’å®šç¾©ã—ãŸé–¢æ•°ã§ã™ã€‚
 
-** g‚¢•û
+** ä½¿ã„æ–¹
 	Include(gs.h);
-	‚Ìˆê•¶‚ğA‹È“ª‚É‘‚¢‚Ä‚­‚¾‚³‚¢B
+	ã®ä¸€æ–‡ã‚’ã€æ›²é ­ã«æ›¸ã„ã¦ãã ã•ã„ã€‚
 */
 
 Include(stdmsg.h);
@@ -20,22 +20,22 @@ Function GSEffect(num,val){
 	SysEx$=F0, 41, (DeviceNumber), 42, 12, {40, 01, (num), (val)}, F7;
 }
 
-/** ƒŠƒo[ƒu‚ÉŠÖ‚·‚é–½—ß
+/** ãƒªãƒãƒ¼ãƒ–ã«é–¢ã™ã‚‹å‘½ä»¤
 ** GSReverbMacro(val)
-ƒŠƒo[ƒuic‹¿‰¹jƒ}ƒNƒ‚Ì•ÏX‚ğ‚µ‚Ü‚·B
+â—‡ãƒªãƒãƒ¼ãƒ–ï¼ˆæ®‹éŸ¿éŸ³ï¼‰ãƒã‚¯ãƒ­ã®å¤‰æ›´ã‚’ã—ã¾ã™ã€‚
 	val =
-		00FRoom 1	01FRoom 2	02FRoom 3
-		03FHall 1	04FHall 2	05FPlate
-		06FDelay	07FPanning Delay
+		00ï¼šRoom 1	01ï¼šRoom 2	02ï¼šRoom 3
+		03ï¼šHall 1	04ï¼šHall 2	05ï¼šPlate
+		06ï¼šDelay	07ï¼šPanning Delay
 */
 Function GSReverbMacro(val)		{ GSEffect($30,val); }
 
 /*** GSReverbCharacter(val)
-ƒŠƒo[ƒuic‹¿‰¹j‚ÌŒÂ«‚ğ•ÏX‚ğ‚µ‚Ü‚·B
+â—‡ãƒªãƒãƒ¼ãƒ–ï¼ˆæ®‹éŸ¿éŸ³ï¼‰ã®å€‹æ€§ã‚’å¤‰æ›´ã‚’ã—ã¾ã™ã€‚
 	val =
-		00FRoom 1	01FRoom 2	02FRoom 3
-		03FHall 1	04FHall 2	05FPlate
-		06FDelay	07FPanning Delay
+		00ï¼šRoom 1	01ï¼šRoom 2	02ï¼šRoom 3
+		03ï¼šHall 1	04ï¼šHall 2	05ï¼šPlate
+		06ï¼šDelay	07ï¼šPanning Delay
 */
 Function GSReverbCharacter(val)	{ GSEffect($31,val); }
 /*
@@ -51,13 +51,13 @@ Function GSReverbTime(val)		{ GSEffect($34,val); }
 Function GSReverbFeedback(val)		{ GSEffect($35,val); }
 Function GSReverbSendToChorus(val)	{ GSEffect($36,val); }
 
-/** ƒR[ƒ‰ƒX‚ÉŠÖ‚·‚é–½—ß
+/** ã‚³ãƒ¼ãƒ©ã‚¹ã«é–¢ã™ã‚‹å‘½ä»¤
 ** GSChorusMacro(val)
-ƒR[ƒ‰ƒXƒ}ƒNƒ‚Ì•ÏX‚ğ‚µ‚Ü‚·B
+â—‡ã‚³ãƒ¼ãƒ©ã‚¹ãƒã‚¯ãƒ­ã®å¤‰æ›´ã‚’ã—ã¾ã™ã€‚
 	val =
-		00FChorus 1      01FChorus 2            02FChorus 3
-		03FChorus 4      04FFeedback Chorus     05FFlanger
-		06FShort Delay   07FShort DelayiFB
+		00ï¼šChorus 1      01ï¼šChorus 2            02ï¼šChorus 3
+		03ï¼šChorus 4      04ï¼šFeedback Chorus     05ï¼šFlanger
+		06ï¼šShort Delay   07ï¼šShort Delayï¼ˆFB
 */
 Function GSChorusMacro(val)		{ GSEffect($38,val); }
 /*
@@ -79,11 +79,11 @@ Function GSChorusDepth(val)		{ GSEffect($3E,val); }
 Function GSChorusSendToReverb(val)	{ GSEffect($3F,val); }
 Function GSChorusSendToDelay(val)	{ GSEffect($40,val); }
 
-/** ƒŠƒYƒ€ƒp[ƒg‚ÉŠÖ‚·‚é–½—ß
+/** ãƒªã‚ºãƒ ãƒ‘ãƒ¼ãƒˆã«é–¢ã™ã‚‹å‘½ä»¤
 ** GS_RHYTHM(val)
-ƒŠƒYƒ€ƒp[ƒg‚Ì•ÏX‚ğ‚µ‚Ü‚·B
+â—‡ãƒªã‚ºãƒ ãƒ‘ãƒ¼ãƒˆã®å¤‰æ›´ã‚’ã—ã¾ã™ã€‚
 	val =
-		00FŠyŠí          01Fƒhƒ‰ƒ€ƒp[ƒg‚P      02Fƒhƒ‰ƒ€ƒp[ƒg‚Q
+		00ï¼šæ¥½å™¨          01ï¼šãƒ‰ãƒ©ãƒ ãƒ‘ãƒ¼ãƒˆï¼‘      02ï¼šãƒ‰ãƒ©ãƒ ãƒ‘ãƒ¼ãƒˆï¼’
 */
 Function GS_RHYTHM(_D) {
  Int _TCH = Channel; //private

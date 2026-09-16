@@ -1,6 +1,6 @@
 /*
-	Roland SC-55 ‰¹FƒŠƒXƒg
-	‰¹F(SC55_Piano1) ‚Ì‚æ‚¤‚Ég‚¤
+	Roland SC-55 éŸ³è‰²ãƒªã‚¹ãƒˆ
+	éŸ³è‰²(SC55_Piano1) ã®ã‚ˆã†ã«ä½¿ã†
 */
 Array SC55_Piano1	=(1,0,0);
 Array SC55_Piano1w	=(1,8,0);

@@ -1,27 +1,27 @@
 //------------------------------------------------------------------------------ Header.
 //
-//@‚ç‚­‚¿‚ñƒm[ƒe[ƒVƒ‡ƒ“ŠÖ”@ver.0.01 LastUpdate = 2000/07/08@‚Ý‚Ã‚¡‚ñ‚±
+//ã€€ã‚‰ãã¡ã‚“ãƒŽãƒ¼ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³é–¢æ•°ã€€ver.0.01 LastUpdate = 2000/07/08ã€€ã¿ã¥ãƒã‚“ã“
 //
-//@ƒXƒP[ƒ‹ŠÖ”ƒTƒ|[ƒg
-//@ƒ_ƒCƒAƒgƒjƒbƒNŠÖ”ƒTƒ|[ƒg
+//ã€€ã‚¹ã‚±ãƒ¼ãƒ«é–¢æ•°ã‚µãƒãƒ¼ãƒˆ
+//ã€€ãƒ€ã‚¤ã‚¢ãƒˆãƒ‹ãƒƒã‚¯é–¢æ•°ã‚µãƒãƒ¼ãƒˆ
 //
 //------------------------------------------------------------------------------
-Int Open = 0;					// ƒI[ƒvƒ“ƒ{ƒCƒVƒ“ƒOƒtƒ‰ƒO
+Int Open = 0;					// ã‚ªãƒ¼ãƒ—ãƒ³ãƒœã‚¤ã‚·ãƒ³ã‚°ãƒ•ãƒ©ã‚°
 //------------------------------------------------------------------------------ InvertFunction.
 Function Invert3(){
-	Int O_value = Inv / 3;			// ƒCƒ“ƒo[ƒg’l‚Í‚R’PˆÊ‚ÅƒIƒNƒ^[ƒuƒAƒbƒv‚È‚Ì‚Åc
-	Int O_shift = O_value * 12;		// ‚R‚ÅŠ„‚Á‚½’l‚ªƒIƒNƒ^[ƒu’l‚É‚È‚é
-	Note1 = Note1 + O_shift;		// ‚»‚ê‚¼‚ê‚Ìƒm[ƒg‚ðƒIƒNƒ^[ƒu’²®
+	Int O_value = Inv / 3;			// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã¯ï¼“å˜ä½ã§ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—ãªã®ã§â€¦
+	Int O_shift = O_value * 12;		// ï¼“ã§å‰²ã£ãŸå€¤ãŒã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ãªã‚‹
+	Note1 = Note1 + O_shift;		// ãã‚Œãžã‚Œã®ãƒŽãƒ¼ãƒˆã‚’ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–èª¿æ•´
 	Note2 = Note2 + O_shift;
 	Note3 = Note3 + O_shift;
-	Int AAA = O_value * 3;			// ƒIƒNƒ^[ƒu’l‚É‚R‚ð‚©‚¯‚Äc
-	Inv = Inv - AAA				// ƒCƒ“ƒo[ƒg’l‚©‚çˆø‚­‚Æu—]‚èv‚ªo‚é
-	/* u—]‚èv’l‚É‚æ‚Á‚ÄƒCƒ“ƒo[ƒgi‰ñ“]j‚³‚¹‚é */
+	Int AAA = O_value * 3;			// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ï¼“ã‚’ã‹ã‘ã¦â€¦
+	Inv = Inv - AAA				// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã‹ã‚‰å¼•ãã¨ã€Œä½™ã‚Šã€ãŒå‡ºã‚‹
+	/* ã€Œä½™ã‚Šã€å€¤ã«ã‚ˆã£ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆï¼ˆå›žè»¢ï¼‰ã•ã›ã‚‹ */
 	If(Inv==-2){Note3 = Note3 - 12; Note2 = Note2 - 12}
 	If(Inv==-1){Note3 = Note3 - 12}
 	If(Inv==1){Note1 = Note1 + 12}
 	If(Inv==2){Note1 = Note1 + 12; Note2 = Note2 + 12}
-	/* ƒI[ƒvƒ“‰» */
+	/* ã‚ªãƒ¼ãƒ—ãƒ³åŒ– */
 	If(Open==1){
 		Note3 = Note3 - 12;
 	}
@@ -32,22 +32,22 @@ Function Invert3(){
 }
 
 Function Invert4(){
-	Int O_value = Inv / 4;			// ƒCƒ“ƒo[ƒg’l‚Í‚S’PˆÊ‚ÅƒIƒNƒ^[ƒuƒAƒbƒv‚È‚Ì‚Åc
-	Int O_shift = O_value * 12;		// ‚S‚ÅŠ„‚Á‚½’l‚ªƒIƒNƒ^[ƒu’l‚É‚È‚é
-	Note1 = Note1 + O_shift;		// ‚»‚ê‚¼‚ê‚Ìƒm[ƒg‚ðƒIƒNƒ^[ƒu’²®
+	Int O_value = Inv / 4;			// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã¯ï¼”å˜ä½ã§ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—ãªã®ã§â€¦
+	Int O_shift = O_value * 12;		// ï¼”ã§å‰²ã£ãŸå€¤ãŒã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ãªã‚‹
+	Note1 = Note1 + O_shift;		// ãã‚Œãžã‚Œã®ãƒŽãƒ¼ãƒˆã‚’ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–èª¿æ•´
 	Note2 = Note2 + O_shift;
 	Note3 = Note3 + O_shift;
 	Note4 = Note4 + O_shift;
-	Int AAA = O_value * 4;			// ƒIƒNƒ^[ƒu’l‚É‚S‚ð‚©‚¯‚Äc
-	Inv = Inv - AAA				// ƒCƒ“ƒo[ƒg’l‚©‚çˆø‚­‚Æu—]‚èv‚ªo‚é
-	/* u—]‚èv’l‚É‚æ‚Á‚ÄƒCƒ“ƒo[ƒgi‰ñ“]j‚³‚¹‚é */
+	Int AAA = O_value * 4;			// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ï¼”ã‚’ã‹ã‘ã¦â€¦
+	Inv = Inv - AAA				// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã‹ã‚‰å¼•ãã¨ã€Œä½™ã‚Šã€ãŒå‡ºã‚‹
+	/* ã€Œä½™ã‚Šã€å€¤ã«ã‚ˆã£ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆï¼ˆå›žè»¢ï¼‰ã•ã›ã‚‹ */
 	If(Inv==-3){Note4 = Note4 - 12; Note3 = Note3 - 12; Note2 = Note2 - 12}
 	If(Inv==-2){Note4 = Note4 - 12; Note3 = Note3 - 12}
 	If(Inv==-1){Note4 = Note4 - 12}
 	If(Inv==1){Note1 = Note1 + 12}
 	If(Inv==2){Note1 = Note1 + 12; Note2 = Note2 + 12}
 	If(Inv==3){Note1 = Note1 + 12; Note2 = Note2 + 12; Note3 = Note3 + 12}
-	/* ƒI[ƒvƒ“‰» */
+	/* ã‚ªãƒ¼ãƒ—ãƒ³åŒ– */
 	If(Open==1){
 		Note3 = Note3 - 12;
 	}
@@ -58,22 +58,22 @@ Function Invert4(){
 }
 
 Function Invert5(){
-	Int O_value = Inv / 4;			// ƒCƒ“ƒo[ƒg’l‚Í‚S’PˆÊ‚ÅƒIƒNƒ^[ƒuƒAƒbƒv‚È‚Ì‚Åc
-	Int O_shift = O_value * 12;		// ‚S‚ÅŠ„‚Á‚½’l‚ªƒIƒNƒ^[ƒu’l‚É‚È‚é
-	Note1 = Note1 + O_shift;		// ‚»‚ê‚¼‚ê‚Ìƒm[ƒg‚ðƒIƒNƒ^[ƒu’²®
+	Int O_value = Inv / 4;			// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã¯ï¼”å˜ä½ã§ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚¢ãƒƒãƒ—ãªã®ã§â€¦
+	Int O_shift = O_value * 12;		// ï¼”ã§å‰²ã£ãŸå€¤ãŒã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ãªã‚‹
+	Note1 = Note1 + O_shift;		// ãã‚Œãžã‚Œã®ãƒŽãƒ¼ãƒˆã‚’ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–èª¿æ•´
 	Note2 = Note2 + O_shift;
 	Note3 = Note3 + O_shift;
 	Note4 = Note4 + O_shift;
-	Int AAA = O_value * 4;			// ƒIƒNƒ^[ƒu’l‚É‚S‚ð‚©‚¯‚Äc
-	Inv = Inv - AAA				// ƒCƒ“ƒo[ƒg’l‚©‚çˆø‚­‚Æu—]‚èv‚ªo‚é
-	/* u—]‚èv’l‚É‚æ‚Á‚ÄƒCƒ“ƒo[ƒgi‰ñ“]j‚³‚¹‚é */
+	Int AAA = O_value * 4;			// ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–å€¤ã«ï¼”ã‚’ã‹ã‘ã¦â€¦
+	Inv = Inv - AAA				// ã‚¤ãƒ³ãƒãƒ¼ãƒˆå€¤ã‹ã‚‰å¼•ãã¨ã€Œä½™ã‚Šã€ãŒå‡ºã‚‹
+	/* ã€Œä½™ã‚Šã€å€¤ã«ã‚ˆã£ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆï¼ˆå›žè»¢ï¼‰ã•ã›ã‚‹ */
 	If(Inv==-3){Note4 = Note4 - 12; Note3 = Note3 - 12; Note2 = Note2 - 12}
 	If(Inv==-2){Note4 = Note4 - 12; Note3 = Note3 - 12}
 	If(Inv==-1){Note4 = Note4 - 12}
 	If(Inv==1){Note1 = Note1 + 12}
 	If(Inv==2){Note1 = Note1 + 12; Note2 = Note2 + 12}
 	If(Inv==3){Note1 = Note1 + 12; Note2 = Note2 + 12; Note3 = Note3 + 12}
-	/* ƒI[ƒvƒ“‰» */
+	/* ã‚ªãƒ¼ãƒ—ãƒ³åŒ– */
 	If(Open==1){
 		Note3 = Note3 - 12;
 	}
@@ -138,7 +138,7 @@ Function C_(Len,Inv,Bass){
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o6c);
 	Invert3()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 }
 
@@ -149,7 +149,7 @@ Function D_(Len,Inv,Bass){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6d);
 	Invert3()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 }
 
@@ -160,7 +160,7 @@ Function E_(Len,Inv,Bass){
 	Int Note2 = NoteNo(o5g);
 	Int Note3 = NoteNo(o5b);
 	Invert3()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 }
 
@@ -171,7 +171,7 @@ Function F_(Len,Inv,Bass){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6c);
 	Invert3()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 }
 
@@ -182,7 +182,7 @@ Function G_(Len,Inv,Bass){
 	Int Note2 = NoteNo(o5b);
 	Int Note3 = NoteNo(o6d);
 	Invert3()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 }
 
@@ -193,7 +193,7 @@ Function A_(Len,Inv,Bass){
 	Int Note2 = NoteNo(o5a);
 	Int Note3 = NoteNo(o6c);
 	Invert3()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 }
 
@@ -204,7 +204,7 @@ Function B_(Len,Inv,Bass){
 	Int Note2 = NoteNo(o5b);
 	Int Note3 = NoteNo(o6d);
 	Invert3()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),%(Len);
 }
 
@@ -216,7 +216,7 @@ Function C7(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6e);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -228,7 +228,7 @@ Function D7(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5c);
 	Int Note4 = NoteNo(o6d);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -240,7 +240,7 @@ Function E7(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -252,7 +252,7 @@ Function F7(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5c);
 	Int Note4 = NoteNo(o6e);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -264,7 +264,7 @@ Function G7(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -276,7 +276,7 @@ Function A7(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5c);
 	Int Note4 = NoteNo(o6e);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -288,7 +288,7 @@ Function B7(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert4()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -300,7 +300,7 @@ Function C9(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert5()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -312,7 +312,7 @@ Function D9(Len,Inv,Bass){
 	Int Note3 = NoteNo(o6c);
 	Int Note4 = NoteNo(o6e);
 	Invert5()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -324,7 +324,7 @@ Function E9(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert5()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -336,7 +336,7 @@ Function F9(Len,Inv,Bass){
 	Int Note3 = NoteNo(o6c);
 	Int Note4 = NoteNo(o6e);
 	Invert5()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -348,7 +348,7 @@ Function G9(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6d);
 	Invert5()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -360,7 +360,7 @@ Function A9(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5b);
 	Int Note4 = NoteNo(o6e);
 	Invert5()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 
@@ -372,7 +372,7 @@ Function B9(Len,Inv,Bass){
 	Int Note3 = NoteNo(o5a);
 	Int Note4 = NoteNo(o6d);
 	Invert5()
-	If(Len==0){Len = MML(l)};			// ‚à‚µƒŒƒ“ƒOƒX‚ªÈ—ª‚³‚ê‚Ä‚½‚ç‚k’l‚©‚çŽæ“¾
+	If(Len==0){Len = MML(l)};			// ã‚‚ã—ãƒ¬ãƒ³ã‚°ã‚¹ãŒçœç•¥ã•ã‚Œã¦ãŸã‚‰ï¼¬å€¤ã‹ã‚‰å–å¾—
 	If(Bass==0){n(Note0),0}; n(Note1),0; n(Note2),0; n(Note3),0; n(Note4),%(Len);
 }
 

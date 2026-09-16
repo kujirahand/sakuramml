@@ -1,29 +1,29 @@
 /**
 KORG ELECTRIBE EA-1
-‰¹Œ¹ƒpƒ‰ƒ[ƒ^‘€ìŠÖ”ŒQ
+éŸ³æºãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿æ“ä½œé–¢æ•°ç¾¤
 */
 
-Int EA1CH = 0; // 0 or 1 ‘‚«ž‚Ýæƒ`ƒƒƒ“ƒlƒ‹
+Int EA1CH = 0; // 0 or 1 æ›¸ãè¾¼ã¿å…ˆãƒãƒ£ãƒ³ãƒãƒ«
 
-//EA1‚Ìƒ|ƒ‹ƒ^ƒƒ“ƒg
+//EA1ã®ãƒãƒ«ã‚¿ãƒ¡ãƒ³ãƒˆ
 Function EA1Portament(Val){
   NRPN(3,(EA1CH*$20),Val);
 }
-//OSC-Balance:OSC1‚ÆOSC2‚Ìƒoƒ‰ƒ“ƒX
+//OSC-Balance:OSC1ã¨OSC2ã®ãƒãƒ©ãƒ³ã‚¹
 Function EA1OSC_Balace(Val){//OSC1 <- 0 ~ 64 ~ 127 -> OSC2
   NRPN(3,(EA1CH*$20)+1, Val);
 }
 Function EA1OSC_Pitch(Val){
   NRPN(3,(EA1CH*$20)+2, Val);
 }
-Function EA1OSC1_Wave(Val){//0:ƒmƒRƒMƒŠ”g / 1:‹éŒ`”g / 2:ŽOŠp”g / 3:Audio in
+Function EA1OSC1_Wave(Val){//0:ãƒŽã‚³ã‚®ãƒªæ³¢ / 1:çŸ©å½¢æ³¢ / 2:ä¸‰è§’æ³¢ / 3:Audio in
   NRPN(3,(EA1CH*$20)+3, Val);
 }
 Function EA1OSC2_Wave(Val){
   NRPN(3,(EA1CH*$20)+4, Val);
 }
 Function EA1Distortion(Val){//0:off / 127:on
-  NRPN(3,(EA1CH*$20)+6, Val);//•\ŠÔˆá‚¢
+  NRPN(3,(EA1CH*$20)+6, Val);//è¡¨é–“é•ã„
 }
 Function EA1AMP(Val){
   NRPN(3,(EA1CH*$20)+7, Val);
@@ -47,7 +47,7 @@ Function EA1DelayTime(Val){
   NRPN(3,(EA1CH*$20)+13, Val);
 }
 
-/* ˆÈ‰ºAƒTƒ“ƒvƒ‹
+/* ä»¥ä¸‹ã€ã‚µãƒ³ãƒ—ãƒ«
 Str Wait = {r%3}
 TR(1)CH(1)
 @4

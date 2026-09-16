@@ -1,28 +1,28 @@
 /*
 =title       "xg.h" ver.0.902
-=description ‚w‚f‰¹Œ¹“Á—L‚Ì–½—ß‚ğ’è‹`‚µ‚½ (2000/03/28)
+=description ï¼¸ï¼§éŸ³æºç‰¹æœ‰ã®å‘½ä»¤ã‚’å®šç¾©ã—ãŸ (2000/03/28)
 =keywords    SAKURA Function
 */
 
-/** ŠT—v
-YAMAHA XG ‰¹Œ¹“Á—L‚Ì–½—ß‚ğ‚Ü‚Æ‚ß‚½’è‹`ƒtƒ@ƒCƒ‹‚Å‚·B
+/** æ¦‚è¦
+â—‡YAMAHA XG éŸ³æºç‰¹æœ‰ã®å‘½ä»¤ã‚’ã¾ã¨ã‚ãŸå®šç¾©ãƒ•ã‚¡ã‚¤ãƒ«ã§ã™ã€‚
 
-**g‚¢•û
+**ä½¿ã„æ–¹
 	Include(xg.h)
-	‚Ìˆê•¶‚ğA‹È“ª‚É‘‚«‰Á‚¦‚Ä‚­‚¾‚³‚¢B
+	ã®ä¸€æ–‡ã‚’ã€æ›²é ­ã«æ›¸ãåŠ ãˆã¦ãã ã•ã„ã€‚
 */
 
 //------------------------------------------------------------------------------
-/**ƒhƒ‰ƒ€ƒm[ƒgƒGƒfƒBƒbƒg
-ƒhƒ‰ƒ€‚Ìƒm[ƒg‚Ì‰¹F‚ğƒGƒfƒBƒbƒg‚·‚é–½—ß‚Å‚·B
-	rr	ŠyŠí”Ô†(0-127)
-	mm	’l(0-127)
+/**ãƒ‰ãƒ©ãƒ ãƒãƒ¼ãƒˆã‚¨ãƒ‡ã‚£ãƒƒãƒˆ
+â—‡ãƒ‰ãƒ©ãƒ ã®ãƒãƒ¼ãƒˆã®éŸ³è‰²ã‚’ã‚¨ãƒ‡ã‚£ãƒƒãƒˆã™ã‚‹å‘½ä»¤ã§ã™ã€‚
+	rr	æ¥½å™¨ç•ªå·(0-127)
+	mm	å€¤(0-127)
 ** DrumFilterCutoff(rr,mm)
 ** DrumFilterResonance(rr,mm)
 ** DrumEGAttackRate(rr,mm)
 ** DrumEGDecayRate(rr,mm)
 ** DrumPitchCoarse(rr,mm)
-** DrumPitch(rr,mm) = DrumPitchCoarse@‚É“¯‚¶
+** DrumPitch(rr,mm) = DrumPitchCoarseã€€ã«åŒã˜
 ** DrumPitchFine(rr,mm)
 ** DrumLevel(rr,mm)
 ** DrumPan(rr,mm)
@@ -46,8 +46,8 @@ Function DrumVariationSendLevel(rr,mm)	{ NRPN=$1F,(rr),(mm); }
 
 //------------------------------------------------------------------------------
 // NRPN
-/** NRPN ŠÖ˜A‚Ì–½—ß
-XG “Á—L‚Ì‚m‚q‚o‚mƒpƒ‰ƒ[ƒ^‚Ì‘€ì
+/** NRPN é–¢é€£ã®å‘½ä»¤
+â—‡XG ç‰¹æœ‰ã®ï¼®ï¼²ï¼°ï¼®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®æ“ä½œ
 
 **HPFCutoff(mm)		
 **HPFResonance(mm)	
@@ -63,7 +63,7 @@ Function DrumVariationSendLevel(rr,mm)	{ NRPN=$1F,(rr),(mm); }
 **EQMidTrebleFrequency(mm)
 **EQMidTrebleFrequency(mm)
 **EQMidTrebleFrequency(mm)
-	mm	’li0~127j
+	mm	å€¤ï¼ˆ0~127ï¼‰
 */
 Function HPFCutoff(mm)		{ NRPN=1,$24,(mm); }
 Function HPFResonance(mm)	{ NRPN=1,$25,(mm); }
@@ -79,9 +79,9 @@ Function EQMidTrebleFrequency(mm){ NRPN=1,$37,(mm); }
 //------------------------------------------------------------------------------
 // EFFECT
 
-/** XG ƒGƒtƒFƒNƒg‚ÉŠÖ‚·‚éŠÖ”
+/** XG ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã«é–¢ã™ã‚‹é–¢æ•°
 **XGEffectType(ad,dd,DD)
- ƒGƒtƒFƒNƒgƒ^ƒCƒv‚Ìİ’è
+â—‡ ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚¿ã‚¤ãƒ—ã®è¨­å®š
 */
 Function XGEffectType(ad,dd,DD){  // (dd)=(MSB) / (DD)=(LSB)
 	SysEx$=F0,43,(DeviceNumber),4C,02,01,(ad),(dd),(DD),F7;
@@ -89,13 +89,13 @@ Function XGEffectType(ad,dd,DD){  // (dd)=(MSB) / (DD)=(LSB)
 
 /*
 **XGReverbType(dd,DD)
-ƒŠƒo[ƒu‚Ìí—Ş‚ğ‘I‚Ñ‚Ü‚·B
+ãƒªãƒãƒ¼ãƒ–ã®ç¨®é¡ã‚’é¸ã³ã¾ã™ã€‚
 	dd = MSB / DD = LSB
 **XGChorusType(dd,DD)		
-ƒR[ƒ‰ƒX‚Ìí—Ş‚ğ‘I‚Ñ‚Ü‚·B
+ã‚³ãƒ¼ãƒ©ã‚¹ã®ç¨®é¡ã‚’é¸ã³ã¾ã™ã€‚
 	dd = MSB / DD = LSB
 **XGVariationType(dd,DD)
-ƒoƒŠƒG[ƒVƒ‡ƒ“‚ÌƒGƒtƒFƒNƒgí—Ş‚ğ‘I‚Ñ‚Ü‚·B
+ãƒãƒªã‚¨ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç¨®é¡ã‚’é¸ã³ã¾ã™ã€‚
 	dd = MSB / DD = LSB
 **XGEffectConnection(VAL,INS)
 */
@@ -122,7 +122,7 @@ Function XGVariationType(dd,DD){
 }
 
 //REVERB TYPE FUNCTION
-/** ƒGƒtƒFƒNƒ^‚Ìİ’è
+/** ã‚¨ãƒ•ã‚§ã‚¯ã‚¿ã®è¨­å®š
 **XGReverbType_HALL1()		
 **XGReverbType_HALL2()		
 **XGReverbType_ROOM1()		
@@ -301,7 +301,7 @@ Function XGVariationReturnLevel(dd) { SysEx$=F0,43,(DeviceNumber),4C,02,01,56,(d
 Function XGAC1ControllerNumber(dd)		{ SysEx$=F0,43,(DeviceNumber),4C,08,00,59,(dd),F7; } 
 Function XGAC1VariationControlDepth(dd)	{ SysEx$=F0,43,(DeviceNumber),4C,02,01,5F,(dd),F7; } 
 
-//ƒpƒ‰ƒ[ƒ^‚ğ‚P‚Â‚¸‚Âİ’è‚·‚é
+//ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ï¼‘ã¤ãšã¤è¨­å®šã™ã‚‹
 Function XGReverbParameter(No,Val){
 	Int ADR;
 	IF(No <= 10){ ADR = 1 + No; }ELSE{ No = No - 11; ADR = $10 + No; }
@@ -324,7 +324,7 @@ Function XGInsertion2Parameter(No,Val){
 } 
 
 
-//ƒpƒ‰ƒ[ƒ^‚ğˆê‹C‚Éİ’è‚·‚éŠÖ”
+//ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ä¸€æ°—ã«è¨­å®šã™ã‚‹é–¢æ•°
 Function XGReverbParameter_1to10(Array DD){
 	Int ID = DeviceNumber & $0F;
 	Int Len = SizeOf(DD);
@@ -359,7 +359,7 @@ Function XGVariationParameter_11to16(Array DD){
 //------------------------------------------------------------------------------
 // OTHER
 
-//  ƒXƒP[ƒ‹ƒ`ƒ…[ƒjƒ“ƒO
+//  ã‚¹ã‚±ãƒ¼ãƒ«ãƒãƒ¥ãƒ¼ãƒ‹ãƒ³ã‚°
 Function XGScaleTuning(C,Cp,D,Dp,E,F,Fp,G,Gp,A,Ap,B){
 	Int ID = DeviceNumber & $0F;
 	FOR(Int I=0; I < 16; I++){
@@ -368,8 +368,8 @@ Function XGScaleTuning(C,Cp,D,Dp,E,F,Fp,G,Gp,A,Ap,B){
 }
 
 /** XGRcvChannelMute(Ch)
-ƒ`ƒƒƒ“ƒlƒ‹ƒ~ƒ…[ƒg
-	Ch	ƒ`ƒƒƒ“ƒlƒ‹‚Ì”Ô†
+â—‡ãƒãƒ£ãƒ³ãƒãƒ«ãƒŸãƒ¥ãƒ¼ãƒˆ
+	Ch	ãƒãƒ£ãƒ³ãƒãƒ«ã®ç•ªå·
 */
 Function XGRcvChannelMute(Ch){
 	Ch=Ch-1;
@@ -377,12 +377,12 @@ Function XGRcvChannelMute(Ch){
 }
 
 /*
-**‚`‚cƒCƒ“ƒvƒbƒgEƒRƒ“ƒgƒ[ƒ‹
-AD ƒCƒ“ƒvƒbƒg‚Ì‘€ì
+**ï¼¡ï¼¤ã‚¤ãƒ³ãƒ—ãƒƒãƒˆãƒ»ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«
+â—‡AD ã‚¤ãƒ³ãƒ—ãƒƒãƒˆã®æ“ä½œ
 
 ** AD_InputGain(Chl, MIC_LINE)
-¡b|ƒQƒCƒ“Ø‚è‘Ö‚¦
-	Chl / ƒ`ƒƒƒ“ƒlƒ‹(0,1)
+â– ï½œï¼ã‚²ã‚¤ãƒ³åˆ‡ã‚Šæ›¿ãˆ
+	Chl / ãƒãƒ£ãƒ³ãƒãƒ«(0,1)
 	MIC_LINE / MIC = 0, LINE = 1
 */
 Function AD_InputGain(Chl, MIC_LINE){
@@ -390,7 +390,7 @@ Function AD_InputGain(Chl, MIC_LINE){
 	SysEx$=f0,43,10,4c,(CHL),00,00,(MIC_LINE),f7;//AD1 Gain-Mic
 }
 /*** AD_Volume(Chl, Val)
-¡b|ƒ{ƒŠƒ…[ƒ€ƒRƒ“ƒgƒ[ƒ‹
+â– ï½œï¼ãƒœãƒªãƒ¥ãƒ¼ãƒ ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«
 	Chl / Channel
 	Val / Value
 */
@@ -399,28 +399,28 @@ Function AD_Volume(Chl, Val){
 	SysEx$=f0,43,10,4c,(CHL),00,0b,(Val),f7;
 }
 /*** AD_MONO_STEREO(Val)
-¡b|ƒ‚[ƒhiƒXƒeƒŒƒIEƒ‚ƒmj
-	‚O‚l‚n‚m‚n@‚P‚r‚s‚d‚q‚d‚n
+â– ï½œï¼ãƒ¢ãƒ¼ãƒ‰ï¼ˆã‚¹ãƒ†ãƒ¬ã‚ªãƒ»ãƒ¢ãƒï¼‰
+	ï¼ï¼ï¼­ï¼¯ï¼®ï¼¯ã€€ï¼‘ï¼ï¼³ï¼´ï¼¥ï¼²ï¼¥ï¼¯
 */
 Function AD_MONO_STEREO(Val){
 	SysEx$=f0,43,10,4c,11,00,00,(Val),f7;
 }
 /*** AD_Chorus(Chl,Val)
-¡b|ƒR[ƒ‰ƒX
+â– ï½œï¼ã‚³ãƒ¼ãƒ©ã‚¹
 */
 Function AD_Chorus(Chl,Val){
 	Chl = $10 + Chl;
 	SysEx$=f0,43,10,4c,(Chl),00,12,(Val),f7;
 }
 /*** AD_Reverb(Chl,Val)
-¡b|ƒŠƒo[ƒu
+â– ï½œï¼ãƒªãƒãƒ¼ãƒ–
 */
 Function AD_Reverb(Chl,Val){
 	Chl = $10 + Chl;
 	SysEx$=f0,43,10,4c,(Chl),00,13,(Val),f7;
 }
 /*** AD_Variation(Chl,Val)
-¡b|ƒoƒŠƒG[ƒVƒ‡ƒ“
+â– ï½œï¼ãƒãƒªã‚¨ãƒ¼ã‚·ãƒ§ãƒ³
 */
 Function AD_Variation(Chl,Val){
 	Chl = $10 + Chl;
@@ -428,7 +428,7 @@ Function AD_Variation(Chl,Val){
 }
 
 /*** AD_Expression(Chl,Val)
-¡b|ƒGƒNƒXƒvƒŒƒbƒVƒ‡ƒ“
+â– ï½œï¼ã‚¨ã‚¯ã‚¹ãƒ—ãƒ¬ãƒƒã‚·ãƒ§ãƒ³
 */
 Function AD_Expression(Chl,Val){
 	Chl = $10 + Chl;

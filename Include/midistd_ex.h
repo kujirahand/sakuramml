@@ -17,7 +17,7 @@
 //					Maker ID
 //======================================================
 //----------------------------------------------
-//Japan			“ú–{
+//Japan			æ—¥æœ¬
 //----------------------------------------------
 Array MakerID_KAWAI_MUSICAL_INSTRUMENTS				= (	$40	);
 Array MakerID_ROLAND								= (	$41	);
@@ -44,7 +44,7 @@ Array MakerID_SD_CARD_ASSOCIATION_					= (	$5F	);
 Array MakerID_CRIMSON_TECHNOLOGY					= (	$00,$40,$00	);
 
 //----------------------------------------------
-//Common		‹¤’Ê
+//Common		å…±é€š
 //----------------------------------------------
 Array MakerID_Test									= (	$7D	);
 Array MakerID_NonRealTime							= (	$7E	);
@@ -57,7 +57,7 @@ Array MakerID_RealTime								= (	$7F	);
 //======================================================
 //==============================================
 //		Send of System exclusive Message
-//		i‹¤’Ê‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—M–½—ßj
+//		ï¼ˆå…±é€šã®ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡å‘½ä»¤ï¼‰
 //----------------------------------------------
 //		Input
 //			Array	Data(MakerID,DeviceID,SubID,Data)
@@ -68,11 +68,11 @@ Function SysExc(Array aSysExcData) {
 
 
 	//--------------------------
-	//Debug—p@ƒf[ƒ^“à—e‚Ìƒ`ƒFƒbƒN(”’l‚ª0`127‚Ì”ÍˆÍ‚Å‚ ‚é‚©H)
+	//Debugç”¨ã€€ãƒ‡ãƒ¼ã‚¿å†…å®¹ã®ãƒã‚§ãƒƒã‚¯(æ•°å€¤ãŒ0ï½127ã®ç¯„å›²ã§ã‚ã‚‹ã‹ï¼Ÿ)
 	If(MidiStd_Debug & $01){
 		For(Int SysExcLoop=0; SysExcLoop<SizeOf(aSysExcData); SysExcLoop++) {
 			If((aSysExcData(SysExcLoop)<0) | (aSysExcData(SysExcLoop)>127)){
-				Print("WanningF”’l‚ª”ÍˆÍ‚ğ‰z‚¦‚Ä‚¢‚Ü‚·B Data=",aSysExcData(SysExcLoop));
+				Print("Wanningï¼šæ•°å€¤ãŒç¯„å›²ã‚’è¶Šãˆã¦ã„ã¾ã™ã€‚ Data=",aSysExcData(SysExcLoop));
 				aSysExcData(SysExcLoop)=0;
 			};
 		};
@@ -80,9 +80,9 @@ Function SysExc(Array aSysExcData) {
 
 
 	//--------------------------
-	//Debug—p@‘—M“à—e‚Ì•\¦
+	//Debugç”¨ã€€é€ä¿¡å†…å®¹ã®è¡¨ç¤º
 	If(MidiStd_Debug & $02){
-		Print("SysEx="+HEX($F0), HEX(aSysExcData), HEX($F7));		//Debug—p
+		Print("SysEx="+HEX($F0), HEX(aSysExcData), HEX($F7));		//Debugç”¨
 	};
 
 	SysEx=$F0,aSysExcData,$F7;
@@ -100,7 +100,7 @@ Function SysExc(Array aSysExcData) {
 //
 //		$F0				Start of System Exclusive Message
 //		[MakerID]		$7E(NRT) or $7F(RT)
-//		[DeviceID]		Alooted ID for MIDI Device i$7F:All Devicej
+//		[DeviceID]		Alooted ID for MIDI Device ï¼ˆ$7F:All Deviceï¼‰
 //		[Sub-ID#1]		Command ID #1
 //		[Sub-ID#2]		Command ID #2
 //		[Data]			Data
@@ -110,7 +110,7 @@ Function SysExc(Array aSysExcData) {
 //		Device ID
 INT Universal_AllDevice				=	$7F;
 
-//		ƒfƒtƒHƒ‹ƒg‚Ìİ’è
+//		ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®è¨­å®š
 INT Universal_DefaultDevice		=	Universal_AllDevice;
 INT Universal_targetDeviceID	=	Universal_DefaultDevice;
 
@@ -174,7 +174,7 @@ Function RT_EX(INT idDevice,INT idSub1,INT idSub2,Array aRtData){
 //		Message for Sample/file Dump
 //------------------------------------------------------
 //		SubID#2 are not used.
-//		SubID#2‚Íg—p‚³‚ê‚Ü‚¹‚ñB
+//		SubID#2ã¯ä½¿ç”¨ã•ã‚Œã¾ã›ã‚“ã€‚
 //======================================================
 //Sub-ID#1
 INT NRT_DumpHeader					=	$01
@@ -193,7 +193,7 @@ Function NRT_DumpHeader_EX(INT idDevice, INT I_Number, INT I_Format, INT I_Freqe
 	NRT_EX2(idDevice, NRT_DumpHeader, A_EX_NRT_DumpHeader);
 };
 Function NRT_DataPacket_EX(INT idDevice, INT kk, Array A_DataPacket) {
-	IF(SizeOf(A_DataPacket)!=120){Print("WarningFData Packet‚ª120Byte‚Å‚Í‚ ‚è‚Ü‚¹‚ñB");};
+	IF(SizeOf(A_DataPacket)!=120){Print("Warningï¼šData PacketãŒ120Byteã§ã¯ã‚ã‚Šã¾ã›ã‚“ã€‚");};
 	Array A_EX_NRT_DataPacket=kk,A_DataPacket,CheckSum(MakerID_NonRealTime,idDevice,NRT_DataPacket,kk,A_DataPacket);
 	NRT_EX2(idDevice, NRT_DataPacket, A_EX_NRT_DataPacket);
 };
@@ -268,15 +268,15 @@ INT NRT_SampleDamp_ExtendedLoopPointRequest			=	$07
 
 
 //======================================================
-//		Device ƒCƒ“ƒNƒƒCƒAƒŠ[
+//		Device ã‚¤ãƒ³ã‚¯ãƒ¯ã‚¤ã‚¢ãƒªãƒ¼
 //======================================================
 //Sub-ID#1
 INT NRT_GeneralInfo					=	$06
 
 //----------------------------------------------
 //Sub-ID#2
-INT NRT_GeneralInfo_IdentityRequest					=	$01	//‚±‚ê‚ğ‘—M‚·‚é‚ÆA
-INT NRT_GeneralInfo_IdentityReply					=	$02	//‚±‚ÌƒƒbƒZ[ƒW‚ª‹A‚Á‚Ä‚­‚éB
+INT NRT_GeneralInfo_IdentityRequest					=	$01	//ã“ã‚Œã‚’é€ä¿¡ã™ã‚‹ã¨ã€
+INT NRT_GeneralInfo_IdentityReply					=	$02	//ã“ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãŒå¸°ã£ã¦ãã‚‹ã€‚
 
 //----------------------------------------------
 //Functions
@@ -309,12 +309,12 @@ INT NRT_Tuning						=	$08
 
 //----------------------------------------------
 //Sub-ID#2
-INT NRT_Tuning_BulkTuningDumpRequest				=	$00	//‚±‚ê‚ğ‘—M‚·‚é‚ÆA
-INT NRT_Tuning_BulkTuningDumpReply					=	$01	//‚±‚ÌƒƒbƒZ[ƒW‚ª‹A‚Á‚Ä‚­‚éB
+INT NRT_Tuning_BulkTuningDumpRequest				=	$00	//ã“ã‚Œã‚’é€ä¿¡ã™ã‚‹ã¨ã€
+INT NRT_Tuning_BulkTuningDumpReply					=	$01	//ã“ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãŒå¸°ã£ã¦ãã‚‹ã€‚
 INT NRT_Tuning_SingleNoteTuningChange				=	$02
 //MIDI TUNING Extensions (CA-020)
-INT NRT_Tuning_BulkTuningDumpRequest_Bank			=	$03	//‚±‚ê‚ğ‘—M‚·‚é‚ÆA
-INT NRT_Tuning_KeyBasedTuningDump					=	$04	//‚±‚ÌƒƒbƒZ[ƒW‚ª‹A‚Á‚Ä‚­‚éB
+INT NRT_Tuning_BulkTuningDumpRequest_Bank			=	$03	//ã“ã‚Œã‚’é€ä¿¡ã™ã‚‹ã¨ã€
+INT NRT_Tuning_KeyBasedTuningDump					=	$04	//ã“ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãŒå¸°ã£ã¦ãã‚‹ã€‚
 INT NRT_Tuning_ScaleOctaveTuningDump1Byte			=	$05
 INT NRT_Tuning_ScaleOctaveTuningDump2Byte			=	$06
 INT NRT_Tuning_SingleNoteTuningChange_Bank			=	$07
@@ -329,7 +329,7 @@ Function NRT_Tuning_BulkTuningDumpRequest_EX(INT idDevice, INT I_ProgramNo){
 };
 
 Function NRT_Tuning_SingleNoteTuningChange_EX(Int idDevice, INT I_ProgramNo, INT SZ_Change, Array A_Change){
-	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ");};
+	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“");};
 	Array	A_EX_RT_Tuning_SingleNoteTuningChange=I_ProgramNo,SZ_Change,A_Change
 	NRT_EX(idDevice,NRT_Tuning,NRT_Tuning_SingleNoteTuningChange,A_EX_RT_Tuning_SingleNoteTuningChange);
 };
@@ -339,7 +339,7 @@ Function NRT_NoteTuning(INT I_ProgramNo, INT SZ_Change, Array A_Change){
 
 //MIDI TUNING Extensions (CA-020)
 Function NRT_Tuning_SingleNoteTuningChange_Bank_EX(Int idDevice, INT I_Bank, INT I_ProgramNo, INT SZ_Change, Array A_Change){
-	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ");};
+	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“");};
 	Array	A_EX_RT_Tuning_SingleNoteTuningChange=I_Bank,I_ProgramNo,SZ_Change,A_Change
 	NRT_EX(idDevice,NRT_Tuning,NRT_Tuning_SingleNoteTuningChange_Bank,A_EX_RT_Tuning_SingleNoteTuningChange);
 };
@@ -353,12 +353,12 @@ Function NRT_Tuning_BulkTuningDumpRequest_Bank_EX(INT idDevice, INT I_Bank, INT 
 
 //MIDI TUNING Extensions - Scale Octave Tuning (CA-021/RP-020)
 Function NRT_Tuning_ScaleOctaveTuning1Byte_EX(Int idDevice, INT I_Channel, Array A_Offset){
-	If(SizeOf(A_Offset)!=12){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ",SizeOf(A_Offset));};
+	If(SizeOf(A_Offset)!=12){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“",SizeOf(A_Offset));};
 	Array	EX_NRT_Tuning_ScaleOctaveTuning=DivValueX(3,I_Channel),A_Offset;
 	NRT_EX(idDevice,NRT_Tuning,NRT_Tuning_ScaleOctaveTuning1Byte,EX_NRT_Tuning_ScaleOctaveTuning);
 };
 Function NRT_Tuning_ScaleOctaveTuning2Byte_EX(Int idDevice, INT I_Channel, Array A_Offset){
-	If(SizeOf(A_Offset)!=12){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ",SizeOf(A_Offset));};
+	If(SizeOf(A_Offset)!=12){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“",SizeOf(A_Offset));};
 	Array	A2_Offset;
 	Array	A24_Offset;
 	For(INT I_Loop=0;I_Loop<12;I_Loop++){
@@ -550,11 +550,11 @@ Function MasterCoarseTuning(Int iTuning) {
 };
 //Master Tuning
 Function MasterTuning(Int iTuning){
-	INT	I_Tuning = iTuning+$80000	//ƒŒƒ“ƒW‚ğC³‚·‚éB
+	INT	I_Tuning = iTuning+$80000	//ãƒ¬ãƒ³ã‚¸ã‚’ä¿®æ­£ã™ã‚‹ã€‚
 	INT	HSB_iTuning = (I_Tuning/$2000);
 	INT	LSB_iTuning = I_Tuning-((HSB_iTuning)*$2000)+$2000
-	//LSB, MSB‚ª0x3000‚ğ‰z‚¦‚Ä‚¢‚½‚çAHSB‚Ì•û‚ğŒJ‚èã‚°‚éB
-	//LSB, MSB‚ÍA0x1000`0x3000‚Ì”ÍˆÍ‚É‚È‚é‚æ‚¤‚É‚·‚éB
+	//LSB, MSBãŒ0x3000ã‚’è¶Šãˆã¦ã„ãŸã‚‰ã€HSBã®æ–¹ã‚’ç¹°ã‚Šä¸Šã’ã‚‹ã€‚
+	//LSB, MSBã¯ã€0x1000ï½0x3000ã®ç¯„å›²ã«ãªã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
 	If((LSB_iTuning>$3000) | (HSB_iTuning<0)){
 		LSB_iTuning = LSB_iTuning - $2000;
 		HSB_iTuning++;
@@ -698,7 +698,7 @@ INT RT_Tuning_ScaleOctaveTuning2Byte				=	$09
 //----------------------------------------------
 //Functions
 Function RT_Tuning_SingleNoteTuningChange_EX(Int idDevice, INT I_ProgramNo, INT SZ_Change, Array A_Change){
-	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ");};
+	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“");};
 	Array	A_EX_RT_Tuning_SingleNoteTuningChange=I_ProgramNo,SZ_Change,A_Change
 	RT_EX(idDevice,RT_Tuning,RT_Tuning_SingleNoteTuningChange,A_EX_RT_Tuning_SingleNoteTuningChange);
 };
@@ -708,7 +708,7 @@ Function RT_NoteTuning(INT I_ProgramNo, INT SZ_Change, Array A_Change){
 
 //MIDI TUNING Extensions (CA-020)
 Function RT_Tuning_SingleNoteTuningChange_Bank_EX(Int idDevice, INT I_Bank, INT I_ProgramNo, INT SZ_Change, Array A_Change){
-	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ");};
+	If(SizeOf(A_Change)!=(SZ_Change*4)){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“");};
 	Array	A_EX_RT_Tuning_SingleNoteTuningChange=I_Bank,I_ProgramNo,SZ_Change,A_Change
 	RT_EX(idDevice,RT_Tuning,RT_Tuning_SingleNoteTuningChange_Bank,A_EX_RT_Tuning_SingleNoteTuningChange);
 };
@@ -718,12 +718,12 @@ Function RT_NoteTuning_Bank(INT I_Bank, INT I_ProgramNo, INT SZ_Change, Array A_
 
 //MIDI TUNING Extensions - Scale Octave Tuning (CA-021/RP-020)
 Function RT_Tuning_ScaleOctaveTuning1Byte_EX(Int idDevice, INT I_Channel, Array A_Offset){
-	If(SizeOf(A_Offset)!=12){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ",SizeOf(A_Offset));};
+	If(SizeOf(A_Offset)!=12){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“",SizeOf(A_Offset));};
 	Array	EX_RT_Tuning_ScaleOctaveTuning=DivValueX(3,I_Channel),A_Offset;
 	RT_EX(idDevice,RT_Tuning,RT_Tuning_ScaleOctaveTuning1Byte,EX_RT_Tuning_ScaleOctaveTuning);
 };
 Function RT_Tuning_ScaleOctaveTuning2Byte_EX(Int idDevice, INT I_Channel, Array A_Offset){
-	If(SizeOf(A_Offset)!=12){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ",SizeOf(A_Offset));};
+	If(SizeOf(A_Offset)!=12){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“",SizeOf(A_Offset));};
 	Array	A2_Offset;
 	Array	A24_Offset;
 	For(INT I_Loop=0;I_Loop<12;I_Loop++){
@@ -770,8 +770,8 @@ Function RT_ControllerDestination_EX(Int idDevice, INT iSubID2, Array A_Data){
 };
 //Channel Pressure
 Function RT_ControllerDestination_ChannelPressure_EX(Int idDevice, INT I_Channel, Array A_Data){
-	If((I_Channel<1)|(I_Channel>16)){Print("WarningFƒ`ƒƒƒ“ƒlƒ‹‚Ì’l‚ª•s³‚Å‚·B", I_Channel);};
-	If((SizeOf(A_Data)%2)!=0){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ", SizeOf(A_Data));};
+	If((I_Channel<1)|(I_Channel>16)){Print("Warningï¼šãƒãƒ£ãƒ³ãƒãƒ«ã®å€¤ãŒä¸æ­£ã§ã™ã€‚", I_Channel);};
+	If((SizeOf(A_Data)%2)!=0){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“", SizeOf(A_Data));};
 	Array A_Data2 = I_Channel-1, A_Data;
 	RT_ControllerDestination_EX(idDevice, RT_ControllerDestination_ChannelPressure, A_Data2)
 };
@@ -780,8 +780,8 @@ Function RT_CD_ChPressure(Array A_Data){
 };
 //Polyhonic Pressure
 Function RT_ControllerDestination_PolyhonicPressure_EX(Int idDevice, INT I_Channel, Array A_Data){
-	If((I_Channel<1)|(I_Channel>16)){Print("WarningFƒ`ƒƒƒ“ƒlƒ‹‚Ì’l‚ª•s³‚Å‚·B", I_Channel);};
-	If((SizeOf(A_Data)%2)!=0){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ", SizeOf(A_Data));};
+	If((I_Channel<1)|(I_Channel>16)){Print("Warningï¼šãƒãƒ£ãƒ³ãƒãƒ«ã®å€¤ãŒä¸æ­£ã§ã™ã€‚", I_Channel);};
+	If((SizeOf(A_Data)%2)!=0){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“", SizeOf(A_Data));};
 	Array A_Data2 = I_Channel-1, A_Data;
 	RT_ControllerDestination_EX(idDevice, RT_ControllerDestination_PolyhonicPressure, A_Data2)
 };
@@ -790,8 +790,8 @@ Function RT_CD_PolyPressure(Array A_Data){
 };
 //Control Change Message
 Function RT_ControllerDestination_ControlChangeMessage_EX(Int idDevice, INT I_Channel, INT I_CC, Array A_Data){
-	If((I_Channel<1)|(I_Channel>16)){Print("WarningFƒ`ƒƒƒ“ƒlƒ‹‚Ì’l‚ª•s³‚Å‚·B", I_Channel);};
-	If((SizeOf(A_Data)%2)!=0){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ", SizeOf(A_Data));};
+	If((I_Channel<1)|(I_Channel>16)){Print("Warningï¼šãƒãƒ£ãƒ³ãƒãƒ«ã®å€¤ãŒä¸æ­£ã§ã™ã€‚", I_Channel);};
+	If((SizeOf(A_Data)%2)!=0){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“", SizeOf(A_Data));};
 	Array A_Data2 = I_Channel-1, I_CC, A_Data;
 	RT_ControllerDestination_EX(idDevice, RT_ControllerDestination_ControlChangeMessage, A_Data2)
 };
@@ -817,8 +817,8 @@ Function RT_KeyBasedInstrument_EX(Int idDevice, INT iSubID2, Array A_Data){
 };
 //BASIC
 Function RT_KeyBasedInstrument_Basic_EX(Int idDevice, INT I_Channel, INT I_Key, Array A_Data){
-	If((I_Channel<1)|(I_Channel>16)){Print("WarningFƒ`ƒƒƒ“ƒlƒ‹‚Ì’l‚ª•s³‚Å‚·B",I_Channel);};
-	If((SizeOf(A_Data)%2)!=0){Print("WarningFƒf[ƒ^‚Ì”‚ª‡‚¢‚Ü‚¹‚ñ",SizeOf(A_Data));};
+	If((I_Channel<1)|(I_Channel>16)){Print("Warningï¼šãƒãƒ£ãƒ³ãƒãƒ«ã®å€¤ãŒä¸æ­£ã§ã™ã€‚",I_Channel);};
+	If((SizeOf(A_Data)%2)!=0){Print("Warningï¼šãƒ‡ãƒ¼ã‚¿ã®æ•°ãŒåˆã„ã¾ã›ã‚“",SizeOf(A_Data));};
 	Array A_Data2 = I_Channel-1, I_Key, A_Data;
 	RT_KeyBasedInstrument_EX(idDevice, RT_KeyBasedInstrument_Basic, A_Data2);
 };

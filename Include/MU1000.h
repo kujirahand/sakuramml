@@ -1,84 +1,84 @@
 // -----------------------------------------------------------------------------
-// YAMAHA MU1000 SYSTEM EXCLUSIVE ŠÖ” "MU1000.h" ver1.0 (2002/10/20)
+// YAMAHA MU1000 SYSTEM EXCLUSIVE é–¢æ•° "MU1000.h" ver1.0 (2002/10/20)
 //
 //                                      programed by. 4neria (4neria@mcn.ne.jp)
 // -----------------------------------------------------------------------------
 
-// ƒ†[ƒU[’è‹`(”CˆÓ‚Å•ÏX‰Â”\ ‚±‚±‚©‚ç)----------------------------------------
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©(ä»»æ„ã§å¤‰æ›´å¯èƒ½ ã“ã“ã‹ã‚‰)----------------------------------------
 
 /* -----------------------------------------------------------------------------
- ‚²©•ª‚Ì‰¹Œ¹‚É‡‚Á‚½ƒfƒoƒCƒXƒiƒ“ƒo[‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B
- ’l‚Ì”ÍˆÍ: [1`16] ƒfƒtƒHƒ‹ƒg’l: [1]
+ ã”è‡ªåˆ†ã®éŸ³æºã«åˆã£ãŸãƒ‡ãƒã‚¤ã‚¹ãƒŠãƒ³ãƒãƒ¼ã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚
+ å€¤ã®ç¯„å›²: [1ï½16] ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤: [1]
 ------------------------------------------------------------------------------*/
 Int DeviceNumberXG = 1; //private
 
-// •ÏX‹Ö~(‚±‚±‚©‚ç)-----------------------------------------------------------
-If((DeviceNumberXG<1)||(DeviceNumberXG>16)) { MsgBox({" DeviceNumberXG‚Ì’l‚Ì”ÍˆÍ‚Í1`16‚Å‚·."});  End; }
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã‹ã‚‰)-----------------------------------------------------------
+If((DeviceNumberXG<1)||(DeviceNumberXG>16)) { MsgBox({" DeviceNumberXGã®å€¤ã®ç¯„å›²ã¯1ï½16ã§ã™."});  End; }
 Int DeviceNumberXG_Blk = DeviceNumberXG - 1; DeviceNumberXG = DeviceNumberXG - 1 + $10;  //private
-// •ÏX‹Ö~(‚±‚±‚Ü‚Å)-----------------------------------------------------------
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã¾ã§)-----------------------------------------------------------
 
 /* -----------------------------------------------------------------------------
- ‚²©•ª‚Ì‰¹Œ¹‚É‡‚Á‚½ƒ|[ƒg‚Ì”‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B
- MU2000,MU2000EX,MU2000EX R1,MU1000,MU1000EX,MU1000EX R1                           c 4
- MU500,MU128,MU100,MU100B,MU100Bs,MU100R,SW1000XG,SW1000XG/P,MU90,MU90B,MU90R,MU80 c 2
- MU50,MU15,MU10,DB50XG,DB60XG,‚»‚Ì‘¼XGŒİŠ·‰¹Œ¹                                     c 1
+ ã”è‡ªåˆ†ã®éŸ³æºã«åˆã£ãŸãƒãƒ¼ãƒˆã®æ•°ã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚
+ MU2000,MU2000EX,MU2000EX R1,MU1000,MU1000EX,MU1000EX R1                           â€¦ 4
+ MU500,MU128,MU100,MU100B,MU100Bs,MU100R,SW1000XG,SW1000XG/P,MU90,MU90B,MU90R,MU80 â€¦ 2
+ MU50,MU15,MU10,DB50XG,DB60XG,ãã®ä»–XGäº’æ›éŸ³æº                                     â€¦ 1
 ------------------------------------------------------------------------------*/
 Int PortNumberXG_MAX = 4;  //private
 
-// •ÏX‹Ö~(‚±‚±‚©‚ç)-----------------------------------------------------------
-If((PortNumberXG_MAX<1)||(PortNumberXG_MAX>4)) { MsgBox ({"PortNumberXG_MAX‚Ì’l‚É0‚â•‰‚Ì’lA‚Ü‚½‚Í5ˆÈã‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ."}); End; }
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã‹ã‚‰)-----------------------------------------------------------
+If((PortNumberXG_MAX<1)||(PortNumberXG_MAX>4)) { MsgBox ({"PortNumberXG_MAXã®å€¤ã«0ã‚„è² ã®å€¤ã€ã¾ãŸã¯5ä»¥ä¸Šã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“."}); End; }
 Int PortNumberXG = $00; Int ChannelNumberXG = $00; Int _MultiPart = $00; Int _Port = $00; Port(0);  //private
-// •ÏX‹Ö~(‚±‚±‚Ü‚Å)-----------------------------------------------------------
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã¾ã§)-----------------------------------------------------------
 
 /* -----------------------------------------------------------------------------
- ‚²©•ª‚Ì‰¹Œ¹‚É‡‚Á‚½ƒCƒ“ƒT[ƒVƒ‡ƒ“ƒGƒtƒFƒNƒg‚Ì”‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B
- MU2000,MU2000EX,MU2000EX R1,MU1000,MU1000EX,MU1000EX R1                      c 4
- MU500,MU128,MU100,MU100B,MU100Bs,MU100R,SW1000XG,SW1000XG/P,MU90,MU90B,MU90R c 2
- MU80                                                                         c 1
- MU50/MU15/MU10,‚»‚Ì‘¼XGŒİŠ·‰¹Œ¹                                              c 0 (—v‚·‚é‚Ég‚¦‚Ü‚¹‚ñ)
+ ã”è‡ªåˆ†ã®éŸ³æºã«åˆã£ãŸã‚¤ãƒ³ã‚µãƒ¼ã‚·ãƒ§ãƒ³ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®æ•°ã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚
+ MU2000,MU2000EX,MU2000EX R1,MU1000,MU1000EX,MU1000EX R1                      â€¦ 4
+ MU500,MU128,MU100,MU100B,MU100Bs,MU100R,SW1000XG,SW1000XG/P,MU90,MU90B,MU90R â€¦ 2
+ MU80                                                                         â€¦ 1
+ MU50/MU15/MU10,ãã®ä»–XGäº’æ›éŸ³æº                                              â€¦ 0 (è¦ã™ã‚‹ã«ä½¿ãˆã¾ã›ã‚“)
 ------------------------------------------------------------------------------*/
 Int XG_InsertionType_MAX = 4;  //private
 
-// •ÏX‹Ö~(‚±‚±‚©‚ç)-----------------------------------------------------------
-If(XG_InsertionType_MAX<0) { MsgBox ({"XG_InsertionType_MAX‚Ì’l‚É•‰‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ."}); End; }
-// •ÏX‹Ö~(‚±‚±‚Ü‚Å)-----------------------------------------------------------
-// ƒ†[ƒU[’è‹`(”CˆÓ‚Å•ÏX‰Â”\ ‚±‚±‚Ü‚Å)----------------------------------------
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã‹ã‚‰)-----------------------------------------------------------
+If(XG_InsertionType_MAX<0) { MsgBox ({"XG_InsertionType_MAXã®å€¤ã«è² ã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“."}); End; }
+// å¤‰æ›´ç¦æ­¢(ã“ã“ã¾ã§)-----------------------------------------------------------
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©(ä»»æ„ã§å¤‰æ›´å¯èƒ½ ã“ã“ã¾ã§)----------------------------------------
 
-// ”Ä—pŠÖ”(•ÏX‹Ö~ ‚±‚±‚©‚ç)--------------------------------------------------
-Function INumberCheck(_N) {  //private _N‚Ì’l‚ª1ˆÈãXG_InsertionType_MAXˆÈ‰º‚Å‚ ‚é‚©ƒ`ƒFƒbƒN
- If(XG_InsertionType_MAX<1) { MsgBox({"XG_InsertionType_MAX‚Ì’l‚ª0‚È‚Ì‚ÅINSERTION‚Íg—p‚Å‚«‚Ü‚¹‚ñ."}); End; }
- If((_N<1)||(_N>XG_InsertionType_MAX)) { MsgBox({"XG_InsertionType‚Ì’l‚ª•s³‚Å‚·. ƒpƒ‰ƒ[ƒ^‚Ì”ÍˆÍ‚Í1`"}+XG_InsertionType_MAX+{"‚Ü‚Å‚Å‚·."}); End; }
+// æ±ç”¨é–¢æ•°(å¤‰æ›´ç¦æ­¢ ã“ã“ã‹ã‚‰)--------------------------------------------------
+Function INumberCheck(_N) {  //private _Nã®å€¤ãŒ1ä»¥ä¸ŠXG_InsertionType_MAXä»¥ä¸‹ã§ã‚ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
+ If(XG_InsertionType_MAX<1) { MsgBox({"XG_InsertionType_MAXã®å€¤ãŒ0ãªã®ã§INSERTIONã¯ä½¿ç”¨ã§ãã¾ã›ã‚“."}); End; }
+ If((_N<1)||(_N>XG_InsertionType_MAX)) { MsgBox({"XG_InsertionTypeã®å€¤ãŒä¸æ­£ã§ã™. ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ç¯„å›²ã¯1ï½"}+XG_InsertionType_MAX+{"ã¾ã§ã§ã™."}); End; }
 }
-Function XG_MultiPart() {  //private ƒ|[ƒg‚Æƒ`ƒƒƒ“ƒlƒ‹‚ğæ“¾‚µAXGd—l‚ÌMultiPart‚ğ¶¬
- _MultiPart = $00; // ‰Šú‰»
- If((PortNumberXG<0)||(PortNumberXG>PortNumberXG_MAX)) { MsgBox ({"PortNumberXG‚Ì’l‚É•‰‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ. ‚Ü‚½‚ÍPortNumberXG_MAX‚Ì’l("}+PortNumberXG_MAX+{")‚ğ’´‚¦‚Ä‚¢‚Ü‚·."}); End; }
+Function XG_MultiPart() {  //private ãƒãƒ¼ãƒˆã¨ãƒãƒ£ãƒ³ãƒãƒ«ã‚’å–å¾—ã—ã€XGä»•æ§˜ã®MultiPartã‚’ç”Ÿæˆ
+ _MultiPart = $00; // åˆæœŸåŒ–
+ If((PortNumberXG<0)||(PortNumberXG>PortNumberXG_MAX)) { MsgBox ({"PortNumberXGã®å€¤ã«è² ã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“. ã¾ãŸã¯PortNumberXG_MAXã®å€¤("}+PortNumberXG_MAX+{")ã‚’è¶…ãˆã¦ã„ã¾ã™."}); End; }
  If(PortNumberXG==$00) {
   _Port = MML(Port);
-  If((_Port<0)||(_Port>(PortNumberXG_MAX-1))) { MsgBox ({"Port();‚Ì’l‚É•‰‚Ì’l‚Íw’è‚Å‚«‚Ü‚¹‚ñ. ‚Ü‚½‚ÍPortNumberXG_MAX‚Ì’l("}+PortNumberXG_MAX+{")‚ğ’´‚¦‚Ä‚¢‚Ü‚·."}); End; }
+  If((_Port<0)||(_Port>(PortNumberXG_MAX-1))) { MsgBox ({"Port();ã®å€¤ã«è² ã®å€¤ã¯æŒ‡å®šã§ãã¾ã›ã‚“. ã¾ãŸã¯PortNumberXG_MAXã®å€¤("}+PortNumberXG_MAX+{")ã‚’è¶…ãˆã¦ã„ã¾ã™."}); End; }
  } Else {
   _Port = PortNumberXG - 1;
  }
- If((ChannelNumberXG<0)||(ChannelNumberXG>16)) { MsgBox({"ChannelNumberXG‚Ì”ÍˆÍ‚Í0`16‚Ü‚Å‚Å‚·."}); End; }
+ If((ChannelNumberXG<0)||(ChannelNumberXG>16)) { MsgBox({"ChannelNumberXGã®ç¯„å›²ã¯0ï½16ã¾ã§ã§ã™."}); End; }
  If(ChannelNumberXG==$00) {
  _MultiPart = (Channel - 1) + (_Port * $10);
  } Else {
  _MultiPart = (ChannelNumberXG - 1) + (_Port * $10);
  }
 }
-Function XG_EX(Array _Data) {  //private XGd—l‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—M (ADR HIGH/MID/LOW,DATA)
+Function XG_EX(Array _Data) {  //private XGä»•æ§˜ã®ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡ (ADR HIGH/MID/LOW,DATA)
  SysEx=$F0,$43,(DeviceNumberXG),$4C,(_Data),$F7;
 }
-Function XG_BLK(Array _Data){  //private XGd—l‚Ìƒoƒ‹ƒNƒ_ƒ“ƒv‘—M (ADR HIGH/MID/LOW,DATA)
+Function XG_BLK(Array _Data){  //private XGä»•æ§˜ã®ãƒãƒ«ã‚¯ãƒ€ãƒ³ãƒ—é€ä¿¡ (ADR HIGH/MID/LOW,DATA)
  Int _DataSize = SizeOf(_Data) - 3; //private
- If(_DataSize<1) { MsgBox({"XG_BLK‚Ìƒpƒ‰ƒ[ƒ^‚É‚ÍADDRESS High/Middle/Low‚Ì3‚Â‚É‰Á‚¦Aƒf[ƒ^’l‚ª1‚ÂˆÈã•K—v‚Å‚·."}); End; }
+ If(_DataSize<1) { MsgBox({"XG_BLKã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã«ã¯ADDRESS High/Middle/Lowã®3ã¤ã«åŠ ãˆã€ãƒ‡ãƒ¼ã‚¿å€¤ãŒ1ã¤ä»¥ä¸Šå¿…è¦ã§ã™."}); End; }
  Int _DataSizeMSB = _DataSize & $FF00 / $0100; Int _DataSizeLSB = _DataSize & $00FF; //private
  SysEx=$F0,$43,(DeviceNumberXG_Blk),$4C,{(_DataSizeMSB),(_DataSizeLSB),(_Data)},$F7;
 }
-Function MU_EX(Array _Data) {  //private XGd—l(MODEL ID:$49)‚ÌƒGƒNƒXƒNƒ‹[ƒVƒu‘—M (ADR HIGH/MID/LOW,DATA)
+Function MU_EX(Array _Data) {  //private XGä»•æ§˜(MODEL ID:$49)ã®ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡ (ADR HIGH/MID/LOW,DATA)
  SysEx=$F0,$43,(DeviceNumberXG),$49,(_Data),$F7;
 }
-Function XG_DrumEX(_N,Str _DNoteNumber,_A,_B) {  //private XGd—l‚Ìƒhƒ‰ƒ€‚ÉŠÖ‚í‚éƒGƒNƒXƒNƒ‹[ƒVƒu‘—M (DrumSetupNumber,DrumNoteNumber,ADR LOW,DATA)
- If((_N<1)||(_N>4)) { MsgBox({"XG DrumŠÖ˜A‚ÌDrumSetupNumber‚Ì’l‚ª•s³‚Å‚·. ƒpƒ‰ƒ[ƒ^‚Ì”ÍˆÍ‚Í1`4‚Ü‚Å‚Å‚·."}); End; }
+Function XG_DrumEX(_N,Str _DNoteNumber,_A,_B) {  //private XGä»•æ§˜ã®ãƒ‰ãƒ©ãƒ ã«é–¢ã‚ã‚‹ã‚¨ã‚¯ã‚¹ã‚¯ãƒ«ãƒ¼ã‚·ãƒ–é€ä¿¡ (DrumSetupNumber,DrumNoteNumber,ADR LOW,DATA)
+ If((_N<1)||(_N>4)) { MsgBox({"XG Drumé–¢é€£ã®DrumSetupNumberã®å€¤ãŒä¸æ­£ã§ã™. ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ç¯„å›²ã¯1ï½4ã¾ã§ã§ã™."}); End; }
  _N = $30 + _N - 1;
  Int _Tmp = StrOrNum(_DNoteNumber); //private
  Int _DNN; //private
@@ -87,11 +87,11 @@ Function XG_DrumEX(_N,Str _DNoteNumber,_A,_B) {  //private XGd—l‚Ìƒhƒ‰ƒ€‚ÉŠÖ‚í‚
  } Else {
   _DNN = NoteNo(_DNoteNumber);
  }
- If((_DNN < $0D)||(_DNN > $5B)) { MsgBox({"XG_DrumEX‚ÌNoteNumber‚Ìw’è‚É•s³‚ª‚ ‚è‚Ü‚·."}); End; }
+ If((_DNN < $0D)||(_DNN > $5B)) { MsgBox({"XG_DrumEXã®NoteNumberã®æŒ‡å®šã«ä¸æ­£ãŒã‚ã‚Šã¾ã™."}); End; }
  XG_EX(_N,_DNN,_A,_B);
 }
 
-// ”Ä—pŠÖ”(•ÏX‹Ö~ ‚±‚±‚Ü‚Å)--------------------------------------------------
+// æ±ç”¨é–¢æ•°(å¤‰æ›´ç¦æ­¢ ã“ã“ã¾ã§)--------------------------------------------------
 
 // MU Native SYSTEM-------------------------------------------------------------
 Function VOICE_MAP(_D) {
@@ -201,10 +201,10 @@ Function AC2_VARIATION_COTROL_DEPTH(_D) {
 }
 Function VARIATION_PARAMETER(Array _Data) {
  Int _DataSize = SizeOf(_Data); //private
- If(_DataSize<2){ MsgBox({"VARIATION_PARAMETER‚ÌDATA’l‚ª1‚ÂˆÈã•K—v‚Å‚·."}); End; }
+ If(_DataSize<2){ MsgBox({"VARIATION_PARAMETERã®DATAå€¤ãŒ1ã¤ä»¥ä¸Šå¿…è¦ã§ã™."}); End; }
  Int _Num = _Data(0); NumberCheck(_Num,1,16); _Num -= 1; //private
  If(_Num<10) {
-  If(_DataSize<3) { MsgBox({"VARIATION_PARAMETER‚ÌNUMBER‚ª1`10‚Ì”ÍˆÍ‚Ìê‡A’l‚É‚ÍMSB‚ÆLSB•K—v‚Å‚·"}); End; }
+  If(_DataSize<3) { MsgBox({"VARIATION_PARAMETERã®NUMBERãŒ1ï½10ã®ç¯„å›²ã®å ´åˆã€å€¤ã«ã¯MSBã¨LSBå¿…è¦ã§ã™"}); End; }
   _Num = _Num * 2 + $42;
   XG_EX($02,$01,_Num,_Data(1),_Data(2));
  } Else {

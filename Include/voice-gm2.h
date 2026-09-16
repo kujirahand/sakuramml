@@ -1,7 +1,7 @@
 /*
-	GM Level2 音色表
+	GM Level2 髻ｳ濶ｲ陦ｨ
 	
-	音色(GM2_Piano1) のように使う
+	髻ｳ濶ｲ(GM2_Piano1) 縺ｮ繧医≧縺ｫ菴ｿ縺�
 */
 //GM2-1
 Array GM2_Piano1	 = (1,0,0);
