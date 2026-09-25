@@ -206,6 +206,9 @@ n（16を上限、トラック0と1はどちらもチャンネル1）です。�
 RPN/NRPNとData Entry（CC6）を復元します。`off`なら復元しません。また`.SysEx`オプションで
 SysExイベントを保持する動作も実装していますが、対応するサンプル曲が無いため検証は限定的です。
 どちらも従来の曲でこれらの機能を使ったケースは確認できていません。
+RPN/NRPN、複数チャンネル、選択解除（127,127）、同時刻の別CCとの順序（RPNのData Entryは同tickの
+通常イベントより後ろ）はPascal版とバイト単位で一致することを`golden.rs`の
+`play_from_*`/`rpn_data_entry_*`で確認済みです。
 
 参照実装: `core/src/compiler/mod.rs`の`Compiler::apply_play_from`、
 テストは`core/tests/golden.rs`の`play_from_*`/`play_to_*`。

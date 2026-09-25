@@ -470,7 +470,9 @@ impl<'a> Compiler<'a> {
         // following reconstruction can add events, so the parser's original
         // event count is no longer sufficient.
         for track in self.tracks.values_mut() {
-            track.events.sort_by_key(|e| e.time);
+            track
+                .events
+                .sort_by_key(|e| (e.time, e.after_ordinary_events));
 
             // PlayTo: drop the trailing run at or after `to_pos`.
             if to_pos > 0 {
@@ -4288,10 +4290,9 @@ impl<'a> Compiler<'a> {
         }
         if let Some(data) = data {
             if !cc_muted[6] {
-                self.push_event(Event::control_change(
+                self.push_event(Event::rpn_data_entry(
                     base,
                     channel,
-                    6,
                     data.clamp(0, 127) as u8,
                 ))?;
             }

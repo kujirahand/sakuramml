@@ -24,6 +24,9 @@ pub struct Event {
     /// therefore sort after other events at the same tick. Direct NoteOff
     /// commands are ordinary raw events and retain their insertion order.
     pub(crate) deferred_at_same_time: bool,
+    /// RPN/NRPN Data Entry is appended by Pascal's `DivideEvent` pass, so it
+    /// sorts after ordinary events at the same tick (but before note-offs).
+    pub(crate) after_ordinary_events: bool,
 }
 
 impl Event {
@@ -32,6 +35,7 @@ impl Event {
             time,
             data,
             deferred_at_same_time: false,
+            after_ordinary_events: false,
         }
     }
 
@@ -50,7 +54,15 @@ impl Event {
             time,
             data: vec![0x80 | (channel & 0x0f), note, velocity],
             deferred_at_same_time: true,
+            after_ordinary_events: false,
         }
+    }
+
+    /// A Data Entry (CC6) written as part of an `RPN`/`NRPN` command.
+    pub(crate) fn rpn_data_entry(time: i64, channel: u8, value: u8) -> Self {
+        let mut event = Self::control_change(time, channel, 6, value);
+        event.after_ordinary_events = true;
+        event
     }
 
     pub fn control_change(time: i64, channel: u8, controller: u8, value: u8) -> Self {

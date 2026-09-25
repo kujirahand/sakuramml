@@ -92,7 +92,12 @@ fn track_chunk(track: &Track) -> Result<Vec<u8>> {
         } else {
             *index
         };
-        (event.time, event.deferred_at_same_time as u8, order)
+        let class = if event.deferred_at_same_time {
+            2u8
+        } else {
+            event.after_ordinary_events as u8
+        };
+        (event.time, class, order)
     });
     let mut events: Vec<_> = indexed_events.into_iter().map(|(_, event)| event).collect();
     remove_duplicate_controllers(&mut events);

@@ -971,7 +971,9 @@ fn play_from_restores_rpn_and_nrpn_only_when_enabled() {
     assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 7]));
     assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb0, 6, 9]));
     assert!(!restored.smf.windows(3).any(|bytes| bytes == [0xb1, 101, 0]));
-    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb1, 7, 11]));
+    assert!(restored.smf.windows(3).any(|bytes| bytes == [0xb0, 7, 11]));
+    // Pascal writes every restored controller on the last event's channel,
+    // which is the RPN Data Entry's (channel 1) here.
 
     let disabled =
         compile("PlayFrom.RPN_NRPN(0) RPN(0,1,9) Time(2:1:0) PlayFrom(2:1:0) c").unwrap();

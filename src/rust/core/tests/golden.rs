@@ -1877,6 +1877,61 @@ fn play_from_discards_and_shifts() {
     );
 }
 
+/// `PlayFrom` restores the RPN selection and Data Entry seen before the cut,
+/// in the same order as the Pascal build's `ExecutePlayFrom`.
+#[test]
+fn play_from_restores_nrpn() {
+    assert_golden(
+        "Channel(1) NRPN(1,32,64) NRPN(1,33,10) Time(2:1:0) PlayFrom(2:1:0) c",
+        "4d546864000000060001000100604d54726b0000002500b0630100b0622100b0060a01b0630101b0622001b00640813d903c644b803c6400ff2f00",
+    );
+}
+
+/// Per-channel RPN and NRPN state, kept in separate lists.
+#[test]
+fn play_from_restores_rpn_nrpn_per_channel() {
+    assert_golden(
+        "Channel(1) RPN(0,0,2) Channel(2) RPN(0,0,5) NRPN(1,2,3) Channel(1) RPN(0,0,4) Time(2:1:0) PlayFrom(2:1:0) c",
+        "4d546864000000060001000100604d54726b0000003100b0650000b0640000b0060401b1650001b1640001b1060501b1630101b1620201b10603813a903c644b803c6400ff2f00",
+    );
+}
+
+/// A selection release (RPN 127,127) is restored like any other selection.
+#[test]
+fn play_from_restores_rpn_selection_release() {
+    assert_golden(
+        "Channel(1) RPN(0,0,2) RPN(127,127,0) Time(2:1:0) PlayFrom(2:1:0) c",
+        "4d546864000000060001000100604d54726b0000002500b0657f00b0647f00b0060001b0650001b0640001b00602813d903c644b803c6400ff2f00",
+    );
+}
+
+/// Verified byte-for-byte against the Pascal build.
+#[test]
+fn play_from_rpn_data_entry_follows_same_tick_controller() {
+    assert_golden(
+        "Channel(1) RPN(0,0,2) y6,5 Time(2:1:0) PlayFrom(2:1:0) c",
+        "4d546864000000060001000100604d54726b0000001900b0650000b0640000b006028140903c644b803c6400ff2f00",
+    );
+}
+
+/// Verified byte-for-byte against the Pascal build.
+#[test]
+fn play_from_rpn_restores_on_the_rpn_channel() {
+    assert_golden(
+        "Channel(1) RPN(0,0,2) Channel(2) y7,11 Time(2:1:0) PlayFrom(2:1:0) c",
+        "4d546864000000060001000100604d54726b0000001d00b0650000b0070b00b0640001b00602813f913c644b813c6400ff2f00",
+    );
+}
+
+/// Verified byte-for-byte against the Pascal build.
+#[test]
+fn rpn_data_entry_sorts_after_same_tick_events() {
+    assert_golden(
+        "Channel(1) c RPN(0,0,2) y6,5 c",
+        "4d546864000000060001000100604d54726b0000002400903c644b803c6412b0650001b0640001b0060500b0060201903c644b803c6415ff2f00",
+    );
+}
+
 /// Where in the source `PlayFrom` appears makes no difference: it is applied
 /// once, after the whole song is compiled, exactly as the Pascal build
 /// applies it at save time rather than as the source is read.
