@@ -233,6 +233,7 @@ pub struct Compiler<'a> {
     rpn_shift_channel: Option<u8>,
     rpn_shift_time: i64,
     rpn_shift: i64,
+    rpn_seq: u64,
     allow_multi_line: bool,
     meta_text_eol: i64,
     /// Time signature, used to turn `Time(m:b:t)` into ticks.
@@ -322,6 +323,7 @@ impl<'a> Compiler<'a> {
             rpn_shift_channel: None,
             rpn_shift_time: 0,
             rpn_shift: 0,
+            rpn_seq: 0,
             allow_multi_line: true,
             meta_text_eol: 0,
             time_signature: (4, 4),
@@ -470,7 +472,9 @@ impl<'a> Compiler<'a> {
         // following reconstruction can add events, so the parser's original
         // event count is no longer sufficient.
         for track in self.tracks.values_mut() {
-            track.events.sort_by_key(|e| e.time);
+            track
+                .events
+                .sort_by_key(|e| (e.time, e.rpn_node.is_some(), e.rpn_node));
 
             // PlayTo: drop the trailing run at or after `to_pos`.
             if to_pos > 0 {
@@ -4269,30 +4273,35 @@ impl<'a> Compiler<'a> {
             return Ok(());
         }
         let base = time - self.rpn_shift - 1;
+        self.rpn_seq += 1;
+        let node = (base, self.rpn_seq);
         let (msb_cc, lsb_cc) = if is_rpn { (101u8, 100u8) } else { (99u8, 98u8) };
         if !cc_muted[msb_cc as usize] {
-            self.push_event(Event::control_change(
+            self.push_event(Event::rpn_part(
                 base - self.controller_shift * 2,
                 channel,
                 msb_cc,
                 msb.clamp(0, 127) as u8,
+                node,
             ))?;
         }
         if !cc_muted[lsb_cc as usize] {
-            self.push_event(Event::control_change(
+            self.push_event(Event::rpn_part(
                 base - self.controller_shift,
                 channel,
                 lsb_cc,
                 lsb.clamp(0, 127) as u8,
+                node,
             ))?;
         }
         if let Some(data) = data {
             if !cc_muted[6] {
-                self.push_event(Event::control_change(
+                self.push_event(Event::rpn_part(
                     base,
                     channel,
                     6,
                     data.clamp(0, 127) as u8,
+                    node,
                 ))?;
             }
         }

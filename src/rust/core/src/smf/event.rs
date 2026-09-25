@@ -24,6 +24,11 @@ pub struct Event {
     /// therefore sort after other events at the same tick. Direct NoteOff
     /// commands are ordinary raw events and retain their insertion order.
     pub(crate) deferred_at_same_time: bool,
+    /// The events of an `RPN`/`NRPN` command are split off one node in
+    /// Pascal's `DivideEvent` pass, so they sort after ordinary events at the
+    /// same tick. Holds `(node time, command sequence number)`: generated
+    /// events of one tick keep the order of the nodes they came from.
+    pub(crate) rpn_node: Option<(i64, u64)>,
 }
 
 impl Event {
@@ -32,6 +37,7 @@ impl Event {
             time,
             data,
             deferred_at_same_time: false,
+            rpn_node: None,
         }
     }
 
@@ -50,7 +56,21 @@ impl Event {
             time,
             data: vec![0x80 | (channel & 0x0f), note, velocity],
             deferred_at_same_time: true,
+            rpn_node: None,
         }
+    }
+
+    /// A controller written as part of an `RPN`/`NRPN` command.
+    pub(crate) fn rpn_part(
+        time: i64,
+        channel: u8,
+        controller: u8,
+        value: u8,
+        node: (i64, u64),
+    ) -> Self {
+        let mut event = Self::control_change(time, channel, controller, value);
+        event.rpn_node = Some(node);
+        event
     }
 
     pub fn control_change(time: i64, channel: u8, controller: u8, value: u8) -> Self {

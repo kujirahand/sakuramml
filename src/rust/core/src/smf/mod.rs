@@ -87,12 +87,16 @@ fn track_chunk(track: &Track) -> Result<Vec<u8>> {
     // NoteOff command is already a direct event and must retain its position.
     let mut indexed_events: Vec<_> = events.into_iter().enumerate().collect();
     indexed_events.sort_by_key(|(index, event)| {
-        let order = if event.deferred_at_same_time {
-            deferred_order[*index]
+        // Ordinary events first, then everything Pascal generates when it
+        // divides nodes, in node order (a note's off, an RPN's controllers).
+        if event.deferred_at_same_time {
+            let (node_time, rank) = deferred_order[*index];
+            (event.time, 1u8, node_time, 0u8, rank, *index)
+        } else if let Some((node_time, seq)) = event.rpn_node {
+            (event.time, 1, node_time, 1, seq as usize, *index)
         } else {
-            *index
-        };
-        (event.time, event.deferred_at_same_time as u8, order)
+            (event.time, 0, 0, 0, *index, *index)
+        }
     });
     let mut events: Vec<_> = indexed_events.into_iter().map(|(_, event)| event).collect();
     remove_duplicate_controllers(&mut events);
@@ -144,7 +148,7 @@ fn remove_duplicate_controllers(events: &mut [Event]) {
 /// before its NoteOff, even when the channel has changed. This is especially
 /// visible in delay helpers, where several copies of one phrase overlap at
 /// fixed offsets.
-fn adjust_overlapping_notes(events: &mut [Event]) -> Vec<usize> {
+fn adjust_overlapping_notes(events: &mut [Event]) -> Vec<(i64, usize)> {
     let mut pairs = Vec::new();
     for on_index in 0..events.len() {
         let Some(status) = events[on_index].data.first().copied() else {
@@ -171,9 +175,9 @@ fn adjust_overlapping_notes(events: &mut [Event]) -> Vec<usize> {
         }
     }
     pairs.sort_by_key(|(_, on, _)| events[*on].time);
-    let mut deferred_order = vec![usize::MAX; events.len()];
-    for (order, &(_, _, off)) in pairs.iter().enumerate() {
-        deferred_order[off] = order;
+    let mut deferred_order: Vec<_> = events.iter().map(|e| (e.time, usize::MAX)).collect();
+    for (order, &(_, on, off)) in pairs.iter().enumerate() {
+        deferred_order[off] = (events[on].time, order);
     }
 
     for index in 0..pairs.len() {
