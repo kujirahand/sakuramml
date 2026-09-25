@@ -37,6 +37,7 @@ const
 //------------------------------------------------------------------------------
 const
   PATH_FLAG = {$IFDEF Win32}'\'{$ELSE}'/'{$ENDIF};
+  PATH_LIST_FLAG = {$IFDEF Win32}';'{$ELSE}':'{$ENDIF};
 
 type
   TMmlBase = class(TMmlSystem)
@@ -4695,10 +4696,16 @@ var
       if FileExists(s) then begin Result := True; Exit; end;
 
       // 環境変数内をチェック
+      {$IFDEF Win32}
       ss := GetEnvironmentVariable('Path');
+      {$ELSE}
+      ss := GetEnvironmentVariable('PATH');
+      {$ENDIF}
       while ss<> '' do
       begin
-        p := GetToken(';', ss);
+        p := GetToken(PATH_LIST_FLAG, ss);
+        if p = '' then Continue;
+        if p[Length(p)] <> PATH_FLAG then p := p + PATH_FLAG;
         s := p + fname;
         if FileExists(s) then begin Result := True; Exit; end;
         s := p + 'Include' + PATH_FLAG + fname;
