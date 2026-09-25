@@ -1932,6 +1932,33 @@ fn rpn_data_entry_sorts_after_same_tick_events() {
     );
 }
 
+/// Verified byte-for-byte against the Pascal build.
+#[test]
+fn play_from_adjacent_rpn_selector_follows_data_entry() {
+    assert_golden(
+        "Time(1:2:0) RPN(0,0,2) Time(1:2:1) RPN(0,1,3) PlayFrom(2:1:0) c",
+        "4d546864000000060001000100604d54726b0000001c00b0650000b0640000b0060201b0650001b0640101b0060300ff2f00",
+    );
+}
+
+/// Verified byte-for-byte against the Pascal build.
+#[test]
+fn rpn_data_entry_follows_same_tick_note_off() {
+    assert_golden(
+        "c Time(1:1:76) RPN(0,0,2)",
+        "4d546864000000060001000100604d54726b0000001800903c6449b0650001b0640001803c6400b0060201ff2f00",
+    );
+}
+
+/// Verified byte-for-byte against the Pascal build.
+#[test]
+fn rpn_data_entry_precedes_later_note_off() {
+    assert_golden(
+        "RPN(0,0,2) c Time(1:1:76) c",
+        "4d546864000000060001000100604d54726b0000002000b0650000b0640000b0060200903c644b803c6401903c644b803c6415ff2f00",
+    );
+}
+
 /// Where in the source `PlayFrom` appears makes no difference: it is applied
 /// once, after the whole song is compiled, exactly as the Pascal build
 /// applies it at save time rather than as the source is read.
