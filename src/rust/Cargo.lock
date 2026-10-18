@@ -46,14 +46,14 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "sakuramml-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "sakuramml-core",
 ]
 
 [[package]]
 name = "sakuramml-core"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "sakuramml-wasm"
