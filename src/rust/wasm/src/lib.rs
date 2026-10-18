@@ -4,7 +4,7 @@
 //! instance for the rest of the page. Recoverable source errors are returned
 //! with partial MIDI data; only failures that prevent serialisation are thrown.
 
-use sakuramml_core::{compile_with_recovery, MemoryIncludes};
+use sakuramml_v2::{compile_with_recovery, MemoryIncludes};
 use wasm_bindgen::prelude::*;
 
 include!(concat!(env!("OUT_DIR"), "/embedded_includes.rs"));

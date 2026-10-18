@@ -3,7 +3,7 @@
 //! All the I/O lives here; the compiler core stays pure so the same code can
 //! run under WASI and in the browser.
 
-use sakuramml_core::IncludeResolver;
+use sakuramml_v2::IncludeResolver;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -57,7 +57,7 @@ fn run(args: &[String]) -> Result<(), Failure> {
                     path.display()
                 )
             })?;
-            let (text, _) = sakuramml_core::encoding::decode_auto(&bytes);
+            let (text, _) = sakuramml_v2::encoding::decode_auto(&bytes);
             (text, Some(path.clone()))
         }
     };
@@ -68,7 +68,7 @@ fn run(args: &[String]) -> Result<(), Failure> {
     });
 
     let resolver = FileIncludes::new(origin.as_deref());
-    let result = sakuramml_core::compile_with_recovery(&source, &resolver)
+    let result = sakuramml_v2::compile_with_recovery(&source, &resolver)
         .map_err(|e| format!("Failed...{e}"))?;
 
     for message in &result.messages {
@@ -190,11 +190,11 @@ fn help_text() -> String {
     format!(
         "=== MML Compiler sakuramml v{VERSION} (Rust) ===\n\
          [USAGE]\n\
-         csakura mmlfile [midifile] ... Compile file\n\
-         csakura -e code [midifile] ... Evaluate code\n\
-         csakura --dump-midi file.mid [dump.txt] ... Dump normalized events\n\
-         csakura -pause             ... Wait for Enter when done\n\
-         csakura -v                 ... Show version"
+         csakura2 mmlfile [midifile] ... Compile file\n\
+         csakura2 -e code [midifile] ... Evaluate code\n\
+         csakura2 --dump-midi file.mid [dump.txt] ... Dump normalized events\n\
+         csakura2 -pause             ... Wait for Enter when done\n\
+         csakura2 -v                 ... Show version"
     )
 }
 

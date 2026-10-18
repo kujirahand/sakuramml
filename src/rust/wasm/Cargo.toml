@@ -10,7 +10,7 @@ repository.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-sakuramml-core = { path = "../core" }
+sakuramml-v2 = { path = "../core" }
 wasm-bindgen = "0.2"
 
 # wasm-pack ships an older wasm-opt than the features rustc now emits by

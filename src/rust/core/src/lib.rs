@@ -6,7 +6,7 @@
 //! bytes and diagnostics that come back.
 //!
 //! ```
-//! use sakuramml_core::compile;
+//! use sakuramml_v2::compile;
 //!
 //! let result = compile("cde").unwrap();
 //! assert_eq!(&result.smf[..4], b"MThd");

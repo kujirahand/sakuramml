@@ -1,5 +1,5 @@
 [package]
-name = "sakuramml-core"
+name = "sakuramml-v2"
 description = "MML (Music Macro Language) to Standard MIDI File compiler core"
 version.workspace = true
 edition.workspace = true

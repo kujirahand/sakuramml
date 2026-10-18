@@ -8,7 +8,7 @@
 //! Every case here asserts the compile *returns* an error — never a panic,
 //! which under WASM would poison the module for the rest of the session.
 
-use sakuramml_core::compile;
+use sakuramml_v2::compile;
 
 #[track_caller]
 fn assert_error_contains(script: &str, needle: &str) {

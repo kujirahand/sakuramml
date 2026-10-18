@@ -5,7 +5,7 @@
 //! byte string. A few cases are pinned to bytes captured from the Pascal
 //! build, and the semantics of every case here was checked against it.
 
-use sakuramml_core::{compile, compiler::MAX_ARRAY_ELEMENTS, MemoryIncludes};
+use sakuramml_v2::{compile, compiler::MAX_ARRAY_ELEMENTS, MemoryIncludes};
 
 /// Compiling `script` must produce exactly what `equivalent` produces.
 #[track_caller]
@@ -454,7 +454,7 @@ fn calling_an_undefined_function_is_an_error() {
 
 #[test]
 fn functions_may_be_defined_in_an_include_file() {
-    use sakuramml_core::compile_with;
+    use sakuramml_v2::compile_with;
 
     let includes =
         MemoryIncludes::new().with("lib.h", "Function middle_c(){n60}".as_bytes().to_vec());
@@ -688,7 +688,7 @@ fn a_user_function_overrides_a_built_in_one() {
 /// `@(GrandPiano)` works without the song asking for anything.
 #[test]
 fn standard_include_is_loaded_automatically() {
-    use sakuramml_core::compile_with;
+    use sakuramml_v2::compile_with;
 
     let includes = MemoryIncludes::new().with(
         "stdmsg.h",
@@ -707,7 +707,7 @@ fn standard_include_is_loaded_automatically() {
 
 #[test]
 fn standard_include_rpn_wrappers_accept_a_parenthesised_parameter() {
-    use sakuramml_core::compile_with;
+    use sakuramml_v2::compile_with;
 
     let includes = MemoryIncludes::new().with(
         "stdmsg.h",

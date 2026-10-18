@@ -7,7 +7,7 @@
 //! cd src/pascal && ./csakura -e "cde" && xxd -p a.mid | tr -d '\n'
 //! ```
 
-use sakuramml_core::compile;
+use sakuramml_v2::compile;
 
 fn hex(s: &str) -> Vec<u8> {
     (0..s.len())
@@ -1053,7 +1053,7 @@ fn time_pointer() {
 
 #[test]
 fn include_resolves_through_the_resolver() {
-    use sakuramml_core::{compile_with, MemoryIncludes, NoIncludes};
+    use sakuramml_v2::{compile_with, MemoryIncludes, NoIncludes};
 
     let includes = MemoryIncludes::new().with("notes.h", "Int base=60;".as_bytes().to_vec());
     let out = compile_with("Include(notes.h) n(base)", &includes).unwrap();
@@ -1067,7 +1067,7 @@ fn include_resolves_through_the_resolver() {
 /// Include files are read as bytes, so a CP932 one works as well as UTF-8.
 #[test]
 fn include_files_may_be_cp932() {
-    use sakuramml_core::{compile_with, MemoryIncludes};
+    use sakuramml_v2::{compile_with, MemoryIncludes};
 
     // "テンポ150" in CP932, which is sutoton for Tempo=150.
     let mut cp932 = vec![0x83, 0x65, 0x83, 0x93, 0x83, 0x7c];
@@ -1176,7 +1176,7 @@ fn a_bare_quote_does_not_start_a_string() {
     let out = compile(r#"TrackName={"テスト１"} c"#).unwrap();
     let needle = "テスト１".as_bytes();
     let cp932: Vec<u8> = {
-        let (bytes, _) = sakuramml_core::encoding::encode_cp932("テスト１", 1);
+        let (bytes, _) = sakuramml_v2::encoding::encode_cp932("テスト１", 1);
         bytes
     };
     assert!(out.smf.windows(cp932.len()).any(|w| w == cp932));

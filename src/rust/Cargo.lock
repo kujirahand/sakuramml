@@ -45,21 +45,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
-name = "sakuramml-cli"
-version = "0.1.1"
-dependencies = [
- "sakuramml-core",
-]
+name = "sakuramml-v2"
+version = "2.1.1"
 
 [[package]]
-name = "sakuramml-core"
-version = "0.1.1"
+name = "sakuramml-v2-cli"
+version = "2.1.1"
+dependencies = [
+ "sakuramml-v2",
+]
 
 [[package]]
 name = "sakuramml-wasm"
 version = "0.1.0"
 dependencies = [
- "sakuramml-core",
+ "sakuramml-v2",
  "wasm-bindgen",
 ]
 

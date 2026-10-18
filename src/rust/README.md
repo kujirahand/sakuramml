@@ -11,7 +11,7 @@ See [../../plan.md](../../plan.md) for the migration plan and
 
 | crate | what it is |
 |---|---|
-| `core/` | `sakuramml-core` — the compiler. Does no I/O at all: text in, bytes and diagnostics out, so it runs unchanged in a CLI, under WASI and in a browser. |
+| `core/` | `sakuramml-v2` — the compiler. Does no I/O at all: text in, bytes and diagnostics out, so it runs unchanged in a CLI, under WASI and in a browser. |
 | `cli/` | `csakura` — command line front end, the counterpart of `src/pascal/csakura.dpr`. All file handling lives here. |
 | `wasm/` | `wasm-bindgen` bindings for the browser. |
 
@@ -19,7 +19,7 @@ See [../../plan.md](../../plan.md) for the migration plan and
 
 ```sh
 cargo test --workspace     # unit tests + golden tests against the Pascal output
-cargo run -p sakuramml-cli -- -e "cde" out.mid
+cargo run -p sakuramml-v2-cli -- -e "cde" out.mid
 ./build-wasm.sh            # browser package into wasm/pkg/
 ./build-wasm.sh nodejs     # Node.js-specific local package
 ./build-npm.sh             # public sakuramml npm package into wasm/pkg/

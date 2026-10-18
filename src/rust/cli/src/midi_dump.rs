@@ -351,11 +351,11 @@ fn text_command(kind: u8, data: &[u8]) -> Option<String> {
     let name = META_TEXT_NAMES
         .into_iter()
         .find_map(|(code, name)| (code == kind).then_some(name))?;
-    let text = sakuramml_core::encoding::decode_cp932(data);
+    let text = sakuramml_v2::encoding::decode_cp932(data);
     if text.contains('"') {
         return None;
     }
-    let (encoded, warnings) = sakuramml_core::encoding::encode_cp932(&text, 0);
+    let (encoded, warnings) = sakuramml_v2::encoding::encode_cp932(&text, 0);
     (encoded == data && warnings.is_empty()).then(|| format!("{name}(\"{text}\")"))
 }
 
