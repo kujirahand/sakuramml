@@ -5,7 +5,7 @@ const manifest = JSON.parse(
   await readFile(new URL("./pkg/package.json", import.meta.url), "utf8"),
 );
 assert.equal(manifest.name, "sakuramml-v2");
-assert.equal(manifest.version, "0.1.0");
+assert.equal(manifest.version, "0.2.0");
 assert.equal(manifest.license, "MIT");
 assert.deepEqual(manifest.files, [
   "sakuramml_bg.wasm",
@@ -30,4 +30,16 @@ const result = compileMml("Tempo=120 cde");
 assert.deepEqual(Array.from(result.midi.slice(0, 4)), [0x4d, 0x54, 0x68, 0x64]);
 assert.deepEqual(result.errors, []);
 assert.equal(version(), manifest.version);
+
+// 標準の Include/*.h が WASM に埋め込まれていて、addInclude なしで使えること。
+// (0.1.0 では stdmsg.h しか埋め込まれておらず、公開後に判明したため回帰防止として確認する)
+for (const name of ["chord2.h", "chord.h", "bend.h"]) {
+  const included = compileMml(`Include(${name}) cde`);
+  assert.deepEqual(
+    Array.from(included.midi.slice(0, 4)),
+    [0x4d, 0x54, 0x68, 0x64],
+    `Include(${name}) should produce a MIDI file`,
+  );
+  assert.deepEqual(included.errors, [], `Include(${name}) should not error`);
+}
 console.log(`npm smoke test passed: ${manifest.name}@${manifest.version}`);
