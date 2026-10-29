@@ -4323,6 +4323,26 @@ impl<'a> Compiler<'a> {
             } else {
                 cur.skip_spaces();
             }
+            // The Pascal build reads a `(...)` element of a list as a nested
+            // argument list and flattens it (`GetArgs` recursing into
+            // `AddArray`), which is how songs write one advance segment per
+            // group: `EP.T((55,95,!4.),(95,85,!8))`. A group whose body has
+            // no top-level comma is a scalar expression instead and keeps
+            // the ordinary path below, so `(85+8)` is unchanged.
+            if parenthesised && cur.peek() == Some('(') {
+                if let Some(group) = self.read_group_args(cur)? {
+                    // `max` counts flattened values, as it does for the
+                    // flat spelling; the group is still read in full, so
+                    // its syntax is validated before any excess is dropped.
+                    let room = max.saturating_sub(args.len());
+                    args.extend(group.into_iter().take(room));
+                    cur.skip_trivia();
+                    if args.len() >= max || !cur.eat(',') {
+                        break;
+                    }
+                    continue;
+                }
+            }
             let value = if assigned && !parenthesised {
                 // `Voice=Vo` — a bare term, which may be a variable or a call.
                 let line = cur.line();
@@ -4380,6 +4400,88 @@ impl<'a> Compiler<'a> {
         }
         if parenthesised && !cur.eat(')') {
             return Err(MmlError::new(cur.line(), "引数の括弧が閉じられていません"));
+        }
+        Ok(args)
+    }
+
+    /// Read one `(...)` group in an argument list as a nested list and
+    /// return its elements, recursively flattened, mirroring the Pascal
+    /// `GetArgs`. Returns `None` — leaving the cursor untouched — when the
+    /// group is a scalar parenthesised expression (its body holds no
+    /// top-level comma) or is never closed; the caller then reads it as an
+    /// ordinary expression, which reports any error.
+    fn read_group_args(&mut self, cur: &mut Cursor) -> Result<Option<Vec<i64>>> {
+        let line = cur.line();
+        let mut probe = cur.clone();
+        if !probe.eat('(') {
+            return Ok(None);
+        }
+        let Some(inner) = probe.read_balanced('(', ')') else {
+            return Ok(None);
+        };
+        if !has_top_level_comma(&inner) {
+            return Ok(None);
+        }
+        *cur = probe;
+        // The body is parsed from its own cursor, like the Pascal build's
+        // temporary source, so its contents cannot leak into what follows.
+        // Unlike the Pascal build, anything the list read stops short of
+        // is an error here, not silently discarded.
+        let mut body = Cursor::with_line(&inner, line);
+        let args = self.read_arg_list_body(&mut body)?;
+        body.skip_trivia();
+        if !body.is_eof() {
+            return Err(MmlError::new(
+                line,
+                "引数グループの末尾に解釈できない文字があります",
+            ));
+        }
+        Ok(Some(args))
+    }
+
+    /// Read a comma-separated argument list that has no outer parentheses
+    /// (the body of a group read by `read_group_args`) until it runs out.
+    /// Elements follow the same rules as in `read_args`: nested groups are
+    /// flattened, `%` takes a joined length, and anything else that can
+    /// start a value is an expression.
+    fn read_arg_list_body(&mut self, cur: &mut Cursor) -> Result<Vec<i64>> {
+        let mut args = Vec::new();
+        loop {
+            cur.skip_trivia();
+            if cur.is_eof() {
+                break;
+            }
+            if cur.peek() == Some('(') {
+                if let Some(group) = self.read_group_args(cur)? {
+                    args.extend(group);
+                } else {
+                    let line = cur.line();
+                    args.push(expr::eval(cur, self)?.as_int(line)?);
+                }
+            } else if cur.peek() == Some('%') {
+                let Some(value) = self.read_joined_argument_length(cur)? else {
+                    break;
+                };
+                args.push(value);
+            } else {
+                match cur.peek() {
+                    Some(c)
+                        if c.is_ascii_digit()
+                            || c == '-'
+                            || c == '$'
+                            || c == '!'
+                            || c.is_ascii_alphabetic() =>
+                    {
+                        let line = cur.line();
+                        args.push(expr::eval(cur, self)?.as_int(line)?);
+                    }
+                    _ => break,
+                }
+            }
+            cur.skip_trivia();
+            if !cur.eat(',') {
+                break;
+            }
         }
         Ok(args)
     }
@@ -5436,6 +5538,23 @@ impl<'a> Compiler<'a> {
             return Ok(Some(self.timebase * 4 / divisor.max(1)));
         }
         if cur.peek() == Some('(') {
+            // Evaluate only the balanced body, the way the Pascal build
+            // cuts the parentheses out with `GetMaruKakko` and evaluates
+            // that text alone. Reading a full expression from the live
+            // cursor would continue past the closing `)` and swallow what
+            // follows — in `v(83)>c` the `>` is an octave command, not a
+            // comparison. An unclosed `(` falls through to the plain
+            // expression read, which reports the error.
+            let mut probe = cur.clone();
+            probe.advance();
+            if let Some(inner) = probe.read_balanced('(', ')') {
+                *cur = probe;
+                // `eval_source` also rejects anything left over inside the
+                // parentheses, so `v(80,90)` stays an error rather than
+                // silently dropping the `,90`.
+                let value = self.eval_source(&inner, line)?;
+                return Ok(Some(value.as_int(line)?));
+            }
             let value = expr::eval(cur, self)?;
             return Ok(Some(value.as_int(line)?));
         }
@@ -5565,6 +5684,38 @@ fn split_play_args(source: &str) -> Vec<&str> {
     }
     args.push(&source[start..]);
     args
+}
+
+/// Whether `source` contains a comma outside every bracket pair — the
+/// mark of an argument list rather than a single scalar expression.
+fn has_top_level_comma(source: &str) -> bool {
+    let mut round = 0usize;
+    let mut curly = 0usize;
+    let mut square = 0usize;
+    let mut in_string = false;
+    for ch in source.chars() {
+        // A `"` inside an argument list opens a string literal (the
+        // octave-down mark cannot appear here), and brackets or commas
+        // inside it are text, not structure.
+        if ch == '"' {
+            in_string = !in_string;
+            continue;
+        }
+        if in_string {
+            continue;
+        }
+        match ch {
+            '(' => round += 1,
+            ')' => round = round.saturating_sub(1),
+            '{' => curly += 1,
+            '}' => curly = curly.saturating_sub(1),
+            '[' => square += 1,
+            ']' => square = square.saturating_sub(1),
+            ',' if round == 0 && curly == 0 && square == 0 => return true,
+            _ => {}
+        }
+    }
+    false
 }
 
 /// Split a function call on top-level commas. Unlike `Play`, semicolons are

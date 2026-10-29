@@ -226,6 +226,18 @@ fn malformed_delimiters_and_trailing_expression_text_are_errors() {
     assert_error_contains("If(1 xyz){c}", "式の末尾");
 }
 
+#[test]
+fn grouped_arguments_reject_leftovers() {
+    // An unclosed group is read as an expression, which reports it.
+    assert_error_contains("EP.T((1,2,3)", "括弧");
+    // Junk a group read stops short of is an error, not silently dropped.
+    assert_error_contains("EP.T((55,95,@)) c", "引数グループの末尾");
+    assert_error_contains("EP.T((1,2,3 4)) c", "引数グループの末尾");
+    // A scalar argument's parentheses must hold one whole expression.
+    assert_error_contains("v(80,90) c", "式の末尾");
+    assert_error_contains("v(1 2) c", "式の末尾");
+}
+
 // --- control flow ----------------------------------------------------------
 
 #[test]

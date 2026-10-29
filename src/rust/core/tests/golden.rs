@@ -1348,6 +1348,60 @@ fn nested_length_literal_in_on_time_matches_pascal_recursion() {
 }
 
 #[test]
+fn grouped_advance_arguments_are_flattened_like_pascal() {
+    // The Pascal `GetArgs` reads a `(...)` element of an argument list as
+    // a nested list and flattens it, so songs group one advance segment
+    // per pair of parentheses. Grouped and flat spellings must agree.
+    assert_same_bytes(
+        "CH(1) EP.T((55,95,!4.),(95,85,!8)) c4",
+        "CH(1) EP.T(55,95,!4.,95,85,!8) c4",
+    );
+    assert_same_bytes("CH(1) EP.T((55,95,!4.)) c4", "CH(1) EP.T(55,95,!4.) c4");
+    assert_same_bytes(
+        "CH(1) v.T((55,95,!4.),(95,85,!8)) c4",
+        "CH(1) v.T(55,95,!4.,95,85,!8) c4",
+    );
+    assert_same_bytes(
+        "CH(1) EP.W((50,85,!2),(85,55,!4)) c4",
+        "CH(1) EP.W(50,85,!2,85,55,!4) c4",
+    );
+    // Negative values, expressions and joined lengths inside a group.
+    assert_same_bytes(
+        "CH(1) PitchBend.T((-2800,0,!8),(-100,0,!8)) c4",
+        "CH(1) PitchBend.T(-2800,0,!8,-100,0,!8) c4",
+    );
+    assert_same_bytes("CH(1) EP.T((75,85+8,!8.)) c4", "CH(1) EP.T(75,93,!8.) c4");
+    assert_same_bytes("CH(1) EP.T((55,95,!4^2.)) c4", "CH(1) EP.T(55,95,!4^2.) c4");
+    // Groups nest.
+    assert_same_bytes(
+        "CH(1) EP.T(((55,95,!4.),(95,85,!8))) c4",
+        "CH(1) EP.T(55,95,!4.,95,85,!8) c4",
+    );
+    // Variables and line breaks inside a group.
+    assert_same_bytes(
+        "Int x=85; CH(1) EP.T((75,x,!8.)) c4",
+        "CH(1) EP.T(75,85,!8.) c4",
+    );
+    assert_same_bytes(
+        "CH(1) EP.T((55,95,!4.),\n(95,85,!8)) c4",
+        "CH(1) EP.T(55,95,!4.,95,85,!8) c4",
+    );
+    // A group without a top-level comma stays a scalar expression.
+    assert_same_bytes("CH(1) v((80+3)) c4", "CH(1) v(83) c4");
+}
+
+#[test]
+fn octave_after_parenthesised_argument_is_not_part_of_the_expression() {
+    // The Pascal build evaluates only the text inside an argument's
+    // parentheses, so in `v(83)>c` the `>` is the octave-up command, not
+    // a comparison operator consuming the note that follows.
+    assert_same_bytes("l8 v(83)>c", "l8 v(83) o6 c");
+    assert_same_bytes("l8 v(83)<c", "l8 v(83) o4 c");
+    // The form real songs use: a one-note octave mark after the shift.
+    compile("l8 v(83)>`e2`d4").unwrap();
+}
+
+#[test]
 fn note_attribute_cycle_delay_repeat_and_range_match_pascal() {
     assert_golden(
         "q.onCycle(!4,20,80) l4 cc",
