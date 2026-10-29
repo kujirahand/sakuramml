@@ -1033,3 +1033,60 @@ fn stretch_rejects_a_zero_length_phrase() {
     assert_error_contains("Stretch{}4", "長さが0");
     assert_error_contains("Stretch{TrackName={\"x\"}}4", "長さが0");
 }
+
+/// Pascal's `getTokenMML` cuts a token that starts with a lowercase letter to
+/// one letter, so single-letter Str macros can be written back to back. A
+/// name the script defined itself still reads whole.
+#[test]
+fn lowercase_tokens_are_single_letters_unless_defined() {
+    assert_same(r#"Str s={"c"} ss"#, "c c");
+    assert_same(r#"Str s={"c"} Str w={"d"} wrsr"#, "d r c r");
+    assert_same(r#"Str xy={"c"} xy"#, "c");
+    assert_same("Function ab(){n60} ab", "n60");
+}
+
+/// `subUserFunc` reads arguments when the next character is one of
+/// `= ( $ 0-9 ! {`, so a user function may be called as `f 60` or `f=60`.
+#[test]
+fn user_functions_take_space_and_equals_arguments() {
+    assert_same("Function F(Int a){n(a)} F 60", "n60");
+    assert_same("Function F(Int a){n(a)} F=60", "n60");
+    assert_same("Function F(Int a){n(a)} F(60)", "n60");
+    assert_same("Function F(Int a,Int b){n(a) n(b)} F 60,62", "n60 n62");
+    assert_same("Function F(Int a){n(a)} F=2*30 c", "n60 c");
+}
+
+/// A user `Function BR` (as `Include/stdmsg.h` defines) shadows the built-in
+/// and must stay callable in every form the built-in accepts.
+#[test]
+fn user_br_matches_the_builtin_in_every_call_form() {
+    let def = "Function BR(mm){RPN=0,0,(mm);} ";
+    assert_same(&format!("{def}BR(120) c"), "BR(120) c");
+    assert_same(&format!("{def}BR 120 c"), "BR(120) c");
+    assert_same(&format!("{def}BR=120 c"), "BR(120) c");
+}
+
+/// Control-change commands read their value with `GetIntValueAndCalc`, so
+/// the value after `=` may continue as an expression; `Tempo` reads a literal
+/// with `GetIntValue` and still rejects it.
+#[test]
+fn control_change_equals_value_continues_as_an_expression() {
+    assert_same("CHO=5*10 c", "CHO=50 c");
+    assert_same("REV=5*10 c", "REV=50 c");
+    assert_same("CHO=2+3 c", "CHO=5 c");
+    assert_same("Int x=4; CHO=x*10 c", "CHO=40 c");
+    assert!(compile("Tempo=5*10 c").is_err());
+}
+
+/// `scriptTimeKey` reads a time bound only when it starts with `(`; the last
+/// value is the key, so `TimeKey(2)` is `TimeKey(,,2)`.
+#[test]
+fn time_key_accepts_the_short_forms() {
+    assert_same("TimeKey(2) c", "TimeKey(,,2) c");
+    assert_same(
+        "TimeKey((1:1:0),2) Time(1:1:0) c",
+        "TimeKey((1:1:0),,2) Time(1:1:0) c",
+    );
+    assert_same("TimeKey2(3) c", "TimeKey2(,,3) c");
+    assert_error_contains("TimeKey() c", "TimeKey");
+}

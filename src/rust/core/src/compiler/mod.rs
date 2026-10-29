@@ -1104,9 +1104,22 @@ impl<'a> Compiler<'a> {
     /// A named command: `Tempo=120`, `TR=2`, `TrackName={"..."}` and friends.
     fn word_command(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let word = cur
+        let mut word = cur
             .read_word()
             .ok_or_else(|| MmlError::new(line, "コマンド名を読み取れませんでした"))?;
+
+        // Pascal's `getTokenMML` cuts a token starting with a lowercase letter
+        // to that one letter (only `A-Z`, `_` and `#` start a whole word), so
+        // `Str s={"c"} ss` is the macro `s` twice. A name the script defined
+        // itself still reads as a whole word.
+        if word.len() > 1
+            && word.starts_with(|c: char| c.is_ascii_lowercase())
+            && !self.functions.contains_key(&word)
+            && !self.variables.contains_key(&word)
+        {
+            cur.retreat(word.len() - 1);
+            word.truncate(1);
+        }
 
         // A user definition wins over the built-in meaning of its name, the
         // same way it does for note letters: `Str S={"c"}` makes a later `S`
@@ -1382,7 +1395,7 @@ impl<'a> Compiler<'a> {
                 if let Some(handled) = self.modifier(cur, target)? {
                     return Ok(handled);
                 }
-                let value = self.expect_int_arg(cur, &word)?;
+                let value = self.expect_int_arg_calc(cur, &word)?;
                 self.write_cc(cc, value);
                 Ok(())
             }
@@ -1500,7 +1513,7 @@ impl<'a> Compiler<'a> {
     fn read_call_args(&mut self, cur: &mut Cursor, name: &str) -> Result<Vec<Value>> {
         cur.skip_spaces();
         if !cur.eat('(') {
-            return Ok(Vec::new());
+            return self.read_bare_call_args(cur, name);
         }
         let line = cur.line();
         let source = cur
@@ -1561,6 +1574,44 @@ impl<'a> Compiler<'a> {
                 }
             }
             args.push(self.eval_source(raw, line)?);
+        }
+        Ok(args)
+    }
+
+    /// The arguments of a user function written without parentheses:
+    /// `BR 120`, `BR=120`, `f 1,2`.
+    ///
+    /// Pascal's `subUserFunc` reads arguments whenever the next character is
+    /// one of `= ( $ 0-9 ! {` (`ARG_CHAR`), taking one `GetArgCalc` value per
+    /// declared parameter, comma separated. A function with no parameters
+    /// takes nothing here, so a following digit stays an ordinary command.
+    fn read_bare_call_args(&mut self, cur: &mut Cursor, name: &str) -> Result<Vec<Value>> {
+        let param_count = self
+            .functions
+            .get(name)
+            .map_or(0, |function| function.params.len());
+        let starts_arg = matches!(cur.peek(), Some('=' | '$' | '!' | '{'))
+            || cur.peek().is_some_and(|c| c.is_ascii_digit());
+        if param_count == 0 || !starts_arg {
+            return Ok(Vec::new());
+        }
+        let line = cur.line();
+        cur.eat('=');
+        let mut args = Vec::new();
+        while args.len() < param_count {
+            cur.skip_spaces();
+            if cur.peek() == Some('!') {
+                let length = self
+                    .read_joined_argument_length(cur)?
+                    .ok_or_else(|| MmlError::new(line, "!の後には音長を指定してください"))?;
+                args.push(Value::Int(length));
+            } else {
+                args.push(self.read_calc_value(cur)?);
+            }
+            cur.skip_spaces();
+            if !cur.eat(',') {
+                break;
+            }
         }
         Ok(args)
     }
@@ -3235,30 +3286,41 @@ impl<'a> Compiler<'a> {
         let body = cur
             .read_balanced('(', ')')
             .ok_or_else(|| MmlError::new(line, "TimeKeyの括弧が閉じていません"))?;
-        let args = split_function_args(&body);
-        if args.len() < 3 || args[2].trim().is_empty() {
+        // Like the Pascal `scriptTimeKey`, a leading `(` introduces a time
+        // bound; anything else leaves that bound at its default (the current
+        // time / no end). Whatever remains is the key value, so `TimeKey(2)`
+        // is `TimeKey(,,2)`.
+        let now = self.track().time;
+        let mut args = Cursor::with_line(&body, line);
+        let mut bounds: [Option<String>; 2] = [None, None];
+        for bound in bounds.iter_mut() {
+            args.skip_spaces();
+            if args.eat('(') {
+                let inner = args
+                    .read_balanced('(', ')')
+                    .ok_or_else(|| MmlError::new(line, "TimeKeyの括弧が閉じていません"))?;
+                *bound = Some(inner);
+            }
+            args.skip_spaces();
+            args.eat(',');
+        }
+        let mut key_source = String::new();
+        while let Some(ch) = args.advance() {
+            key_source.push(ch);
+        }
+        if key_source.trim().is_empty() {
             return Err(MmlError::new(
                 line,
                 "TimeKeyには(開始,終了,値)を指定してください",
             ));
         }
-        let now = self.track().time;
-        let parse_time = |compiler: &mut Self, text: &str| -> Result<i64> {
-            let text = text.trim();
-            if text.is_empty() {
-                return Ok(now);
-            }
-            let text = text
-                .strip_prefix('(')
-                .and_then(|s| s.strip_suffix(')'))
-                .unwrap_or(text);
-            compiler.time_value(text, line)
+        let from = match &bounds[0] {
+            Some(text) => self.time_value(text.trim(), line)?,
+            None => now,
         };
-        let from = parse_time(self, args[0])?;
-        let to = if args[1].trim().is_empty() {
-            None
-        } else {
-            Some(parse_time(self, args[1])?)
+        let to = match &bounds[1] {
+            Some(text) => Some(self.time_value(text.trim(), line)?),
+            None => None,
         };
         if to.is_some_and(|to| to <= from) {
             return Err(MmlError::new(
@@ -3266,7 +3328,7 @@ impl<'a> Compiler<'a> {
                 "TimeKeyの終了位置は開始位置より後にしてください",
             ));
         }
-        let key = self.eval_source(args[2].trim(), line)?.as_int(line)?;
+        let key = self.eval_source(key_source.trim(), line)?.as_int(line)?;
         let rule = TimeKeyRule { from, to, key };
         if second {
             self.time_keys2.push(rule);
@@ -3934,13 +3996,17 @@ impl<'a> Compiler<'a> {
             .ok_or_else(|| MmlError::new(line, "ループが ] で閉じられていません"))?;
 
         let (body, tail) = split_loop_break(&body);
+        // A tail may hold further `:` markers for this same loop; Pascal
+        // treats every one of them as this loop's break marker, so they are
+        // no-ops on the passes where the tail plays at all.
+        let tail = tail.map(strip_loop_breaks);
         for iteration in 0..count.max(0) {
             self.run_fragment(body, line)?;
             if self.take_exit() {
                 break;
             }
             let is_last = iteration == count - 1;
-            if let Some(tail) = tail {
+            if let Some(tail) = &tail {
                 if !is_last {
                     self.run_fragment(tail, line)?;
                 }
@@ -5513,6 +5579,37 @@ impl<'a> Compiler<'a> {
         self.expect_int(cur, name)
     }
 
+    /// Like `expect_int_arg`, but the value after `=` may continue as a full
+    /// expression (`CHO=5*10`).
+    ///
+    /// The Pascal control-change commands read their value with
+    /// `GetIntValueAndCalc` (`GetArgCalc`), which keeps consuming operators
+    /// after the first term; `Tempo=5*10` goes through `GetIntValue` and does
+    /// not. A trailing operator with no operand (`CHO=5 >c`) is left alone, as
+    /// Pascal rewinds to before the operator in that case.
+    fn expect_int_arg_calc(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
+        let line = cur.line();
+        cur.skip_spaces();
+        if cur.eat('=') {
+            cur.skip_spaces();
+            return self.read_calc_value(cur)?.as_int(line);
+        }
+        self.expect_int(cur, name)
+    }
+
+    /// A value followed by any operators that continue it, the way Pascal's
+    /// `GetArgCalc` reads one. When the continuation does not parse (an
+    /// operator that is really the next command, as in `CHO=5 >c`), only the
+    /// first term is taken.
+    fn read_calc_value(&mut self, cur: &mut Cursor) -> Result<Value> {
+        let mut probe = cur.clone();
+        if let Ok(value) = expr::eval(&mut probe, self) {
+            *cur = probe;
+            return Ok(value);
+        }
+        expr::eval_term(cur, self)
+    }
+
     /// Read a numeric argument: a bare integer literal, or — inside
     /// parentheses — a full expression, which is the only place variables may
     /// appear (`o(x)` works, `ox` does not, matching the Pascal build).
@@ -6176,6 +6273,25 @@ fn parse_switch_arms(source: &str, line: usize) -> Result<Vec<(Option<String>, S
         }
     }
     Ok(arms)
+}
+
+/// Remove every top-level `:` loop-break marker from a loop tail.
+///
+/// Pascal executes each `:` in a loop body as a break marker for that
+/// loop (`scriptLoopBreak`): on the final pass the first one exits, and
+/// on earlier passes all of them are no-ops. So the tail of `[2 c:d:e]`
+/// plays as `de` on the first pass, giving `c d e c` overall.
+fn strip_loop_breaks(fragment: &str) -> String {
+    let mut out = String::new();
+    let mut rest = fragment;
+    loop {
+        let (head, tail) = split_loop_break(rest);
+        out.push_str(head);
+        match tail {
+            Some(tail) => rest = tail,
+            None => return out,
+        }
+    }
 }
 
 /// Split a loop body at a top-level `:`.

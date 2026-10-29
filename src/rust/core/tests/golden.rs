@@ -858,6 +858,12 @@ fn time_key_ranges_match_pascal_at_boundaries_and_when_overlapping() {
         "Time(1:2:0) TimeKey(,,2)c",
         "4d546864000000060001000100604d54726b0000000c60903e644b803e6415ff2f00",
     );
+    // `scriptTimeKey` reads a bound only when it starts with `(`, so a lone
+    // value is the key: `TimeKey(2)` is `TimeKey(,,2)`.
+    assert_golden(
+        "Time(1:2:0) TimeKey(2)c",
+        "4d546864000000060001000100604d54726b0000000c60903e644b803e6415ff2f00",
+    );
     // Later matching declarations win. When their half-open range ends, the
     // still-active earlier declaration becomes visible again.
     assert_golden(
@@ -1191,6 +1197,17 @@ fn japanese_symbols_convert() {
     assert_same_bytes("↑ド↓レ", ">c<d");
     assert_same_bytes("ド♯レ♭", "c#d-");
     assert_same_bytes("音量一二三 ドレミ", "v123 cde");
+}
+
+/// A loop body may contain more than one `:` break marker (Pascal's
+/// `scriptLoopBreak` treats each one as the same loop's marker): the tail
+/// after the first marker still plays on non-final passes, with the
+/// remaining markers acting as no-ops. mml_id=1908's PN3 part relies on
+/// this, with two markers inside one `[...]` body.
+#[test]
+fn loop_tail_may_contain_further_break_markers() {
+    assert_same_bytes("[2 c:d:e] f", "cde cf");
+    assert_same_bytes("[3 c:d:e] f", "cde cde cf");
 }
 
 #[track_caller]
