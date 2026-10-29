@@ -1377,6 +1377,15 @@ fn grouped_advance_arguments_are_flattened_like_pascal() {
         "CH(1) EP.T(((55,95,!4.),(95,85,!8))) c4",
         "CH(1) EP.T(55,95,!4.,95,85,!8) c4",
     );
+    // Variables and line breaks inside a group.
+    assert_same_bytes(
+        "Int x=85; CH(1) EP.T((75,x,!8.)) c4",
+        "CH(1) EP.T(75,85,!8.) c4",
+    );
+    assert_same_bytes(
+        "CH(1) EP.T((55,95,!4.),\n(95,85,!8)) c4",
+        "CH(1) EP.T(55,95,!4.,95,85,!8) c4",
+    );
     // A group without a top-level comma stays a scalar expression.
     assert_same_bytes("CH(1) v((80+3)) c4", "CH(1) v(83) c4");
 }

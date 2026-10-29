@@ -4331,7 +4331,11 @@ impl<'a> Compiler<'a> {
             // the ordinary path below, so `(85+8)` is unchanged.
             if parenthesised && cur.peek() == Some('(') {
                 if let Some(group) = self.read_group_args(cur)? {
-                    args.extend(group);
+                    // `max` counts flattened values, as it does for the
+                    // flat spelling; the group is still read in full, so
+                    // its syntax is validated before any excess is dropped.
+                    let room = max.saturating_sub(args.len());
+                    args.extend(group.into_iter().take(room));
                     cur.skip_trivia();
                     if args.len() >= max || !cur.eat(',') {
                         break;
@@ -4421,8 +4425,18 @@ impl<'a> Compiler<'a> {
         *cur = probe;
         // The body is parsed from its own cursor, like the Pascal build's
         // temporary source, so its contents cannot leak into what follows.
+        // Unlike the Pascal build, anything the list read stops short of
+        // is an error here, not silently discarded.
         let mut body = Cursor::with_line(&inner, line);
-        self.read_arg_list_body(&mut body).map(Some)
+        let args = self.read_arg_list_body(&mut body)?;
+        body.skip_trivia();
+        if !body.is_eof() {
+            return Err(MmlError::new(
+                line,
+                "引数グループの末尾に解釈できない文字があります",
+            ));
+        }
+        Ok(Some(args))
     }
 
     /// Read a comma-separated argument list that has no outer parentheses
@@ -5535,8 +5549,10 @@ impl<'a> Compiler<'a> {
             probe.advance();
             if let Some(inner) = probe.read_balanced('(', ')') {
                 *cur = probe;
-                let mut body = Cursor::with_line(&inner, line);
-                let value = expr::eval(&mut body, self)?;
+                // `eval_source` also rejects anything left over inside the
+                // parentheses, so `v(80,90)` stays an error rather than
+                // silently dropping the `,90`.
+                let value = self.eval_source(&inner, line)?;
                 return Ok(Some(value.as_int(line)?));
             }
             let value = expr::eval(cur, self)?;
@@ -5676,7 +5692,18 @@ fn has_top_level_comma(source: &str) -> bool {
     let mut round = 0usize;
     let mut curly = 0usize;
     let mut square = 0usize;
+    let mut in_string = false;
     for ch in source.chars() {
+        // A `"` inside an argument list opens a string literal (the
+        // octave-down mark cannot appear here), and brackets or commas
+        // inside it are text, not structure.
+        if ch == '"' {
+            in_string = !in_string;
+            continue;
+        }
+        if in_string {
+            continue;
+        }
         match ch {
             '(' => round += 1,
             ')' => round = round.saturating_sub(1),
