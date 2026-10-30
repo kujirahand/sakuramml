@@ -1369,3 +1369,17 @@ fn semicolon_terminates_a_call_argument_list() {
     );
     compile("Int A = ASC(MID({\"abc\"},1,1););").unwrap();
 }
+
+/// Doubled `=` markers are tolerated where Pascal tolerates them:
+/// Tempo skips a whole run, TimeSignature and the note-info commands
+/// skip two (their own plus the value reader's). The sutoton
+/// spelling 拍子=4,4 needs the TimeSignature case, since the
+/// replacement text already ends in `=`.
+#[test]
+fn doubled_equals_markers_are_tolerated() {
+    assert_same("Tempo==120 c", "Tempo=120 c");
+    assert_same("Tempo= = 120 c", "Tempo=120 c");
+    assert_same("System.TimeSignature==4,4 c", "System.TimeSignature=4,4 c");
+    assert_same("v==100 c", "v100 c");
+    assert_same("q==90 c", "q90 c");
+}

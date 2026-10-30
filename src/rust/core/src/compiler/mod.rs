@@ -1416,7 +1416,7 @@ impl<'a> Compiler<'a> {
 
         match word.as_str() {
             "Tempo" | "TEMPO" => {
-                let bpm = self.expect_int_arg(cur, &word)?;
+                let bpm = self.expect_tempo_arg(cur, &word)?;
                 let usec = Self::tempo_usec(bpm, line)?;
                 self.tempo = bpm;
                 let time = self.track().time;
@@ -3736,6 +3736,12 @@ impl<'a> Compiler<'a> {
     /// `TimeSignature=n,d` — also recorded, since `Time` is measured in bars.
     fn time_signature(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        // Two `=` are tolerated here (the command's own skip plus the
+        // value reader's), which the sutoton spelling needs: its
+        // replacement text for 拍子 already ends in `=`, so a written
+        // `拍子=4,4` arrives as `System.TimeSignature==4,4`.
+        cur.skip_spaces();
+        cur.eat('=');
         let args = self.read_args(cur, 2)?;
         if args.len() < 2 {
             return Err(MmlError::new(line, "拍子は 分子,分母 で指定してください"));
@@ -6508,6 +6514,10 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         cur.skip_spaces();
         if cur.eat('=') {
+            // Pascal's SetNoteInfo skips one `=` and its value reader
+            // skips another, so `v==100` is a plain assignment too.
+            cur.skip_spaces();
+            cur.eat('=');
             return self.expect_int(cur, name);
         }
         let mut signs = 0i64;
@@ -6562,6 +6572,27 @@ impl<'a> Compiler<'a> {
             // while `Tempo=100+20` reads the bare term and the `+20`
             // fails as the next statement. (The control-change commands
             // use `expect_int_arg_calc`, whose values always calculate.)
+            if matches!(cur.peek(), Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '#') {
+                return self.read_calc_value(cur)?.as_int(line);
+            }
+            return expr::eval_term(cur, self)?.as_int(line);
+        }
+        self.expect_int(cur, name)
+    }
+
+    /// Tempo's argument: Pascal's scriptTempo skips a whole run of `=`
+    /// before the value (ver.1 compatibility, `Tempo= = 50`), where
+    /// other commands accept just one. The value itself then reads
+    /// exactly as in `expect_int_arg`'s `=` branch.
+    fn expect_tempo_arg(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
+        let line = cur.line();
+        cur.skip_spaces();
+        let mut ate = false;
+        while cur.eat('=') {
+            ate = true;
+            cur.skip_spaces();
+        }
+        if ate {
             if matches!(cur.peek(), Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '#') {
                 return self.read_calc_value(cur)?.as_int(line);
             }
