@@ -1279,3 +1279,14 @@ fn slur_may_start_the_next_line() {
     assert_same("c4\n& d4 e4", "c4 & d4 e4");
     assert_same("c4\n\n& d4", "c4 & d4");
 }
+
+/// A chord's joined length uses the full GetNoteLength grammar after
+/// the quote, `+` / `-` parts included, even with no leading digits:
+/// `'fa-'^-8` is the default length tied, minus an eighth.
+#[test]
+fn chord_length_joins_may_add_and_subtract() {
+    assert_same("'ceg'^-8 c", "'ceg'4^4-8 c");
+    assert_same("'ceg'-8 c", "'ceg'4-8 c");
+    assert_same("'ceg'^+8 c", "'ceg'4^4+8 c");
+    assert_same("'ceg' ^ -8 c", "'ceg'4^4-8 c");
+}

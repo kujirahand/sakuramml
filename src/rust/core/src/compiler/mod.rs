@@ -3042,36 +3042,10 @@ impl<'a> Compiler<'a> {
 
         // A tie immediately after a chord belongs to the chord length. The
         // command-level `^` is a rest in Pascal, so the chord parser must
-        // consume a joined chord length itself. Whitespace may separate
-        // tie groups (`'a#g'^^^^^ ^^^^^^,,-5`): Pascal's GetNoteLength
-        // skips spaces around the joins, so the scan here does the same,
-        // without consuming trailing space when no tie follows.
-        {
-            let mut probe = cur.clone();
-            probe.skip_spaces();
-            if probe.peek() == Some('^') {
-                *cur = probe;
-                let mut total = length.unwrap_or_else(|| self.track().length);
-                loop {
-                    while cur.eat('^') {
-                        let part = self
-                            .read_length(cur)?
-                            .unwrap_or_else(|| self.track().length);
-                        total = total.checked_add(part).ok_or_else(|| {
-                            MmlError::new(line, "和音の結合音長が範囲を超えました")
-                        })?;
-                    }
-                    let mut probe = cur.clone();
-                    probe.skip_spaces();
-                    if probe.peek() == Some('^') {
-                        *cur = probe;
-                        continue;
-                    }
-                    break;
-                }
-                length = Some(total);
-            }
-        }
+        // consume a joined chord length itself: the full GetNoteLength
+        // join grammar, `^` / `+` / `-` parts included (`'fa-'^-8`),
+        // with spaces allowed around the joins (`'a#g'^^^^^ ^^^^^^,,-5`).
+        length = self.extend_default_length_joins(cur, length, default_length, line)?;
 
         // `'ceg'4,80,100,0,5` — gate/velocity/timing/octave after the
         // length, in that fixed order (Pascal's `RecWaon.Option` chain,
