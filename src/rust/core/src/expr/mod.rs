@@ -855,9 +855,11 @@ fn parse_call_args(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Vec<Va
         }
         args.push(eval(cur, ctx)?);
         cur.skip_spaces();
-        // A `:` terminates the whole list, as in Pascal's GetArgs
-        // (`GU(6:2)` passes only 6); the rest of the group is discarded.
-        if cur.peek() == Some(':') {
+        // A `:` or `;` terminates the whole list, as in Pascal's
+        // GetArgs (`GU(6:2)` passes only 6, and the stray semicolon in
+        // `MID(S,1,1);` ends the inner list); the rest of the group
+        // is discarded.
+        if matches!(cur.peek(), Some(':') | Some(';')) {
             if !cur.skip_group_remainder('(', ')') {
                 return Err(MmlError::new(
                     cur.line(),

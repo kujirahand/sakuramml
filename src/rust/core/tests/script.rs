@@ -1356,3 +1356,16 @@ fn comments_do_not_disturb_structure() {
     assert_same("Function F(){ /* } */ c }; F", "c");
     compile("If(1){ CuePoint={\"http://example.com/x.dls\"} c }").unwrap();
 }
+
+/// A stray `;` inside a call's argument list ends the list, like
+/// `:` does (legacy headers write `ASC(MID(S,1,1);)`): the rest of
+/// the group is discarded, so `G(3;5)` is `G(3)`.
+#[test]
+fn semicolon_terminates_a_call_argument_list() {
+    let defs = "Function G(Int A, Int B){ Result = A*10+B } ";
+    assert_same(
+        &format!("{defs} If(G(3;5) == 30){{ c }}"),
+        &format!("{defs} If(G(3) == 30){{ c }}"),
+    );
+    compile("Int A = ASC(MID({\"abc\"},1,1););").unwrap();
+}

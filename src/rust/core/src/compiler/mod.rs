@@ -4568,15 +4568,15 @@ impl<'a> Compiler<'a> {
     }
 
     /// Like `eval_source`, but for one element of a call's argument list:
-    /// a `:` after the value terminates the whole list in Pascal's
-    /// GetArgs (`GU(6:2)` passes only 6, and `GU(6:2,9)` drops the 9
-    /// too), reported through the returned flag. Any other trailing
-    /// character is the usual trailing-junk error.
+    /// a `:` or `;` after the value terminates the whole list in
+    /// Pascal's GetArgs (`GU(6:2)` passes only 6, and `GU(6:2,9)`
+    /// drops the 9 too), reported through the returned flag. Any
+    /// other trailing character is the usual trailing-junk error.
     fn eval_call_arg(&mut self, raw: &str, line: usize) -> Result<(Value, bool)> {
         let mut cur = Cursor::with_line(raw.trim(), line);
         let value = expr::eval(&mut cur, self)?;
         cur.skip_trivia();
-        if cur.peek() == Some(':') {
+        if matches!(cur.peek(), Some(':') | Some(';')) {
             return Ok((value, true));
         }
         if !cur.is_eof() {
