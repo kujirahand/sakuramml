@@ -5,7 +5,7 @@ const manifest = JSON.parse(
   await readFile(new URL("./pkg/package.json", import.meta.url), "utf8"),
 );
 assert.equal(manifest.name, "sakuramml-v2");
-assert.equal(manifest.version, "0.3.1");
+assert.equal(manifest.version, "0.3.3");
 assert.equal(manifest.license, "MIT");
 assert.deepEqual(manifest.files, [
   "sakuramml_bg.wasm",
