@@ -1299,3 +1299,12 @@ fn command_values_may_be_signed() {
     assert_same("PitchBend(+100) c", "PitchBend(100) c");
     compile("p%-100 c").unwrap();
 }
+
+/// An argument length joins with `-` as well as `^`:
+/// `%!1^1-16` in a note's gate slot parses (and matches the Pascal
+/// build byte for byte), and `!4-8` in an argument is a dotted quarter.
+#[test]
+fn argument_length_joins_may_subtract() {
+    compile("a16,%!1^1-16 c").unwrap();
+    assert_same("EP.onTime(0,127,!4-8) c", "EP.onTime(0,127,!8) c");
+}

@@ -6270,6 +6270,7 @@ impl<'a> Compiler<'a> {
         let mut total = 0i64;
         let mut found = false;
         let mut after_join = false;
+        let mut sign = 1i64;
         loop {
             // A part may carry its own `!` (a nested length after a join,
             // converted once more below) or no value at all: Pascal's
@@ -6304,12 +6305,18 @@ impl<'a> Compiler<'a> {
                 part_value += half;
             }
             total = total
-                .checked_add(part_value)
+                .checked_add(sign * part_value)
                 .ok_or_else(|| MmlError::new(cur.line(), "結合音長が範囲を超えました"))?;
             found = true;
-            if !cur.eat('^') {
+            // GetNoteLength joins with `^`, `+` and `-` alike
+            // (`%!1^1-16` in a note's gate slot, `!8-16` in an argument).
+            sign = if cur.eat('^') || cur.eat('+') {
+                1
+            } else if cur.eat('-') {
+                -1
+            } else {
                 break;
-            }
+            };
             cur.skip_bars();
             cur.skip_spaces();
             after_join = true;
