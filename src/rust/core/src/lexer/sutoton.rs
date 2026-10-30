@@ -114,25 +114,27 @@ pub fn to_mml_with(src: &str, user: &mut UserMacros) -> String {
     let chars: Vec<char> = src.chars().collect();
     let mut out = String::with_capacity(src.len());
     let mut index = 0;
-    let mut in_string = false;
 
     'outer: while index < chars.len() {
         let ch = chars[index];
-        if in_string {
-            out.push(ch);
-            if ch == '"' {
-                in_string = false;
-            }
-            index += 1;
-            continue;
-        }
-        // A string starts at `{"`, both characters at once; a bare `"` is the
-        // octave-down operator.
+        // A string starts at `{"`, both characters at once; a bare `"` is
+        // the octave-down operator. Pascal's CopyToKakkoEnd scans to the
+        // first `}`: only when the segment ends with `"}` is it a real
+        // string and copied verbatim. The unclosed form `{"ceg}` is plain
+        // MML with an octave mark, so only the `{"` is emitted and the
+        // content is converted like everything else.
         if ch == '{' && chars.get(index + 1) == Some(&'"') {
+            let close = (index + 2..chars.len()).find(|&i| chars[i] == '}');
+            if let Some(end) = close.filter(|&end| end > index + 2 && chars[end - 1] == '"') {
+                for c in &chars[index..=end] {
+                    out.push(*c);
+                }
+                index = end + 1;
+                continue;
+            }
             out.push('{');
             out.push('"');
             index += 2;
-            in_string = true;
             continue;
         }
         // Comments pass through untouched: prose must not be expanded (a
@@ -290,6 +292,15 @@ mod tests {
     fn user_macros_override_the_builtin_table() {
         // ド is normally c.
         assert_eq!(to_mml("~{ド}={n60}ド"), "n60");
+    }
+
+    #[test]
+    fn unclosed_brace_quote_is_plain_mml() {
+        // `{"` without a closing `"}` before the brace ends is not a
+        // string at all (Pascal's CopyToKakkoEnd rewinds): the content
+        // converts like ordinary MML, and text after the brace is not
+        // swallowed. dSakura writes tuplets this way: 連符{"シレ#ソ}4.
+        assert_eq!(to_mml(r#"Div{"シレ#ソ}4音量104"#), r#"Div{"bd#g}4v104"#);
     }
 
     #[test]

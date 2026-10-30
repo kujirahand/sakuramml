@@ -123,7 +123,7 @@ pub fn normalize(src: &str) -> String {
         let ch = chars[index];
         if in_string {
             out.push(ch);
-            if ch == '"' {
+            if ch == '}' {
                 in_string = false;
             }
             index += 1;
@@ -137,7 +137,9 @@ pub fn normalize(src: &str) -> String {
         }
         // A string starts at `{"`, both characters at once. A bare `"` is the
         // octave-down operator, so it must not open one — `q30 d"ad` is three
-        // notes, not a string.
+        // notes, not a string. The verbatim region ends at the first `}`,
+        // not at the closing quote: Pascal's CopyToKakkoEnd does exactly
+        // that so the unclosed form `{"ceg}` keeps working.
         if ch == '{' && chars.get(index + 1) == Some(&'"') {
             out.push('{');
             out.push('"');
