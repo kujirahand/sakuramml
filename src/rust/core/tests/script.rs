@@ -1201,3 +1201,21 @@ fn scalar_group_yields_its_first_value() {
     let out = compile("Int X = (1,2); Print(X) Print((1,2)+10)").unwrap();
     assert_eq!(out.messages, vec!["1".to_string(), "11".to_string()]);
 }
+
+/// A variable named `h` keeps its assignments even though `h` is also
+/// the Q2 command (`Int h=3; h=90;` sets 90 in Pascal too); the bare
+/// command form and longer defined names resolve as names first.
+#[test]
+fn h_command_does_not_steal_defined_names() {
+    let out = compile("Int h=3; h=90; Print(h)").unwrap();
+    assert_eq!(out.messages, vec!["90".to_string()]);
+    let out = compile("Int hp=3; hp=90; Print(hp)").unwrap();
+    assert_eq!(out.messages, vec!["90".to_string()]);
+    // The Q2 command itself still reads its value, even when an Int
+    // variable happens to share the name.
+    let out = compile("Int h=3; h10 Print(MML(h))").unwrap();
+    assert_eq!(out.messages, vec!["10".to_string()]);
+    assert_same("h10 c", "h10 c");
+    compile("Str h={c} h d").unwrap();
+    compile("Function hatena(){ n60 } hatena").unwrap();
+}

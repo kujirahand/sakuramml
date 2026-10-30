@@ -1088,13 +1088,33 @@ impl<'a> Compiler<'a> {
             }
             'h' => {
                 // `h` sets Q2 (Pascal's funcQgate2): a step value taken
-                // off every gate. A Str variable whose name begins with
-                // `h` still wins, since names resolve before commands.
+                // off every gate. A defined name still wins, since names
+                // resolve before commands: a longer defined name (`hp`,
+                // a function called `hatena`) goes to the word path, and
+                // a variable named exactly `h` keeps its assignments
+                // (`Int h=3; h=90;` sets 90 in Pascal too, while the
+                // bare `h10` stays the Q2 command).
                 let mut probe = cur.clone();
                 if let Some(word) = probe.read_word() {
-                    if matches!(self.variables.get(&word), Some(Value::Str(_))) {
-                        let name = cur.read_word().unwrap_or_default();
-                        return self.string_variable(cur, &name, line);
+                    let defined =
+                        self.variables.contains_key(&word) || self.functions.contains_key(&word);
+                    let assignment_follows = {
+                        let mut rest = probe.clone();
+                        rest.skip_spaces();
+                        rest.peek() == Some('=')
+                            || matches!(rest.peek(), Some('+') | Some('-'))
+                                && rest.peek() == rest.peek_at(1)
+                            || matches!(rest.peek(), Some('+') | Some('-') | Some('*') | Some('/'))
+                                && rest.peek_at(1) == Some('=')
+                    };
+                    // An Int/Array variable named `h` followed by a value
+                    // (`h10`) is the Q2 command, as in Pascal; a Str `h`
+                    // plays its macro and a function `h` is called, so
+                    // those delegate whenever they are defined.
+                    let plays_or_calls = matches!(self.variables.get(&word), Some(Value::Str(_)))
+                        || self.functions.contains_key(&word);
+                    if defined && (word != "h" || assignment_follows || plays_or_calls) {
+                        return self.word_command(cur);
                     }
                 }
                 cur.advance();
