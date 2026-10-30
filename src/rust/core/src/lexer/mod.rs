@@ -64,6 +64,12 @@ impl Cursor {
         Some(ch)
     }
 
+    /// Step back over `count` characters that contain no line break, such as
+    /// part of an identifier that was just read.
+    pub fn retreat(&mut self, count: usize) {
+        self.pos = self.pos.saturating_sub(count);
+    }
+
     /// Consume `ch` if it is next, reporting whether it was there.
     pub fn eat(&mut self, ch: char) -> bool {
         if self.peek() == Some(ch) {

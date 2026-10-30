@@ -858,6 +858,12 @@ fn time_key_ranges_match_pascal_at_boundaries_and_when_overlapping() {
         "Time(1:2:0) TimeKey(,,2)c",
         "4d546864000000060001000100604d54726b0000000c60903e644b803e6415ff2f00",
     );
+    // `scriptTimeKey` reads a bound only when it starts with `(`, so a lone
+    // value is the key: `TimeKey(2)` is `TimeKey(,,2)`.
+    assert_golden(
+        "Time(1:2:0) TimeKey(2)c",
+        "4d546864000000060001000100604d54726b0000000c60903e644b803e6415ff2f00",
+    );
     // Later matching declarations win. When their half-open range ends, the
     // still-active earlier declaration becomes visible again.
     assert_golden(
@@ -1193,6 +1199,17 @@ fn japanese_symbols_convert() {
     assert_same_bytes("音量一二三 ドレミ", "v123 cde");
 }
 
+/// A loop body may contain more than one `:` break marker (Pascal's
+/// `scriptLoopBreak` treats each one as the same loop's marker): the tail
+/// after the first marker still plays on non-final passes, with the
+/// remaining markers acting as no-ops. mml_id=1908's PN3 part relies on
+/// this, with two markers inside one `[...]` body.
+#[test]
+fn loop_tail_may_contain_further_break_markers() {
+    assert_same_bytes("[2 c:d:e] f", "cde cf");
+    assert_same_bytes("[3 c:d:e] f", "cde cde cf");
+}
+
 #[track_caller]
 fn assert_same_bytes(actual: &str, expected: &str) {
     let left = compile(actual).unwrap_or_else(|e| panic!("failed to compile {actual:?}: {e}"));
@@ -1202,6 +1219,43 @@ fn assert_same_bytes(actual: &str, expected: &str) {
         hex_string(&right.smf),
         "\n  {actual:?}\n  should equal {expected:?}"
     );
+}
+
+/// `GetArgCalc` folds operators by `CalcTMStack`'s pass order and gives back an
+/// operator with no term after it, so `>c` after a value is still an octave.
+#[test]
+fn calc_values_follow_precedence_and_rewind_before_a_dangling_operator() {
+    assert_same_bytes("CHO=2+3*4 c", "CHO=14 c");
+    assert_same_bytes("CHO=5 >c", "CHO=5 o6 c");
+    assert_same_bytes("Function F(a){CHO=a} F 2+3*4 c", "CHO=14 c");
+}
+
+/// `scriptTimeKey` drops what follows the key's first comma.
+#[test]
+fn time_key_key_stops_at_the_first_comma() {
+    assert_same_bytes("Time(1:2:0) TimeKey(,,2,3)c", "Time(1:2:0) TimeKey(,,2)c");
+}
+
+#[test]
+fn bare_function_arguments() {
+    assert_same_bytes("Function F(a){CHO=a} F!4 c", "CHO=96 c");
+    assert_same_bytes("Function F(s){s} F {\"c\"}", "c");
+    // A function with no parameters takes nothing from what follows.
+    assert_same_bytes("Function G(){e} G c", "e c");
+    // Pascal's GetArgs also consumes a trailing comma.
+    assert_same_bytes("Function F(a){CHO=a} F 60, c", "CHO=60 c");
+}
+
+#[test]
+fn loop_colon_markers_survive_nesting_parentheses_and_strings() {
+    assert_same_bytes("[2 [2 a:b]:c:d]", "abacd aba");
+    assert_same_bytes("[2 c:Time(1:2:0):e]", "c Time(1:2:0) e c");
+    assert_same_bytes("[2 c:Str Y={\"a:b\"}:e]", "c Str Y={\"a:b\"} e c");
+}
+
+#[test]
+fn defined_names_are_read_whole_alongside_one_letter_macros() {
+    assert_same_bytes("Str s={\"c\"} Function sm(a){CHO=a} s sm 5", "c CHO=5");
 }
 
 // --- rhythm mode, Sub, and user-defined Japanese macros ---

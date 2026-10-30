@@ -111,7 +111,162 @@ pub fn eval_term(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     parse_unary(cur, ctx)
 }
 
+/// Apply one binary operator to two evaluated operands. Every reader below
+/// (the precedence-climbing `eval` and the Pascal-shaped `eval_calc`) goes
+/// through this, so a value means the same thing whichever one produced it.
+fn apply_binary(op: &str, left: Value, right: Value, line: usize) -> Result<Value> {
+    match op {
+        "||" => Ok(Value::Int((left.truthy() || right.truthy()) as i64)),
+        "&&" => Ok(Value::Int((left.truthy() && right.truthy()) as i64)),
+        "==" | "!=" | "<" | ">" | "<=" | ">=" => {
+            // Strings compare as strings; anything else compares numerically.
+            let result = match (&left, &right) {
+                (Value::Str(a), Value::Str(b)) => compare(op, a, b),
+                _ => compare(op, &left.as_int(line)?, &right.as_int(line)?),
+            };
+            Ok(Value::Int(result as i64))
+        }
+        "+" => match (&left, &right) {
+            // `+` concatenates when either side is a string.
+            (Value::Str(s), _) => Ok(Value::Str(format!("{s}{}", right.as_str()))),
+            (_, Value::Str(s)) => Ok(Value::Str(format!("{}{s}", left.as_str()))),
+            _ => left
+                .as_int(line)?
+                .checked_add(right.as_int(line)?)
+                .map(Value::Int)
+                .ok_or_else(|| MmlError::new(line, "整数の加算結果が範囲を超えました")),
+        },
+        "-" => left
+            .as_int(line)?
+            .checked_sub(right.as_int(line)?)
+            .map(Value::Int)
+            .ok_or_else(|| MmlError::new(line, "整数の減算結果が範囲を超えました")),
+        _ => {
+            let (a, b) = (left.as_int(line)?, right.as_int(line)?);
+            let value = match op {
+                "*" => a
+                    .checked_mul(b)
+                    .ok_or_else(|| MmlError::new(line, "整数の乗算結果が範囲を超えました"))?,
+                _ if b == 0 => return Err(MmlError::new(line, "0で割ることはできません")),
+                "/" => a
+                    .checked_div(b)
+                    .ok_or_else(|| MmlError::new(line, "整数の除算結果が範囲を超えました"))?,
+                _ => a
+                    .checked_rem(b)
+                    .ok_or_else(|| MmlError::new(line, "整数の剰余演算結果が範囲を超えました"))?,
+            };
+            Ok(Value::Int(value))
+        }
+    }
+}
+
+fn compare<T: PartialOrd>(op: &str, a: &T, b: &T) -> bool {
+    match op {
+        "==" => a == b,
+        "!=" => a != b,
+        "<" => a < b,
+        ">" => a > b,
+        "<=" => a <= b,
+        _ => a >= b,
+    }
+}
+
+/// Evaluate a value the way Pascal's `GetArgCalc` reads one: a first term,
+/// then operator-and-term pairs for as long as they parse, folded by
+/// `CalcTMStack`'s pass order (`* / %`, then `+ -`, then comparisons, then
+/// and/or).
+///
+/// An operator with no term after it is not part of the value: the cursor
+/// rewinds to before the operator, so `CHO=5 >c` leaves `>c` (an octave
+/// shift) for the caller. Each term is evaluated once, on a probe cursor that
+/// is adopted when the term parses, so terms with side effects (`Random`,
+/// user functions) never run twice. Errors from the calculation itself, such
+/// as division by zero, are returned.
+///
+/// `^` is not an operator here even though Pascal lists it: in MML it is the
+/// tie mark, as in `CHO=5 ^c`.
+pub fn eval_calc(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    let line = cur.line();
+    let mut terms = vec![parse_unary(cur, ctx)?];
+    let mut ops: Vec<&'static str> = Vec::new();
+    loop {
+        let mut probe = cur.clone();
+        probe.skip_spaces();
+        let Some((op, len)) = peek_calc_operator(&probe) else {
+            break;
+        };
+        for _ in 0..len {
+            probe.advance();
+        }
+        match parse_unary(&mut probe, ctx) {
+            Ok(term) => {
+                *cur = probe;
+                ops.push(op);
+                terms.push(term);
+            }
+            // No term after the operator: it belongs to the next command.
+            Err(_) => break,
+        }
+    }
+
+    for level in 0..=3 {
+        let mut terms_in = terms.into_iter();
+        let mut folded = vec![terms_in.next().expect("a first term was read")];
+        let mut rest_ops = Vec::new();
+        for (op, term) in ops.into_iter().zip(terms_in) {
+            if op_level(op) == level {
+                let left = folded.pop().expect("folded is never empty");
+                folded.push(apply_binary(op, left, term, line)?);
+            } else {
+                rest_ops.push(op);
+                folded.push(term);
+            }
+        }
+        terms = folded;
+        ops = rest_ops;
+    }
+    Ok(terms.remove(0))
+}
+
+/// Pass number of an operator in `CalcTMStack`.
+fn op_level(op: &str) -> u8 {
+    match op {
+        "*" | "/" | "%" => 0,
+        "+" | "-" => 1,
+        "==" | "!=" | "<" | ">" | "<=" | ">=" => 2,
+        _ => 3,
+    }
+}
+
+/// The binary operator at the cursor and its length in characters, limited to
+/// those `apply_binary` implements. A lone `=` is equality, as in Pascal; a
+/// lone `&` or `|` is the logical operator; a lone `!` is not an operator.
+fn peek_calc_operator(cur: &Cursor) -> Option<(&'static str, usize)> {
+    Some(match (cur.peek()?, cur.peek_at(1)) {
+        ('*', _) => ("*", 1),
+        // `//` and `/*` start comments.
+        ('/', Some('/') | Some('*')) => return None,
+        ('/', _) => ("/", 1),
+        ('%', _) => ("%", 1),
+        ('+', _) => ("+", 1),
+        ('-', _) => ("-", 1),
+        ('=', Some('=')) => ("==", 2),
+        ('=', _) => ("==", 1),
+        ('!', Some('=')) => ("!=", 2),
+        ('<', Some('=')) => ("<=", 2),
+        ('<', _) => ("<", 1),
+        ('>', Some('=')) => (">=", 2),
+        ('>', _) => (">", 1),
+        ('&', Some('&')) => ("&&", 2),
+        ('&', _) => ("&&", 1),
+        ('|', Some('|')) => ("||", 2),
+        ('|', _) => ("||", 1),
+        _ => return None,
+    })
+}
+
 fn parse_or(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    let line = cur.line();
     let mut left = parse_and(cur, ctx)?;
     loop {
         cur.skip_spaces();
@@ -119,7 +274,7 @@ fn parse_or(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             cur.advance();
             cur.advance();
             let right = parse_and(cur, ctx)?;
-            left = Value::Int((left.truthy() || right.truthy()) as i64);
+            left = apply_binary("||", left, right, line)?;
         } else {
             return Ok(left);
         }
@@ -127,6 +282,7 @@ fn parse_or(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
 }
 
 fn parse_and(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    let line = cur.line();
     let mut left = parse_comparison(cur, ctx)?;
     loop {
         cur.skip_spaces();
@@ -134,7 +290,7 @@ fn parse_and(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             cur.advance();
             cur.advance();
             let right = parse_comparison(cur, ctx)?;
-            left = Value::Int((left.truthy() && right.truthy()) as i64);
+            left = apply_binary("&&", left, right, line)?;
         } else {
             return Ok(left);
         }
@@ -160,29 +316,7 @@ fn parse_comparison(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value
     }
 
     let right = parse_additive(cur, ctx)?;
-    // Strings compare as strings; anything else compares numerically.
-    let result = match (&left, &right) {
-        (Value::Str(a), Value::Str(b)) => match op {
-            "==" => a == b,
-            "!=" => a != b,
-            "<" => a < b,
-            ">" => a > b,
-            "<=" => a <= b,
-            _ => a >= b,
-        },
-        _ => {
-            let (a, b) = (left.as_int(line)?, right.as_int(line)?);
-            match op {
-                "==" => a == b,
-                "!=" => a != b,
-                "<" => a < b,
-                ">" => a > b,
-                "<=" => a <= b,
-                _ => a >= b,
-            }
-        }
-    };
-    Ok(Value::Int(result as i64))
+    apply_binary(op, left, right, line)
 }
 
 fn parse_additive(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
@@ -191,38 +325,13 @@ fn parse_additive(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> 
     loop {
         cur.skip_spaces();
         let op = match cur.peek() {
-            // `||` is the or-operator, not two additions.
-            Some('+') => '+',
-            Some('-') => '-',
+            Some('+') => "+",
+            Some('-') => "-",
             _ => return Ok(left),
         };
         cur.advance();
         let right = parse_multiplicative(cur, ctx)?;
-
-        left =
-            match (&left, op) {
-                // `+` concatenates when either side is a string.
-                (Value::Str(s), '+') => Value::Str(format!("{s}{}", right.as_str())),
-                _ => {
-                    if op == '+' {
-                        if let Value::Str(s) = &right {
-                            Value::Str(format!("{}{s}", left.as_str()))
-                        } else {
-                            let a = left.as_int(line)?;
-                            let b = right.as_int(line)?;
-                            Value::Int(a.checked_add(b).ok_or_else(|| {
-                                MmlError::new(line, "整数の加算結果が範囲を超えました")
-                            })?)
-                        }
-                    } else {
-                        let a = left.as_int(line)?;
-                        let b = right.as_int(line)?;
-                        Value::Int(a.checked_sub(b).ok_or_else(|| {
-                            MmlError::new(line, "整数の減算結果が範囲を超えました")
-                        })?)
-                    }
-                }
-            };
+        left = apply_binary(op, left, right, line)?;
     }
 }
 
@@ -232,27 +341,14 @@ fn parse_multiplicative(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<V
     loop {
         cur.skip_spaces();
         let op = match cur.peek() {
-            Some('*') => '*',
-            Some('/') if !matches!(cur.peek_at(1), Some('/') | Some('*')) => '/',
-            Some('%') => '%',
+            Some('*') => "*",
+            Some('/') if !matches!(cur.peek_at(1), Some('/') | Some('*')) => "/",
+            Some('%') => "%",
             _ => return Ok(left),
         };
         cur.advance();
         let right = parse_unary(cur, ctx)?;
-        let (a, b) = (left.as_int(line)?, right.as_int(line)?);
-        let value = match op {
-            '*' => a
-                .checked_mul(b)
-                .ok_or_else(|| MmlError::new(line, "整数の乗算結果が範囲を超えました"))?,
-            _ if b == 0 => return Err(MmlError::new(line, "0で割ることはできません")),
-            '/' => a
-                .checked_div(b)
-                .ok_or_else(|| MmlError::new(line, "整数の除算結果が範囲を超えました"))?,
-            _ => a
-                .checked_rem(b)
-                .ok_or_else(|| MmlError::new(line, "整数の剰余演算結果が範囲を超えました"))?,
-        };
-        left = Value::Int(value);
+        left = apply_binary(op, left, right, line)?;
     }
 }
 
