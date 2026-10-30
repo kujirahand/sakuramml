@@ -127,13 +127,15 @@ mod tests {
 
     #[test]
     fn wrapper_returns_partial_midi_and_errors() {
-        let result = match compile_mml("c NotACommand d") {
+        // `@` with no voice number is a genuine error (an unknown word
+        // alone is only a warning since the Pascal-parity change).
+        let result = match compile_mml("c @ d") {
             Ok(result) => result,
             Err(_) => panic!("recoverable source errors must not be thrown"),
         };
         assert_eq!(&result.midi[..4], b"MThd");
         assert_eq!(result.errors.len(), 1);
-        assert!(result.errors[0].contains("NotACommand"));
+        assert!(result.errors[0].contains("@"));
     }
 
     #[test]

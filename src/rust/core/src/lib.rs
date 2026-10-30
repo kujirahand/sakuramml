@@ -129,17 +129,26 @@ mod tests {
     }
 
     #[test]
-    fn reports_unknown_command_without_panicking() {
-        let err = compile("NotACommand").unwrap_err();
-        assert!(err.message.contains("未定義"));
+    fn unknown_command_is_a_warning_not_an_error() {
+        // The Pascal build only hints at an unknown statement word and
+        // carries on compiling; the name surfaces as a warning instead.
+        let out = compile("NotACommand").unwrap();
+        assert!(out.errors.is_empty());
+        assert!(out
+            .warnings
+            .iter()
+            .any(|w| w.message.contains("NotACommand") && w.message.contains("未定義")));
     }
 
     #[test]
     fn recovering_compile_reports_errors_and_keeps_later_notes() {
         let out = compile_recovering("c NotACommand d @ e").unwrap();
-        assert_eq!(out.errors.len(), 2);
-        assert!(out.errors[0].message.contains("NotACommand"));
-        assert!(out.errors[1].message.contains("@"));
+        assert_eq!(out.errors.len(), 1);
+        assert!(out.errors[0].message.contains("@"));
+        assert!(out
+            .warnings
+            .iter()
+            .any(|w| w.message.contains("NotACommand")));
         for note in [60, 62, 64] {
             assert!(out.smf.windows(3).any(|event| event == [0x90, note, 100]));
         }
@@ -156,17 +165,25 @@ mod tests {
     #[test]
     fn recovering_compile_deduplicates_loop_diagnostics() {
         let out = compile_recovering("[3 NotACommand] c").unwrap();
-        assert_eq!(out.errors.len(), 1);
-        assert!(out.errors[0].message.contains("NotACommand"));
+        assert!(out.errors.is_empty());
+        assert!(out
+            .warnings
+            .iter()
+            .any(|w| w.message.contains("NotACommand")));
         assert!(out.smf.windows(3).any(|event| event == [0x90, 60, 100]));
     }
 
     #[test]
-    fn recovering_compile_reports_and_discards_a_dangling_slur() {
+    fn dangling_slur_warns_and_plays_the_note_like_pascal() {
+        // Pascal compiles `c&` successfully and plays the note with its
+        // ordinary gate; the dangling slur is not an error there.
         let out = compile_recovering("c&").unwrap();
-        assert_eq!(out.errors.len(), 1);
-        assert!(out.errors[0].message.contains("&の後に音符がありません"));
-        assert!(!out.smf.windows(3).any(|event| event == [0x90, 60, 100]));
+        assert!(out.errors.is_empty());
+        assert!(out
+            .warnings
+            .iter()
+            .any(|w| w.message.contains("&の後に音符がありません")));
+        assert!(out.smf.windows(3).any(|event| event == [0x90, 60, 100]));
     }
 
     #[test]

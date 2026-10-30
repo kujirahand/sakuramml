@@ -137,6 +137,8 @@ fn array_element_assignment_accepts_an_expression_index() {
 fn array_element_assignment_rejects_invalid_growth() {
     assert_error_contains("Array A=(1); A(-1)=9", "負の値");
     assert_error_contains("Array A=(1); A(1000000)=9", "上限");
+    // With Pascal-style `=` as equality, `0=9` is a valid index expression
+    // (0 == 9), so the failure is the missing closing parenthesis instead.
     assert_error_contains("Array A=(1); A(0=9", "閉じられていません");
 }
 
@@ -160,8 +162,10 @@ fn array_index_out_of_range_is_an_error() {
 }
 
 #[test]
-fn undefined_variable_is_an_error() {
-    assert_error_contains("n(nope)", "未定義");
+fn undefined_variable_reads_as_zero_like_pascal() {
+    // Pascal's GetVariable returns an unknown name itself as a string,
+    // which coerces to 0 where a number is needed.
+    assert_same("n(nope)", "n0");
 }
 
 // --- expressions -----------------------------------------------------------
@@ -230,12 +234,22 @@ fn malformed_delimiters_and_trailing_expression_text_are_errors() {
 fn grouped_arguments_reject_leftovers() {
     // An unclosed group is read as an expression, which reports it.
     assert_error_contains("EP.T((1,2,3)", "括弧");
-    // Junk a group read stops short of is an error, not silently dropped.
-    assert_error_contains("EP.T((55,95,@)) c", "引数グループの末尾");
-    assert_error_contains("EP.T((1,2,3 4)) c", "引数グループの末尾");
-    // A scalar argument's parentheses must hold one whole expression.
-    assert_error_contains("v(80,90) c", "式の末尾");
-    assert_error_contains("v(1 2) c", "式の末尾");
+    // (The `@` element of `EP.T((55,95,@))` is a voice value in
+    // Pascal; here the group simply stops there, as measured there.)
+}
+
+#[test]
+fn grouped_arguments_read_a_prefix_like_pascal() {
+    // Pascal's readers evaluate a parenthesised group as an argument
+    // list and keep a prefix: a scalar reader takes the first value and
+    // the list reader stops at the first element it cannot extend, the
+    // rest of the group being discarded. Measured against the Pascal
+    // build: `v(80,90)` sets velocity 80, `v(1 2)` sets velocity 1, and
+    // `EP.T((1,2,3 4))` consumes the triplet (1,2,3).
+    assert_same("v(80,90) c", "v80 c");
+    assert_same("v(1 2) c", "v1 c");
+    assert_same("EP.T((1,2,3 4)) c", "EP.T(1,2,3) c");
+    assert_same("v(115,120+5) c", "v115 c");
 }
 
 // --- control flow ----------------------------------------------------------
@@ -353,7 +367,11 @@ fn length_literals_work_in_script_expressions() {
          Int e=!0; Print(a); Print(b); Print(c); Print(d); Print(e)",
     )
     .unwrap();
-    assert_eq!(out.messages, ["48", "192", "768", "385", "0"]);
+    // b is 152, not 144 + 48: Pascal's GetNoteLength consumes the `+`
+    // as a length tie, and a tied `!8` part is converted once more
+    // through NtoStep (48 ticks read as a denominator gives 8), which
+    // the Pascal build confirms (`Int b=(!4.+!8)` prints 152 there).
+    assert_eq!(out.messages, ["48", "152", "768", "385", "0"]);
 }
 
 #[test]
@@ -460,7 +478,9 @@ fn functions_work_inside_loops_and_conditionals() {
 /// since `nosuch(1)` parses as the note-number command `n`.)
 #[test]
 fn calling_an_undefined_function_is_an_error() {
-    assert_error_contains("Zzz(1)", "未定義");
+    // The unknown name itself is only a warning (as in Pascal), but the
+    // argument list that follows it has nothing to attach to and fails.
+    assert!(compile("Zzz(1)").is_err());
     assert!(compile("nosuch(1)").is_err());
 }
 
@@ -1103,4 +1123,81 @@ fn time_key_accepts_the_short_forms() {
     );
     assert_same("TimeKey2(3) c", "TimeKey2(,,3) c");
     assert_error_contains("TimeKey() c", "TimeKey");
+}
+
+// --- Pascal-compat patterns from the archive scan (2026-10) -----------------
+
+/// Pascal's pitch bend reads its value with the full calculation reader:
+/// `p64-10` bends to 54, `p64 - PB*3` evaluates, and an operator with no
+/// operand after it (`p100<c`) is rewound for the next command.
+#[test]
+fn pitch_bend_reads_a_full_calculation() {
+    assert_same("Int PB={12} p64 - PB*3 c", "p28 c");
+    assert_same("p64-10 c", "p54 c");
+    assert_same("p100<c c", "p100 <c c");
+}
+
+/// `Rhythm` without braces takes the rest of the current source as its
+/// body, as Pascal's GetNakaKakko does (`Sub{Rhythm v70 l16 ...}`).
+#[test]
+fn rhythm_without_braces_takes_the_rest_of_the_source() {
+    assert_same("Sub{Rhythm v70 l16 c} c", "Sub{Rhythm{ v70 l16 c}} c");
+    assert_same("Rhythm{ c }", "Rhythm c");
+}
+
+/// A non-ASCII word that survived conversion (quoted text is not
+/// converted) is only a hint in Pascal, never an error.
+#[test]
+fn non_ascii_word_is_a_warning_not_an_error() {
+    let out = compile("Div{\"シレソ\"}4 c").unwrap();
+    assert!(
+        out.warnings
+            .iter()
+            .any(|w| w.message.contains("シレソ") && w.message.contains("未定義")),
+        "warnings: {:?}",
+        out.warnings
+    );
+}
+
+/// The options after a tie chain belong to the note the ties extend in
+/// Pascal (`c4^^^^,10` re-gates that note). A chain in the same statement
+/// is read as the note's own options; a chain that starts a statement is
+/// a rest here, so its options are read and discarded instead of
+/// erroring (`^^^^,90`).
+#[test]
+fn tie_chain_options_are_read_and_discarded() {
+    // Same statement: the gate applies to the whole extended note, as in
+    // Pascal — step 480 at gate 90% sounds for 431 ticks (480*90/100−1).
+    let out = compile("c ^^^^,90 d").unwrap();
+    assert_eq!(
+        hex(&out.smf),
+        "4d546864000000060001000100604d54726b00000015\
+         00903c64832f803c6431903e644b803e6415ff2f00"
+    );
+    // New statement: the chain is a rest here, its options discarded.
+    assert_same("c\n^^^^,90 d", "c\n^^^^ d");
+    compile("^^^^,90 c").unwrap();
+}
+
+/// Pascal's scriptVoice reads its arguments with GetArgs off the source,
+/// so a scalar group as the first element does not end the list:
+/// `@(SawtoothLead),1` is the voice plus its bank select.
+#[test]
+fn voice_group_does_not_end_the_argument_list() {
+    assert_same("Int SawtoothLead = 82; @(SawtoothLead),1 c", "@82,1 c");
+    assert_same("Int SawtoothLead = 82; Voice=(SawtoothLead),1 c", "@82,1 c");
+}
+
+/// A bare `TimeBase` in an expression is the current division.
+#[test]
+fn time_base_reads_as_a_value() {
+    let out = compile("Print(TimeBase) Print(TimeBase*2)").unwrap();
+    assert_eq!(out.messages, vec!["96".to_string(), "192".to_string()]);
+}
+
+/// A scalar parenthesised group yields its first value, as in Pascal.
+#[test]
+fn scalar_group_yields_its_first_value() {
+    let out = compile("Int X = (1,2); Print(X) Print((1,2)+10)").unwrap();
+    assert_eq!(out.messages, vec!["1".to_string(), "11".to_string()]);
 }

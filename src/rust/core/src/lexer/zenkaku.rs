@@ -48,8 +48,16 @@ const SYMBOLS: &[(char, char)] = &[
 
 /// Convert a full-width character to its half-width equivalent, if it has one.
 pub fn to_half_width(ch: char) -> Option<char> {
-    // Full-width ASCII: '！'(U+FF01) ..= '～'(U+FF5E) maps to '!'..='~'.
-    if ('\u{FF01}'..='\u{FF5E}').contains(&ch) {
+    // Pascal's table converts the full-width punctuation and digits,
+    // but NOT the full-width alphabet: `Ｔ` stays `Ｔ`, so a user
+    // sutoton keyed on it can never rewrite the `T` of `TR` or `Time`.
+    let converts = matches!(ch,
+        '\u{FF01}'..='\u{FF0F}'
+        | '\u{FF10}'..='\u{FF19}'
+        | '\u{FF1A}'..='\u{FF20}'
+        | '\u{FF3E}' | '\u{FF3F}'
+        | '\u{FF5B}'..='\u{FF5E}');
+    if converts {
         return char::from_u32('!' as u32 + (ch as u32 - 0xFF01));
     }
     SYMBOLS
@@ -58,10 +66,54 @@ pub fn to_half_width(ch: char) -> Option<char> {
         .map(|(_, to)| *to)
 }
 
+/// Copy a comment starting at `index` (which points at `/`) verbatim into
+/// `out`, returning the position just past it. Block comments nest, as they
+/// do in the Pascal build's `skipComment`.
+pub(crate) fn push_comment(chars: &[char], index: usize, out: &mut String) -> Option<usize> {
+    let mut position = index;
+    if chars.get(position + 1) == Some(&'/') {
+        while position < chars.len() {
+            let ch = chars[position];
+            out.push(ch);
+            position += 1;
+            if ch == '\n' {
+                break;
+            }
+        }
+        return Some(position);
+    }
+    if chars.get(position + 1) == Some(&'*') {
+        let mut nest = 0;
+        while position < chars.len() {
+            let ch = chars[position];
+            let next = chars.get(position + 1);
+            out.push(ch);
+            position += 1;
+            if ch == '/' && next == Some(&'*') {
+                out.push('*');
+                position += 1;
+                nest += 1;
+            } else if ch == '*' && next == Some(&'/') {
+                out.push('/');
+                position += 1;
+                nest -= 1;
+                if nest <= 0 {
+                    break;
+                }
+            }
+        }
+        return Some(position);
+    }
+    None
+}
+
 /// Normalise full-width symbols in a source string.
 ///
 /// Text inside double quotes is left alone: it is user data (track names,
 /// lyrics), not MML syntax — and its digits and brackets must survive intact.
+/// Comments are likewise copied verbatim: Pascal's `ConvToHalfSign` skips
+/// them, and converting prose could manufacture `/*` or `*/` sequences that
+/// corrupt the comment's extent.
 pub fn normalize(src: &str) -> String {
     let mut out = String::with_capacity(src.len());
     let chars: Vec<char> = src.chars().collect();
@@ -76,6 +128,12 @@ pub fn normalize(src: &str) -> String {
             }
             index += 1;
             continue;
+        }
+        if ch == '/' {
+            if let Some(next) = push_comment(&chars, index, &mut out) {
+                index = next;
+                continue;
+            }
         }
         // A string starts at `{"`, both characters at once. A bare `"` is the
         // octave-down operator, so it must not open one — `q30 d"ad` is three
@@ -99,8 +157,12 @@ mod tests {
 
     #[test]
     fn converts_full_width_ascii() {
-        assert_eq!(normalize("ｃｄｅ"), "cde");
-        assert_eq!(normalize("Ｔｅｍｐｏ＝１２０"), "Tempo=120");
+        // Punctuation and digits convert; the full-width alphabet does
+        // not — Pascal's `ConvToHalfSign` table has no letters in it, so
+        // `ｃｄｅ` stays an (undefined) word and `Ｔ` stays available as a
+        // sutoton key that cannot collide with ASCII commands.
+        assert_eq!(normalize("ｃｄｅ"), "ｃｄｅ");
+        assert_eq!(normalize("Ｔｅｍｐｏ＝１２０"), "Ｔｅｍｐｏ=120");
         assert_eq!(normalize("（４：１：０）"), "(4:1:0)");
     }
 

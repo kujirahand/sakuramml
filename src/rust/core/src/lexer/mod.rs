@@ -111,15 +111,23 @@ impl Cursor {
                     }
                 }
                 Some('/') if self.peek_at(1) == Some('*') => {
+                    // Block comments nest in the Pascal build (`skipComment`
+                    // counts depth), and legacy files rely on it.
                     self.advance();
                     self.advance();
-                    while !self.is_eof() {
+                    let mut nest = 1;
+                    while !self.is_eof() && nest > 0 {
                         if self.peek() == Some('*') && self.peek_at(1) == Some('/') {
                             self.advance();
                             self.advance();
-                            break;
+                            nest -= 1;
+                        } else if self.peek() == Some('/') && self.peek_at(1) == Some('*') {
+                            self.advance();
+                            self.advance();
+                            nest += 1;
+                        } else {
+                            self.advance();
                         }
-                        self.advance();
                     }
                 }
                 _ => return,
@@ -134,7 +142,35 @@ impl Cursor {
         }
     }
 
+    /// Skip measure bars (`|`) sitting where a length continues: Pascal's
+    /// length reader steps over them, so `c2^|4` ties a quarter note.
+    pub fn skip_bars(&mut self) {
+        while self.peek() == Some('|') {
+            self.advance();
+        }
+    }
+
     /// Read a run of ASCII digits as an integer, if one is next.
+    /// Consume a decimal point and fraction digits right after an integer
+    /// literal, as Pascal's number reader does: `2.` and `2.5` are both
+    /// the real number whose integer value is 2. A point followed by a
+    /// letter is left alone — that is a `.onNote`-style modifier or a
+    /// member name, not a fraction.
+    pub fn eat_fraction(&mut self) {
+        if self.peek() != Some('.') {
+            return;
+        }
+        match self.peek_at(1) {
+            Some(c) if c.is_ascii_digit() => {}
+            Some(c) if c.is_ascii_alphabetic() || c == '_' => return,
+            _ => {}
+        }
+        self.advance();
+        while matches!(self.peek(), Some(c) if c.is_ascii_digit()) {
+            self.advance();
+        }
+    }
+
     pub fn read_int(&mut self) -> Option<i64> {
         let negative =
             if self.peek() == Some('-') && self.peek_at(1).is_some_and(|c| c.is_ascii_digit()) {
@@ -178,30 +214,70 @@ impl Cursor {
     ///
     /// Returns `None` when the bracket is never closed.
     pub fn read_balanced(&mut self, open: char, close: char) -> Option<String> {
+        // Pure nesting count, as in Pascal's `skipKakko`: quote characters
+        // are ordinary content here. A `{"` opening is often just a brace
+        // followed by the octave-down operator (`{"fcfga...`), and treating
+        // it as a quoted string would swallow the block's closing brace
+        // whenever the text holds no closing quote.
         let mut body = String::new();
         let mut depth = 1usize;
-        let mut in_string = false;
         loop {
             let ch = self.advance()?;
-            if in_string {
-                body.push(ch);
-                if ch == '"' {
-                    in_string = false;
-                }
-                continue;
-            }
             match ch {
-                // A string starts at `{"`, both characters at once; a bare
-                // `"` lowers the octave for one note, so it must not swallow
-                // the rest of the block.
-                '{' if self.peek() == Some('"') => {
-                    self.advance();
-                    in_string = true;
-                    if open == '{' {
-                        depth += 1;
+                c if c == open => {
+                    depth += 1;
+                    body.push(c);
+                }
+                c if c == close => {
+                    depth -= 1;
+                    if depth == 0 {
+                        return Some(body);
                     }
-                    body.push('{');
-                    body.push('"');
+                    body.push(c);
+                }
+                c => body.push(c),
+            }
+        }
+    }
+
+    /// Like `read_balanced`, but `//` and `/* */` comments are skipped
+    /// while counting, so brackets inside comments do not affect the
+    /// nesting. Pascal delimits function and control-flow bodies this
+    /// way (its struct scanner tokenises the body), which legacy library
+    /// headers rely on: their trailing comments quote fragments such as
+    /// `//(%("}+...+{"));"}` whose brackets would otherwise close the
+    /// body early. Comment text is still copied into the returned body;
+    /// the statement runner skips it again when executing.
+    pub fn read_balanced_skip_comments(&mut self, open: char, close: char) -> Option<String> {
+        let mut body = String::new();
+        let mut depth = 1usize;
+        loop {
+            let ch = self.advance()?;
+            match ch {
+                '/' if self.peek() == Some('/') => {
+                    body.push(ch);
+                    while let Some(c) = self.peek() {
+                        if c == '\n' {
+                            break;
+                        }
+                        body.push(self.advance()?);
+                    }
+                }
+                '/' if self.peek() == Some('*') => {
+                    body.push(ch);
+                    body.push(self.advance()?);
+                    let mut comment_depth = 1usize;
+                    while comment_depth > 0 {
+                        let c = self.advance()?;
+                        body.push(c);
+                        if c == '/' && self.peek() == Some('*') {
+                            body.push(self.advance()?);
+                            comment_depth += 1;
+                        } else if c == '*' && self.peek() == Some('/') {
+                            body.push(self.advance()?);
+                            comment_depth -= 1;
+                        }
+                    }
                 }
                 c if c == open => {
                     depth += 1;
@@ -217,6 +293,25 @@ impl Cursor {
                 c => body.push(c),
             }
         }
+    }
+
+    /// Skip the rest of a bracketed group whose opening bracket has
+    /// already been consumed, through its matching close. Pure nesting,
+    /// like `read_balanced`, but the text is discarded. Returns `false`
+    /// when the group never closes.
+    pub fn skip_group_remainder(&mut self, open: char, close: char) -> bool {
+        let mut depth = 1usize;
+        while let Some(ch) = self.advance() {
+            if ch == open {
+                depth += 1;
+            } else if ch == close {
+                depth -= 1;
+                if depth == 0 {
+                    return true;
+                }
+            }
+        }
+        false
     }
 
     /// Read an identifier: a letter, `_` or a leading `#`, followed by

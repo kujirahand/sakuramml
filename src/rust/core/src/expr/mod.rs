@@ -19,16 +19,161 @@ pub enum Value {
     Array(Vec<Value>),
 }
 
+/// Names the statement layer owns: built-in commands (from the compiler's
+/// word dispatch, plus the single-letter notes and rest). In Pascal these
+/// resolve through `ExecuteCommand`, which yields no value for them — a
+/// calc term that runs into one fails and the calc reader rewinds — so they
+/// must not fall back to the unknown-name string below.
+fn is_statement_command(name: &str) -> bool {
+    const NAMES: &[&str] = &[
+        "ARRAY",
+        "AllowMultiLine",
+        "ArgOrder",
+        "Array",
+        "BR",
+        "CCMute",
+        "CCNoMute",
+        "CH",
+        "CHANNEL",
+        "CRESC",
+        "Channel",
+        "ChannelPrefix",
+        "Copyright",
+        "Cresc",
+        "CuePoint",
+        "DECRESC",
+        "DIV",
+        "Decresc",
+        "DeleteCC",
+        "DirectSMF",
+        "Div",
+        "EXIT",
+        "End",
+        "Exit",
+        "FOR",
+        "FUNCTION",
+        "For",
+        "Function",
+        "IF",
+        "INCLUDE",
+        "INT",
+        "INTEGER",
+        "If",
+        "Include",
+        "InstrumentName",
+        "Int",
+        "Integer",
+        "KEY",
+        "KP",
+        "Key",
+        "KeyFlag",
+        "KeyPressure",
+        "KeyShift",
+        "Keyshift",
+        "Lyric",
+        "Marker",
+        "MetaText",
+        "MetaTextEOL",
+        "MsgBox",
+        "Mute",
+        "NRPN",
+        "NoteOff",
+        "NoteOn",
+        "NowTrack",
+        "PLAY",
+        "PORT",
+        "PRINT",
+        "PitchBend",
+        "Play",
+        "PlayFrom",
+        "PlayTo",
+        "Port",
+        "Print",
+        "PrintTime",
+        "PrintTrack",
+        "RESULT",
+        "RHYTHM",
+        "RPN",
+        "RYTHM",
+        "ResetGM",
+        "ResetGS",
+        "ResetXG",
+        "Result",
+        "Rhythm",
+        "Rythm",
+        "S",
+        "STR",
+        "SUB",
+        "SWITCH",
+        "SYSEX",
+        "SYSTEM",
+        "Slur",
+        "Solo",
+        "Str",
+        "Stretch",
+        "Sub",
+        "Switch",
+        "SysEx",
+        "System",
+        "TEMPO",
+        "TIME",
+        "TIMEBASE",
+        "TR",
+        "TRACK",
+        "Tempo",
+        "TempoChange",
+        "Text",
+        "Time",
+        "TimeBase",
+        "TimeKey",
+        "TimeKey2",
+        "TimeKeyFlag",
+        "TimeSignature",
+        "Timebase",
+        "Track",
+        "TrackKey",
+        "TrackMute",
+        "TrackName",
+        "TrackSync",
+        "UseKeyShift",
+        "Voice",
+        "WHILE",
+        "While",
+        "a",
+        "b",
+        "c",
+        "checked",
+        "d",
+        "e",
+        "f",
+        "g",
+        "r",
+    ];
+    NAMES.binary_search(&name).is_ok()
+}
+
+/// Delphi's `StrToIntDef`: decimal, or hexadecimal after a `$` prefix;
+/// anything else becomes 0.
+fn legacy_str_to_int(text: &str) -> i64 {
+    let text = text.trim();
+    if let Some(hex) = text.strip_prefix('$') {
+        i64::from_str_radix(hex.trim(), 16).unwrap_or(0)
+    } else {
+        text.parse().unwrap_or(0)
+    }
+}
+
 impl Value {
-    /// Numeric view of a value; strings and arrays are not numbers.
-    pub fn as_int(&self, line: usize) -> Result<i64> {
+    /// Numeric view of a value. Pascal's `TMStr.IntValue` is
+    /// `StrToIntDef(value, 0)`: a string that does not parse as a number
+    /// (with `$` as the hex prefix) coerces to 0 rather than raising, and
+    /// legacy songs depend on that leniency.
+    pub fn as_int(&self, _line: usize) -> Result<i64> {
         match self {
             Value::Int(v) => Ok(*v),
-            Value::Str(s) => s
-                .trim()
-                .parse()
-                .map_err(|_| MmlError::new(line, format!("数値ではありません: \"{s}\""))),
-            Value::Array(_) => Err(MmlError::new(line, "配列は数値として使えません")),
+            Value::Str(s) => Ok(legacy_str_to_int(s)),
+            // Pascal's TMArray.IntValue is the element count.
+            Value::Array(items) => Ok(items.len() as i64),
         }
     }
 
@@ -72,6 +217,12 @@ pub trait EvalContext {
     /// not know the song timebase and retain `!` as logical negation.
     fn length_literal(&self, _denominator: i64) -> Option<i64> {
         None
+    }
+
+    /// The current default note length in ticks, used for a length part
+    /// with no value of its own (Pascal's GetNoteLength `def`).
+    fn default_length(&self) -> i64 {
+        0
     }
 }
 
@@ -118,6 +269,10 @@ fn apply_binary(op: &str, left: Value, right: Value, line: usize) -> Result<Valu
     match op {
         "||" => Ok(Value::Int((left.truthy() || right.truthy()) as i64)),
         "&&" => Ok(Value::Int((left.truthy() && right.truthy()) as i64)),
+        // Pascal's expression operators include the single `|` and `&`,
+        // which are bitwise on integers (5|2 = 7, 5&3 = 1).
+        "|" => Ok(Value::Int(left.as_int(line)? | right.as_int(line)?)),
+        "&" => Ok(Value::Int(left.as_int(line)? & right.as_int(line)?)),
         "==" | "!=" | "<" | ">" | "<=" | ">=" => {
             // Strings compare as strings; anything else compares numerically.
             let result = match (&left, &right) {
@@ -253,14 +408,15 @@ fn peek_calc_operator(cur: &Cursor) -> Option<(&'static str, usize)> {
         ('=', Some('=')) => ("==", 2),
         ('=', _) => ("==", 1),
         ('!', Some('=')) => ("!=", 2),
+        ('<', Some('>')) => ("!=", 2),
         ('<', Some('=')) => ("<=", 2),
         ('<', _) => ("<", 1),
         ('>', Some('=')) => (">=", 2),
         ('>', _) => (">", 1),
         ('&', Some('&')) => ("&&", 2),
-        ('&', _) => ("&&", 1),
+        ('&', _) => ("&", 1),
         ('|', Some('|')) => ("||", 2),
-        ('|', _) => ("||", 1),
+        ('|', _) => ("|", 1),
         _ => return None,
     })
 }
@@ -283,17 +439,36 @@ fn parse_or(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
 
 fn parse_and(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
-    let mut left = parse_comparison(cur, ctx)?;
+    let mut left = parse_bitwise(cur, ctx)?;
     loop {
         cur.skip_spaces();
         if cur.peek() == Some('&') && cur.peek_at(1) == Some('&') {
             cur.advance();
             cur.advance();
-            let right = parse_comparison(cur, ctx)?;
+            let right = parse_bitwise(cur, ctx)?;
             left = apply_binary("&&", left, right, line)?;
         } else {
             return Ok(left);
         }
+    }
+}
+
+/// The single `&` and `|` operators share one level in Pascal and
+/// associate to the left, below the comparisons: `1|0&0` is `(1|0)&0`.
+fn parse_bitwise(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
+    let line = cur.line();
+    let mut left = parse_comparison(cur, ctx)?;
+    loop {
+        cur.skip_spaces();
+        let op = match (cur.peek(), cur.peek_at(1)) {
+            (Some('&'), Some('&')) | (Some('|'), Some('|')) => return Ok(left),
+            (Some('&'), _) => "&",
+            (Some('|'), _) => "|",
+            _ => return Ok(left),
+        };
+        cur.advance();
+        let right = parse_comparison(cur, ctx)?;
+        left = apply_binary(op, left, right, line)?;
     }
 }
 
@@ -302,16 +477,23 @@ fn parse_comparison(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value
     let left = parse_additive(cur, ctx)?;
     cur.skip_spaces();
 
-    let op = match (cur.peek(), cur.peek_at(1)) {
-        (Some('='), Some('=')) => "==",
-        (Some('!'), Some('=')) => "!=",
-        (Some('<'), Some('=')) => "<=",
-        (Some('>'), Some('=')) => ">=",
-        (Some('<'), _) => "<",
-        (Some('>'), _) => ">",
+    // The canonical operator and how many source characters it spans:
+    // Pascal writes equality with a single `=` (and inequality `<>`), so
+    // `If(Music=1)` is everywhere in legacy songs — `=` means `==` but
+    // consumes one character. `eval_calc` already reads `=` this way; the
+    // expression grammar now matches.
+    let (op, len) = match (cur.peek(), cur.peek_at(1)) {
+        (Some('='), Some('=')) => ("==", 2),
+        (Some('!'), Some('=')) => ("!=", 2),
+        (Some('<'), Some('=')) => ("<=", 2),
+        (Some('>'), Some('=')) => (">=", 2),
+        (Some('<'), Some('>')) => ("!=", 2),
+        (Some('='), _) => ("==", 1),
+        (Some('<'), _) => ("<", 1),
+        (Some('>'), _) => (">", 1),
         _ => return Ok(left),
     };
-    for _ in 0..op.len() {
+    for _ in 0..len {
         cur.advance();
     }
 
@@ -352,6 +534,94 @@ fn parse_multiplicative(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<V
     }
 }
 
+/// One part of a `!` length literal: a denominator (converted through
+/// the context's NtoStep), a `%` step count (used raw), a `$` hex
+/// denominator, a parenthesised value, a nested `!` length (whose step
+/// result is converted once more, as Pascal's getOne does), or — when
+/// none of those starts the part — the current default length. Dots
+/// after the part augment it.
+fn parse_length_one(cur: &mut Cursor, ctx: &mut dyn EvalContext, line: usize) -> Result<i64> {
+    cur.skip_spaces();
+    cur.skip_bars();
+    cur.skip_spaces();
+    let overflow = || MmlError::new(line, "音長リテラルの値が範囲を超えました");
+    let mut value = match cur.peek() {
+        Some('!') => {
+            cur.advance();
+            let raw = parse_length_parts(cur, ctx, line)?;
+            ctx.length_literal(raw).ok_or_else(|| {
+                MmlError::new(line, "入れ子の音長リテラルをtick値へ変換できません")
+            })?
+        }
+        Some('$') => {
+            cur.advance();
+            let raw = cur
+                .read_hex()
+                .ok_or_else(|| MmlError::new(line, "$の後には16進数を指定してください"))?;
+            ctx.length_literal(raw)
+                .ok_or_else(|| MmlError::new(line, "音長リテラルをtick値へ変換できません"))?
+        }
+        Some('%') => {
+            cur.advance();
+            cur.read_int()
+                .ok_or_else(|| MmlError::new(line, "%の後には数値を指定してください"))?
+        }
+        Some(c) if c.is_ascii_digit() => {
+            let denominator = cur
+                .read_int()
+                .ok_or_else(|| MmlError::new(line, "音長を読み取れません"))?;
+            ctx.length_literal(denominator)
+                .ok_or_else(|| MmlError::new(line, "音長リテラルをtick値へ変換できません"))?
+        }
+        Some('(') => {
+            cur.advance();
+            let raw = eval(cur, ctx)?.as_int(line)?;
+            cur.skip_spaces();
+            if !cur.eat(')') {
+                return Err(MmlError::new(line, "括弧が閉じられていません"));
+            }
+            ctx.length_literal(raw)
+                .ok_or_else(|| MmlError::new(line, "音長リテラルをtick値へ変換できません"))?
+        }
+        _ => ctx.default_length(),
+    };
+    let mut half = value;
+    while cur.eat('.') {
+        half /= 2;
+        value = value.checked_add(half).ok_or_else(overflow)?;
+    }
+    Ok(value)
+}
+
+/// A whole `!` length literal after the `!`: one part plus any number of
+/// `^` / `+` / `-` joined parts, mirroring Pascal's GetNoteLength.
+fn parse_length_parts(cur: &mut Cursor, ctx: &mut dyn EvalContext, line: usize) -> Result<i64> {
+    let overflow = || MmlError::new(line, "結合音長の値が範囲を超えました");
+    let mut total = parse_length_one(cur, ctx, line)?;
+    loop {
+        let mut probe = cur.clone();
+        probe.skip_spaces();
+        probe.skip_bars();
+        probe.skip_spaces();
+        match probe.peek() {
+            Some('^') | Some('+') => {
+                probe.advance();
+                let part = parse_length_one(&mut probe, ctx, line)?;
+                total = total.checked_add(part).ok_or_else(overflow)?;
+                *cur = probe;
+            }
+            Some('-') => {
+                probe.advance();
+                let part = parse_length_one(&mut probe, ctx, line)?;
+                total = total.checked_sub(part).ok_or_else(overflow)?;
+                *cur = probe;
+            }
+            _ => break,
+        }
+    }
+    Ok(total)
+}
+
 fn parse_unary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
     cur.skip_spaces();
@@ -367,48 +637,21 @@ fn parse_unary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             cur.advance();
             parse_unary(cur, ctx)
         }
-        Some('!') if cur.peek_at(1).is_some_and(|ch| ch.is_ascii_digit()) => {
-            let mut probe = cur.clone();
-            probe.advance();
-            let denominator = probe
-                .read_int()
-                .ok_or_else(|| MmlError::new(line, "!の後には音長を指定してください"))?;
-            if let Some(mut value) = ctx.length_literal(denominator) {
-                let mut half = value;
-                while probe.eat('.') {
-                    half /= 2;
-                    value = value
-                        .checked_add(half)
-                        .ok_or_else(|| MmlError::new(line, "音長リテラルの値が範囲を超えました"))?;
-                }
-                while probe.eat('^') {
-                    let nested_literal = probe.eat('!');
-                    let joined_denominator = probe
-                        .read_int()
-                        .ok_or_else(|| MmlError::new(line, "^の後には音長を指定してください"))?;
-                    // Pascal recursively parses a second `!` as the
-                    // denominator: `!1^!1` is 384 + NtoStep(384) = 385.
-                    let joined_denominator = if nested_literal {
-                        ctx.length_literal(joined_denominator).ok_or_else(|| {
-                            MmlError::new(line, "入れ子の音長リテラルをtick値へ変換できません")
-                        })?
-                    } else {
-                        joined_denominator
-                    };
-                    let mut joined = ctx
-                        .length_literal(joined_denominator)
-                        .ok_or_else(|| MmlError::new(line, "結合音長をtick値へ変換できません"))?;
-                    let mut joined_half = joined;
-                    while probe.eat('.') {
-                        joined_half /= 2;
-                        joined = joined.checked_add(joined_half).ok_or_else(|| {
-                            MmlError::new(line, "音長リテラルの値が範囲を超えました")
-                        })?;
-                    }
-                    value = value
-                        .checked_add(joined)
-                        .ok_or_else(|| MmlError::new(line, "結合音長の値が範囲を超えました"))?;
-                }
+        Some('!')
+            if cur.peek_at(1).is_some_and(|ch| {
+                ch.is_ascii_digit() || matches!(ch, '^' | '.' | '(' | '%' | '$' | '!')
+            }) =>
+        {
+            // A `!` length literal, read the way Pascal's GetNoteLength
+            // reads it (via getArg's `!` branch): a first part, then any
+            // number of `^` / `+` / `-` joined parts, where a part with no
+            // value of its own is the track's current default length.
+            // Contexts that cannot convert lengths (a plain variable map)
+            // keep the logical-NOT reading.
+            if ctx.length_literal(1).is_some() {
+                let mut probe = cur.clone();
+                probe.advance();
+                let value = parse_length_parts(&mut probe, ctx, line)?;
                 *cur = probe;
                 Ok(Value::Int(value))
             } else {
@@ -435,6 +678,17 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             cur.advance();
             let value = eval(cur, ctx)?;
             cur.skip_spaces();
+            if cur.eat(',') {
+                // A group in term position yields its first value in
+                // Pascal (`Int X = (1,2)` sets 1, `v(115,120+5)` sets
+                // velocity 115): the rest of the group is discarded.
+                // Whole-list positions (array declarations, argument
+                // lists) never reach this reader.
+                if !cur.skip_group_remainder('(', ')') {
+                    return Err(MmlError::new(line, "括弧が閉じられていません"));
+                }
+                return Ok(value);
+            }
             if !cur.eat(')') {
                 return Err(MmlError::new(line, "括弧が閉じられていません"));
             }
@@ -475,6 +729,9 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             let value = cur
                 .read_int()
                 .ok_or_else(|| MmlError::new(line, "数値を読み取れません"))?;
+            // Pascal reads `2.` / `2.5` as a real and truncates: the
+            // fraction is consumed and dropped.
+            cur.eat_fraction();
             Ok(Value::Int(value))
         }
         // `#` leads a string macro's name, as in `#STR(n)` or `#Melody`.
@@ -549,8 +806,22 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
                     .ok_or_else(|| MmlError::new(line, format!("関数\"{name}\"は値を返しません")));
             }
 
-            ctx.lookup(&name)
-                .ok_or_else(|| MmlError::new(line, format!("変数\"{name}\"は未定義です")))
+            // Pascal's GetVariable (mml_system.pas) returns an unknown name
+            // itself as a string instead of raising: the error raise is
+            // commented out in the original. Legacy songs rely on this —
+            // `___` is used as a "not specified" sentinel compared against
+            // array elements, and placeholder arguments evaluate to 0
+            // through the string-to-int coercion below. Names owned by the
+            // statement layer are the exception: Pascal executes them as
+            // commands, which yields no value, so the read fails (and a
+            // surrounding calc rewinds) instead of inventing a string.
+            match ctx.lookup(&name) {
+                Some(value) => Ok(value),
+                None if is_statement_command(&name) => {
+                    Err(MmlError::new(line, format!("変数\"{name}\"は未定義です")))
+                }
+                None => Ok(Value::Str(name.clone())),
+            }
         }
         _ => Err(MmlError::new(line, "式を読み取れません")),
     }
@@ -569,9 +840,20 @@ fn parse_call_args(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Vec<Va
         return Ok(args);
     }
     loop {
+        // An empty slot reads as 0, as in Pascal's GetArgs.
+        if cur.peek() == Some(',') {
+            args.push(Value::Int(0));
+            cur.advance();
+            continue;
+        }
         args.push(eval(cur, ctx)?);
         cur.skip_spaces();
         if cur.eat(',') {
+            // A trailing comma before `)` leaves one last empty slot.
+            cur.skip_spaces();
+            if cur.peek() == Some(')') {
+                args.push(Value::Int(0));
+            }
             continue;
         }
         if !cur.eat(')') {
@@ -668,7 +950,28 @@ mod tests {
     }
 
     #[test]
-    fn undefined_variable_is_an_error() {
-        assert!(eval_str("nope", &Variables::new()).is_err());
+    fn pascal_style_equality_operators() {
+        // Pascal writes `=` for equality and `<>` for inequality.
+        assert_eq!(int("1=1"), 1);
+        assert_eq!(int("(1=1)"), 1);
+        assert_eq!(int("1=2"), 0);
+        assert_eq!(int("1<>2"), 1);
+        assert_eq!(int("2>1"), 1);
+    }
+
+    #[test]
+    fn undefined_variable_reads_as_its_own_name() {
+        // Pascal's GetVariable returns an unknown name itself as a string;
+        // numerically it coerces to 0 (StrToIntDef).
+        assert_eq!(
+            eval_str("nope", &Variables::new()).unwrap(),
+            Value::Str("nope".to_string())
+        );
+        assert_eq!(int("nope"), 0);
+        // `+` with a string concatenates, as in Pascal's TMPlus.
+        assert_eq!(
+            eval_str("nope+5", &Variables::new()).unwrap(),
+            Value::Str("nope5".to_string())
+        );
     }
 }

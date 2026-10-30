@@ -432,9 +432,18 @@ fn play_keeps_empty_argument_positions_as_track_numbers() {
 
 #[test]
 fn play_reports_the_failing_track() {
-    let error = compile("Play({c},{NotACommand})").unwrap_err();
+    let error = compile("Play({c},{@})").unwrap_err();
     assert!(error.message.contains("Playのトラック1"), "{error}");
-    assert!(error.message.contains("未定義"), "{error}");
+}
+
+#[test]
+fn play_tolerates_an_unknown_word_like_pascal() {
+    // Pascal only hints at the unknown word inside the track and succeeds.
+    let out = compile("Play({c},{NotACommand})").unwrap();
+    assert!(out
+        .warnings
+        .iter()
+        .any(|w| w.message.contains("NotACommand")));
 }
 
 #[test]
@@ -1499,7 +1508,8 @@ fn note_modifiers_and_slur_reject_invalid_arguments() {
         ("Slur(0,10,13) c&d", "1〜12"),
         ("Slur(0,(-9223372036854775807-1)) c&d", "valueが範囲外"),
         ("Slur(3,-4611686018427387904) c&&d", "時間が範囲外"),
-        ("Slur(2,100) c&", "音符"),
+        // A dangling slur (`Slur(2,100) c&`) is not in this list: Pascal
+        // tolerates it and plays the note, so it compiles with a warning.
     ] {
         let error = compile(mml).unwrap_err();
         assert!(error.message.contains(expected), "{mml}: {error:?}");
