@@ -1290,3 +1290,12 @@ fn chord_length_joins_may_add_and_subtract() {
     assert_same("'ceg'^+8 c", "'ceg'4^4+8 c");
     assert_same("'ceg' ^ -8 c", "'ceg'4^4-8 c");
 }
+
+/// A command value may carry its own sign: `p%+8192` is a pitch bend
+/// to the very top in Pascal, not a missing-value error.
+#[test]
+fn command_values_may_be_signed() {
+    assert_same("p%+8192 c", "p%8192 c");
+    assert_same("PitchBend(+100) c", "PitchBend(100) c");
+    compile("p%-100 c").unwrap();
+}

@@ -6326,8 +6326,23 @@ impl<'a> Compiler<'a> {
     fn expect_int(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
         let line = cur.line();
         cur.skip_spaces();
-        self.read_number(cur)?
-            .ok_or_else(|| MmlError::new(line, format!("{name}には数値を指定してください")))
+        // A leading sign belongs to the value, as in Pascal's reader:
+        // `p%+8192` is a pitch bend to the top, not an error.
+        let negative = match cur.peek() {
+            Some('+') if matches!(cur.peek_at(1), Some('0'..='9' | '$' | '(' | '!')) => {
+                cur.advance();
+                false
+            }
+            Some('-') if matches!(cur.peek_at(1), Some('0'..='9' | '$' | '(' | '!')) => {
+                cur.advance();
+                true
+            }
+            _ => false,
+        };
+        let value = self
+            .read_number(cur)?
+            .ok_or_else(|| MmlError::new(line, format!("{name}には数値を指定してください")))?;
+        Ok(if negative { -value } else { value })
     }
 
     /// Set or adjust an `o/q/v/t` track value. Repeated bare signs use the
