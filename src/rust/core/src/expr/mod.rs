@@ -273,6 +273,7 @@ fn apply_binary(op: &str, left: Value, right: Value, line: usize) -> Result<Valu
         // which are bitwise on integers (5|2 = 7, 5&3 = 1).
         "|" => Ok(Value::Int(left.as_int(line)? | right.as_int(line)?)),
         "&" => Ok(Value::Int(left.as_int(line)? & right.as_int(line)?)),
+        "^" => Ok(Value::Int(left.as_int(line)? ^ right.as_int(line)?)),
         "==" | "!=" | "<" | ">" | "<=" | ">=" => {
             // Strings compare as strings; anything else compares numerically.
             let result = match (&left, &right) {
@@ -417,6 +418,7 @@ fn peek_calc_operator(cur: &Cursor) -> Option<(&'static str, usize)> {
         ('&', _) => ("&", 1),
         ('|', Some('|')) => ("||", 2),
         ('|', _) => ("|", 1),
+        ('^', _) => ("^", 1),
         _ => return None,
     })
 }
@@ -464,6 +466,11 @@ fn parse_bitwise(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             (Some('&'), Some('&')) | (Some('|'), Some('|')) => return Ok(left),
             (Some('&'), _) => "&",
             (Some('|'), _) => "|",
+            // `^` is bitwise XOR here, at the same level as `&` and `|`
+            // (Pascal: `1|2^3` = 0, read left to right). Length joins
+            // after a `!` literal are consumed inside the literal itself,
+            // and note-level `^` ties never reach the expression parser.
+            (Some('^'), _) => "^",
             _ => return Ok(left),
         };
         cur.advance();
@@ -848,6 +855,17 @@ fn parse_call_args(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Vec<Va
         }
         args.push(eval(cur, ctx)?);
         cur.skip_spaces();
+        // A `:` terminates the whole list, as in Pascal's GetArgs
+        // (`GU(6:2)` passes only 6); the rest of the group is discarded.
+        if cur.peek() == Some(':') {
+            if !cur.skip_group_remainder('(', ')') {
+                return Err(MmlError::new(
+                    cur.line(),
+                    "関数呼び出しの括弧が閉じられていません",
+                ));
+            }
+            return Ok(args);
+        }
         if cur.eat(',') {
             // A trailing comma before `)` leaves one last empty slot.
             cur.skip_spaces();

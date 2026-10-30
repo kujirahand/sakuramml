@@ -1219,3 +1219,55 @@ fn h_command_does_not_steal_defined_names() {
     compile("Str h={c} h d").unwrap();
     compile("Function hatena(){ n60 } hatena").unwrap();
 }
+
+/// A `:` inside a user function call terminates the whole argument
+/// list in Pascal's GetArgs: `GU(6:2)` passes only 6, and even the
+/// comma-separated `GU(6:2,9)` drops the 9. The same holds when the
+/// call appears inside an expression.
+#[test]
+fn colon_terminates_a_function_argument_list() {
+    let out = compile(
+        "Function GU(Int a, Int b){ Print(a) Print(b) Result = a } GU(6:2) GU(6:2,9) Int X = GU(7:3); Print(X)",
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        vec![
+            "6".to_string(),
+            "0".to_string(),
+            "6".to_string(),
+            "0".to_string(),
+            "7".to_string(),
+            "0".to_string(),
+            "7".to_string()
+        ]
+    );
+}
+
+/// Pascal's GetIntValue continues as a full calculation only when the
+/// value after `=` begins with a name: `Tempo=TEM+20` is 120, while
+/// `Tempo=100+20` reads the bare term and fails on the leftover.
+#[test]
+fn name_led_assignment_value_calculates() {
+    let out = compile("Int TEM=100; Tempo=TEM+20 Print(Tempo)").unwrap();
+    assert_eq!(out.messages, vec!["120".to_string()]);
+    assert!(compile("Tempo=100+20").is_err());
+}
+
+/// In an expression, `^` is bitwise XOR at the same precedence level
+/// as `&` and `|`, read left to right — it is not a length join there
+/// (Pascal: `2^8` = 10, `1|2^3` = 0, `1^2+3` = 4).
+#[test]
+fn caret_is_bitwise_xor_in_expressions() {
+    let out = compile("Print(2^8) Print(1|2^3) Print(1^2+3) Function F(Int a){ Print(a) } F(2^8)")
+        .unwrap();
+    assert_eq!(
+        out.messages,
+        vec![
+            "10".to_string(),
+            "0".to_string(),
+            "4".to_string(),
+            "10".to_string()
+        ]
+    );
+}

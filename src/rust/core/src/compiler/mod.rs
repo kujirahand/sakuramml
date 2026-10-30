@@ -1914,7 +1914,11 @@ impl<'a> Compiler<'a> {
                     break;
                 }
             }
-            args.push(self.eval_source(raw, line)?);
+            let (value, terminated) = self.eval_call_arg(raw, line)?;
+            args.push(value);
+            if terminated {
+                break;
+            }
         }
         Ok(args)
     }
@@ -4566,6 +4570,27 @@ impl<'a> Compiler<'a> {
         Ok(value)
     }
 
+    /// Like `eval_source`, but for one element of a call's argument list:
+    /// a `:` after the value terminates the whole list in Pascal's
+    /// GetArgs (`GU(6:2)` passes only 6, and `GU(6:2,9)` drops the 9
+    /// too), reported through the returned flag. Any other trailing
+    /// character is the usual trailing-junk error.
+    fn eval_call_arg(&mut self, raw: &str, line: usize) -> Result<(Value, bool)> {
+        let mut cur = Cursor::with_line(raw.trim(), line);
+        let value = expr::eval(&mut cur, self)?;
+        cur.skip_trivia();
+        if cur.peek() == Some(':') {
+            return Ok((value, true));
+        }
+        if !cur.is_eof() {
+            return Err(MmlError::new(
+                cur.line(),
+                "式の末尾に解釈できない文字があります",
+            ));
+        }
+        Ok((value, false))
+    }
+
     /// Read a parenthesised condition and evaluate it.
     fn read_condition(&mut self, cur: &mut Cursor) -> Result<Value> {
         let line = cur.line();
@@ -6441,6 +6466,14 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         if cur.eat('=') {
             cur.skip_spaces();
+            // Pascal's GetIntValue continues as a full calculation only
+            // when the value begins with a name: `Tempo=TEM+20` is 120,
+            // while `Tempo=100+20` reads the bare term and the `+20`
+            // fails as the next statement. (The control-change commands
+            // use `expect_int_arg_calc`, whose values always calculate.)
+            if matches!(cur.peek(), Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '#') {
+                return self.read_calc_value(cur)?.as_int(line);
+            }
             return expr::eval_term(cur, self)?.as_int(line);
         }
         self.expect_int(cur, name)
