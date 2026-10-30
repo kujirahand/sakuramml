@@ -1459,3 +1459,13 @@ fn play_without_an_argument_and_a_non_numeric_loop_count() {
     assert_same("[(3) c]", "[3 c]");
     assert_same("~{PLAY} = {[2}\n[(PLAY) c ]", "[2 c ]");
 }
+
+/// A bare-quote string that is never closed runs to the end of
+/// the text without an error (Pascal's GetTokenChars): song 2487
+/// ends a Print with `+" 秒")`, the closing quote untyped.
+#[test]
+fn an_unterminated_bare_quote_string_runs_to_the_end() {
+    let out = compile("Int TM=75 Print(\"演奏は \"+TM/60+\" 分 \"+ TM%60+\" 秒\")").unwrap();
+    assert_eq!(out.messages, ["演奏は 1 分 15 秒"]);
+    assert_same("Print(\"abc)", "Print(\"abc\")");
+}

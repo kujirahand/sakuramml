@@ -714,12 +714,17 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
         }
         Some('"') => {
             cur.advance();
+            // Pascal's bare-quote reader (GetTokenChars) runs to the
+            // next `"` or to the end of the text, across newlines,
+            // and never fails: song 2487 ends a Print with `+" 秒")`
+            // where the closing quote was never typed, and the
+            // string is simply ` 秒`.
             let mut text = String::new();
             loop {
                 match cur.advance() {
                     Some('"') => break,
                     Some(c) => text.push(c),
-                    None => return Err(MmlError::new(line, "文字列が閉じられていません")),
+                    None => break,
                 }
             }
             Ok(Value::Str(text))

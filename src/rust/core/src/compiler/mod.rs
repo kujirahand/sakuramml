@@ -5465,12 +5465,14 @@ impl<'a> Compiler<'a> {
         if !cur.eat('"') {
             return Err(MmlError::new(line, "文字列は \" で囲んで指定してください"));
         }
+        // As in expressions, an unterminated bare-quote string just
+        // runs to the end of the text (Pascal's GetTokenChars).
         let mut text = String::new();
         loop {
             match cur.advance() {
                 Some('"') => break,
                 Some(c) => text.push(c),
-                None => return Err(MmlError::new(line, "文字列が閉じられていません")),
+                None => break,
             }
         }
         cur.skip_spaces();
