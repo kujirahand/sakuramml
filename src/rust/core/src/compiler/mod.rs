@@ -2910,7 +2910,26 @@ impl<'a> Compiler<'a> {
             let mut probe = cur.clone();
             probe.skip_trivia();
             if probe.peek() == Some('{') {
-                self.read_block(cur, line)?
+                // GetNakaKakko does not fail on a missing `}` either:
+                // it gathers to the end of the source. Song 1060's
+                // final `Rythm{` is never closed, and its body is the
+                // rest of the file.
+                let mut attempt = cur.clone();
+                match self.read_block(&mut attempt, line) {
+                    Ok(body) => {
+                        *cur = attempt;
+                        body
+                    }
+                    Err(_) => {
+                        let mut rest = String::new();
+                        cur.skip_trivia();
+                        cur.advance(); // the `{`
+                        while let Some(ch) = cur.advance() {
+                            rest.push(ch);
+                        }
+                        rest
+                    }
+                }
             } else {
                 let mut rest = String::new();
                 while let Some(ch) = cur.advance() {

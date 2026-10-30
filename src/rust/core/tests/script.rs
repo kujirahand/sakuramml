@@ -1469,3 +1469,11 @@ fn an_unterminated_bare_quote_string_runs_to_the_end() {
     assert_eq!(out.messages, ["演奏は 1 分 15 秒"]);
     assert_same("Print(\"abc)", "Print(\"abc\")");
 }
+
+/// A `Rythm{` that is never closed takes the rest of the source
+/// as its body (GetNakaKakko gathers to the end without failing):
+/// song 1060 ends the file with one.
+#[test]
+fn an_unclosed_rythm_body_runs_to_the_end() {
+    assert_same("Rythm{\n b", "Rythm{ b }");
+}
