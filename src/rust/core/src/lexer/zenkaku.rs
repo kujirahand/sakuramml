@@ -72,29 +72,33 @@ pub fn to_half_width(ch: char) -> Option<char> {
 pub(crate) fn push_comment(chars: &[char], index: usize, out: &mut String) -> Option<usize> {
     let mut position = index;
     if chars.get(position + 1) == Some(&'/') {
+        // A `//` comment is dropped, as Pascal's ConvToHalfSign drops it;
+        // the line break itself is left for the main loop to copy.
         while position < chars.len() {
-            let ch = chars[position];
-            out.push(ch);
-            position += 1;
-            if ch == '\n' {
+            if chars[position] == '\n' {
                 break;
             }
+            position += 1;
         }
         return Some(position);
     }
     if chars.get(position + 1) == Some(&'*') {
+        // A `/* ... */` comment (nestable, as in Pascal) is dropped too:
+        // only its line breaks survive, so line numbers stay aligned.
+        // Dropping matters beyond tidiness — a comment holding `[` or
+        // `{` would otherwise poison the structural scans downstream.
         let mut nest = 0;
         while position < chars.len() {
             let ch = chars[position];
             let next = chars.get(position + 1);
-            out.push(ch);
+            if ch == '\n' {
+                out.push('\n');
+            }
             position += 1;
             if ch == '/' && next == Some(&'*') {
-                out.push('*');
                 position += 1;
                 nest += 1;
             } else if ch == '*' && next == Some(&'/') {
-                out.push('/');
                 position += 1;
                 nest -= 1;
                 if nest <= 0 {
@@ -111,9 +115,9 @@ pub(crate) fn push_comment(chars: &[char], index: usize, out: &mut String) -> Op
 ///
 /// Text inside double quotes is left alone: it is user data (track names,
 /// lyrics), not MML syntax — and its digits and brackets must survive intact.
-/// Comments are likewise copied verbatim: Pascal's `ConvToHalfSign` skips
-/// them, and converting prose could manufacture `/*` or `*/` sequences that
-/// corrupt the comment's extent.
+/// Comments are dropped, as Pascal's `ConvToHalfSign` drops them (only
+/// their line breaks are kept): the compiler never sees them, so brackets
+/// or braces written inside a comment cannot disturb structural scans.
 pub fn normalize(src: &str) -> String {
     let mut out = String::with_capacity(src.len());
     let chars: Vec<char> = src.chars().collect();

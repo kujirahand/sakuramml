@@ -1345,3 +1345,14 @@ fn bars_do_not_break_joins_or_slurs() {
     assert_same("a2|&a", "a2&a");
     assert_same("a2|\n&a", "a2&a");
 }
+
+/// Comments are dropped by the conversion passes, as Pascal's
+/// ConvToHalfSign drops them, so brackets inside a comment cannot
+/// disturb the structural scans — and comment-like text inside a
+/// string must not hide a closing brace either.
+#[test]
+fn comments_do_not_disturb_structure() {
+    assert_same("[2 /* ] ] */ c] d", "[2 c] d");
+    assert_same("Function F(){ /* } */ c }; F", "c");
+    compile("If(1){ CuePoint={\"http://example.com/x.dls\"} c }").unwrap();
+}

@@ -4660,14 +4660,16 @@ impl<'a> Compiler<'a> {
     }
 
     /// Read a `{ ... }` body the way Pascal delimits code blocks
-    /// (function bodies and If/For/While bodies): brackets inside
-    /// comments do not count towards the nesting.
+    /// (function bodies and If/For/While bodies): plain nesting, like
+    /// its skipKakko. Comments cannot interfere — the conversion
+    /// passes have already dropped them — and comment-like text inside
+    /// a string (`{"http://..."}`) must not hide the closing brace.
     fn read_block_code(&mut self, cur: &mut Cursor, line: usize) -> Result<String> {
         cur.skip_trivia();
         if !cur.eat('{') {
             return Err(MmlError::new(line, "{ が必要です"));
         }
-        cur.read_balanced_skip_comments('{', '}')
+        cur.read_balanced('{', '}')
             .ok_or_else(|| MmlError::new(line, "{ が } で閉じられていません"))
     }
 
