@@ -155,9 +155,17 @@ mod tests {
     }
 
     #[test]
-    fn recovering_compile_skips_an_unknown_braced_group() {
+    fn recovering_compile_reads_a_braced_groups_contents_inline() {
+        // Pascal has no braced block at statement position: `{` is an
+        // undefined token (a hint) and the contents parse as ordinary
+        // MML, so the gibberish letters `n`/`o`/`t` each fail for a
+        // missing value while the surrounding notes still play.
         let out = compile_recovering("c {not mml} d").unwrap();
-        assert_eq!(out.errors.len(), 1);
+        assert_eq!(out.errors.len(), 3);
+        assert!(out
+            .warnings
+            .iter()
+            .any(|w| w.message.contains("\"{\"は未定義です")));
         assert!(out.smf.windows(3).any(|event| event == [0x90, 60, 100]));
         assert!(out.smf.windows(3).any(|event| event == [0x90, 62, 100]));
     }

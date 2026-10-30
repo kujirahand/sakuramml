@@ -1296,6 +1296,25 @@ impl<'a> Compiler<'a> {
                     .ok_or_else(|| MmlError::new(line, "括弧が閉じられていません"))?;
                 self.run_fragment(&body, line)
             }
+            // Braces in statement position are not a block to
+            // Pascal: `{` is an undefined token (hint only) and the
+            // text inside is parsed inline, which is how performed
+            // MidiDelay arguments such as `r4{'`c+`a'}` work — the
+            // chord inside plays as ordinary MML.
+            '{' => {
+                cur.advance();
+                self.warnings.push(Warning::new(
+                    line,
+                    "\"{\"は未定義です。綴りを確かめてください。".to_string(),
+                ));
+                Ok(())
+            }
+            '}' => {
+                cur.advance();
+                self.warnings
+                    .push(Warning::new(line, "突然の\"}\"。".to_string()));
+                Ok(())
+            }
             '$' => {
                 cur.advance();
                 self.define_rythm_macro(cur)

@@ -1433,3 +1433,14 @@ fn a_term_may_carry_a_redundant_equals() {
     assert_same("Int X=2; If(X===2){ c }", "Int X=2; If(X==2){ c }");
     assert_same("Int X=1; If(X>==0){ c }", "Int X=1; If(X>=0){ c }");
 }
+
+/// Braces at statement position are hints, not a block: Pascal
+/// parses the contents inline, so `{"c"} d` plays both notes one
+/// octave down (each `"` marker applies to the next note) while
+/// `{c} d` plays them plainly.
+#[test]
+fn braced_text_at_statement_position_parses_inline() {
+    assert_same("{c} d", "c d");
+    assert_same("{\"c\"} d", "\"c \"d");
+    assert_same("Function F(Str S){ S } F(r4{c})", "r4 c");
+}
