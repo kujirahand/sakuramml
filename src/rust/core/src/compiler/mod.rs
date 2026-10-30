@@ -77,6 +77,9 @@ struct TrackState {
     arg_order: String,
     velocity: i64,
     gate_percent: i64,
+    /// The `h` value (Pascal's `CurTrack.Q2`): a step count subtracted
+    /// from every note's gate. Zero until an `h` command sets it.
+    q2: i64,
     timing: i64,
     events: Vec<Event>,
     /// Pascal's `LastNodeNo`, used by `KeyPressure`. A newly allocated Pascal
@@ -143,6 +146,7 @@ impl TrackState {
             arg_order: "lqvto".to_string(),
             velocity: 100,
             gate_percent: 80,
+            q2: 0,
             timing: 0,
             events: Vec::new(),
             last_note_no: 0,
@@ -340,7 +344,7 @@ impl<'a> Compiler<'a> {
             chord_length: None,
             chord_options: None,
             cc_frequency: advance_spec::DEFAULT_FREQUENCY,
-            rythm_macros: rythm::Macros::new(),
+            rythm_macros: rythm::default_macros(),
             rythm_depth: 0,
             sutoton_macros: crate::lexer::sutoton::UserMacros::new(),
         }
@@ -406,17 +410,35 @@ impl<'a> Compiler<'a> {
             .values()
             .any(|track| !track.slur_notes.is_empty())
         {
-            let error = MmlError::new(cur.line(), "&の後に音符がありません");
-            if !self.recover_errors {
-                return Err(error);
+            // Pascal tolerates a slur with no following note at the end of
+            // a song: the buffered notes simply play un-slurred. Flush
+            // them as plain notes and warn, rather than erroring (or
+            // dropping the notes).
+            self.warnings
+                .push(Warning::new(cur.line(), "&の後に音符がありません"));
+            let pending: Vec<i64> = self
+                .tracks
+                .iter()
+                .filter(|(_, track)| !track.slur_notes.is_empty())
+                .map(|(no, _)| *no)
+                .collect();
+            for no in pending {
+                let (channel, notes) = {
+                    let track = self.tracks.get_mut(&no).expect("track exists");
+                    (track.channel, std::mem::take(&mut track.slur_notes))
+                };
+                for note in notes {
+                    self.buffered_slur_events = self.buffered_slur_events.saturating_sub(2);
+                    self.push_event_to_track(
+                        no,
+                        Event::note_on(note.start, channel, note.note, note.velocity),
+                    )?;
+                    self.push_event_to_track(
+                        no,
+                        Event::note_off(note.off, channel, note.note, note.velocity),
+                    )?;
+                }
             }
-            if !self.errors.contains(&error) {
-                self.errors.push(error);
-            }
-            for track in self.tracks.values_mut() {
-                track.slur_notes.clear();
-            }
-            self.buffered_slur_events = 0;
         }
         self.apply_play_from()?;
 
@@ -936,6 +958,22 @@ impl<'a> Compiler<'a> {
                 self.rest(cur)
             }
             'n' => {
+                // A Str variable named `n` (a function parameter, usually)
+                // wins over the note-number command when no numeric
+                // argument follows: Pascal resolves the name in the symbol
+                // table, so `Function Ped(Str n){ ... n ... }` plays the
+                // argument's text.
+                let mut probe = cur.clone();
+                probe.advance();
+                probe.skip_spaces();
+                let numeric_start = matches!(
+                    probe.peek(),
+                    Some('0'..='9' | '(' | '=' | '$' | '!' | '+' | '-')
+                );
+                if !numeric_start && matches!(self.variables.get("n"), Some(Value::Str(_))) {
+                    cur.advance();
+                    return self.string_variable(cur, "n", line);
+                }
                 cur.advance();
                 self.note_number(cur)
             }
@@ -945,6 +983,28 @@ impl<'a> Compiler<'a> {
             }
             'o' => {
                 cur.advance();
+                // `o_...` selects Pascal's independent parameter layer
+                // (SetNoteInfo's `_` prefix): `o_-1` is a relative change,
+                // and `o_.onNote...` modifiers attach through it.
+                if cur.eat('_') {
+                    let layered = self.consume_layer_index(cur)?;
+                    if let Some(handled) = self.modifier(cur, OnNoteTarget::Octave)? {
+                        return Ok(handled);
+                    }
+                    let current = self.track().octave;
+                    let value = if layered
+                        && !matches!(cur.peek(), Some('+' | '-' | '=' | '0'..='9' | '('))
+                    {
+                        current
+                    } else {
+                        self.read_underscore_relative(cur, "o", current)?
+                    };
+                    if !layered {
+                        self.track().octave = value;
+                    }
+                    self.reset_note_modifier(OnNoteTarget::Octave);
+                    return Ok(());
+                }
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Octave)? {
                     return Ok(handled);
                 }
@@ -956,6 +1016,49 @@ impl<'a> Compiler<'a> {
             }
             'l' => {
                 cur.advance();
+                // Pascal reads the length with GetArg, and a Str macro name
+                // in that position is *executed* as the argument (`lPN1`
+                // plays PN1 and leaves the length to the macro). An Int
+                // variable there is an error in Pascal too, so only the
+                // Str case is diverted.
+                {
+                    let mut probe = cur.clone();
+                    probe.skip_spaces();
+                    if let Some(word) = probe.read_word() {
+                        if !word.starts_with('#')
+                            && matches!(self.variables.get(&word), Some(Value::Str(_)))
+                        {
+                            cur.skip_spaces();
+                            let name = cur.read_word().unwrap_or_default();
+                            return self.string_variable(cur, &name, line);
+                        }
+                    }
+                }
+                // `l_...` is the same independent-layer form as `o_...`
+                // (a Str variable named `l_...` was handled by the probe
+                // above, exactly as Pascal resolves the name first).
+                if cur.eat('_') {
+                    let layered = self.consume_layer_index(cur)?;
+                    if let Some(handled) = self.modifier(cur, OnNoteTarget::Length)? {
+                        return Ok(handled);
+                    }
+                    let default_length = self.track().length;
+                    let value = self.read_length_in_mode(cur, self.step_mode, default_length)?;
+                    match value {
+                        Some(value) => {
+                            if !layered {
+                                self.track().length = value;
+                            }
+                        }
+                        None if layered => {}
+                        None => {
+                            return Err(MmlError::new(line, "lコマンドには音長を指定してください"));
+                        }
+                    }
+                    self.reset_note_modifier(OnNoteTarget::Length);
+                    return Ok(());
+                }
+                cur.skip_spaces();
                 let modifier_in_steps = cur.peek() == Some('%') && cur.peek_at(1) == Some('.');
                 if modifier_in_steps {
                     cur.advance();
@@ -983,8 +1086,68 @@ impl<'a> Compiler<'a> {
                 self.reset_note_modifier(OnNoteTarget::Length);
                 Ok(())
             }
+            'h' => {
+                // `h` sets Q2 (Pascal's funcQgate2): a step value taken
+                // off every gate. A defined name still wins, since names
+                // resolve before commands: a longer defined name (`hp`,
+                // a function called `hatena`) goes to the word path, and
+                // a variable named exactly `h` keeps its assignments
+                // (`Int h=3; h=90;` sets 90 in Pascal too, while the
+                // bare `h10` stays the Q2 command).
+                let mut probe = cur.clone();
+                if let Some(word) = probe.read_word() {
+                    let defined =
+                        self.variables.contains_key(&word) || self.functions.contains_key(&word);
+                    let assignment_follows = {
+                        let mut rest = probe.clone();
+                        rest.skip_spaces();
+                        rest.peek() == Some('=')
+                            || matches!(rest.peek(), Some('+') | Some('-'))
+                                && rest.peek() == rest.peek_at(1)
+                            || matches!(rest.peek(), Some('+') | Some('-') | Some('*') | Some('/'))
+                                && rest.peek_at(1) == Some('=')
+                    };
+                    // An Int/Array variable named `h` followed by a value
+                    // (`h10`) is the Q2 command, as in Pascal; a Str `h`
+                    // plays its macro and a function `h` is called, so
+                    // those delegate whenever they are defined.
+                    let plays_or_calls = matches!(self.variables.get(&word), Some(Value::Str(_)))
+                        || self.functions.contains_key(&word);
+                    if defined && (word != "h" || assignment_follows || plays_or_calls) {
+                        return self.word_command(cur);
+                    }
+                }
+                cur.advance();
+                cur.skip_spaces();
+                let value = self.read_calc_value(cur)?.as_int(line)?;
+                self.track().q2 = value;
+                Ok(())
+            }
             'q' => {
                 cur.advance();
+                // `q_...` is the same independent-layer form as `o_...`:
+                // `q_.T(...)` attaches a modifier through the `_`, and
+                // `q_=-95` writes the layer value.
+                if cur.eat('_') {
+                    let layered = self.consume_layer_index(cur)?;
+                    if let Some(handled) = self.modifier(cur, OnNoteTarget::Gate)? {
+                        return Ok(handled);
+                    }
+                    let current = self.track().gate_percent;
+                    let value = if layered
+                        && !matches!(cur.peek(), Some('+' | '-' | '=' | '0'..='9' | '('))
+                    {
+                        current
+                    } else {
+                        self.read_underscore_relative(cur, "q", current)?
+                    };
+                    if !layered {
+                        self.track().gate_percent = value;
+                    }
+                    self.reset_note_modifier(OnNoteTarget::Gate);
+                    return Ok(());
+                }
+                cur.skip_spaces();
                 let modifier_in_steps = cur.peek() == Some('%') && cur.peek_at(1) == Some('.');
                 if modifier_in_steps {
                     cur.advance();
@@ -1002,6 +1165,7 @@ impl<'a> Compiler<'a> {
                 }
                 // `q%n` gives the gate in ticks; a later plain `q` goes back
                 // to reading it as a percentage.
+                cur.skip_spaces();
                 let in_steps = cur.peek() == Some('%');
                 if in_steps {
                     cur.advance();
@@ -1017,6 +1181,30 @@ impl<'a> Compiler<'a> {
             }
             'v' => {
                 cur.advance();
+                // `v_...` is the same independent-layer form as `o_...`:
+                // `v_.Random(8)` and `v_.N(...)` attach modifiers through
+                // the `_`.
+                if cur.eat('_') {
+                    let layered = self.consume_layer_index(cur)?;
+                    if let Some(handled) = self.modifier(cur, OnNoteTarget::Velocity)? {
+                        return Ok(handled);
+                    }
+                    let current = self.track().velocity;
+                    let value = if layered
+                        && !matches!(cur.peek(), Some('+' | '-' | '=' | '0'..='9' | '('))
+                    {
+                        current
+                    } else {
+                        self.read_underscore_relative(cur, "v", current)?
+                    };
+                    if !layered {
+                        self.track().velocity = value;
+                    }
+                    self.reset_note_modifier(OnNoteTarget::Velocity);
+                    return Ok(());
+                }
+                cur.skip_spaces();
+                cur.eat('%');
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Velocity)? {
                     return Ok(handled);
                 }
@@ -1028,6 +1216,27 @@ impl<'a> Compiler<'a> {
             }
             't' => {
                 cur.advance();
+                // `t_...` is the same independent-layer form as `o_...`:
+                // `t_.Random(3)` attaches a modifier through the `_`.
+                if cur.eat('_') {
+                    let layered = self.consume_layer_index(cur)?;
+                    if let Some(handled) = self.modifier(cur, OnNoteTarget::Timing)? {
+                        return Ok(handled);
+                    }
+                    let current = self.track().timing;
+                    let value = if layered
+                        && !matches!(cur.peek(), Some('+' | '-' | '=' | '0'..='9' | '('))
+                    {
+                        current
+                    } else {
+                        self.read_underscore_relative(cur, "t", current)?
+                    };
+                    if !layered {
+                        self.track().timing = value;
+                    }
+                    self.reset_note_modifier(OnNoteTarget::Timing);
+                    return Ok(());
+                }
                 if let Some(handled) = self.modifier(cur, OnNoteTarget::Timing)? {
                     return Ok(handled);
                 }
@@ -1068,6 +1277,19 @@ impl<'a> Compiler<'a> {
                 cur.advance();
                 self.repeat(cur)
             }
+            // A parenthesised group in statement position is executed as
+            // its own fragment: Pascal evaluates it as a calc statement,
+            // which is how `(Time=Time-!1^1)` rewinds the time pointer
+            // where a Sub would be awkward. Note-option parentheses are
+            // consumed by the note reader itself and never reach here.
+            '(' => {
+                let line = cur.line();
+                cur.advance();
+                let body = cur
+                    .read_balanced('(', ')')
+                    .ok_or_else(|| MmlError::new(line, "括弧が閉じられていません"))?;
+                self.run_fragment(&body, line)
+            }
             '$' => {
                 cur.advance();
                 self.define_rythm_macro(cur)
@@ -1094,6 +1316,42 @@ impl<'a> Compiler<'a> {
                 Ok(())
             }
             c if c.is_ascii_alphabetic() || c == '_' || c == '#' => self.word_command(cur),
+            // A non-ASCII word at statement position: Pascal's tokenizer
+            // reads the kana/kanji run (plus trailing ASCII alphanumerics)
+            // as one token and, finding no such command, only hints and
+            // carries on — this is how quoted text that escaped the
+            // do-re-mi conversion (`Div{"シレソ"}`) behaves there.
+            c if !c.is_ascii() && c.is_alphabetic() => {
+                let mut word = String::new();
+                while let Some(ch) = cur.peek() {
+                    if !ch.is_ascii() && ch.is_alphabetic() {
+                        word.push(ch);
+                        cur.advance();
+                    } else {
+                        break;
+                    }
+                }
+                while let Some(ch) = cur.peek() {
+                    if ch.is_ascii_alphanumeric() || ch == '_' {
+                        word.push(ch);
+                        cur.advance();
+                    } else {
+                        break;
+                    }
+                }
+                if self.functions.contains_key(&word) {
+                    let args = self.read_call_args(cur, &word)?;
+                    self.call_function(&word, args, line)?;
+                } else if matches!(self.variables.get(&word), Some(Value::Str(_))) {
+                    self.string_variable(cur, &word.clone(), line)?;
+                } else {
+                    self.warnings.push(Warning::new(
+                        line,
+                        format!("\"{word}\"は未定義です。綴りを確かめてください。"),
+                    ));
+                }
+                Ok(())
+            }
             other => Err(MmlError::new(
                 line,
                 format!("解釈できない文字です: '{other}'"),
@@ -1141,6 +1399,8 @@ impl<'a> Compiler<'a> {
             let is_assignment = probe.peek() == Some('=')
                 || matches!(probe.peek(), Some('+') | Some('-'))
                     && probe.peek() == probe.peek_at(1)
+                || matches!(probe.peek(), Some('+') | Some('-') | Some('*') | Some('/'))
+                    && probe.peek_at(1) == Some('=')
                 || matches!(self.variables.get(&word), Some(Value::Array(_)))
                     && probe.peek() == Some('(');
             if is_assignment {
@@ -1311,8 +1571,33 @@ impl<'a> Compiler<'a> {
             "Str" | "STR" => self.declare(cur, VarKind::Str),
             "Array" | "ARRAY" => self.declare(cur, VarKind::Array),
             "Print" | "PRINT" => {
-                let value = self.read_value(cur)?;
-                self.messages.push(value.as_str());
+                // Pascal's scriptPrint reads a whole GetArgs list, so a
+                // parenthesised call prints every argument: an array
+                // argument contributes its elements, and the list itself
+                // joins with ", " (TMArray.StrValue). A `{...}` string is
+                // an ordinary element of that list.
+                let mut probe = cur.clone();
+                probe.skip_spaces();
+                if probe.peek() == Some('(') {
+                    *cur = probe;
+                    cur.advance();
+                    let source = cur
+                        .read_balanced('(', ')')
+                        .ok_or_else(|| MmlError::new(line, "括弧が閉じられていません"))?;
+                    let parts = split_array_initializer(&source, line, MAX_ARRAY_ELEMENTS)?;
+                    let mut texts = Vec::with_capacity(parts.len());
+                    for part in &parts {
+                        if part.trim().is_empty() {
+                            texts.push("0".to_string());
+                        } else {
+                            texts.push(self.eval_source(part.trim(), line)?.as_str());
+                        }
+                    }
+                    self.messages.push(texts.join(", "));
+                } else {
+                    let value = self.read_value(cur)?;
+                    self.messages.push(value.as_str());
+                }
                 Ok(())
             }
             "Function" | "FUNCTION" => self.define_function(cur),
@@ -1437,10 +1722,18 @@ impl<'a> Compiler<'a> {
                 let name = other.to_string();
                 self.assign(cur, &name)
             }
-            other => Err(MmlError::new(
-                line,
-                format!("\"{other}\"は未定義です。綴りを確かめてください。"),
-            )),
+            other => {
+                // Pascal only hints at an unknown statement word and carries
+                // on (the raise in Analize is commented out): legacy songs
+                // contain calls to macros their authors never defined, and
+                // definitions the Pascal build silently skips. Match it with
+                // a warning so the name stays visible in the output.
+                self.warnings.push(Warning::new(
+                    line,
+                    format!("\"{other}\"は未定義です。綴りを確かめてください。"),
+                ));
+                Ok(())
+            }
         }
     }
 
@@ -1462,7 +1755,7 @@ impl<'a> Compiler<'a> {
             Vec::new()
         };
 
-        let body = self.read_block(cur, line)?;
+        let body = self.read_block_code(cur, line)?;
         self.functions
             .insert(name, FunctionDef { params, body, line });
         Ok(())
@@ -1472,13 +1765,23 @@ impl<'a> Compiler<'a> {
     ///
     /// The type name is accepted and ignored: values carry their own type, so
     /// the declaration only matters for readability.
+    ///
+    /// Comments may appear inside the declaration (legacy songs annotate
+    /// defaults, e.g. `Int Voi = 1,// 音色初期値 = GrandPiano`), and commas
+    /// inside a default's parentheses or braces do not separate parameters:
+    /// Pascal reads the declaration token by token, skipping comments.
     fn parse_params(&mut self, source: &str, line: usize) -> Result<Vec<Param>> {
+        let source = strip_param_comments(source);
+        let parts = split_param_parts(&source);
         let mut params = Vec::new();
-        for part in source.split(',') {
-            let part = part.trim();
+        let mut index = 0;
+        while index < parts.len() {
+            let part = parts[index].trim();
+            index += 1;
             if part.is_empty() {
                 continue;
             }
+
             let mut cur = Cursor::with_line(part, line);
             let mut name = cur
                 .read_word()
@@ -1497,17 +1800,43 @@ impl<'a> Compiler<'a> {
                 cur.skip_spaces();
             }
 
-            let default = if cur.eat('=') {
+            let mut default = if cur.eat('=') {
                 Some(expr::eval(&mut cur, self)?)
             } else {
                 None
             };
+            // An Array parameter's default is a bare value list that runs to
+            // the end of the declaration (`Array Set=1,1,127,100,...`): the
+            // parameter collects the call arguments, and the list is what it
+            // holds when they are omitted. A parenthesized default already
+            // evaluates to an Array and consumes nothing extra.
+            if kind == VarKind::Array {
+                if let Some(first) = default.take() {
+                    if !matches!(first, Value::Array(_)) {
+                        let mut items = vec![first];
+                        while index < parts.len() {
+                            let extra = parts[index].trim();
+                            index += 1;
+                            if extra.is_empty() {
+                                continue;
+                            }
+                            let mut extra_cur = Cursor::with_line(extra, line);
+                            items.push(expr::eval(&mut extra_cur, self)?);
+                        }
+                        default = Some(Value::Array(items));
+                    } else {
+                        default = Some(first);
+                    }
+                }
+            }
+
             params.push(Param {
                 name,
                 kind,
                 default,
             });
         }
+
         Ok(params)
     }
 
@@ -1545,6 +1874,12 @@ impl<'a> Compiler<'a> {
                 args.push(Value::Int(0));
                 continue;
             }
+            if raw.starts_with('.') {
+                // As in `read_args`: a `.`-led argument is a zero, and
+                // Pascal's list reader discards the rest from there.
+                args.push(Value::Int(0));
+                break;
+            }
             if matches!(
                 params.get(index).map(|param| param.kind),
                 Some(VarKind::Str)
@@ -1569,10 +1904,14 @@ impl<'a> Compiler<'a> {
                 let mut length_cur = Cursor::with_line(raw, line);
                 if let Some(length) = self.read_joined_argument_length(&mut length_cur)? {
                     length_cur.skip_trivia();
+                    args.push(Value::Int(length));
                     if length_cur.is_eof() {
-                        args.push(Value::Int(length));
                         continue;
                     }
+                    // Trailing junk after the length (`!4.99`): Pascal's
+                    // list reader stops there and discards the rest of
+                    // the parenthesised text, later arguments included.
+                    break;
                 }
             }
             args.push(self.eval_source(raw, line)?);
@@ -1776,10 +2115,69 @@ impl<'a> Compiler<'a> {
                 let name = args.first().map(|v| v.as_str()).unwrap_or_default();
                 Value::Int(self.command_value(&name, line)?)
             }
+            // Readable commands (Pascal 読取り可): bare use reads the current
+            // value; an argument sets it first, as the Pascal scripts do.
+            "Channel" | "CHANNEL" | "CH" => {
+                if let Some(value) = args.first() {
+                    let no = value.as_int(line)?;
+                    if !(1..=16).contains(&no) {
+                        return Err(MmlError::new(
+                            line,
+                            format!("チャンネルは1〜16の範囲で指定してください: {no}"),
+                        ));
+                    }
+                    self.track().channel = (no - 1) as u8;
+                }
+                Value::Int(self.track().channel as i64 + 1)
+            }
+            "Track" | "TRACK" | "TR" | "NowTrack" => {
+                if let Some(value) = args.first() {
+                    let no = value.as_int(line)?;
+                    self.current = no;
+                    let timebase = self.timebase;
+                    let step_mode = self.step_mode;
+                    self.tracks
+                        .entry(no)
+                        .or_insert_with(|| TrackState::new(no, timebase, step_mode));
+                }
+                Value::Int(self.current)
+            }
+            "Tempo" | "TEMPO" => {
+                if let Some(value) = args.first() {
+                    let bpm = value.as_int(line)?;
+                    let usec = Self::tempo_usec(bpm, line)?;
+                    self.tempo = bpm;
+                    let time = self.track().time;
+                    self.push_event_to_track(0, Event::tempo(time, usec))?;
+                }
+                Value::Int(self.tempo)
+            }
+            "Voice" => {
+                if args.is_empty() {
+                    Value::Int(self.command_value("@", line)?)
+                } else {
+                    // Route through the statement implementation so bank
+                    // selection and range checks behave identically.
+                    let text = format!(
+                        "({})",
+                        args.iter()
+                            .map(|value| value.as_int(line).map(|n| n.to_string()))
+                            .collect::<Result<Vec<_>>>()?
+                            .join(",")
+                    );
+                    let mut cur = Cursor::with_line(&text, line);
+                    self.voice(&mut cur)?;
+                    Value::Int(self.track().voice)
+                }
+            }
             "Time" => {
                 let source = args.first().map(Value::as_str).unwrap_or_default();
                 Value::Int(self.time_value(&source, line)?)
             }
+            // A bare `TimeBase` in an expression is the current division,
+            // as in Pascal (`Print(TimeBase)` shows 96 by default), where
+            // the statement command of the same name sets it.
+            "TimeBase" => Value::Int(self.timebase),
             "System.GetKeyFlag" => Value::Array(
                 ('a'..='g')
                     .map(|note| Value::Int(self.key_flags[pitch_class_index(note).unwrap()]))
@@ -1892,6 +2290,7 @@ impl<'a> Compiler<'a> {
             "v" => track.velocity,
             "o" => track.octave,
             "q" => track.gate_percent,
+            "h" => track.q2,
             "t" => track.timing,
             "@" => track.voice,
             "Key" => key_shift,
@@ -1965,6 +2364,21 @@ impl<'a> Compiler<'a> {
 
         let mut shadowed: Vec<(String, Option<Value>)> = Vec::new();
         for (index, param) in function.params.iter().enumerate() {
+            // An Array parameter collects every argument from its position
+            // onward (`Function TrackSet(Array Set=...)` is called as
+            // `TrackSet(1,2,3,...)` and reads them back as `Set(0)`, `Set(1)`,
+            // ...). A single already-array argument passes through as-is.
+            if param.kind == VarKind::Array {
+                let remaining = &args[index.min(args.len())..];
+                let value = match remaining {
+                    [] => param.default.clone().unwrap_or(Value::Array(Vec::new())),
+                    [single] => single.clone(),
+                    _ => Value::Array(remaining.to_vec()),
+                };
+                shadowed.push((param.name.clone(), self.variables.get(&param.name).cloned()));
+                self.variables.insert(param.name.clone(), value);
+                continue;
+            }
             // An argument the caller left out falls back to the parameter's
             // default, or to 0 — the Pascal build accepts `f(1)` for a
             // two-parameter function, and Include/bend.h relies on it.
@@ -2220,7 +2634,18 @@ impl<'a> Compiler<'a> {
 
     fn expect_single_modifier_arg(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
         let line = cur.line();
-        let values = self.read_args(cur, 1)?;
+        // Pascal reads these with GetIntValueAndCalc, which evaluates a
+        // parenthesised group as an argument list and keeps the first
+        // value (`o.Random(3,7)` sets a random width of 3). Read the
+        // whole group and take the first element; a bare value keeps
+        // the single-argument reading.
+        let mut probe = cur.clone();
+        probe.skip_spaces();
+        let values = if probe.peek() == Some('(') {
+            self.read_args(cur, usize::MAX)?
+        } else {
+            self.read_args(cur, 1)?
+        };
         values
             .first()
             .copied()
@@ -2449,8 +2874,32 @@ impl<'a> Compiler<'a> {
     /// `Rythm{ ... }` — expand the drum macros, then compile the result.
     fn rythm(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let body = self.read_block(cur, line)?;
-        let expanded = rythm::expand(&body, &self.rythm_macros);
+        // Pascal reads the body with GetNakaKakko, which does not
+        // require the brace: without one, the rest of the current
+        // source is the rhythm body (`Sub{Rhythm v70 l16 ...}`).
+        let body = {
+            let mut probe = cur.clone();
+            probe.skip_trivia();
+            if probe.peek() == Some('{') {
+                self.read_block(cur, line)?
+            } else {
+                let mut rest = String::new();
+                while let Some(ch) = cur.advance() {
+                    rest.push(ch);
+                }
+                rest
+            }
+        };
+        let expanded = {
+            // Pascal's ReplaceRythm inlines a defined `#name` where it
+            // stands; the resolver hands the pass the current variables.
+            let resolve = |name: &str| match self.variables.get(name) {
+                Some(Value::Str(text)) => Some(text.clone()),
+                Some(Value::Int(value)) => Some(value.to_string()),
+                _ => None,
+            };
+            rythm::expand(&body, &mut self.rythm_macros, &resolve)
+        };
         self.rythm_depth += 1;
         let result = self.run_fragment(&expanded, line);
         self.rythm_depth -= 1;
@@ -2501,20 +2950,63 @@ impl<'a> Compiler<'a> {
                 .insert(name.to_string(), Value::Str(current.replace(&from, &to)));
             return Ok(());
         }
-        let contents = match self.variables.get(name) {
+        let mut contents = match self.variables.get(name) {
             Some(value) => value.as_str(),
-            None => return Ok(()),
+            None => String::new(),
         };
+        // Pascal's ExecuteStr: a `( ... )` right after the name supplies
+        // macro arguments. Without a comma the whole text is one string
+        // argument (a `{...}` wrapper is stripped); with commas each part
+        // is evaluated like a function argument. Bodies that mention `#?`
+        // get `#?1`, `#?2`, ... replaced textually with the arguments;
+        // other bodies have the arguments appended, joined with ", ".
+        cur.skip_spaces();
+        if cur.peek() == Some('(') {
+            cur.advance();
+            let raw = cur
+                .read_balanced('(', ')')
+                .ok_or_else(|| MmlError::new(line, "マクロ引数の括弧が閉じられていません"))?;
+            let args: Vec<String> = if !raw.contains(',') {
+                let text = raw.trim();
+                let text = if text.len() >= 2 && text.starts_with('{') && text.ends_with('}') {
+                    &text[1..text.len() - 1]
+                } else {
+                    text
+                };
+                vec![text.to_string()]
+            } else {
+                let mut values = Vec::new();
+                for part in split_function_args(&raw) {
+                    values.push(self.eval_source(part.trim(), line)?.as_str());
+                }
+                values
+            };
+            if contents.contains("#?") {
+                for (index, arg) in args.iter().enumerate() {
+                    contents = contents.replace(&format!("#?{}", index + 1), arg);
+                }
+            } else {
+                contents.push_str(&args.join(", "));
+            }
+        }
         if contents.is_empty() {
             return Ok(());
         }
-        let expanded = self.preprocess(&contents);
-        let expanded = if self.rythm_depth > 0 {
-            rythm::expand(&expanded, &self.rythm_macros)
-        } else {
-            expanded
-        };
-        self.run_fragment(&expanded, line)
+        // A string macro's body compiles as ordinary MML even when the
+        // invocation sits inside a Rythm block: Pascal's ReplaceRythm
+        // rewrites only the block's literal text (inlining the `#name`s
+        // that were defined when the block started), and a body pulled in
+        // later — a macro defined by an escape group inside the block,
+        // say — runs through the plain compiler. Rhythm-expanding the
+        // body here would corrupt it: `v.onNote(80,...)` would lose its
+        // parentheses to the escape rule and glue the first value onto
+        // the option name.
+        // The body is a slice of already-preprocessed source (or built
+        // from values that were), so it must not be preprocessed again:
+        // a second pass would rewrite the ASCII the first pass produced
+        // (`Time` becoming `Tempoime` when a user sutoton maps `T`).
+        // Pascal compiles macro bodies in place, without re-converting.
+        self.run_fragment(&contents, line)
     }
 
     /// `'ceg'4` — a chord: every note starts together and shares one length.
@@ -2544,10 +3036,46 @@ impl<'a> Compiler<'a> {
             self.read_length(cur)?
         };
 
-        // `'ceg'4,80,100,0,5` — gate/velocity/timing/octave after the length,
-        // in that fixed order (Pascal's `RecWaon.Option` chain, unlike a
-        // note's `ArgOrder`), applied as the defaults for every note in the
-        // chord body.
+        // A tie immediately after a chord belongs to the chord length. The
+        // command-level `^` is a rest in Pascal, so the chord parser must
+        // consume a joined chord length itself. Whitespace may separate
+        // tie groups (`'a#g'^^^^^ ^^^^^^,,-5`): Pascal's GetNoteLength
+        // skips spaces around the joins, so the scan here does the same,
+        // without consuming trailing space when no tie follows.
+        {
+            let mut probe = cur.clone();
+            probe.skip_spaces();
+            if probe.peek() == Some('^') {
+                *cur = probe;
+                let mut total = length.unwrap_or_else(|| self.track().length);
+                loop {
+                    while cur.eat('^') {
+                        let part = self
+                            .read_length(cur)?
+                            .unwrap_or_else(|| self.track().length);
+                        total = total.checked_add(part).ok_or_else(|| {
+                            MmlError::new(line, "和音の結合音長が範囲を超えました")
+                        })?;
+                    }
+                    let mut probe = cur.clone();
+                    probe.skip_spaces();
+                    if probe.peek() == Some('^') {
+                        *cur = probe;
+                        continue;
+                    }
+                    break;
+                }
+                length = Some(total);
+            }
+        }
+
+        // `'ceg'4,80,100,0,5` — gate/velocity/timing/octave after the
+        // length, in that fixed order (Pascal's `RecWaon.Option` chain,
+        // unlike a note's `ArgOrder`), applied as the defaults for every
+        // note in the chord body. Pascal's funcWaon reads them only after
+        // GetNoteLength has taken the whole length, ties included, which
+        // is why songs write `'a#g'^^^^^ ^^^^^^,,-5`: the options follow
+        // the joined length, not the first segment.
         let mut options = NoteOptions::default();
         for index in 1..=4 {
             cur.skip_spaces();
@@ -2557,22 +3085,6 @@ impl<'a> Compiler<'a> {
             cur.skip_spaces();
             let mut unused_length = None;
             self.read_note_option(cur, index, default_length, &mut unused_length, &mut options)?;
-        }
-
-        // A tie immediately after a chord belongs to the chord length. The
-        // command-level `^` is a rest in Pascal, so the chord parser must
-        // consume a joined chord length itself.
-        if cur.peek() == Some('^') {
-            let mut total = length.unwrap_or_else(|| self.track().length);
-            while cur.eat('^') {
-                let part = self
-                    .read_length(cur)?
-                    .unwrap_or_else(|| self.track().length);
-                total = total
-                    .checked_add(part)
-                    .ok_or_else(|| MmlError::new(line, "和音の結合音長が範囲を超えました"))?;
-            }
-            length = Some(total);
         }
 
         let start = self.track().time;
@@ -2876,12 +3388,55 @@ impl<'a> Compiler<'a> {
     /// `Sub{ ... }` — play the block, then put the time pointer back.
     fn sub(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let body = self.read_block(cur, line)?;
+        let body = self.read_sub_block(cur, line)?;
         let before = self.track().time;
         self.run_fragment(&body, line)?;
         let track = self.track();
         track.time = before;
         Ok(())
+    }
+
+    /// Read a Sub body the way Pascal's `GetNakaKakko` does: it does not
+    /// require an opening brace, but collects text with brace nesting from
+    /// wherever the cursor stands, stopping at the close that returns the
+    /// nesting to zero, or at the end of the input. Rhythm mode relies on
+    /// this: `(v110 S){ ... }` expands to `v110 S Sub{ ... }`, and the
+    /// first Sub swallows the second one's name while scanning for its
+    /// block, then plays the collected text as a nested Sub.
+    fn read_sub_block(&mut self, cur: &mut Cursor, line: usize) -> Result<String> {
+        let mut scan = cur.clone();
+        scan.skip_spaces();
+        let mut nest: i64 = 0;
+        let mut body = String::new();
+        while let Some(c) = scan.peek() {
+            match c {
+                '{' => {
+                    if nest != 0 {
+                        body.push(c);
+                    }
+                    nest += 1;
+                    scan.advance();
+                }
+                '}' => {
+                    nest -= 1;
+                    if nest < 0 {
+                        return Err(MmlError::new(line, "「{」が足りません"));
+                    }
+                    scan.advance();
+                    if nest == 0 {
+                        *cur = scan;
+                        return Ok(body);
+                    }
+                    body.push(c);
+                }
+                _ => {
+                    body.push(c);
+                    scan.advance();
+                }
+            }
+        }
+        *cur = scan;
+        Ok(body)
     }
 
     /// `Play({track 0},{track 1},...)` — compile several tracks in parallel.
@@ -2937,8 +3492,10 @@ impl<'a> Compiler<'a> {
                 .or_insert_with(|| TrackState::new(track_no as i64, timebase, step_mode));
             track.time = start_time;
 
-            let normalized = self.preprocess(&source);
-            if let Err(error) = self.run_fragment(&normalized, line) {
+            // As with string macros, the value is already-preprocessed
+            // source text; Pascal's Play compiles it without converting
+            // it again.
+            if let Err(error) = self.run_fragment(&source, line) {
                 self.current = original_track;
                 return Err(MmlError::new(
                     error.line,
@@ -3259,6 +3816,15 @@ impl<'a> Compiler<'a> {
     fn time_command(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         cur.skip_spaces();
+        // `Time=<expression>` sets the pointer directly (a step count),
+        // the form used inside parenthesised calc statements such as
+        // `(Time=Time-!1^1)`.
+        if cur.eat('=') {
+            let value = expr::eval(cur, self)?.as_int(line)?;
+            let time = self.checked_time(value.max(0), 0, line)?;
+            self.track().time = time;
+            return Ok(());
+        }
         if !cur.eat('(') {
             return Err(MmlError::new(
                 line,
@@ -3629,6 +4195,13 @@ impl<'a> Compiler<'a> {
     /// Convert `totalTicks` or `measure:beat:step` into an absolute time.
     /// Used by both the Time command and the readable `Time(...)` function.
     fn time_value(&mut self, body: &str, line: usize) -> Result<i64> {
+        // A bare `Time` read (no argument) is the current time pointer,
+        // as with Pascal's readable commands; only an explicit
+        // `measure:beat:step` body goes through the parser below (an empty
+        // body would otherwise fail as an empty expression).
+        if body.trim().is_empty() {
+            return Ok(self.track().time);
+        }
         let parts: Vec<i64> = body
             .split(':')
             .map(|part| {
@@ -3684,14 +4257,17 @@ impl<'a> Compiler<'a> {
     /// `Int name[=value];`, `Str name[={"..."}];`, `Array name[=(a,b,c)];`
     fn declare(&mut self, cur: &mut Cursor, kind: VarKind) -> Result<()> {
         let line = cur.line();
-        cur.skip_spaces();
+        // Trivia, not just spaces: legacy songs annotate declarations with
+        // comments between the keyword and the name (`Int /* Bool */ X = 0`),
+        // and Pascal's tokeniser skips comments in these positions.
+        cur.skip_trivia();
         let parenthesised_name = cur.eat('(');
-        cur.skip_spaces();
+        cur.skip_trivia();
         let name = cur
             .read_word()
             .ok_or_else(|| MmlError::new(line, "変数名を指定してください"))?;
         if parenthesised_name {
-            cur.skip_spaces();
+            cur.skip_trivia();
             if !cur.eat(')') {
                 return Err(MmlError::new(line, "変数名の括弧が閉じられていません"));
             }
@@ -3704,28 +4280,56 @@ impl<'a> Compiler<'a> {
         };
         self.variables.insert(name.clone(), initial);
 
-        cur.skip_spaces();
+        cur.skip_trivia();
         if cur.peek() == Some('=') {
             if kind == VarKind::Array {
                 cur.advance();
-                cur.skip_spaces();
+                cur.skip_trivia();
                 if cur.eat('(') {
                     let source = cur
                         .read_balanced('(', ')')
                         .ok_or_else(|| MmlError::new(line, "配列の初期値が閉じていません"))?;
                     let raw_items = split_array_initializer(&source, line, MAX_ARRAY_ELEMENTS)?;
                     let mut items = Vec::with_capacity(raw_items.len());
-                    for raw in raw_items {
-                        items.push(self.eval_source(raw.trim(), line)?);
+                    for raw in &raw_items {
+                        // An empty slot is a zero, as in Pascal's GetArgs.
+                        if raw.trim().is_empty() {
+                            items.push(Value::Int(0));
+                        } else {
+                            items.push(self.eval_source(raw.trim(), line)?);
+                        }
                     }
                     self.variables.insert(name, Value::Array(items));
                     return Ok(());
                 }
-                let value = expr::eval(cur, self)?;
-                if !matches!(value, Value::Array(_)) {
-                    return Err(MmlError::new(line, "配列には配列値を代入してください"));
+                // A bare comma list is an initializer too: Pascal reads
+                // the value with getArgsWithType, so `Array A = 0,0,0`
+                // declares three elements, and a lone array value is
+                // flattened into the new array (GetArgs' AddArray rule).
+                let mut items: Vec<Value> = Vec::new();
+                loop {
+                    cur.skip_trivia();
+                    if matches!(cur.peek(), Some(',') | Some(';') | None) {
+                        // An empty slot is a zero, as in Pascal's GetArgs.
+                        items.push(Value::Int(0));
+                    } else {
+                        match expr::eval(cur, self)? {
+                            Value::Array(values) => items.extend(values),
+                            value => items.push(value),
+                        }
+                    }
+                    if items.len() > MAX_ARRAY_ELEMENTS {
+                        return Err(MmlError::new(
+                            line,
+                            format!("配列の要素数が上限({MAX_ARRAY_ELEMENTS})を超えます"),
+                        ));
+                    }
+                    cur.skip_trivia();
+                    if !cur.eat(',') {
+                        break;
+                    }
                 }
-                self.variables.insert(name, value);
+                self.variables.insert(name, Value::Array(items));
                 return Ok(());
             }
             self.assign(cur, &name)?;
@@ -3786,6 +4390,32 @@ impl<'a> Compiler<'a> {
                     .insert(name.to_string(), Value::Int(current + step));
                 return Ok(());
             }
+            // Compound assignment: `I += n`, `I -= n`, `I *= n`, `I /= n`
+            // (Pascal's subIncDec; `/=` is integer division, and division
+            // by zero yields 0 there, as in Div2).
+            if matches!(cur.peek(), Some('+') | Some('-') | Some('*') | Some('/'))
+                && cur.peek_at(1) == Some('=')
+            {
+                let op = cur.advance().unwrap_or_default();
+                cur.advance();
+                let rhs = self.read_value(cur)?.as_int(line)?;
+                let current = self
+                    .variables
+                    .get(name)
+                    .map(|value| value.as_int(line))
+                    .transpose()?
+                    .unwrap_or(0);
+                let value = match op {
+                    '+' => current.checked_add(rhs),
+                    '-' => current.checked_sub(rhs),
+                    '*' => current.checked_mul(rhs),
+                    _ if rhs == 0 => Some(0),
+                    _ => current.checked_div(rhs),
+                }
+                .ok_or_else(|| MmlError::new(line, "計算が範囲を超えました"))?;
+                self.variables.insert(name.to_string(), Value::Int(value));
+                return Ok(());
+            }
         }
 
         if !cur.eat('=') {
@@ -3816,7 +4446,7 @@ impl<'a> Compiler<'a> {
     fn if_statement(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         let condition = self.read_condition(cur)?;
-        let then_body = self.read_block(cur, line)?;
+        let then_body = self.read_block_code(cur, line)?;
 
         cur.skip_trivia();
         let else_body = {
@@ -3824,7 +4454,7 @@ impl<'a> Compiler<'a> {
             match probe.read_word().as_deref() {
                 Some("Else") | Some("ELSE") => {
                     *cur = probe;
-                    Some(self.read_block(cur, line)?)
+                    Some(self.read_block_code(cur, line)?)
                 }
                 _ => None,
             }
@@ -3842,7 +4472,7 @@ impl<'a> Compiler<'a> {
     fn while_statement(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         let condition_src = self.read_paren_source(cur, line)?;
-        let body = self.read_block(cur, line)?;
+        let body = self.read_block_code(cur, line)?;
 
         let mut iterations = 0u32;
         while self.eval_source(&condition_src, line)?.truthy() {
@@ -3865,7 +4495,7 @@ impl<'a> Compiler<'a> {
     fn for_statement(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         let header = self.read_paren_source(cur, line)?;
-        let body = self.read_block(cur, line)?;
+        let body = self.read_block_code(cur, line)?;
 
         let parts: Vec<&str> = header.split(';').collect();
         if parts.len() < 3 {
@@ -3960,6 +4590,18 @@ impl<'a> Compiler<'a> {
             return Err(MmlError::new(line, "{ が必要です"));
         }
         cur.read_balanced('{', '}')
+            .ok_or_else(|| MmlError::new(line, "{ が } で閉じられていません"))
+    }
+
+    /// Read a `{ ... }` body the way Pascal delimits code blocks
+    /// (function bodies and If/For/While bodies): brackets inside
+    /// comments do not count towards the nesting.
+    fn read_block_code(&mut self, cur: &mut Cursor, line: usize) -> Result<String> {
+        cur.skip_trivia();
+        if !cur.eat('{') {
+            return Err(MmlError::new(line, "{ が必要です"));
+        }
+        cur.read_balanced_skip_comments('{', '}')
             .ok_or_else(|| MmlError::new(line, "{ が } で閉じられていません"))
     }
 
@@ -4133,7 +4775,48 @@ impl<'a> Compiler<'a> {
     /// Voice numbers are 1-based in MML and 0-based in MIDI.
     fn voice(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let args = self.read_args(cur, 3)?;
+        // The voice may be an instrument name: stdmsg.h defines them as Int
+        // variables (`Int GrandPiano = 1;`), and Pascal's scriptVoice reads
+        // its arguments with GetArgs, which resolves names. The plain
+        // read_args path only accepts numeric literals, so a leading name
+        // is evaluated as a term first.
+        let args = {
+            let mut probe = cur.clone();
+            probe.skip_spaces();
+            let leading_word = probe.read_word().unwrap_or_default();
+            // Only a word that actually names a variable takes the term
+            // path; anything else keeps the numeric reader (and its error).
+            if !leading_word.is_empty() && self.variables.contains_key(&leading_word) {
+                let mut values = Vec::new();
+                loop {
+                    cur.skip_spaces();
+                    values.push(expr::eval_term(cur, self)?.as_int(line)?);
+                    cur.skip_spaces();
+                    if values.len() >= 3 || !cur.eat(',') {
+                        break;
+                    }
+                }
+                values
+            } else {
+                self.read_args(cur, 3)?
+            }
+        };
+        // Pascal's scriptVoice reads its arguments with GetArgs straight
+        // off the source, so a scalar group as the first element does not
+        // end the list: `@(SawtoothLead),1` is the voice plus its bank,
+        // where the parenthesised reader above stops at the group.
+        let mut args = args;
+        while args.len() < 3 {
+            let mut probe = cur.clone();
+            probe.skip_spaces();
+            if probe.peek() != Some(',') {
+                break;
+            }
+            *cur = probe;
+            cur.advance();
+            cur.skip_spaces();
+            args.push(expr::eval_term(cur, self)?.as_int(line)?);
+        }
         let Some(&voice) = args.first() else {
             return Err(MmlError::new(line, "@には音色番号を指定してください"));
         };
@@ -4253,8 +4936,17 @@ impl<'a> Compiler<'a> {
             self.write_pitch_bend(value);
             return Ok(());
         }
+        // `p=0` is as valid as `p0`: Pascal's argument reader treats the
+        // `=` as the argument marker, like the other commands. The value
+        // itself is read with the full calculation reader, as Pascal's
+        // pitch bend does: `p64-10` bends to 54 and `p64 - PB*3`
+        // evaluates the expression, while a trailing operator with no
+        // operand (`p100<c`) is rewound and left for the next command.
+        cur.skip_spaces();
+        cur.eat('=');
         let value = self
-            .expect_int(cur, "p")
+            .read_calc_value(cur)
+            .and_then(|value| value.as_int(line))
             .map_err(|_| MmlError::new(line, "pには値を指定してください"))?;
         // The simple form sets only the MSB: LSB stays 0.
         self.write_pitch_bend_raw(0, value.clamp(0, 127) as u8);
@@ -4394,6 +5086,7 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         let parenthesised = cur.eat('(');
         let mut args = Vec::new();
+        let mut stopped_mid_list = false;
         loop {
             // Inside parentheses a list may run over several lines.
             if parenthesised {
@@ -4422,7 +5115,12 @@ impl<'a> Compiler<'a> {
                 }
             }
             let value = if assigned && !parenthesised {
-                // `Voice=Vo` — a bare term, which may be a variable or a call.
+                // `Voice=Vo` — a bare value, which may be a variable or a
+                // call. Pascal's GetArgs evaluates each element with the
+                // full expression grammar (GetArgCalc), so a note-length
+                // literal keeps calculating: `EP.T=110,0,!1*4` reads its
+                // last argument as 384*4 steps, not as `!1` followed by a
+                // stray `*4`.
                 let line = cur.line();
                 match cur.peek() {
                     Some(c)
@@ -4430,9 +5128,10 @@ impl<'a> Compiler<'a> {
                             || c == '_'
                             || c == '$'
                             || c == '-'
+                            || c == '!'
                             || c == '(' =>
                     {
-                        Some(expr::eval_term(cur, self)?.as_int(line)?)
+                        Some(expr::eval(cur, self)?.as_int(line)?)
                     }
                     _ => None,
                 }
@@ -4460,14 +5159,40 @@ impl<'a> Compiler<'a> {
             } else {
                 self.read_number(cur)?
             };
-            let Some(value) = value else { break };
+            // An empty slot (`@123,,0`, `EP.T(100,,!4)`) reads as 0: Pascal's
+            // GetArgs substitutes a zero value when GetArgCalc finds nothing
+            // between the commas.
+            let value = match value {
+                Some(value) => value,
+                None if cur.peek() == Some(',') => 0,
+                None if parenthesised && cur.peek() == Some('.') => {
+                    // A `.`-led argument (`.`, `.!4.`, `.5`) reads as zero
+                    // in Pascal and ends the list there: GetArgCalc finds
+                    // no value, the dummy zero is added, and the break
+                    // check discards the rest of the group.
+                    args.push(0);
+                    stopped_mid_list = true;
+                    break;
+                }
+                None if parenthesised && !args.is_empty() && cur.peek() == Some(')') => {
+                    args.push(0);
+                    break;
+                }
+                None => break,
+            };
             args.push(value);
             if parenthesised {
                 cur.skip_trivia();
             } else {
                 cur.skip_spaces();
             }
-            if args.len() >= max || !cur.eat(',') {
+            if args.len() >= max {
+                break;
+            }
+            if !cur.eat(',') {
+                // The list ended without a comma: Pascal's reader stops
+                // here and discards the rest of the group (see below).
+                stopped_mid_list = true;
                 break;
             }
         }
@@ -4477,7 +5202,17 @@ impl<'a> Compiler<'a> {
             cur.skip_spaces();
         }
         if parenthesised && !cur.eat(')') {
-            return Err(MmlError::new(cur.line(), "引数の括弧が閉じられていません"));
+            // Pascal extracts the parenthesised text first and parses a
+            // prefix of it as the argument list, discarding whatever the
+            // list reader stopped at (`EP.T(...,!4.127,...)` ends the
+            // list at the length literal). Mirror that when the reader
+            // stopped mid-list: skip the rest of the group instead of
+            // failing, unless it never closes. Stopping because `max`
+            // arguments were read keeps the strict reading, so excess
+            // arguments to a fixed-arity command still fail.
+            if !(stopped_mid_list && cur.skip_group_remainder('(', ')')) {
+                return Err(MmlError::new(cur.line(), "引数の括弧が閉じられていません"));
+            }
         }
         Ok(args)
     }
@@ -4503,17 +5238,10 @@ impl<'a> Compiler<'a> {
         *cur = probe;
         // The body is parsed from its own cursor, like the Pascal build's
         // temporary source, so its contents cannot leak into what follows.
-        // Unlike the Pascal build, anything the list read stops short of
-        // is an error here, not silently discarded.
+        // Whatever the list read stops short of is discarded, as in
+        // Pascal: `(1,2,3 4)` yields the triplet (1,2,3).
         let mut body = Cursor::with_line(&inner, line);
         let args = self.read_arg_list_body(&mut body)?;
-        body.skip_trivia();
-        if !body.is_eof() {
-            return Err(MmlError::new(
-                line,
-                "引数グループの末尾に解釈できない文字があります",
-            ));
-        }
         Ok(Some(args))
     }
 
@@ -4777,7 +5505,24 @@ impl<'a> Compiler<'a> {
     /// `funcNoteR` path and therefore behaves exactly like a rest. This can
     /// happen when a custom ArgOrder stops before reaching `l`.
     fn tie(&mut self, cur: &mut Cursor) -> Result<()> {
-        self.rest(cur)
+        self.rest(cur)?;
+        // Pascal reads the `,gate,velocity,timing,octave` options as part
+        // of the note the tie chain extends (`c4^^^^,10` re-gates that
+        // note). A statement-level tie here is a rest, with no note left
+        // to re-gate, so the options are read and discarded; a rest
+        // itself takes none (`r,90` is an error there too).
+        let mut options = NoteOptions::default();
+        let mut unused_length = None;
+        let default_length = self.track().length;
+        for index in 1..=4 {
+            cur.skip_spaces();
+            if !cur.eat(',') {
+                break;
+            }
+            cur.skip_spaces();
+            self.read_note_option(cur, index, default_length, &mut unused_length, &mut options)?;
+        }
+        Ok(())
     }
 
     fn read_slur_marker(&mut self, cur: &mut Cursor) -> Result<Option<Option<i64>>> {
@@ -4826,12 +5571,12 @@ impl<'a> Compiler<'a> {
         slur: Option<Option<i64>>,
         line: usize,
     ) -> Result<()> {
-        if !(0..=127).contains(&note_no) {
-            return Err(MmlError::new(
-                line,
-                format!("ノート番号が範囲外です(0〜127): {note_no}"),
-            ));
-        }
+        // Pascal clamps the note number into range instead of failing
+        // (`nn := Max(0, min(127, nn))` in scriptNote / NoteOn), which is
+        // what songs with wild transpositions and computed drum numbers
+        // rely on. A calculation that overflows i64 still errors earlier,
+        // where the checked arithmetic lives.
+        let note_no = note_no.clamp(0, 127);
         let time = self.track().time;
         let length = length.unwrap_or(defaults.length);
         let raw_velocity = options.velocity.unwrap_or(defaults.velocity);
@@ -4843,6 +5588,9 @@ impl<'a> Compiler<'a> {
         } else {
             defaults.gate_in_steps.unwrap_or(self.track().gate_in_steps)
         };
+        // Pascal subtracts the `h` value (Q2) from the computed gate
+        // whenever the note has a length.
+        let q2 = if length > 0 { self.track().q2 } else { 0 };
         let (length, gate, chord_gate) = if self.stretch_rate != 1.0 {
             // Pascal scales the duration and the pre-NoteOff gate separately,
             // then applies the one-tick packed-note adjustment.
@@ -4851,21 +5599,18 @@ impl<'a> Compiler<'a> {
             } else {
                 length.saturating_mul(gate_value) / q_max.max(1)
             };
-            let scaled_gate = self.scale_stretch(raw_gate, line)?;
+            let scaled_gate = self.scale_stretch(raw_gate - q2, line)?;
             (
                 self.scale_stretch(length, line)?,
                 (scaled_gate - 1).max(1),
                 scaled_gate.max(1),
             )
         } else if gate_in_steps {
-            (length, (gate_value - 1).max(1), gate_value.max(1))
+            let base = gate_value - q2;
+            (length, (base - 1).max(1), base.max(1))
         } else {
-            let raw_gate = length.saturating_mul(gate_value) / q_max.max(1);
-            (
-                length,
-                gate_ticks_scaled(length, gate_value, q_max),
-                raw_gate.max(1),
-            )
+            let raw_gate = length.saturating_mul(gate_value) / q_max.max(1) - q2;
+            (length, (raw_gate - 1).max(1), raw_gate.max(1))
         };
         let (timing, channel) = {
             let track = self.track();
@@ -5208,6 +5953,20 @@ impl<'a> Compiler<'a> {
         // The two forms differ, as they do in the Pascal build: `c(4,...)`
         // sets only the length and ignores the rest, while `c4,80,100,0,5`
         // follows the current track's ArgOrder.
+        // A group whose first token is a name followed by `=` is not note
+        // options but a parenthesised calc statement (`c (Time=Time-!1)`):
+        // leave it for the statement layer.
+        if cur.peek() == Some('(') {
+            let mut probe = cur.clone();
+            probe.advance();
+            probe.skip_spaces();
+            if let Some(word) = probe.read_word() {
+                probe.skip_spaces();
+                if probe.peek() == Some('=') && !word.is_empty() {
+                    return Ok((None, options));
+                }
+            }
+        }
         if cur.peek() == Some('(') {
             let line = cur.line();
             cur.advance();
@@ -5339,6 +6098,8 @@ impl<'a> Compiler<'a> {
                 cur.advance();
             }
             cur.skip_spaces();
+            cur.skip_bars();
+            cur.skip_spaces();
             let step_mode = self.track().system_step_mode;
             let part = self
                 .read_length_in_mode(cur, step_mode, default_length)?
@@ -5363,6 +6124,12 @@ impl<'a> Compiler<'a> {
         step_mode: bool,
         default_length: i64,
     ) -> Result<Option<i64>> {
+        // Pascal's tokeniser skips spaces before a length wherever one is
+        // expected, so `l 12` and `r 4` read their numbers. Every caller
+        // here is in such a position.
+        cur.skip_spaces();
+        cur.skip_bars();
+        cur.skip_spaces();
         let mut total: Option<i64> = None;
         let mut subtract = false;
         let mut after_operator = false;
@@ -5401,6 +6168,20 @@ impl<'a> Compiler<'a> {
                 match self.read_number(cur).ok().flatten() {
                     Some(n) if n > 0 => Some(self.timebase * 4 / n),
                     other => other,
+                }
+            } else if cur.peek() == Some('(') {
+                // A parenthesised length: `l(8)`. Pascal's GetNoteLength
+                // evaluates the group as an expression and converts the
+                // result like a plain denominator, exactly as for digits.
+                match self.read_number(cur).ok().flatten() {
+                    Some(n) => Some(if step_mode {
+                        n
+                    } else if n <= 0 {
+                        0
+                    } else {
+                        self.timebase * 4 / n
+                    }),
+                    None => None,
                 }
             } else if after_operator {
                 // Pascal treats an omitted part after ^, +, or - as the
@@ -5452,12 +6233,16 @@ impl<'a> Compiler<'a> {
                     subtract = false;
                     after_operator = true;
                     cur.advance();
+                    cur.skip_bars();
+                    cur.skip_spaces();
                     continue;
                 }
                 Some('-') => {
                     subtract = true;
                     after_operator = true;
                     cur.advance();
+                    cur.skip_bars();
+                    cur.skip_spaces();
                     continue;
                 }
                 _ => {}
@@ -5476,11 +6261,20 @@ impl<'a> Compiler<'a> {
         let mut found = false;
         let mut after_join = false;
         loop {
+            // A part may carry its own `!` (a nested length after a join,
+            // converted once more below) or no value at all: Pascal's
+            // GetNoteLength reads an omitted part as the default length,
+            // which is what makes `!^^1` mean default + default + whole.
+            // The `!` is consumed here rather than by read_number, whose
+            // divisor read would reject the omitted part outright.
             let nested_literal = after_join && cur.peek() == Some('!');
-            let mut part = if cur.eat('%') || cur.peek() == Some('!') {
+            let bang = cur.eat('!');
+            let mut part = if cur.eat('%') {
                 self.read_number(cur)?
             } else if matches!(cur.peek(), Some(c) if c.is_ascii_digit()) {
                 cur.read_int().map(|n| self.timebase * 4 / n.max(1))
+            } else if bang || after_join {
+                Some(self.track().length)
             } else {
                 None
             };
@@ -5506,6 +6300,8 @@ impl<'a> Compiler<'a> {
             if !cur.eat('^') {
                 break;
             }
+            cur.skip_bars();
+            cur.skip_spaces();
             after_join = true;
         }
         Ok(found.then_some(total))
@@ -5527,6 +6323,65 @@ impl<'a> Compiler<'a> {
     /// Set or adjust an `o/q/v/t` track value. Repeated bare signs use the
     /// command's configured increment (`v++` is `2 * System.vAdd`), while a
     /// following number is the amount itself (`v+10`).
+    /// After a note-info command's first `_`, a second `_` starts the
+    /// multi-layer form (`t__3(0)`): a layer index, then that layer's
+    /// value in parentheses or bare. Pascal stores per-layer offsets in
+    /// `ArrayNote`; this implementation does not model the extra layers,
+    /// so the value is consumed and dropped (recorded in
+    /// spec/10-compatibility.md). Returns true when the form was present.
+    /// After a `cmd_` layer marker, an optional second `_` plus a number
+    /// names the layer itself (`t__2.onCycle(...)`). Only the marker and
+    /// the number are consumed here; whatever follows — a `.modifier` or
+    /// a value — belongs to that layer and is the caller's to read.
+    /// Returns true when a layer was named.
+    fn consume_layer_index(&mut self, cur: &mut Cursor) -> Result<bool> {
+        if !cur.eat('_') {
+            return Ok(false);
+        }
+        let line = cur.line();
+        cur.skip_spaces();
+        self.read_number(cur)?
+            .ok_or_else(|| MmlError::new(line, "コマンド__の後には数値を指定してください"))?;
+        cur.skip_spaces();
+        Ok(true)
+    }
+
+    /// The value after a note-info command's `_` layer marker: a signed
+    /// number applied *relative* to the current value, so `o_3` raises
+    /// the octave by 3 and `o_-1` lowers it by 1 (Pascal's SetNoteInfo
+    /// treats the `_` form as an increment of the independent layer,
+    /// which for the standalone commands is the value itself).
+    fn read_underscore_relative(
+        &mut self,
+        cur: &mut Cursor,
+        name: &str,
+        current: i64,
+    ) -> Result<i64> {
+        let line = cur.line();
+        cur.skip_spaces();
+        // Pascal's SetNoteInfo consumes an optional `=` before the value
+        // (`q_=-95` sets the layer to -95; in this build's single-value
+        // model that is the current value plus the signed amount).
+        cur.eat('=');
+        cur.skip_spaces();
+        let sign: i64 = if cur.eat('-') {
+            -1
+        } else {
+            cur.eat('+');
+            1
+        };
+        let amount = self
+            .read_number(cur)?
+            .ok_or_else(|| MmlError::new(line, format!("{name}には数値を指定してください")))?;
+        current
+            .checked_add(
+                sign.checked_mul(amount).ok_or_else(|| {
+                    MmlError::new(line, format!("{name}の相対値が範囲を超えました"))
+                })?,
+            )
+            .ok_or_else(|| MmlError::new(line, format!("{name}の相対値が範囲を超えました")))
+    }
+
     fn expect_note_info_value(
         &mut self,
         cur: &mut Cursor,
@@ -5606,6 +6461,19 @@ impl<'a> Compiler<'a> {
             cur.skip_spaces();
             return self.read_calc_value(cur)?.as_int(line);
         }
+        // Pascal reads these arguments with GetArgCalc in the bare form
+        // too, so a leading term that names a function or variable is a
+        // value (`P Random(0,127)`). Plain numbers keep the fast path, and
+        // anything else keeps the numeric reader's error.
+        {
+            let mut probe = cur.clone();
+            probe.skip_spaces();
+            if let Some(word) = probe.read_word() {
+                if self.has_function(&word) || self.variables.contains_key(&word) {
+                    return self.read_calc_value(cur)?.as_int(line);
+                }
+            }
+        }
         self.expect_int(cur, name)
     }
 
@@ -5651,10 +6519,12 @@ impl<'a> Compiler<'a> {
             probe.advance();
             if let Some(inner) = probe.read_balanced('(', ')') {
                 *cur = probe;
-                // `eval_source` also rejects anything left over inside the
-                // parentheses, so `v(80,90)` stays an error rather than
-                // silently dropping the `,90`.
-                let value = self.eval_source(&inner, line)?;
+                // Pascal evaluates the group as an argument list and a
+                // scalar reader keeps the first value: `v(80,90)` sets
+                // velocity 80 and `v(115,120+5)` sets 115. Evaluate a
+                // prefix of the body and leave the rest unread.
+                let mut inner_cur = Cursor::with_line(&inner, line);
+                let value = expr::eval(&mut inner_cur, self)?;
                 return Ok(Some(value.as_int(line)?));
             }
             let value = expr::eval(cur, self)?;
@@ -5694,6 +6564,13 @@ impl EvalContext for Compiler<'_> {
         } else {
             self.timebase * 4 / denominator
         })
+    }
+
+    fn default_length(&self) -> i64 {
+        self.tracks
+            .get(&self.current)
+            .map(|track| track.length)
+            .unwrap_or(0)
     }
 }
 
@@ -5851,15 +6728,79 @@ fn split_function_args(source: &str) -> Vec<&str> {
 /// Split a parenthesised array initializer without collecting more entries
 /// than the array can hold. Empty positions are ignored, matching the legacy
 /// initializer, and nested commas stay inside their expression or string.
-fn split_array_initializer(source: &str, line: usize, max: usize) -> Result<Vec<&str>> {
+fn split_array_initializer(source: &str, line: usize, max: usize) -> Result<Vec<String>> {
+    // Comments are stripped first (outside string literals): Pascal's
+    // tokeniser skips them anywhere, and legacy songs annotate array
+    // initialisers line by line (`"Ab/Ab", //Ai`). A block comment is
+    // replaced by one space so it cannot glue two tokens together.
+    let chars: Vec<char> = source.chars().collect();
+    let mut cleaned = String::with_capacity(source.len());
+    let mut index = 0;
+    let mut in_quote = false;
+    let mut curly = 0usize;
+    while index < chars.len() {
+        let ch = chars[index];
+        if in_quote {
+            cleaned.push(ch);
+            if ch == '"' {
+                in_quote = false;
+            }
+            index += 1;
+            continue;
+        }
+        if curly == 0 && ch == '/' && chars.get(index + 1) == Some(&'/') {
+            while index < chars.len() && chars[index] != '\n' {
+                index += 1;
+            }
+            continue;
+        }
+        if curly == 0 && ch == '/' && chars.get(index + 1) == Some(&'*') {
+            let mut nest = 1usize;
+            index += 2;
+            while index < chars.len() && nest > 0 {
+                if chars[index] == '/' && chars.get(index + 1) == Some(&'*') {
+                    nest += 1;
+                    index += 2;
+                } else if chars[index] == '*' && chars.get(index + 1) == Some(&'/') {
+                    nest -= 1;
+                    index += 2;
+                } else {
+                    index += 1;
+                }
+            }
+            cleaned.push(' ');
+            continue;
+        }
+        match ch {
+            '{' => curly += 1,
+            '}' => curly = curly.saturating_sub(1),
+            '"' if curly == 0 => in_quote = true,
+            _ => {}
+        }
+        cleaned.push(ch);
+        index += 1;
+    }
+
+    // An entirely empty list is an empty array, not one empty element.
+    if cleaned.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+
+    // Split on top-level commas. Every slot is an element, even an empty
+    // one: Pascal's GetArgs substitutes a zero value for a slot with
+    // nothing in it, which is how songs write a dummy first element to
+    // make the rest 1-based (`Array A = (, "x", "y")` has three items).
     let mut args = Vec::new();
     let mut start = 0usize;
     let mut round = 0usize;
     let mut curly = 0usize;
     let mut square = 0usize;
+    let mut in_quote = false;
 
-    for (index, ch) in source.char_indices() {
+    for (index, ch) in cleaned.char_indices() {
         match ch {
+            '"' if curly == 0 => in_quote = !in_quote,
+            _ if in_quote => {}
             '(' => round += 1,
             ')' => round = round.saturating_sub(1),
             '{' => curly += 1,
@@ -5867,32 +6808,25 @@ fn split_array_initializer(source: &str, line: usize, max: usize) -> Result<Vec<
             '[' => square += 1,
             ']' => square = square.saturating_sub(1),
             ',' if round == 0 && curly == 0 && square == 0 => {
-                let raw = &source[start..index];
-                if !raw.trim().is_empty() {
-                    if args.len() >= max {
-                        return Err(MmlError::new(
-                            line,
-                            format!("配列の要素数が上限({max})を超えます"),
-                        ));
-                    }
-                    args.push(raw);
+                if args.len() >= max {
+                    return Err(MmlError::new(
+                        line,
+                        format!("配列の要素数が上限({max})を超えます"),
+                    ));
                 }
+                args.push(cleaned[start..index].to_string());
                 start = index + ch.len_utf8();
             }
             _ => {}
         }
     }
-
-    let raw = &source[start..];
-    if !raw.trim().is_empty() {
-        if args.len() >= max {
-            return Err(MmlError::new(
-                line,
-                format!("配列の要素数が上限({max})を超えます"),
-            ));
-        }
-        args.push(raw);
+    if args.len() >= max {
+        return Err(MmlError::new(
+            line,
+            format!("配列の要素数が上限({max})を超えます"),
+        ));
     }
+    args.push(cleaned[start..].to_string());
     Ok(args)
 }
 
@@ -6064,6 +6998,144 @@ pub const STANDARD_INCLUDE: &str = "stdmsg.h";
 const VERSION_NUMBER: i64 = 2385;
 
 /// Functions the compiler provides itself.
+fn strip_param_comments(source: &str) -> String {
+    let mut result = String::with_capacity(source.len());
+    let mut i = 0;
+    let mut line_comment = false;
+    let mut block_comment = false;
+    let mut brace_string = false;
+    let mut quoted_string = false;
+
+    while i < source.len() {
+        let rest = &source[i..];
+        let ch = rest.chars().next().unwrap();
+        let width = ch.len_utf8();
+
+        if line_comment {
+            if ch == '\n' || ch == '\r' {
+                result.push(ch);
+                if ch == '\n' {
+                    line_comment = false;
+                }
+            } else {
+                result.push(' ');
+            }
+            i += width;
+            continue;
+        }
+
+        if block_comment {
+            if rest.starts_with("*/") {
+                result.push(' ');
+                result.push(' ');
+                i += 2;
+                block_comment = false;
+            } else {
+                if ch == '\n' || ch == '\r' {
+                    result.push(ch);
+                } else {
+                    result.push(' ');
+                }
+                i += width;
+            }
+            continue;
+        }
+
+        if brace_string {
+            result.push(ch);
+            if ch == '}' {
+                brace_string = false;
+            }
+            i += width;
+            continue;
+        }
+
+        if quoted_string {
+            result.push(ch);
+            if ch == '\\' {
+                i += width;
+                if i < source.len() {
+                    let escaped = source[i..].chars().next().unwrap();
+                    result.push(escaped);
+                    i += escaped.len_utf8();
+                }
+            } else {
+                if ch == '"' {
+                    quoted_string = false;
+                }
+                i += width;
+            }
+            continue;
+        }
+
+        if rest.starts_with("//") {
+            result.push(' ');
+            result.push(' ');
+            i += 2;
+            line_comment = true;
+        } else if rest.starts_with("/*") {
+            result.push(' ');
+            result.push(' ');
+            i += 2;
+            block_comment = true;
+        } else {
+            result.push(ch);
+            match ch {
+                '{' => brace_string = true,
+                '"' => quoted_string = true,
+                _ => {}
+            }
+            i += width;
+        }
+    }
+
+    result
+}
+
+fn split_param_parts(source: &str) -> Vec<&str> {
+    let mut parts = Vec::new();
+    let mut start = 0;
+    let mut paren_depth = 0;
+    let mut brace_string = false;
+    let mut quoted_string = false;
+    let mut escaped = false;
+
+    for (index, ch) in source.char_indices() {
+        if quoted_string {
+            if escaped {
+                escaped = false;
+            } else if ch == '\\' {
+                escaped = true;
+            } else if ch == '"' {
+                quoted_string = false;
+            }
+            continue;
+        }
+
+        if brace_string {
+            if ch == '}' {
+                brace_string = false;
+            }
+            continue;
+        }
+
+        match ch {
+            '"' => quoted_string = true,
+            '{' => brace_string = true,
+            '(' => paren_depth += 1,
+            ')' if paren_depth > 0 => paren_depth -= 1,
+            ',' if paren_depth == 0 => {
+                parts.push(&source[start..index]);
+                start = index + ch.len_utf8();
+            }
+            _ => {}
+        }
+    }
+
+    parts.push(&source[start..]);
+    parts
+}
+
 fn is_builtin_function(name: &str) -> bool {
     matches!(
         name,
@@ -6090,6 +7162,21 @@ fn is_builtin_function(name: &str) -> bool {
             | "VERSION"
             | "Time"
             | "System.GetKeyFlag"
+            // Commands Pascal marks 読取り可 (readable): in value position
+            // they return their current setting, and with an argument they
+            // set it and return the new value (scriptChannel/scriptTrack/
+            // scriptTempo in mml_base.pas all work this way).
+            | "Channel"
+            | "CHANNEL"
+            | "CH"
+            | "Track"
+            | "TRACK"
+            | "TR"
+            | "NowTrack"
+            | "Tempo"
+            | "TEMPO"
+            | "Voice"
+            | "TimeBase"
     )
 }
 
@@ -6304,17 +7391,14 @@ fn strip_loop_breaks(fragment: &str) -> String {
 /// The part before it runs on every pass; the part after runs on every pass
 /// but the last, so `[3 c:d]` plays `c d c d c`.
 fn split_loop_break(body: &str) -> (&str, Option<&str>) {
+    // Pascal finds the marker with its pure nesting scan (skipKakko):
+    // brackets alone decide what is top level. A `"` needs no string
+    // state here — inside `{...}` the depth already protects a colon,
+    // and a `{"..."}` whose quote never closes (the closing brace ends
+    // it, as in `Sub{"bf4.}`) must not swallow a later marker.
     let mut depth = 0i32;
-    let mut in_string = false;
-    let mut previous = ' ';
     for (index, ch) in body.char_indices() {
-        let was_string_start = previous == '{' && ch == '"';
-        previous = ch;
         match ch {
-            // Strings start at `{"`; a bare `"` is the octave-down operator.
-            '"' if was_string_start => in_string = true,
-            '"' if in_string => in_string = false,
-            _ if in_string => {}
             '[' | '{' | '(' => depth += 1,
             ']' | '}' | ')' => depth -= 1,
             ':' if depth == 0 => return (&body[..index], Some(&body[index + 1..])),
@@ -6355,6 +7439,10 @@ fn gate_ticks(length: i64, gate_percent: i64) -> i64 {
 
 /// As [`gate_ticks`], but with `q` measured against `System.qMax` instead of
 /// 100 — `System.qMax=8; q8` is a full-length note, for old MML dialects.
+/// Production gate math lives in `write_note`, which subtracts the `h`
+/// command's Q2 before the −1 adjustment; this scaled form now serves the
+/// measured-value tests only.
+#[cfg(test)]
 fn gate_ticks_scaled(length: i64, gate_value: i64, q_max: i64) -> i64 {
     // Saturating, not wrapping: an absurd length is caught downstream by the
     // time check, and must not overflow on the way there.
@@ -6393,11 +7481,19 @@ mod tests {
 
     #[test]
     fn array_initializer_limit_accepts_the_boundary_and_rejects_one_more() {
-        let items = split_array_initializer("0,(1+2),,{a,b}", 1, 3).unwrap();
-        assert_eq!(items, ["0", "(1+2)", "{a,b}"]);
+        // Empty slots count as elements (they become zeros), so the
+        // double comma in the middle is a fourth slot.
+        let items = split_array_initializer("0,(1+2),,{a,b}", 1, 4).unwrap();
+        assert_eq!(items, ["0", "(1+2)", "", "{a,b}"]);
 
-        let error = split_array_initializer("0,(1+2),,{a,b},4", 1, 3).unwrap_err();
+        let error = split_array_initializer("0,(1+2),,{a,b}", 1, 3).unwrap_err();
         assert!(error.message.contains("上限(3)"));
+    }
+
+    #[test]
+    fn array_initializer_skips_comments_and_quoted_commas() {
+        let items = split_array_initializer("\"a,b\", // note\n\"c\" /* x */,1", 1, 8).unwrap();
+        assert_eq!(items, ["\"a,b\"", " \n\"c\"  ", "1"]);
     }
 
     #[test]

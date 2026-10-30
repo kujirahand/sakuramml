@@ -306,7 +306,9 @@ mod tests {
         ));
         let args = vec![
             "-e".into(),
-            "c NotACommand d".into(),
+            // `@` with no voice number is a genuine error (an unknown word
+            // alone is only a warning since the Pascal-parity change).
+            "c @ d".into(),
             output.clone().into_os_string().into_string().unwrap(),
         ];
 

@@ -135,6 +135,17 @@ pub fn to_mml_with(src: &str, user: &mut UserMacros) -> String {
             in_string = true;
             continue;
         }
+        // Comments pass through untouched: prose must not be expanded (a
+        // user macro named like a common syllable would otherwise rewrite
+        // the text, and an expansion containing `/*` or `*/` would corrupt
+        // the comment's extent in included files — Pascal skips comments
+        // in its conversion pass too).
+        if ch == '/' {
+            if let Some(next) = crate::lexer::zenkaku::push_comment(&chars, index, &mut out) {
+                index = next;
+                continue;
+            }
+        }
         // `~{name}={mml}` defines a macro and produces nothing itself.
         if ch == '~' {
             if let Some((name, replacement, next)) = read_definition(&chars, index) {
@@ -146,38 +157,41 @@ pub fn to_mml_with(src: &str, user: &mut UserMacros) -> String {
             }
         }
 
-        // User definitions take precedence over the built-in table.
+        // Pascal keeps the user definitions and the built-in table in
+        // one list sorted by key length, longest first, so a built-in
+        // `大きく` still wins over a user-defined `大`. User entries win
+        // ties against a built-in of the same length.
+        let mut best: Option<(usize, &str)> = None;
         for (key, value) in user.iter() {
             let key_len = key.chars().count();
-            if index + key_len <= chars.len()
+            if key_len > best.map_or(0, |(len, _)| len)
+                && index + key_len <= chars.len()
                 && chars[index..index + key_len]
                     .iter()
                     .copied()
                     .eq(key.chars())
             {
-                out.push_str(value);
-                index += key_len;
-                continue 'outer;
+                best = Some((key_len, value));
             }
         }
-
-        if ch.is_ascii() {
-            out.push(ch);
-            index += 1;
-            continue;
-        }
-        for (key, value) in SUTOTON {
-            let key_len = key.chars().count();
-            if index + key_len <= chars.len()
-                && chars[index..index + key_len]
-                    .iter()
-                    .copied()
-                    .eq(key.chars())
-            {
-                out.push_str(value);
-                index += key_len;
-                continue 'outer;
+        if !ch.is_ascii() {
+            for (key, value) in SUTOTON {
+                let key_len = key.chars().count();
+                if key_len > best.map_or(0, |(len, _)| len)
+                    && index + key_len <= chars.len()
+                    && chars[index..index + key_len]
+                        .iter()
+                        .copied()
+                        .eq(key.chars())
+                {
+                    best = Some((key_len, value));
+                }
             }
+        }
+        if let Some((key_len, value)) = best {
+            out.push_str(value);
+            index += key_len;
+            continue 'outer;
         }
         out.push(ch);
         index += 1;
