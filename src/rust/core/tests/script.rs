@@ -1406,3 +1406,19 @@ fn length_joins_cross_line_breaks() {
     assert_same("e1+1\n+1 c", "e1+1+1 c");
     assert_same("e1+1\n    +1 c", "e1+1+1 c");
 }
+
+/// A variable in scope shadows a function of the same name in
+/// value position: guitar.h defines Functions A and C, and songs
+/// still declare `Int A` loop counters or an `Int C` and use them
+/// as plain values. The call form still reaches the function.
+#[test]
+fn a_variable_shadows_a_function_in_value_position() {
+    assert_same(
+        "Function A(Int ST, Str LEN){ Result = ST } Int A = 5; If(A + 1 == 6){ c }",
+        "c",
+    );
+    assert_same(
+        "Function A(Int ST, Str LEN){ Result = ST } If(A(7, {x}) == 7){ c }",
+        "c",
+    );
+}

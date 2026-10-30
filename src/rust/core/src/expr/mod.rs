@@ -789,6 +789,16 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
                 }
             }
 
+            // A variable in scope shadows a function of the same name
+            // in value position: guitar.h defines Functions A and C,
+            // and songs still declare `Int A` loop counters or an
+            // `Int C` and use them as plain values, as Pascal allows.
+            if cur.peek() != Some('(') {
+                if let Some(value) = ctx.lookup(&name) {
+                    return Ok(value);
+                }
+            }
+
             if ctx.has_function(&name) {
                 // A few built-ins take MML text rather than a value:
                 // `NoteNo(o4c)` and `MML(v)` are read, not evaluated.
