@@ -210,9 +210,10 @@ fn expressions_need_parentheses() {
 }
 
 #[test]
-fn division_by_zero_is_an_error_not_a_panic() {
-    assert_error_contains("n((1/0))", "0で割る");
-    assert_error_contains("n((1%0))", "0で割る");
+fn division_by_zero_yields_zero_not_a_panic() {
+    // Pascal's calc yields 0 for a zero divisor, never an error.
+    assert_same("n((1/0))", "n(0)");
+    assert_same("n((1%0))", "n(0)");
 }
 
 #[test]
@@ -1102,7 +1103,11 @@ fn control_change_equals_value_continues_as_an_expression() {
 /// is evaluated once.
 #[test]
 fn control_change_calculation_errors_propagate() {
-    assert_error_contains("CHO=5/0 c", "0で割る");
+    // A zero divisor is 0 in Pascal's calc, not an error...
+    assert_same("CHO=5/0 c", "CHO=0 c");
+    // ...but a genuine calculation error still propagates instead
+    // of being rewound away.
+    assert_error_contains("CHO=9223372036854775807+1 c", "範囲");
     assert_same("CHO=Random(1,1) >c", "CHO=1 o6 c");
 }
 
@@ -1174,8 +1179,13 @@ fn tie_chain_options_are_read_and_discarded() {
         "4d546864000000060001000100604d54726b00000015\
          00903c64832f803c6431903e644b803e6415ff2f00"
     );
-    // New statement: the chain is a rest here, its options discarded.
-    assert_same("c\n^^^^,90 d", "c\n^^^^ d");
+    // A chain on the next line joins the note just the same in
+    // Pascal (verified against the Pascal binary byte for byte):
+    // its gate option applies, and without options the note extends.
+    assert_same("c\n^^^^,90 d", "c ^^^^,90 d");
+    assert_same("c\n^^^^ d", "c^^^^ d");
+    // At the start of a song the chain is a rest; its options are
+    // discarded.
     compile("^^^^,90 c").unwrap();
 }
 
@@ -1218,4 +1228,279 @@ fn h_command_does_not_steal_defined_names() {
     assert_same("h10 c", "h10 c");
     compile("Str h={c} h d").unwrap();
     compile("Function hatena(){ n60 } hatena").unwrap();
+}
+
+/// A `:` inside a user function call terminates the whole argument
+/// list in Pascal's GetArgs: `GU(6:2)` passes only 6, and even the
+/// comma-separated `GU(6:2,9)` drops the 9. The same holds when the
+/// call appears inside an expression.
+#[test]
+fn colon_terminates_a_function_argument_list() {
+    let out = compile(
+        "Function GU(Int a, Int b){ Print(a) Print(b) Result = a } GU(6:2) GU(6:2,9) Int X = GU(7:3); Print(X)",
+    )
+    .unwrap();
+    assert_eq!(
+        out.messages,
+        vec![
+            "6".to_string(),
+            "0".to_string(),
+            "6".to_string(),
+            "0".to_string(),
+            "7".to_string(),
+            "0".to_string(),
+            "7".to_string()
+        ]
+    );
+}
+
+/// Pascal's GetIntValue continues as a full calculation only when the
+/// value after `=` begins with a name: `Tempo=TEM+20` is 120, while
+/// `Tempo=100+20` reads the bare term and fails on the leftover.
+#[test]
+fn name_led_assignment_value_calculates() {
+    let out = compile("Int TEM=100; Tempo=TEM+20 Print(Tempo)").unwrap();
+    assert_eq!(out.messages, vec!["120".to_string()]);
+    assert!(compile("Tempo=100+20").is_err());
+}
+
+/// In an expression, `^` is bitwise XOR at the same precedence level
+/// as `&` and `|`, read left to right — it is not a length join there
+/// (Pascal: `2^8` = 10, `1|2^3` = 0, `1^2+3` = 4).
+#[test]
+fn caret_is_bitwise_xor_in_expressions() {
+    let out = compile("Print(2^8) Print(1|2^3) Print(1^2+3) Function F(Int a){ Print(a) } F(2^8)")
+        .unwrap();
+    assert_eq!(
+        out.messages,
+        vec![
+            "10".to_string(),
+            "0".to_string(),
+            "4".to_string(),
+            "10".to_string()
+        ]
+    );
+}
+
+/// A slur may start the next line: Pascal's readers skip line breaks
+/// between a note and its `&`, which dSakura songs rely on.
+#[test]
+fn slur_may_start_the_next_line() {
+    assert_same("c4\n& d4 e4", "c4 & d4 e4");
+    assert_same("c4\n\n& d4", "c4 & d4");
+}
+
+/// A chord's joined length uses the full GetNoteLength grammar after
+/// the quote, `+` / `-` parts included, even with no leading digits:
+/// `'fa-'^-8` is the default length tied, minus an eighth.
+#[test]
+fn chord_length_joins_may_add_and_subtract() {
+    assert_same("'ceg'^-8 c", "'ceg'4^4-8 c");
+    assert_same("'ceg'-8 c", "'ceg'4-8 c");
+    assert_same("'ceg'^+8 c", "'ceg'4^4+8 c");
+    assert_same("'ceg' ^ -8 c", "'ceg'4^4-8 c");
+}
+
+/// A command value may carry its own sign: `p%+8192` is a pitch bend
+/// to the very top in Pascal, not a missing-value error.
+#[test]
+fn command_values_may_be_signed() {
+    assert_same("p%+8192 c", "p%8192 c");
+    assert_same("PitchBend(+100) c", "PitchBend(100) c");
+    compile("p%-100 c").unwrap();
+}
+
+/// An argument length joins with `-` as well as `^`:
+/// `%!1^1-16` in a note's gate slot parses (and matches the Pascal
+/// build byte for byte), and `!4-8` in an argument is a dotted quarter.
+#[test]
+fn argument_length_joins_may_subtract() {
+    compile("a16,%!1^1-16 c").unwrap();
+    assert_same("EP.onTime(0,127,!4-8) c", "EP.onTime(0,127,!8) c");
+}
+
+/// Pascal reads If / While / For headers with GetKakkoNest: the text
+/// runs until the first parenthesis group closes, and the group need
+/// not open the header — `IF MEN=(1) { ... }` has condition `MEN=1`.
+#[test]
+fn if_condition_need_not_start_with_a_paren() {
+    assert_same(
+        "Int MEN=2; IF MEN=(2) { c } IF MEN=(1) { d }",
+        "Int MEN=2; c",
+    );
+    assert_same("Int I=0; While I=(0) { I=1; c }", "c");
+}
+
+/// Pascal's GetNoteLength defaults silently when no length follows,
+/// so a doubled `ll8` or a bare `l` keeps the current length.
+#[test]
+fn bare_l_keeps_the_current_length() {
+    assert_same("ll8 c", "l8 c");
+    assert_same("l16 l c", "l16 c");
+}
+
+/// Play takes a bare string value too, not only a parenthesised list.
+#[test]
+fn play_accepts_a_bare_string() {
+    assert_same("#R={ c }; Play #R", "#R={ c }; Play(#R)");
+    assert_same("Str R={ c }; Play R", "Str R={ c }; Play(R)");
+}
+
+/// Bar lines do not break a length join or a slur: Pascal's length
+/// reader steps over `|` while joining, so `a16|^16&` ties across the
+/// bar and slurs onward, and a line may open with the slur itself.
+#[test]
+fn bars_do_not_break_joins_or_slurs() {
+    assert_same("a16|^16 a", "a16^16 a");
+    assert_same("a2|&a", "a2&a");
+    assert_same("a2|\n&a", "a2&a");
+}
+
+/// Comments are dropped by the conversion passes, as Pascal's
+/// ConvToHalfSign drops them, so brackets inside a comment cannot
+/// disturb the structural scans — and comment-like text inside a
+/// string must not hide a closing brace either.
+#[test]
+fn comments_do_not_disturb_structure() {
+    assert_same("[2 /* ] ] */ c] d", "[2 c] d");
+    assert_same("Function F(){ /* } */ c }; F", "c");
+    compile("If(1){ CuePoint={\"http://example.com/x.dls\"} c }").unwrap();
+}
+
+/// A stray `;` inside a call's argument list ends the list, like
+/// `:` does (legacy headers write `ASC(MID(S,1,1);)`): the rest of
+/// the group is discarded, so `G(3;5)` is `G(3)`.
+#[test]
+fn semicolon_terminates_a_call_argument_list() {
+    let defs = "Function G(Int A, Int B){ Result = A*10+B } ";
+    assert_same(
+        &format!("{defs} If(G(3;5) == 30){{ c }}"),
+        &format!("{defs} If(G(3) == 30){{ c }}"),
+    );
+    compile("Int A = ASC(MID({\"abc\"},1,1););").unwrap();
+}
+
+/// Doubled `=` markers are tolerated where Pascal tolerates them:
+/// Tempo skips a whole run, TimeSignature and the note-info commands
+/// skip two (their own plus the value reader's). The sutoton
+/// spelling 拍子=4,4 needs the TimeSignature case, since the
+/// replacement text already ends in `=`.
+#[test]
+fn doubled_equals_markers_are_tolerated() {
+    assert_same("Tempo==120 c", "Tempo=120 c");
+    assert_same("Tempo= = 120 c", "Tempo=120 c");
+    assert_same("System.TimeSignature==4,4 c", "System.TimeSignature=4,4 c");
+    assert_same("v==100 c", "v100 c");
+    assert_same("q==90 c", "q90 c");
+}
+
+/// A parenthesised group in term position is an argument list too:
+/// `:` and `;` cut it off like `,` does, so a Time-shaped value
+/// written to Tempo (`テンポ(22:2:0)` after conversion) reads as 22.
+#[test]
+fn a_group_may_be_cut_off_by_colon_or_semicolon() {
+    assert_same("Tempo=(22:2:0) c", "Tempo=22 c");
+    assert_same("Int X=(22;9); c", "Int X=22; c");
+}
+
+/// Length joins cross line breaks, as Pascal's join loop skips
+/// them: a `+1+1+...` chain wrapped onto following lines still
+/// extends the note it started on.
+#[test]
+fn length_joins_cross_line_breaks() {
+    assert_same("e1+1\n+1 c", "e1+1+1 c");
+    assert_same("e1+1\n    +1 c", "e1+1+1 c");
+}
+
+/// A variable in scope shadows a function of the same name in
+/// value position: guitar.h defines Functions A and C, and songs
+/// still declare `Int A` loop counters or an `Int C` and use them
+/// as plain values. The call form still reaches the function.
+#[test]
+fn a_variable_shadows_a_function_in_value_position() {
+    assert_same(
+        "Function A(Int ST, Str LEN){ Result = ST } Int A = 5; If(A + 1 == 6){ c }",
+        "c",
+    );
+    assert_same(
+        "Function A(Int ST, Str LEN){ Result = ST } If(A(7, {x}) == 7){ c }",
+        "c",
+    );
+}
+
+/// A term may carry one redundant `=`: Pascal's operator scan
+/// takes at most two characters, so in `X!==2` the operator is
+/// `!=` and the term reader swallows the leftover `=` (likewise
+/// `===` and `>==`).
+#[test]
+fn a_term_may_carry_a_redundant_equals() {
+    assert_same("Int X=1; If(X!==2){ c }", "Int X=1; If(X!=2){ c }");
+    assert_same("Int X=2; If(X===2){ c }", "Int X=2; If(X==2){ c }");
+    assert_same("Int X=1; If(X>==0){ c }", "Int X=1; If(X>=0){ c }");
+}
+
+/// Braces at statement position are hints, not a block: Pascal
+/// parses the contents inline, so `{"c"} d` plays both notes one
+/// octave down (each `"` marker applies to the next note) while
+/// `{c} d` plays them plainly.
+#[test]
+fn braced_text_at_statement_position_parses_inline() {
+    assert_same("{c} d", "c d");
+    assert_same("{\"c\"} d", "\"c \"d");
+    assert_same("Function F(Str S){ S } F(r4{c})", "r4 c");
+}
+
+/// Song 865's machinery: an ASCII-named sutoton definition
+/// (`~{PLAY}={[2}`) never expands, so `(PLAY)` stays a group; the
+/// group is a bare `Play` with no readable argument, which Pascal
+/// treats as a no-op; and a loop whose parenthesised "count" does
+/// not evaluate to a number falls back to 2 with the group kept
+/// in the body.
+#[test]
+fn play_without_an_argument_and_a_non_numeric_loop_count() {
+    assert_same("(PLAY) c", "c");
+    assert_same("Play c", "c");
+    assert_same("[(PLAY) c]", "[2 c]");
+    assert_same("[(3) c]", "[3 c]");
+    assert_same("~{PLAY} = {[2}\n[(PLAY) c ]", "[2 c ]");
+}
+
+/// A bare-quote string that is never closed runs to the end of
+/// the text without an error (Pascal's GetTokenChars): song 2487
+/// ends a Print with `+" 秒")`, the closing quote untyped.
+#[test]
+fn an_unterminated_bare_quote_string_runs_to_the_end() {
+    let out = compile("Int TM=75 Print(\"演奏は \"+TM/60+\" 分 \"+ TM%60+\" 秒\")").unwrap();
+    assert_eq!(out.messages, ["演奏は 1 分 15 秒"]);
+    assert_same("Print(\"abc)", "Print(\"abc\")");
+}
+
+/// A `Rythm{` that is never closed takes the rest of the source
+/// as its body (GetNakaKakko gathers to the end without failing):
+/// song 1060 ends the file with one.
+#[test]
+fn an_unclosed_rythm_body_runs_to_the_end() {
+    assert_same("Rythm{\n b", "Rythm{ b }");
+}
+
+/// Pascal's calc yields 0 for a zero divisor (TMDiv guards it,
+/// TMMod catches it), never an error.
+#[test]
+fn division_and_modulo_by_zero_yield_zero() {
+    let out = compile("Int X=1/0 Print(X)").unwrap();
+    assert_eq!(out.messages, ["0"]);
+    let out = compile("Int X=5%0 Print(X)").unwrap();
+    assert_eq!(out.messages, ["0"]);
+    // As a loop count, `(1/0)` is therefore 0: the loop is skipped.
+    assert_same("[(1/0) c]", "");
+    // A trailing operator in a count group rewinds like Pascal's
+    // calc reader: `(1+)` counts 1.
+    assert_same("[(1+) c]", "[1 c]");
+}
+
+/// A redundant `=` is also skipped after a unary sign.
+#[test]
+fn a_redundant_equals_after_a_sign() {
+    let out = compile("Int X=-=2 Print(X)").unwrap();
+    assert_eq!(out.messages, ["-2"]);
 }

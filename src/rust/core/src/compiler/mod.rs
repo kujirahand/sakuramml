@@ -1076,9 +1076,15 @@ impl<'a> Compiler<'a> {
                     self.step_mode
                 };
                 let default_length = self.track().length;
-                let value = self
-                    .read_length_in_mode(cur, step_mode, default_length)?
-                    .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
+                // Pascal's GetNoteLength falls back to its default (-1,
+                // which SetValue treats as "no change") when no length
+                // follows, so a doubled `ll8` or a bare `l` before
+                // another command keeps the current length silently
+                // instead of failing.
+                let Some(value) = self.read_length_in_mode(cur, step_mode, default_length)? else {
+                    self.reset_note_modifier(OnNoteTarget::Length);
+                    return Ok(());
+                };
                 let track = self.track();
                 track.length = value;
                 track.length_in_steps = in_steps;
@@ -1290,6 +1296,25 @@ impl<'a> Compiler<'a> {
                     .ok_or_else(|| MmlError::new(line, "括弧が閉じられていません"))?;
                 self.run_fragment(&body, line)
             }
+            // Braces in statement position are not a block to
+            // Pascal: `{` is an undefined token (hint only) and the
+            // text inside is parsed inline, which is how performed
+            // MidiDelay arguments such as `r4{'`c+`a'}` work — the
+            // chord inside plays as ordinary MML.
+            '{' => {
+                cur.advance();
+                self.warnings.push(Warning::new(
+                    line,
+                    "\"{\"は未定義です。綴りを確かめてください。".to_string(),
+                ));
+                Ok(())
+            }
+            '}' => {
+                cur.advance();
+                self.warnings
+                    .push(Warning::new(line, "突然の\"}\"。".to_string()));
+                Ok(())
+            }
             '$' => {
                 cur.advance();
                 self.define_rythm_macro(cur)
@@ -1410,7 +1435,7 @@ impl<'a> Compiler<'a> {
 
         match word.as_str() {
             "Tempo" | "TEMPO" => {
-                let bpm = self.expect_int_arg(cur, &word)?;
+                let bpm = self.expect_tempo_arg(cur, &word)?;
                 let usec = Self::tempo_usec(bpm, line)?;
                 self.tempo = bpm;
                 let time = self.track().time;
@@ -1914,7 +1939,11 @@ impl<'a> Compiler<'a> {
                     break;
                 }
             }
-            args.push(self.eval_source(raw, line)?);
+            let (value, terminated) = self.eval_call_arg(raw, line)?;
+            args.push(value);
+            if terminated {
+                break;
+            }
         }
         Ok(args)
     }
@@ -2881,7 +2910,26 @@ impl<'a> Compiler<'a> {
             let mut probe = cur.clone();
             probe.skip_trivia();
             if probe.peek() == Some('{') {
-                self.read_block(cur, line)?
+                // GetNakaKakko does not fail on a missing `}` either:
+                // it gathers to the end of the source. Song 1060's
+                // final `Rythm{` is never closed, and its body is the
+                // rest of the file.
+                let mut attempt = cur.clone();
+                match self.read_block(&mut attempt, line) {
+                    Ok(body) => {
+                        *cur = attempt;
+                        body
+                    }
+                    Err(_) => {
+                        let mut rest = String::new();
+                        cur.skip_trivia();
+                        cur.advance(); // the `{`
+                        while let Some(ch) = cur.advance() {
+                            rest.push(ch);
+                        }
+                        rest
+                    }
+                }
             } else {
                 let mut rest = String::new();
                 while let Some(ch) = cur.advance() {
@@ -3038,36 +3086,10 @@ impl<'a> Compiler<'a> {
 
         // A tie immediately after a chord belongs to the chord length. The
         // command-level `^` is a rest in Pascal, so the chord parser must
-        // consume a joined chord length itself. Whitespace may separate
-        // tie groups (`'a#g'^^^^^ ^^^^^^,,-5`): Pascal's GetNoteLength
-        // skips spaces around the joins, so the scan here does the same,
-        // without consuming trailing space when no tie follows.
-        {
-            let mut probe = cur.clone();
-            probe.skip_spaces();
-            if probe.peek() == Some('^') {
-                *cur = probe;
-                let mut total = length.unwrap_or_else(|| self.track().length);
-                loop {
-                    while cur.eat('^') {
-                        let part = self
-                            .read_length(cur)?
-                            .unwrap_or_else(|| self.track().length);
-                        total = total.checked_add(part).ok_or_else(|| {
-                            MmlError::new(line, "和音の結合音長が範囲を超えました")
-                        })?;
-                    }
-                    let mut probe = cur.clone();
-                    probe.skip_spaces();
-                    if probe.peek() == Some('^') {
-                        *cur = probe;
-                        continue;
-                    }
-                    break;
-                }
-                length = Some(total);
-            }
-        }
+        // consume a joined chord length itself: the full GetNoteLength
+        // join grammar, `^` / `+` / `-` parts included (`'fa-'^-8`),
+        // with spaces allowed around the joins (`'a#g'^^^^^ ^^^^^^,,-5`).
+        length = self.extend_default_length_joins(cur, length, default_length, line)?;
 
         // `'ceg'4,80,100,0,5` — gate/velocity/timing/octave after the
         // length, in that fixed order (Pascal's `RecWaon.Option` chain,
@@ -3450,12 +3472,37 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         cur.eat('=');
         cur.skip_spaces();
-        if !cur.eat('(') {
-            return Err(MmlError::new(
-                line,
-                "Playには(トラック...)を指定してください",
-            ));
+        // Pascal reads the argument with its general value reader, so a
+        // bare string value works too: `PLAY #RAIN` plays that one
+        // string on track 0, like the one-argument parenthesised form.
+        // With nothing readable after it (`PLAY` alone, or the `(PLAY)`
+        // group in song 865) Pascal's reader just yields nothing and
+        // the command is a no-op, so a failed read is swallowed with
+        // the cursor left where it was.
+        if cur.peek() != Some('(') {
+            let mut probe = cur.clone();
+            let Ok(value) = self.read_value(&mut probe) else {
+                return Ok(());
+            };
+            *cur = probe;
+            let Value::Str(source) = value else {
+                return Ok(());
+            };
+            let original_track = self.current;
+            let start_time = self.track().time;
+            let step_mode = self.step_mode;
+            self.current = 0;
+            let timebase = self.timebase;
+            let track = self
+                .tracks
+                .entry(self.current)
+                .or_insert_with(|| TrackState::new(0, timebase, step_mode));
+            track.time = start_time;
+            let outcome = self.run_fragment(&source, line);
+            self.current = original_track;
+            return outcome;
         }
+        cur.advance();
         let body = cur
             .read_balanced('(', ')')
             .ok_or_else(|| MmlError::new(line, "Playの括弧が閉じていません"))?;
@@ -3735,6 +3782,12 @@ impl<'a> Compiler<'a> {
     /// `TimeSignature=n,d` — also recorded, since `Time` is measured in bars.
     fn time_signature(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
+        // Two `=` are tolerated here (the command's own skip plus the
+        // value reader's), which the sutoton spelling needs: its
+        // replacement text for 拍子 already ends in `=`, so a written
+        // `拍子=4,4` arrives as `System.TimeSignature==4,4`.
+        cur.skip_spaces();
+        cur.eat('=');
         let args = self.read_args(cur, 2)?;
         if args.len() < 2 {
             return Err(MmlError::new(line, "拍子は 分子,分母 で指定してください"));
@@ -4471,7 +4524,7 @@ impl<'a> Compiler<'a> {
     /// `While(cond){ ... }`
     fn while_statement(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let condition_src = self.read_paren_source(cur, line)?;
+        let condition_src = self.read_kakko_nest_source(cur, line)?;
         let body = self.read_block_code(cur, line)?;
 
         let mut iterations = 0u32;
@@ -4494,7 +4547,7 @@ impl<'a> Compiler<'a> {
     /// `For(init; cond; update){ ... }`
     fn for_statement(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let header = self.read_paren_source(cur, line)?;
+        let header = self.read_kakko_nest_source(cur, line)?;
         let body = self.read_block_code(cur, line)?;
 
         let parts: Vec<&str> = header.split(';').collect();
@@ -4566,11 +4619,76 @@ impl<'a> Compiler<'a> {
         Ok(value)
     }
 
+    /// Like `eval_source`, but for one element of a call's argument list:
+    /// a `:` or `;` after the value terminates the whole list in
+    /// Pascal's GetArgs (`GU(6:2)` passes only 6, and `GU(6:2,9)`
+    /// drops the 9 too), reported through the returned flag. Any
+    /// other trailing character is the usual trailing-junk error.
+    fn eval_call_arg(&mut self, raw: &str, line: usize) -> Result<(Value, bool)> {
+        let mut cur = Cursor::with_line(raw.trim(), line);
+        let value = expr::eval(&mut cur, self)?;
+        cur.skip_trivia();
+        if matches!(cur.peek(), Some(':') | Some(';')) {
+            return Ok((value, true));
+        }
+        if !cur.is_eof() {
+            return Err(MmlError::new(
+                cur.line(),
+                "式の末尾に解釈できない文字があります",
+            ));
+        }
+        Ok((value, false))
+    }
+
     /// Read a parenthesised condition and evaluate it.
     fn read_condition(&mut self, cur: &mut Cursor) -> Result<Value> {
         let line = cur.line();
-        let src = self.read_paren_source(cur, line)?;
+        let src = self.read_kakko_nest_source(cur, line)?;
         self.eval_source(&src, line)
+    }
+
+    /// Pascal's GetKakkoNest, used for If / Switch / While / For headers:
+    /// the text runs until the first parenthesis group closes, and the
+    /// group need not start the text — `IF MEN=(1) { ... }` has the
+    /// condition `MEN=1`. The outermost pair is stripped; inner pairs
+    /// are kept.
+    fn read_kakko_nest_source(&mut self, cur: &mut Cursor, line: usize) -> Result<String> {
+        cur.skip_trivia();
+        let mut nest = 0i32;
+        let mut saw_group = false;
+        let mut src = String::new();
+        loop {
+            match cur.peek() {
+                None => break,
+                Some('(') => {
+                    cur.advance();
+                    if nest > 0 {
+                        src.push('(');
+                    }
+                    nest += 1;
+                    saw_group = true;
+                }
+                Some(')') => {
+                    cur.advance();
+                    nest -= 1;
+                    if nest < 0 {
+                        return Err(MmlError::new(line, "\"(\"が足りません"));
+                    }
+                    if nest == 0 && saw_group {
+                        break;
+                    }
+                    src.push(')');
+                }
+                Some(c) => {
+                    src.push(c);
+                    cur.advance();
+                }
+            }
+        }
+        if !saw_group {
+            return Err(MmlError::new(line, "( が必要です"));
+        }
+        Ok(src)
     }
 
     /// Read the raw text inside `( ... )`.
@@ -4594,14 +4712,16 @@ impl<'a> Compiler<'a> {
     }
 
     /// Read a `{ ... }` body the way Pascal delimits code blocks
-    /// (function bodies and If/For/While bodies): brackets inside
-    /// comments do not count towards the nesting.
+    /// (function bodies and If/For/While bodies): plain nesting, like
+    /// its skipKakko. Comments cannot interfere — the conversion
+    /// passes have already dropped them — and comment-like text inside
+    /// a string (`{"http://..."}`) must not hide the closing brace.
     fn read_block_code(&mut self, cur: &mut Cursor, line: usize) -> Result<String> {
         cur.skip_trivia();
         if !cur.eat('{') {
             return Err(MmlError::new(line, "{ が必要です"));
         }
-        cur.read_balanced_skip_comments('{', '}')
+        cur.read_balanced('{', '}')
             .ok_or_else(|| MmlError::new(line, "{ が } で閉じられていません"))
     }
 
@@ -4644,7 +4764,50 @@ impl<'a> Compiler<'a> {
     fn repeat(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         cur.skip_spaces();
-        let count = self.read_number(cur)?.unwrap_or(2);
+        // A parenthesised count is Pascal's `getArg` on the group:
+        // `(3)` / `(2+2)` give the count. Two shapes yield no value
+        // there and fall back to the default 2, with the group kept
+        // in the body as a statement: a bare name (`[(PLAY) ...]`,
+        // song 865) and a calc whose trailing operator has no term
+        // (`[(1+) ...]` counts 1, via the calc reader's rewind). A
+        // genuine error inside a compound group — a failing function
+        // call, say — still propagates, as it does in Pascal.
+        let count = if cur.peek() == Some('(') {
+            let mut probe = cur.clone();
+            match self.read_number(&mut probe) {
+                Ok(Some(n)) => {
+                    *cur = probe;
+                    n
+                }
+                Ok(None) => 2,
+                Err(err) => {
+                    let mut probe = cur.clone();
+                    probe.advance();
+                    let Some(inner) = probe.read_balanced('(', ')') else {
+                        return Err(err);
+                    };
+                    let trimmed = inner.trim();
+                    let bare_name = !trimmed.is_empty()
+                        && trimmed
+                            .chars()
+                            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '#'));
+                    if bare_name {
+                        2
+                    } else {
+                        let mut inner_cur = Cursor::with_line(&inner, line);
+                        match expr::eval_calc(&mut inner_cur, self) {
+                            Ok(value) => {
+                                *cur = probe;
+                                value.as_int(line)?
+                            }
+                            Err(_) => return Err(err),
+                        }
+                    }
+                }
+            }
+        } else {
+            self.read_number(cur)?.unwrap_or(2)
+        };
         let body = cur
             .read_balanced('[', ']')
             .ok_or_else(|| MmlError::new(line, "ループが ] で閉じられていません"))?;
@@ -5348,12 +5511,14 @@ impl<'a> Compiler<'a> {
         if !cur.eat('"') {
             return Err(MmlError::new(line, "文字列は \" で囲んで指定してください"));
         }
+        // As in expressions, an unterminated bare-quote string just
+        // runs to the end of the text (Pascal's GetTokenChars).
         let mut text = String::new();
         loop {
             match cur.advance() {
                 Some('"') => break,
                 Some(c) => text.push(c),
-                None => return Err(MmlError::new(line, "文字列が閉じられていません")),
+                None => break,
             }
         }
         cur.skip_spaces();
@@ -5526,7 +5691,25 @@ impl<'a> Compiler<'a> {
     }
 
     fn read_slur_marker(&mut self, cur: &mut Cursor) -> Result<Option<Option<i64>>> {
-        cur.skip_spaces();
+        // The slur may sit on the next line or past a bar line
+        // (`a2|&"a` — Pascal's readers skip both), but only commit to
+        // the wider skip when a `&` really follows, so a note at the
+        // end of a line keeps its position for whatever comes next.
+        let mut probe = cur.clone();
+        loop {
+            probe.skip_space_return();
+            if probe.peek() == Some('|') {
+                probe.advance();
+            } else {
+                break;
+            }
+        }
+        if probe.peek() == Some('&') {
+            *cur = probe;
+        } else {
+            cur.skip_spaces();
+            return Ok(None);
+        }
         if !cur.eat('&') {
             return Ok(None);
         }
@@ -6091,7 +6274,17 @@ impl<'a> Compiler<'a> {
         line: usize,
     ) -> Result<Option<i64>> {
         let mut total = initial;
-        cur.skip_spaces();
+        // A join may sit past bar lines and line breaks as well as
+        // spaces (`a16|^16`, or a `+1+1...` chain wrapped onto the
+        // next line): Pascal's GetNoteLength steps over all of them
+        // while joining.
+        let skip_join_gap = |cur: &mut Cursor| loop {
+            cur.skip_space_return();
+            if !cur.eat('|') {
+                break;
+            }
+        };
+        skip_join_gap(cur);
         while matches!(cur.peek(), Some('^') | Some('+') | Some('-')) {
             let subtract = cur.eat('-');
             if !subtract {
@@ -6113,7 +6306,7 @@ impl<'a> Compiler<'a> {
                 }
                 .ok_or_else(|| MmlError::new(line, "結合音長が範囲を超えました"))?,
             );
-            cur.skip_spaces();
+            skip_join_gap(cur);
         }
         Ok(total)
     }
@@ -6228,6 +6421,24 @@ impl<'a> Compiler<'a> {
                 .ok_or_else(|| MmlError::new(cur.line(), "結合音長が範囲を超えました"))?,
             );
 
+            // The join may continue on the next line or past a bar
+            // (Pascal's join loop skips line breaks): commit to the
+            // wider skip only when a join really follows.
+            {
+                let mut probe = cur.clone();
+                loop {
+                    probe.skip_space_return();
+                    if probe.peek() == Some('|') {
+                        probe.advance();
+                    } else {
+                        break;
+                    }
+                }
+                if matches!(probe.peek(), Some('^') | Some('+') | Some('-')) {
+                    *cur = probe;
+                }
+            }
+
             match cur.peek() {
                 Some('^') | Some('+') => {
                     subtract = false;
@@ -6260,6 +6471,7 @@ impl<'a> Compiler<'a> {
         let mut total = 0i64;
         let mut found = false;
         let mut after_join = false;
+        let mut sign = 1i64;
         loop {
             // A part may carry its own `!` (a nested length after a join,
             // converted once more below) or no value at all: Pascal's
@@ -6294,12 +6506,18 @@ impl<'a> Compiler<'a> {
                 part_value += half;
             }
             total = total
-                .checked_add(part_value)
+                .checked_add(sign * part_value)
                 .ok_or_else(|| MmlError::new(cur.line(), "結合音長が範囲を超えました"))?;
             found = true;
-            if !cur.eat('^') {
+            // GetNoteLength joins with `^`, `+` and `-` alike
+            // (`%!1^1-16` in a note's gate slot, `!8-16` in an argument).
+            sign = if cur.eat('^') || cur.eat('+') {
+                1
+            } else if cur.eat('-') {
+                -1
+            } else {
                 break;
-            }
+            };
             cur.skip_bars();
             cur.skip_spaces();
             after_join = true;
@@ -6316,8 +6534,23 @@ impl<'a> Compiler<'a> {
     fn expect_int(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
         let line = cur.line();
         cur.skip_spaces();
-        self.read_number(cur)?
-            .ok_or_else(|| MmlError::new(line, format!("{name}には数値を指定してください")))
+        // A leading sign belongs to the value, as in Pascal's reader:
+        // `p%+8192` is a pitch bend to the top, not an error.
+        let negative = match cur.peek() {
+            Some('+') if matches!(cur.peek_at(1), Some('0'..='9' | '$' | '(' | '!')) => {
+                cur.advance();
+                false
+            }
+            Some('-') if matches!(cur.peek_at(1), Some('0'..='9' | '$' | '(' | '!')) => {
+                cur.advance();
+                true
+            }
+            _ => false,
+        };
+        let value = self
+            .read_number(cur)?
+            .ok_or_else(|| MmlError::new(line, format!("{name}には数値を指定してください")))?;
+        Ok(if negative { -value } else { value })
     }
 
     /// Set or adjust an `o/q/v/t` track value. Repeated bare signs use the
@@ -6392,6 +6625,10 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         cur.skip_spaces();
         if cur.eat('=') {
+            // Pascal's SetNoteInfo skips one `=` and its value reader
+            // skips another, so `v==100` is a plain assignment too.
+            cur.skip_spaces();
+            cur.eat('=');
             return self.expect_int(cur, name);
         }
         let mut signs = 0i64;
@@ -6441,6 +6678,35 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         if cur.eat('=') {
             cur.skip_spaces();
+            // Pascal's GetIntValue continues as a full calculation only
+            // when the value begins with a name: `Tempo=TEM+20` is 120,
+            // while `Tempo=100+20` reads the bare term and the `+20`
+            // fails as the next statement. (The control-change commands
+            // use `expect_int_arg_calc`, whose values always calculate.)
+            if matches!(cur.peek(), Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '#') {
+                return self.read_calc_value(cur)?.as_int(line);
+            }
+            return expr::eval_term(cur, self)?.as_int(line);
+        }
+        self.expect_int(cur, name)
+    }
+
+    /// Tempo's argument: Pascal's scriptTempo skips a whole run of `=`
+    /// before the value (ver.1 compatibility, `Tempo= = 50`), where
+    /// other commands accept just one. The value itself then reads
+    /// exactly as in `expect_int_arg`'s `=` branch.
+    fn expect_tempo_arg(&mut self, cur: &mut Cursor, name: &str) -> Result<i64> {
+        let line = cur.line();
+        cur.skip_spaces();
+        let mut ate = false;
+        while cur.eat('=') {
+            ate = true;
+            cur.skip_spaces();
+        }
+        if ate {
+            if matches!(cur.peek(), Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '#') {
+                return self.read_calc_value(cur)?.as_int(line);
+            }
             return expr::eval_term(cur, self)?.as_int(line);
         }
         self.expect_int(cur, name)

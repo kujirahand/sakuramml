@@ -25,6 +25,9 @@ pub enum Value {
 /// calc term that runs into one fails and the calc reader rewinds — so they
 /// must not fall back to the unknown-name string below.
 fn is_statement_command(name: &str) -> bool {
+    // NAMES must stay sorted: the lookup below is a binary search, and
+    // an out-of-order insertion would silently misclassify a name.
+    debug_assert!(NAMES.windows(2).all(|pair| pair[0] < pair[1]));
     const NAMES: &[&str] = &[
         "ARRAY",
         "AllowMultiLine",
@@ -273,6 +276,7 @@ fn apply_binary(op: &str, left: Value, right: Value, line: usize) -> Result<Valu
         // which are bitwise on integers (5|2 = 7, 5&3 = 1).
         "|" => Ok(Value::Int(left.as_int(line)? | right.as_int(line)?)),
         "&" => Ok(Value::Int(left.as_int(line)? & right.as_int(line)?)),
+        "^" => Ok(Value::Int(left.as_int(line)? ^ right.as_int(line)?)),
         "==" | "!=" | "<" | ">" | "<=" | ">=" => {
             // Strings compare as strings; anything else compares numerically.
             let result = match (&left, &right) {
@@ -302,7 +306,11 @@ fn apply_binary(op: &str, left: Value, right: Value, line: usize) -> Result<Valu
                 "*" => a
                     .checked_mul(b)
                     .ok_or_else(|| MmlError::new(line, "整数の乗算結果が範囲を超えました"))?,
-                _ if b == 0 => return Err(MmlError::new(line, "0で割ることはできません")),
+                // Pascal's TMDiv/TMMod yield 0 for a zero divisor
+                // (a guard and a try/except respectively), never an
+                // error: `Int X=1/0` sets 0 there.
+                "/" if b == 0 => 0,
+                "%" if b == 0 => 0,
                 "/" => a
                     .checked_div(b)
                     .ok_or_else(|| MmlError::new(line, "整数の除算結果が範囲を超えました"))?,
@@ -335,11 +343,13 @@ fn compare<T: PartialOrd>(op: &str, a: &T, b: &T) -> bool {
 /// rewinds to before the operator, so `CHO=5 >c` leaves `>c` (an octave
 /// shift) for the caller. Each term is evaluated once, on a probe cursor that
 /// is adopted when the term parses, so terms with side effects (`Random`,
-/// user functions) never run twice. Errors from the calculation itself, such
-/// as division by zero, are returned.
+/// user functions) never run twice. Errors from the calculation itself
+/// (overflow, a failing function call) are returned; a zero divisor is
+/// not one of them, since Pascal's calc yields 0 there.
 ///
-/// `^` is not an operator here even though Pascal lists it: in MML it is the
-/// tie mark, as in `CHO=5 ^c`.
+/// `^` is the XOR operator here, as in Pascal's `CreateEnzansi`; the
+/// tie reading survives because a term after `^` that does not parse
+/// (`CHO=5 ^c`, the note C) rewinds as above.
 pub fn eval_calc(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
     let mut terms = vec![parse_unary(cur, ctx)?];
@@ -395,7 +405,9 @@ fn op_level(op: &str) -> u8 {
 
 /// The binary operator at the cursor and its length in characters, limited to
 /// those `apply_binary` implements. A lone `=` is equality, as in Pascal; a
-/// lone `&` or `|` is the logical operator; a lone `!` is not an operator.
+/// lone `&` or `|` is the bitwise operator (Pascal's TMAnd/TMOr on
+/// integers), `&&` / `||` are the logical ones; a lone `!` is not an
+/// operator.
 fn peek_calc_operator(cur: &Cursor) -> Option<(&'static str, usize)> {
     Some(match (cur.peek()?, cur.peek_at(1)) {
         ('*', _) => ("*", 1),
@@ -417,6 +429,7 @@ fn peek_calc_operator(cur: &Cursor) -> Option<(&'static str, usize)> {
         ('&', _) => ("&", 1),
         ('|', Some('|')) => ("||", 2),
         ('|', _) => ("|", 1),
+        ('^', _) => ("^", 1),
         _ => return None,
     })
 }
@@ -464,6 +477,11 @@ fn parse_bitwise(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             (Some('&'), Some('&')) | (Some('|'), Some('|')) => return Ok(left),
             (Some('&'), _) => "&",
             (Some('|'), _) => "|",
+            // `^` is bitwise XOR here, at the same level as `&` and `|`
+            // (Pascal: `1|2^3` = 0, read left to right). Length joins
+            // after a `!` literal are consumed inside the literal itself,
+            // and note-level `^` ties never reach the expression parser.
+            (Some('^'), _) => "^",
             _ => return Ok(left),
         };
         cur.advance();
@@ -673,17 +691,28 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
     cur.skip_spaces();
 
+    // Pascal's term reader skips one redundant `=` before a term
+    // (GetArg's `=` case). That is what makes `X!==2` read as
+    // `X != 2`: the operator scan takes at most two characters
+    // (`!=`), and the term swallows the leftover `=`. Likewise
+    // `X===2`, `X>==0`, and a bare `=5` term.
+    if cur.peek() == Some('=') {
+        cur.advance();
+        cur.skip_spaces();
+    }
+
     match cur.peek() {
         Some('(') => {
             cur.advance();
             let value = eval(cur, ctx)?;
             cur.skip_spaces();
-            if cur.eat(',') {
+            if cur.eat(',') || matches!(cur.peek(), Some(':') | Some(';')) {
                 // A group in term position yields its first value in
                 // Pascal (`Int X = (1,2)` sets 1, `v(115,120+5)` sets
-                // velocity 115): the rest of the group is discarded.
-                // Whole-list positions (array declarations, argument
-                // lists) never reach this reader.
+                // velocity 115): the rest of the group is discarded,
+                // whether the list continues with `,` or is cut off by
+                // `:` / `;` as in GetArgs. Whole-list positions (array
+                // declarations, argument lists) never reach this reader.
                 if !cur.skip_group_remainder('(', ')') {
                     return Err(MmlError::new(line, "括弧が閉じられていません"));
                 }
@@ -696,12 +725,17 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
         }
         Some('"') => {
             cur.advance();
+            // Pascal's bare-quote reader (GetTokenChars) runs to the
+            // next `"` or to the end of the text, across newlines,
+            // and never fails: song 2487 ends a Print with `+" 秒")`
+            // where the closing quote was never typed, and the
+            // string is simply ` 秒`.
             let mut text = String::new();
             loop {
                 match cur.advance() {
                     Some('"') => break,
                     Some(c) => text.push(c),
-                    None => return Err(MmlError::new(line, "文字列が閉じられていません")),
+                    None => break,
                 }
             }
             Ok(Value::Str(text))
@@ -781,6 +815,16 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
                 }
             }
 
+            // A variable in scope shadows a function of the same name
+            // in value position: guitar.h defines Functions A and C,
+            // and songs still declare `Int A` loop counters or an
+            // `Int C` and use them as plain values, as Pascal allows.
+            if cur.peek() != Some('(') {
+                if let Some(value) = ctx.lookup(&name) {
+                    return Ok(value);
+                }
+            }
+
             if ctx.has_function(&name) {
                 // A few built-ins take MML text rather than a value:
                 // `NoteNo(o4c)` and `MML(v)` are read, not evaluated.
@@ -848,6 +892,19 @@ fn parse_call_args(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Vec<Va
         }
         args.push(eval(cur, ctx)?);
         cur.skip_spaces();
+        // A `:` or `;` terminates the whole list, as in Pascal's
+        // GetArgs (`GU(6:2)` passes only 6, and the stray semicolon in
+        // `MID(S,1,1);` ends the inner list); the rest of the group
+        // is discarded.
+        if matches!(cur.peek(), Some(':') | Some(';')) {
+            if !cur.skip_group_remainder('(', ')') {
+                return Err(MmlError::new(
+                    cur.line(),
+                    "関数呼び出しの括弧が閉じられていません",
+                ));
+            }
+            return Ok(args);
+        }
         if cur.eat(',') {
             // A trailing comma before `)` leaves one last empty slot.
             cur.skip_spaces();
@@ -934,9 +991,11 @@ mod tests {
     }
 
     #[test]
-    fn division_by_zero_is_an_error_not_a_panic() {
-        assert!(eval_str("1/0", &Variables::new()).is_err());
-        assert!(eval_str("1%0", &Variables::new()).is_err());
+    fn division_by_zero_yields_zero_not_a_panic() {
+        // Pascal's TMDiv guards a zero divisor and TMMod catches it:
+        // both yield 0 rather than failing.
+        assert_eq!(eval_str("1/0", &Variables::new()).unwrap(), Value::Int(0));
+        assert_eq!(eval_str("1%0", &Variables::new()).unwrap(), Value::Int(0));
     }
 
     #[test]

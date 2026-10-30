@@ -142,6 +142,15 @@ impl Cursor {
         }
     }
 
+    /// Skip spaces and line breaks (Pascal's skipSpaceReturn): the gap
+    /// between a note and its slur or tie may span lines, as in
+    /// dSakura songs that start a line with the slur mark.
+    pub fn skip_space_return(&mut self) {
+        while matches!(self.peek(), Some(' ' | '\t' | '\r' | '\n')) {
+            self.advance();
+        }
+    }
+
     /// Skip measure bars (`|`) sitting where a length continues: Pascal's
     /// length reader steps over them, so `c2^|4` ties a quarter note.
     pub fn skip_bars(&mut self) {
@@ -224,61 +233,6 @@ impl Cursor {
         loop {
             let ch = self.advance()?;
             match ch {
-                c if c == open => {
-                    depth += 1;
-                    body.push(c);
-                }
-                c if c == close => {
-                    depth -= 1;
-                    if depth == 0 {
-                        return Some(body);
-                    }
-                    body.push(c);
-                }
-                c => body.push(c),
-            }
-        }
-    }
-
-    /// Like `read_balanced`, but `//` and `/* */` comments are skipped
-    /// while counting, so brackets inside comments do not affect the
-    /// nesting. Pascal delimits function and control-flow bodies this
-    /// way (its struct scanner tokenises the body), which legacy library
-    /// headers rely on: their trailing comments quote fragments such as
-    /// `//(%("}+...+{"));"}` whose brackets would otherwise close the
-    /// body early. Comment text is still copied into the returned body;
-    /// the statement runner skips it again when executing.
-    pub fn read_balanced_skip_comments(&mut self, open: char, close: char) -> Option<String> {
-        let mut body = String::new();
-        let mut depth = 1usize;
-        loop {
-            let ch = self.advance()?;
-            match ch {
-                '/' if self.peek() == Some('/') => {
-                    body.push(ch);
-                    while let Some(c) = self.peek() {
-                        if c == '\n' {
-                            break;
-                        }
-                        body.push(self.advance()?);
-                    }
-                }
-                '/' if self.peek() == Some('*') => {
-                    body.push(ch);
-                    body.push(self.advance()?);
-                    let mut comment_depth = 1usize;
-                    while comment_depth > 0 {
-                        let c = self.advance()?;
-                        body.push(c);
-                        if c == '/' && self.peek() == Some('*') {
-                            body.push(self.advance()?);
-                            comment_depth += 1;
-                        } else if c == '*' && self.peek() == Some('/') {
-                            body.push(self.advance()?);
-                            comment_depth -= 1;
-                        }
-                    }
-                }
                 c if c == open => {
                     depth += 1;
                     body.push(c);
