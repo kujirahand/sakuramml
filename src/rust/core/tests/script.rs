@@ -1335,3 +1335,13 @@ fn play_accepts_a_bare_string() {
     assert_same("#R={ c }; Play #R", "#R={ c }; Play(#R)");
     assert_same("Str R={ c }; Play R", "Str R={ c }; Play(R)");
 }
+
+/// Bar lines do not break a length join or a slur: Pascal's length
+/// reader steps over `|` while joining, so `a16|^16&` ties across the
+/// bar and slurs onward, and a line may open with the slur itself.
+#[test]
+fn bars_do_not_break_joins_or_slurs() {
+    assert_same("a16|^16 a", "a16^16 a");
+    assert_same("a2|&a", "a2&a");
+    assert_same("a2|\n&a", "a2&a");
+}

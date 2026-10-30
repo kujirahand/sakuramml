@@ -5592,12 +5592,19 @@ impl<'a> Compiler<'a> {
     }
 
     fn read_slur_marker(&mut self, cur: &mut Cursor) -> Result<Option<Option<i64>>> {
-        // The slur may sit on the next line (Pascal's readers skip line
-        // breaks here), but only commit to the wider skip when a `&`
-        // really follows, so a note at the end of a line keeps its
-        // position for whatever comes next.
+        // The slur may sit on the next line or past a bar line
+        // (`a2|&"a` — Pascal's readers skip both), but only commit to
+        // the wider skip when a `&` really follows, so a note at the
+        // end of a line keeps its position for whatever comes next.
         let mut probe = cur.clone();
-        probe.skip_space_return();
+        loop {
+            probe.skip_space_return();
+            if probe.peek() == Some('|') {
+                probe.advance();
+            } else {
+                break;
+            }
+        }
         if probe.peek() == Some('&') {
             *cur = probe;
         } else {
@@ -6168,7 +6175,15 @@ impl<'a> Compiler<'a> {
         line: usize,
     ) -> Result<Option<i64>> {
         let mut total = initial;
-        cur.skip_spaces();
+        // A join may sit past bar lines as well as spaces (`a16|^16`):
+        // Pascal's GetNoteLength steps over both while joining.
+        let skip_join_gap = |cur: &mut Cursor| loop {
+            cur.skip_spaces();
+            if !cur.eat('|') {
+                break;
+            }
+        };
+        skip_join_gap(cur);
         while matches!(cur.peek(), Some('^') | Some('+') | Some('-')) {
             let subtract = cur.eat('-');
             if !subtract {
@@ -6190,7 +6205,7 @@ impl<'a> Compiler<'a> {
                 }
                 .ok_or_else(|| MmlError::new(line, "結合音長が範囲を超えました"))?,
             );
-            cur.skip_spaces();
+            skip_join_gap(cur);
         }
         Ok(total)
     }
