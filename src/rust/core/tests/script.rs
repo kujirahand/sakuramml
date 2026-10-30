@@ -1308,3 +1308,30 @@ fn argument_length_joins_may_subtract() {
     compile("a16,%!1^1-16 c").unwrap();
     assert_same("EP.onTime(0,127,!4-8) c", "EP.onTime(0,127,!8) c");
 }
+
+/// Pascal reads If / While / For headers with GetKakkoNest: the text
+/// runs until the first parenthesis group closes, and the group need
+/// not open the header — `IF MEN=(1) { ... }` has condition `MEN=1`.
+#[test]
+fn if_condition_need_not_start_with_a_paren() {
+    assert_same(
+        "Int MEN=2; IF MEN=(2) { c } IF MEN=(1) { d }",
+        "Int MEN=2; c",
+    );
+    assert_same("Int I=0; While I=(0) { I=1; c }", "c");
+}
+
+/// Pascal's GetNoteLength defaults silently when no length follows,
+/// so a doubled `ll8` or a bare `l` keeps the current length.
+#[test]
+fn bare_l_keeps_the_current_length() {
+    assert_same("ll8 c", "l8 c");
+    assert_same("l16 l c", "l16 c");
+}
+
+/// Play takes a bare string value too, not only a parenthesised list.
+#[test]
+fn play_accepts_a_bare_string() {
+    assert_same("#R={ c }; Play #R", "#R={ c }; Play(#R)");
+    assert_same("Str R={ c }; Play R", "Str R={ c }; Play(R)");
+}

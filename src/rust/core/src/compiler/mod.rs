@@ -1076,9 +1076,15 @@ impl<'a> Compiler<'a> {
                     self.step_mode
                 };
                 let default_length = self.track().length;
-                let value = self
-                    .read_length_in_mode(cur, step_mode, default_length)?
-                    .ok_or_else(|| MmlError::new(line, "lコマンドには音長を指定してください"))?;
+                // Pascal's GetNoteLength falls back to its default (-1,
+                // which SetValue treats as "no change") when no length
+                // follows, so a doubled `ll8` or a bare `l` before
+                // another command keeps the current length silently
+                // instead of failing.
+                let Some(value) = self.read_length_in_mode(cur, step_mode, default_length)? else {
+                    self.reset_note_modifier(OnNoteTarget::Length);
+                    return Ok(());
+                };
                 let track = self.track();
                 track.length = value;
                 track.length_in_steps = in_steps;
@@ -3428,12 +3434,29 @@ impl<'a> Compiler<'a> {
         cur.skip_spaces();
         cur.eat('=');
         cur.skip_spaces();
-        if !cur.eat('(') {
-            return Err(MmlError::new(
-                line,
-                "Playには(トラック...)を指定してください",
-            ));
+        // Pascal reads the argument with its general value reader, so a
+        // bare string value works too: `PLAY #RAIN` plays that one
+        // string on track 0, like the one-argument parenthesised form.
+        if cur.peek() != Some('(') {
+            let value = self.read_value(cur)?;
+            let Value::Str(source) = value else {
+                return Ok(());
+            };
+            let original_track = self.current;
+            let start_time = self.track().time;
+            let step_mode = self.step_mode;
+            self.current = 0;
+            let timebase = self.timebase;
+            let track = self
+                .tracks
+                .entry(self.current)
+                .or_insert_with(|| TrackState::new(0, timebase, step_mode));
+            track.time = start_time;
+            let outcome = self.run_fragment(&source, line);
+            self.current = original_track;
+            return outcome;
         }
+        cur.advance();
         let body = cur
             .read_balanced('(', ')')
             .ok_or_else(|| MmlError::new(line, "Playの括弧が閉じていません"))?;
@@ -4449,7 +4472,7 @@ impl<'a> Compiler<'a> {
     /// `While(cond){ ... }`
     fn while_statement(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let condition_src = self.read_paren_source(cur, line)?;
+        let condition_src = self.read_kakko_nest_source(cur, line)?;
         let body = self.read_block_code(cur, line)?;
 
         let mut iterations = 0u32;
@@ -4472,7 +4495,7 @@ impl<'a> Compiler<'a> {
     /// `For(init; cond; update){ ... }`
     fn for_statement(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
-        let header = self.read_paren_source(cur, line)?;
+        let header = self.read_kakko_nest_source(cur, line)?;
         let body = self.read_block_code(cur, line)?;
 
         let parts: Vec<&str> = header.split(';').collect();
@@ -4568,8 +4591,52 @@ impl<'a> Compiler<'a> {
     /// Read a parenthesised condition and evaluate it.
     fn read_condition(&mut self, cur: &mut Cursor) -> Result<Value> {
         let line = cur.line();
-        let src = self.read_paren_source(cur, line)?;
+        let src = self.read_kakko_nest_source(cur, line)?;
         self.eval_source(&src, line)
+    }
+
+    /// Pascal's GetKakkoNest, used for If / Switch / While / For headers:
+    /// the text runs until the first parenthesis group closes, and the
+    /// group need not start the text — `IF MEN=(1) { ... }` has the
+    /// condition `MEN=1`. The outermost pair is stripped; inner pairs
+    /// are kept.
+    fn read_kakko_nest_source(&mut self, cur: &mut Cursor, line: usize) -> Result<String> {
+        cur.skip_trivia();
+        let mut nest = 0i32;
+        let mut saw_group = false;
+        let mut src = String::new();
+        loop {
+            match cur.peek() {
+                None => break,
+                Some('(') => {
+                    cur.advance();
+                    if nest > 0 {
+                        src.push('(');
+                    }
+                    nest += 1;
+                    saw_group = true;
+                }
+                Some(')') => {
+                    cur.advance();
+                    nest -= 1;
+                    if nest < 0 {
+                        return Err(MmlError::new(line, "\"(\"が足りません"));
+                    }
+                    if nest == 0 && saw_group {
+                        break;
+                    }
+                    src.push(')');
+                }
+                Some(c) => {
+                    src.push(c);
+                    cur.advance();
+                }
+            }
+        }
+        if !saw_group {
+            return Err(MmlError::new(line, "( が必要です"));
+        }
+        Ok(src)
     }
 
     /// Read the raw text inside `( ... )`.
