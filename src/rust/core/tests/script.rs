@@ -1078,6 +1078,20 @@ fn control_change_equals_value_continues_as_an_expression() {
     assert!(compile("Tempo=5*10 c").is_err());
 }
 
+/// A real calculation error is reported as such, and a term with side effects
+/// is evaluated once.
+#[test]
+fn control_change_calculation_errors_propagate() {
+    assert_error_contains("CHO=5/0 c", "0で割る");
+    assert_same("CHO=Random(1,1) >c", "CHO=1 o6 c");
+}
+
+/// The key of `TimeKey` ends at its first comma.
+#[test]
+fn time_key_short_form_with_one_leading_comma() {
+    assert_same("TimeKey(,2) c", "TimeKey(,,2) c");
+}
+
 /// `scriptTimeKey` reads a time bound only when it starts with `(`; the last
 /// value is the key, so `TimeKey(2)` is `TimeKey(,,2)`.
 #[test]

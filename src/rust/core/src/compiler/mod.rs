@@ -1111,7 +1111,9 @@ impl<'a> Compiler<'a> {
         // Pascal's `getTokenMML` cuts a token starting with a lowercase letter
         // to that one letter (only `A-Z`, `_` and `#` start a whole word), so
         // `Str s={"c"} ss` is the macro `s` twice. A name the script defined
-        // itself still reads as a whole word.
+        // itself still reads as a whole word. Reading defined names whole is
+        // a deliberate leniency, not Pascal behaviour: Pascal would cut
+        // `sm` to `s` and `m` even when a function `sm` exists.
         if word.len() > 1
             && word.starts_with(|c: char| c.is_ascii_lowercase())
             && !self.functions.contains_key(&word)
@@ -3304,8 +3306,18 @@ impl<'a> Compiler<'a> {
             args.skip_spaces();
             args.eat(',');
         }
+        // `scriptTimeKey` reads the key with `GetIntValueAndCalc` and drops the
+        // rest of the temporary source, so `TimeKey(,,2,3)` is `TimeKey(,,2)`.
+        // The key therefore ends at the first comma outside nested parentheses.
         let mut key_source = String::new();
+        let mut depth = 0usize;
         while let Some(ch) = args.advance() {
+            match ch {
+                '(' => depth += 1,
+                ')' => depth = depth.saturating_sub(1),
+                ',' if depth == 0 => break,
+                _ => {}
+            }
             key_source.push(ch);
         }
         if key_source.trim().is_empty() {
@@ -5598,16 +5610,9 @@ impl<'a> Compiler<'a> {
     }
 
     /// A value followed by any operators that continue it, the way Pascal's
-    /// `GetArgCalc` reads one. When the continuation does not parse (an
-    /// operator that is really the next command, as in `CHO=5 >c`), only the
-    /// first term is taken.
+    /// `GetArgCalc` reads one (see `expr::eval_calc`).
     fn read_calc_value(&mut self, cur: &mut Cursor) -> Result<Value> {
-        let mut probe = cur.clone();
-        if let Ok(value) = expr::eval(&mut probe, self) {
-            *cur = probe;
-            return Ok(value);
-        }
-        expr::eval_term(cur, self)
+        expr::eval_calc(cur, self)
     }
 
     /// Read a numeric argument: a bare integer literal, or — inside

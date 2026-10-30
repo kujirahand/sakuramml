@@ -1221,6 +1221,43 @@ fn assert_same_bytes(actual: &str, expected: &str) {
     );
 }
 
+/// `GetArgCalc` folds operators by `CalcTMStack`'s pass order and gives back an
+/// operator with no term after it, so `>c` after a value is still an octave.
+#[test]
+fn calc_values_follow_precedence_and_rewind_before_a_dangling_operator() {
+    assert_same_bytes("CHO=2+3*4 c", "CHO=14 c");
+    assert_same_bytes("CHO=5 >c", "CHO=5 o6 c");
+    assert_same_bytes("Function F(a){CHO=a} F 2+3*4 c", "CHO=14 c");
+}
+
+/// `scriptTimeKey` drops what follows the key's first comma.
+#[test]
+fn time_key_key_stops_at_the_first_comma() {
+    assert_same_bytes("Time(1:2:0) TimeKey(,,2,3)c", "Time(1:2:0) TimeKey(,,2)c");
+}
+
+#[test]
+fn bare_function_arguments() {
+    assert_same_bytes("Function F(a){CHO=a} F!4 c", "CHO=96 c");
+    assert_same_bytes("Function F(s){s} F {\"c\"}", "c");
+    // A function with no parameters takes nothing from what follows.
+    assert_same_bytes("Function G(){e} G c", "e c");
+    // Pascal's GetArgs also consumes a trailing comma.
+    assert_same_bytes("Function F(a){CHO=a} F 60, c", "CHO=60 c");
+}
+
+#[test]
+fn loop_colon_markers_survive_nesting_parentheses_and_strings() {
+    assert_same_bytes("[2 [2 a:b]:c:d]", "abacd aba");
+    assert_same_bytes("[2 c:Time(1:2:0):e]", "c Time(1:2:0) e c");
+    assert_same_bytes("[2 c:Str Y={\"a:b\"}:e]", "c Str Y={\"a:b\"} e c");
+}
+
+#[test]
+fn defined_names_are_read_whole_alongside_one_letter_macros() {
+    assert_same_bytes("Str s={\"c\"} Function sm(a){CHO=a} s sm 5", "c CHO=5");
+}
+
 // --- rhythm mode, Sub, and user-defined Japanese macros ---
 
 /// `Sub{...}` plays the block and puts the time pointer back, so what follows
