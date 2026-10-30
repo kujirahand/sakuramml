@@ -1271,3 +1271,11 @@ fn caret_is_bitwise_xor_in_expressions() {
         ]
     );
 }
+
+/// A slur may start the next line: Pascal's readers skip line breaks
+/// between a note and its `&`, which dSakura songs rely on.
+#[test]
+fn slur_may_start_the_next_line() {
+    assert_same("c4\n& d4 e4", "c4 & d4 e4");
+    assert_same("c4\n\n& d4", "c4 & d4");
+}

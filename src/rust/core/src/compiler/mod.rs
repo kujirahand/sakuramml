@@ -5551,7 +5551,18 @@ impl<'a> Compiler<'a> {
     }
 
     fn read_slur_marker(&mut self, cur: &mut Cursor) -> Result<Option<Option<i64>>> {
-        cur.skip_spaces();
+        // The slur may sit on the next line (Pascal's readers skip line
+        // breaks here), but only commit to the wider skip when a `&`
+        // really follows, so a note at the end of a line keeps its
+        // position for whatever comes next.
+        let mut probe = cur.clone();
+        probe.skip_space_return();
+        if probe.peek() == Some('&') {
+            *cur = probe;
+        } else {
+            cur.skip_spaces();
+            return Ok(None);
+        }
         if !cur.eat('&') {
             return Ok(None);
         }

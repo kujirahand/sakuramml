@@ -142,6 +142,15 @@ impl Cursor {
         }
     }
 
+    /// Skip spaces and line breaks (Pascal's skipSpaceReturn): the gap
+    /// between a note and its slur or tie may span lines, as in
+    /// dSakura songs that start a line with the slur mark.
+    pub fn skip_space_return(&mut self) {
+        while matches!(self.peek(), Some(' ' | '\t' | '\r' | '\n')) {
+            self.advance();
+        }
+    }
+
     /// Skip measure bars (`|`) sitting where a length continues: Pascal's
     /// length reader steps over them, so `c2^|4` ties a quarter note.
     pub fn skip_bars(&mut self) {
