@@ -1174,8 +1174,13 @@ fn tie_chain_options_are_read_and_discarded() {
         "4d546864000000060001000100604d54726b00000015\
          00903c64832f803c6431903e644b803e6415ff2f00"
     );
-    // New statement: the chain is a rest here, its options discarded.
-    assert_same("c\n^^^^,90 d", "c\n^^^^ d");
+    // A chain on the next line joins the note just the same in
+    // Pascal (verified against the Pascal binary byte for byte):
+    // its gate option applies, and without options the note extends.
+    assert_same("c\n^^^^,90 d", "c ^^^^,90 d");
+    assert_same("c\n^^^^ d", "c^^^^ d");
+    // At the start of a song the chain is a rest; its options are
+    // discarded.
     compile("^^^^,90 c").unwrap();
 }
 
@@ -1382,4 +1387,22 @@ fn doubled_equals_markers_are_tolerated() {
     assert_same("System.TimeSignature==4,4 c", "System.TimeSignature=4,4 c");
     assert_same("v==100 c", "v100 c");
     assert_same("q==90 c", "q90 c");
+}
+
+/// A parenthesised group in term position is an argument list too:
+/// `:` and `;` cut it off like `,` does, so a Time-shaped value
+/// written to Tempo (`テンポ(22:2:0)` after conversion) reads as 22.
+#[test]
+fn a_group_may_be_cut_off_by_colon_or_semicolon() {
+    assert_same("Tempo=(22:2:0) c", "Tempo=22 c");
+    assert_same("Int X=(22;9); c", "Int X=22; c");
+}
+
+/// Length joins cross line breaks, as Pascal's join loop skips
+/// them: a `+1+1+...` chain wrapped onto following lines still
+/// extends the note it started on.
+#[test]
+fn length_joins_cross_line_breaks() {
+    assert_same("e1+1\n+1 c", "e1+1+1 c");
+    assert_same("e1+1\n    +1 c", "e1+1+1 c");
 }

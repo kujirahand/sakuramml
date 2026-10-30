@@ -685,12 +685,13 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
             cur.advance();
             let value = eval(cur, ctx)?;
             cur.skip_spaces();
-            if cur.eat(',') {
+            if cur.eat(',') || matches!(cur.peek(), Some(':') | Some(';')) {
                 // A group in term position yields its first value in
                 // Pascal (`Int X = (1,2)` sets 1, `v(115,120+5)` sets
-                // velocity 115): the rest of the group is discarded.
-                // Whole-list positions (array declarations, argument
-                // lists) never reach this reader.
+                // velocity 115): the rest of the group is discarded,
+                // whether the list continues with `,` or is cut off by
+                // `:` / `;` as in GetArgs. Whole-list positions (array
+                // declarations, argument lists) never reach this reader.
                 if !cur.skip_group_remainder('(', ')') {
                     return Err(MmlError::new(line, "括弧が閉じられていません"));
                 }

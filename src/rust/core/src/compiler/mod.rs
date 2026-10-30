@@ -6183,10 +6183,12 @@ impl<'a> Compiler<'a> {
         line: usize,
     ) -> Result<Option<i64>> {
         let mut total = initial;
-        // A join may sit past bar lines as well as spaces (`a16|^16`):
-        // Pascal's GetNoteLength steps over both while joining.
+        // A join may sit past bar lines and line breaks as well as
+        // spaces (`a16|^16`, or a `+1+1...` chain wrapped onto the
+        // next line): Pascal's GetNoteLength steps over all of them
+        // while joining.
         let skip_join_gap = |cur: &mut Cursor| loop {
-            cur.skip_spaces();
+            cur.skip_space_return();
             if !cur.eat('|') {
                 break;
             }
@@ -6327,6 +6329,24 @@ impl<'a> Compiler<'a> {
                 }
                 .ok_or_else(|| MmlError::new(cur.line(), "結合音長が範囲を超えました"))?,
             );
+
+            // The join may continue on the next line or past a bar
+            // (Pascal's join loop skips line breaks): commit to the
+            // wider skip only when a join really follows.
+            {
+                let mut probe = cur.clone();
+                loop {
+                    probe.skip_space_return();
+                    if probe.peek() == Some('|') {
+                        probe.advance();
+                    } else {
+                        break;
+                    }
+                }
+                if matches!(probe.peek(), Some('^') | Some('+') | Some('-')) {
+                    *cur = probe;
+                }
+            }
 
             match cur.peek() {
                 Some('^') | Some('+') => {
