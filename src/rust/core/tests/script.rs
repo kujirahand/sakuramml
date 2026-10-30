@@ -1444,3 +1444,18 @@ fn braced_text_at_statement_position_parses_inline() {
     assert_same("{\"c\"} d", "\"c \"d");
     assert_same("Function F(Str S){ S } F(r4{c})", "r4 c");
 }
+
+/// Song 865's machinery: an ASCII-named sutoton definition
+/// (`~{PLAY}={[2}`) never expands, so `(PLAY)` stays a group; the
+/// group is a bare `Play` with no readable argument, which Pascal
+/// treats as a no-op; and a loop whose parenthesised "count" does
+/// not evaluate to a number falls back to 2 with the group kept
+/// in the body.
+#[test]
+fn play_without_an_argument_and_a_non_numeric_loop_count() {
+    assert_same("(PLAY) c", "c");
+    assert_same("Play c", "c");
+    assert_same("[(PLAY) c]", "[2 c]");
+    assert_same("[(3) c]", "[3 c]");
+    assert_same("~{PLAY} = {[2}\n[(PLAY) c ]", "[2 c ]");
+}

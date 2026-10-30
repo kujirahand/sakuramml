@@ -3456,8 +3456,16 @@ impl<'a> Compiler<'a> {
         // Pascal reads the argument with its general value reader, so a
         // bare string value works too: `PLAY #RAIN` plays that one
         // string on track 0, like the one-argument parenthesised form.
+        // With nothing readable after it (`PLAY` alone, or the `(PLAY)`
+        // group in song 865) Pascal's reader just yields nothing and
+        // the command is a no-op, so a failed read is swallowed with
+        // the cursor left where it was.
         if cur.peek() != Some('(') {
-            let value = self.read_value(cur)?;
+            let mut probe = cur.clone();
+            let Ok(value) = self.read_value(&mut probe) else {
+                return Ok(());
+            };
+            *cur = probe;
             let Value::Str(source) = value else {
                 return Ok(());
             };
@@ -4737,7 +4745,23 @@ impl<'a> Compiler<'a> {
     fn repeat(&mut self, cur: &mut Cursor) -> Result<()> {
         let line = cur.line();
         cur.skip_spaces();
-        let count = self.read_number(cur)?.unwrap_or(2);
+        // A parenthesised count is Pascal's `getArg` on the group:
+        // `(3)` / `(2+2)` give the count, but a group that does not
+        // evaluate to a number (the `(PLAY)` in song 865) yields no
+        // value there, so the count defaults to 2 and the group
+        // stays in the body as a statement.
+        let count = if cur.peek() == Some('(') {
+            let mut probe = cur.clone();
+            match self.read_number(&mut probe) {
+                Ok(Some(n)) => {
+                    *cur = probe;
+                    n
+                }
+                _ => 2,
+            }
+        } else {
+            self.read_number(cur)?.unwrap_or(2)
+        };
         let body = cur
             .read_balanced('[', ']')
             .ok_or_else(|| MmlError::new(line, "ループが ] で閉じられていません"))?;
