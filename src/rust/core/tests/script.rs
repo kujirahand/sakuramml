@@ -1422,3 +1422,14 @@ fn a_variable_shadows_a_function_in_value_position() {
         "c",
     );
 }
+
+/// A term may carry one redundant `=`: Pascal's operator scan
+/// takes at most two characters, so in `X!==2` the operator is
+/// `!=` and the term reader swallows the leftover `=` (likewise
+/// `===` and `>==`).
+#[test]
+fn a_term_may_carry_a_redundant_equals() {
+    assert_same("Int X=1; If(X!==2){ c }", "Int X=1; If(X!=2){ c }");
+    assert_same("Int X=2; If(X===2){ c }", "Int X=2; If(X==2){ c }");
+    assert_same("Int X=1; If(X>==0){ c }", "Int X=1; If(X>=0){ c }");
+}

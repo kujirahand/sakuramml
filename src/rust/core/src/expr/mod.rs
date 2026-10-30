@@ -680,6 +680,16 @@ fn parse_primary(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
     cur.skip_spaces();
 
+    // Pascal's term reader skips one redundant `=` before a term
+    // (GetArg's `=` case). That is what makes `X!==2` read as
+    // `X != 2`: the operator scan takes at most two characters
+    // (`!=`), and the term swallows the leftover `=`. Likewise
+    // `X===2`, `X>==0`, and a bare `=5` term.
+    if cur.peek() == Some('=') {
+        cur.advance();
+        cur.skip_spaces();
+    }
+
     match cur.peek() {
         Some('(') => {
             cur.advance();
