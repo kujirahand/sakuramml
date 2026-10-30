@@ -4765,10 +4765,13 @@ impl<'a> Compiler<'a> {
         let line = cur.line();
         cur.skip_spaces();
         // A parenthesised count is Pascal's `getArg` on the group:
-        // `(3)` / `(2+2)` give the count, but a group that does not
-        // evaluate to a number (the `(PLAY)` in song 865) yields no
-        // value there, so the count defaults to 2 and the group
-        // stays in the body as a statement.
+        // `(3)` / `(2+2)` give the count. Two shapes yield no value
+        // there and fall back to the default 2, with the group kept
+        // in the body as a statement: a bare name (`[(PLAY) ...]`,
+        // song 865) and a calc whose trailing operator has no term
+        // (`[(1+) ...]` counts 1, via the calc reader's rewind). A
+        // genuine error inside a compound group — a failing function
+        // call, say — still propagates, as it does in Pascal.
         let count = if cur.peek() == Some('(') {
             let mut probe = cur.clone();
             match self.read_number(&mut probe) {
@@ -4776,7 +4779,31 @@ impl<'a> Compiler<'a> {
                     *cur = probe;
                     n
                 }
-                _ => 2,
+                Ok(None) => 2,
+                Err(err) => {
+                    let mut probe = cur.clone();
+                    probe.advance();
+                    let Some(inner) = probe.read_balanced('(', ')') else {
+                        return Err(err);
+                    };
+                    let trimmed = inner.trim();
+                    let bare_name = !trimmed.is_empty()
+                        && trimmed
+                            .chars()
+                            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '#'));
+                    if bare_name {
+                        2
+                    } else {
+                        let mut inner_cur = Cursor::with_line(&inner, line);
+                        match expr::eval_calc(&mut inner_cur, self) {
+                            Ok(value) => {
+                                *cur = probe;
+                                value.as_int(line)?
+                            }
+                            Err(_) => return Err(err),
+                        }
+                    }
+                }
             }
         } else {
             self.read_number(cur)?.unwrap_or(2)

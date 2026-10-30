@@ -25,6 +25,9 @@ pub enum Value {
 /// calc term that runs into one fails and the calc reader rewinds — so they
 /// must not fall back to the unknown-name string below.
 fn is_statement_command(name: &str) -> bool {
+    // NAMES must stay sorted: the lookup below is a binary search, and
+    // an out-of-order insertion would silently misclassify a name.
+    debug_assert!(NAMES.windows(2).all(|pair| pair[0] < pair[1]));
     const NAMES: &[&str] = &[
         "ARRAY",
         "AllowMultiLine",
@@ -303,7 +306,11 @@ fn apply_binary(op: &str, left: Value, right: Value, line: usize) -> Result<Valu
                 "*" => a
                     .checked_mul(b)
                     .ok_or_else(|| MmlError::new(line, "整数の乗算結果が範囲を超えました"))?,
-                _ if b == 0 => return Err(MmlError::new(line, "0で割ることはできません")),
+                // Pascal's TMDiv/TMMod yield 0 for a zero divisor
+                // (a guard and a try/except respectively), never an
+                // error: `Int X=1/0` sets 0 there.
+                "/" if b == 0 => 0,
+                "%" if b == 0 => 0,
                 "/" => a
                     .checked_div(b)
                     .ok_or_else(|| MmlError::new(line, "整数の除算結果が範囲を超えました"))?,
@@ -336,11 +343,13 @@ fn compare<T: PartialOrd>(op: &str, a: &T, b: &T) -> bool {
 /// rewinds to before the operator, so `CHO=5 >c` leaves `>c` (an octave
 /// shift) for the caller. Each term is evaluated once, on a probe cursor that
 /// is adopted when the term parses, so terms with side effects (`Random`,
-/// user functions) never run twice. Errors from the calculation itself, such
-/// as division by zero, are returned.
+/// user functions) never run twice. Errors from the calculation itself
+/// (overflow, a failing function call) are returned; a zero divisor is
+/// not one of them, since Pascal's calc yields 0 there.
 ///
-/// `^` is not an operator here even though Pascal lists it: in MML it is the
-/// tie mark, as in `CHO=5 ^c`.
+/// `^` is the XOR operator here, as in Pascal's `CreateEnzansi`; the
+/// tie reading survives because a term after `^` that does not parse
+/// (`CHO=5 ^c`, the note C) rewinds as above.
 pub fn eval_calc(cur: &mut Cursor, ctx: &mut dyn EvalContext) -> Result<Value> {
     let line = cur.line();
     let mut terms = vec![parse_unary(cur, ctx)?];
@@ -396,7 +405,9 @@ fn op_level(op: &str) -> u8 {
 
 /// The binary operator at the cursor and its length in characters, limited to
 /// those `apply_binary` implements. A lone `=` is equality, as in Pascal; a
-/// lone `&` or `|` is the logical operator; a lone `!` is not an operator.
+/// lone `&` or `|` is the bitwise operator (Pascal's TMAnd/TMOr on
+/// integers), `&&` / `||` are the logical ones; a lone `!` is not an
+/// operator.
 fn peek_calc_operator(cur: &Cursor) -> Option<(&'static str, usize)> {
     Some(match (cur.peek()?, cur.peek_at(1)) {
         ('*', _) => ("*", 1),
@@ -980,9 +991,11 @@ mod tests {
     }
 
     #[test]
-    fn division_by_zero_is_an_error_not_a_panic() {
-        assert!(eval_str("1/0", &Variables::new()).is_err());
-        assert!(eval_str("1%0", &Variables::new()).is_err());
+    fn division_by_zero_yields_zero_not_a_panic() {
+        // Pascal's TMDiv guards a zero divisor and TMMod catches it:
+        // both yield 0 rather than failing.
+        assert_eq!(eval_str("1/0", &Variables::new()).unwrap(), Value::Int(0));
+        assert_eq!(eval_str("1%0", &Variables::new()).unwrap(), Value::Int(0));
     }
 
     #[test]

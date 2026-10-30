@@ -210,9 +210,10 @@ fn expressions_need_parentheses() {
 }
 
 #[test]
-fn division_by_zero_is_an_error_not_a_panic() {
-    assert_error_contains("n((1/0))", "0で割る");
-    assert_error_contains("n((1%0))", "0で割る");
+fn division_by_zero_yields_zero_not_a_panic() {
+    // Pascal's calc yields 0 for a zero divisor, never an error.
+    assert_same("n((1/0))", "n(0)");
+    assert_same("n((1%0))", "n(0)");
 }
 
 #[test]
@@ -1102,7 +1103,11 @@ fn control_change_equals_value_continues_as_an_expression() {
 /// is evaluated once.
 #[test]
 fn control_change_calculation_errors_propagate() {
-    assert_error_contains("CHO=5/0 c", "0で割る");
+    // A zero divisor is 0 in Pascal's calc, not an error...
+    assert_same("CHO=5/0 c", "CHO=0 c");
+    // ...but a genuine calculation error still propagates instead
+    // of being rewound away.
+    assert_error_contains("CHO=9223372036854775807+1 c", "範囲");
     assert_same("CHO=Random(1,1) >c", "CHO=1 o6 c");
 }
 
@@ -1476,4 +1481,26 @@ fn an_unterminated_bare_quote_string_runs_to_the_end() {
 #[test]
 fn an_unclosed_rythm_body_runs_to_the_end() {
     assert_same("Rythm{\n b", "Rythm{ b }");
+}
+
+/// Pascal's calc yields 0 for a zero divisor (TMDiv guards it,
+/// TMMod catches it), never an error.
+#[test]
+fn division_and_modulo_by_zero_yield_zero() {
+    let out = compile("Int X=1/0 Print(X)").unwrap();
+    assert_eq!(out.messages, ["0"]);
+    let out = compile("Int X=5%0 Print(X)").unwrap();
+    assert_eq!(out.messages, ["0"]);
+    // As a loop count, `(1/0)` is therefore 0: the loop is skipped.
+    assert_same("[(1/0) c]", "");
+    // A trailing operator in a count group rewinds like Pascal's
+    // calc reader: `(1+)` counts 1.
+    assert_same("[(1+) c]", "[1 c]");
+}
+
+/// A redundant `=` is also skipped after a unary sign.
+#[test]
+fn a_redundant_equals_after_a_sign() {
+    let out = compile("Int X=-=2 Print(X)").unwrap();
+    assert_eq!(out.messages, ["-2"]);
 }
